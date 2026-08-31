@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тарифы | Scholary</title>
+  <meta name="description" content="Тарифы Scholary: отчёт о вероятности — 4 000 ₸, разбор со специалистом — 15 000 ₸, документы и подача — 25 000 ₸.">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">Scholary</a>
+  <nav class="nav"><a href="index.html#faq">Вопросы</a><a class="nav-cta" href="quiz.html">Узнать вероятность</a></nav>
+</header>
+
+<main class="section">
+  <div class="container">
+    <h2>Тарифы</h2>
+    <p class="lead">Все цены в тенге, с учётом всех сборов. Оплата картой, Apple Pay / Google Pay через TipTop Pay; возможна оплата Kaspi-переводом.</p>
+    <div class="tariffs">
+      <div class="card tariff featured">
+        <div style="display:flex; justify-content:space-between; align-items:baseline">
+          <strong style="font-size:16px">Отчёт о вероятности</strong>
+          <span class="price" style="color:var(--accent)">4 000&nbsp;₸</span>
+        </div>
+        <ul>
+          <li>квиз из 7 вопросов и расчёт по шести осям профиля</li>
+          <li>две вероятности — поступление и стипендия — по каждой программе</li>
+          <li>портфель из 8–10 программ, календарь дедлайнов</li>
+          <li>PDF на WhatsApp и почту сразу после оплаты</li>
+        </ul>
+        <a class="btn btn-primary" href="quiz.html">Пройти квиз</a>
+      </div>
+      <div class="card tariff">
+        <span class="tariff-flag">Чаще всего берут</span>
+        <div style="display:flex; justify-content:space-between; align-items:baseline">
+          <strong style="font-size:16px">Разбор со специалистом</strong>
+          <span class="price">15 000&nbsp;₸</span>
+        </div>
+        <ul>
+          <li>90 минут онлайн (Zoom / Google Meet)</li>
+          <li>приоритеты по программам, план документов, мотивационное</li>
+          <li>отчёт о вероятности включён</li>
+          <li>оплата после согласования времени</li>
+        </ul>
+        <a class="btn btn-outline" id="waConsult" href="#">Оставить заявку</a>
+      </div>
+      <div class="card tariff">
+        <div style="display:flex; justify-content:space-between; align-items:baseline">
+          <strong style="font-size:16px">Документы и подача</strong>
+          <span class="price">25 000&nbsp;₸</span>
+        </div>
+        <ul>
+          <li>проверка каждого документа до отправки</li>
+          <li>комплектность пакета по 5 программам</li>
+          <li>доведение до подачи, ведение по дедлайнам</li>
+        </ul>
+        <a class="btn btn-outline" id="waPackage" href="#">Оставить заявку</a>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--faint); font-weight:600; margin-top:18px">Возвраты — согласно разделу 5 <a href="oferta.html">публичной оферты</a>: недоставленный отчёт — повторная отправка или полный возврат; консультация отменяется с полным возвратом за 24 часа.</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-links"><a href="index.html">Главная</a><a href="oferta.html">Публичная оферта</a><a href="privacy.html">Политика конфиденциальности</a></div>
+    <div class="footer-requisites">ИП «АТТА» · ИИН 920725301448 · г. Алматы, ул. Розыбакиева, 250Б-13 · +7 (775) 383-18-36</div>
+    <div class="footer-legal">© 2026 Scholary</div>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const C = window.SCHOLARY_CONFIG;
+    const wa = (t) => "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(t);
+    document.getElementById("waConsult").href = wa("Здравствуйте! Хочу разбор со специалистом за 15 000 ₸");
+    document.getElementById("waPackage").href = wa("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸");
+    track("tariffs_view");
+  });
+</script>
+</body>
+</html>

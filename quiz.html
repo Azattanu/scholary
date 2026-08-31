@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Квиз — рассчитай вероятность | Scholary</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/report-engine.js"></script>
+  <script src="js/app.js" defer></script>
+  <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
+  <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="index.html">Scholary</a>
+  <div id="topStatus" style="font-size:13px; font-weight:700; color:var(--muted)"></div>
+</header>
+
+<div class="quiz-shell">
+  <div class="quiz-top" id="quizTop">
+    <div class="quiz-meta">
+      <span id="metaLeft">Вопрос 1 из 8</span>
+      <span class="step-count" id="metaRight">~2 минуты</span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill" style="width:6%"></div></div>
+  </div>
+  <div id="screen" style="display:flex; flex-direction:column; flex-grow:1"></div>
+</div>
+
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", function () {
+
+const C = window.SCHOLARY_CONFIG;
+const $ = (id) => document.getElementById(id);
+const screen = $("screen");
+const answers = {};           // ответы фазы 1
+const phase2 = {};            // ответы фазы 2
+let stepIndex = 0;
+
+/* =====================================================================
+   ФАЗА 1 — восемь экранов. groups: подгруппы вопросов на одном экране.
+   ===================================================================== */
+const STEPS = [
+  { id: "level", q: "Куда поступаем?", why: "От уровня зависят и программы, и веса модели",
+    groups: [
+      { key: "level", label: null, type: "single", options: [
+        { v: "bachelor", t: "После школы — на бакалавриат" },
+        { v: "master", t: "После бакалавриата — на магистратуру" },
+        { v: "phd", t: "На PhD / докторантуру" } ] },
+      { key: "year", label: "Год поступления", type: "chips-single", options: [
+        { v: "2027", t: "2027" }, { v: "2028", t: "2028" }, { v: "later", t: "Позже / не решил" } ] }
+    ] },
+  { id: "academics", q: "Как у тебя с оценками?", why: "Академика — одна из шести осей расчёта. Честный ответ = честный прогноз",
+    groups: [
+      // --- ветка БАКАЛАВРИАТ (после школы) ---
+      { key: "gpa_band", label: "Средний балл аттестата", type: "single", showIf: (a) => a.level !== "master" && a.level !== "phd", options: [
+        { v: "5.0-4.5", t: "5.0 – 4.5", s: "почти отличник" },
+        { v: "4.4-4.0", t: "4.4 – 4.0" },
+        { v: "3.9-3.5", t: "3.9 – 3.5" },
+        { v: "<3.5", t: "Ниже 3.5", s: "это не приговор — есть программы и для такого профиля" } ] },
+      { key: "school_type", label: "Где учишься", type: "chips-single", showIf: (a) => a.level !== "master" && a.level !== "phd", options: [
+        { v: "nis", t: "НИШ" }, { v: "rfmsh", t: "РФМШ / БИЛ" }, { v: "lyceum", t: "Лицей / гимназия" },
+        { v: "regular", t: "Школа" }, { v: "college", t: "Колледж" } ] },
+      // --- ветка PhD: своя шкала + тема исследования ---
+      { key: "gpa_phd", label: "GPA магистратуры (шкала 4.0)", type: "single", showIf: (a) => a.level === "phd", options: [
+        { v: "3.67+", t: "3.67 и выше" },
+        { v: "3.33-3.66", t: "3.33 – 3.66" },
+        { v: "3.0-3.32", t: "3.0 – 3.32" },
+        { v: "<3.0", t: "Ниже 3.0" },
+        { v: "unknown", t: "Не знаю свой GPA" } ] },
+      { key: "phd_topic", label: "Тема исследования", type: "chips-single", showIf: (a) => a.level === "phd", options: [
+        { v: "defined", t: "Тема определена" }, { v: "rough", t: "Есть направление" }, { v: "none", t: "Пока нет" } ] },
+      // --- ветка МАГИСТРАТУРА ---
+      { key: "gpa_uni", label: "GPA бакалавриата (шкала 4.0)", type: "single", showIf: (a) => a.level === "master", options: [
+        { v: "3.67+", t: "3.67 и выше", s: "зона красного диплома" },
+        { v: "3.33-3.66", t: "3.33 – 3.66" },
+        { v: "3.0-3.32", t: "3.0 – 3.32" },
+        { v: "<3.0", t: "Ниже 3.0", s: "есть программы, где важнее опыт и мотивация" },
+        { v: "unknown", t: "Не знаю свой GPA" } ] },
+      { key: "uni_type", label: "Где учишься / учился", type: "chips-single", showIf: (a) => a.level === "master" || a.level === "phd", options: [
+        { v: "nu", t: "Назарбаев Университет" }, { v: "top_kz", t: "Топ-вуз РК (КБТУ, КИМЭП, ЕНУ, КазНУ…)" },
+        { v: "regional", t: "Другой вуз РК" }, { v: "foreign", t: "Зарубежный вуз" } ] }
+    ] },
+  { id: "language", q: "Что с английским?", why: "Язык — главный фильтр реальности. Многие программы принимают и без сертификата",
+    groups: [
+      { key: "lang_status", label: null, type: "single", options: [
+        { v: "have", t: "Есть IELTS / TOEFL", s: "укажешь балл ниже" },
+        { v: "soon", t: "Сдаю в ближайшие полгода" },
+        { v: "none", t: "Сертификата нет и пока не планирую" } ] },
+      { key: "ielts_band", label: "Балл (или ожидаемый)", type: "chips-single", showIf: (a) => a.lang_status === "have" || a.lang_status === "soon", options: [
+        { v: "7+", t: "7.0+" }, { v: "6.5", t: "6.5" }, { v: "6.0", t: "6.0" }, { v: "5.5", t: "5.5" }, { v: "<5.5", t: "ниже 5.5" }, { v: "unknown", t: "не знаю" } ] },
+      { key: "sat", label: "SAT — для США и части топ-вузов", type: "chips-single", showIf: (a) => a.level !== "master" && a.level !== "phd", options: [
+        { v: "1400+", t: "Сдан, 1400+" }, { v: "1200-1399", t: "Сдан, 1200–1399" }, { v: "<1200", t: "Сдан, ниже 1200" },
+        { v: "plan", t: "Планирую сдавать" }, { v: "no", t: "Не сдаю" } ] }
+    ] },
+  { id: "field", q: "Какие направления тянут?", why: "Можно выбрать до трёх — портфель соберём по всем",
+    groups: [ { key: "field", label: null, type: "multi", max: 3, options: [
+      { v: "it", t: "IT и Computer Science" },
+      { v: "eng", t: "Инженерия и технологии" },
+      { v: "med", t: "Медицина и здоровье" },
+      { v: "bus", t: "Бизнес и экономика" },
+      { v: "sci", t: "Естественные науки" },
+      { v: "hum", t: "Гуманитарные и социальные" },
+      { v: "art", t: "Искусство и дизайн" },
+      { v: "law", t: "Право" } ] } ] },
+  { id: "achievements", q: "Что уже есть в копилке?", why: "Выбери всё, что подходит — достижения добавляют баллы стипендиям",
+    groups: [ { key: "achievements", label: null, type: "multi", options: [
+      { v: "intl_olymp", t: "Международные олимпиады" },
+      { v: "rep_olymp", t: "Республиканские олимпиады" },
+      { v: "city_olymp", t: "Областные / городские олимпиады", showIf: (a) => a.level !== "master" && a.level !== "phd" },
+      { v: "publications", t: "Научные публикации / конференции", showIf: (a) => a.level === "master" || a.level === "phd" },
+      { v: "work_exp", t: "Опыт работы по специальности", showIf: (a) => a.level === "master" || a.level === "phd" },
+      { v: "project", t: "Проекты, стартапы, исследования" },
+      { v: "volunteer", t: "Волонтёрство" },
+      { v: "sport_art", t: "Спорт / творчество на уровне наград" },
+      { v: "none", t: "Пока ничего из этого", exclusive: true } ] } ] },
+  { id: "budget", q: "Сколько семья готова вкладывать в год?", why: "Считаем только реальные варианты: есть программы с обучением за 0 ₸",
+    groups: [ { key: "budget", label: null, type: "single", options: [
+      { v: "0", t: "0 ₸ — только полная стипендия" },
+      { v: "<1m", t: "До 1 млн ₸" },
+      { v: "1-3m", t: "1 – 3 млн ₸" },
+      { v: "3m+", t: "Больше 3 млн ₸" } ] } ] },
+  { id: "priority", q: "Что для тебя важнее всего?", why: "От ответа зависит, как соберём твой портфель программ",
+    groups: [
+      { key: "priority", label: null, type: "single", options: [
+        { v: "scholarship", t: "Стипендия и минимум расходов" },
+        { v: "country", t: "Конкретная страна", s: "уточним какая" },
+        { v: "university", t: "Сильный университет" },
+        { v: "major", t: "Конкретная специальность" } ] },
+      { key: "target_countries", label: "Какие страны? (до трёх)", type: "chips-multi", max: 3, showIf: (a) => a.priority === "country", options: [
+        { v: "hu", t: "Венгрия" }, { v: "de", t: "Германия" }, { v: "it", t: "Италия" }, { v: "cz", t: "Чехия" },
+        { v: "tr", t: "Турция" }, { v: "cn", t: "Китай" }, { v: "kr", t: "Корея" }, { v: "jp", t: "Япония" },
+        { v: "pl", t: "Польша" }, { v: "us", t: "США" }, { v: "uk", t: "Британия" }, { v: "ca", t: "Канада" },
+        { v: "fr", t: "Франция" }, { v: "nl", t: "Нидерланды" }, { v: "ae", t: "ОАЭ" }, { v: "other", t: "Другая" } ] },
+      { key: "target_university", label: "Есть конкретный вуз на примете? (необязательно)", type: "input", placeholder: "Например: TU Munich", optional: true, showIf: (a) => a.priority === "university" },
+      { key: "target_major", label: "Какая специальность? (необязательно)", type: "input", placeholder: "Например: Data Science", optional: true, showIf: (a) => a.priority === "major" }
+    ] },
+  { id: "contact", q: "Куда прислать результат?", why: null, contact: true }
+];
+
+/* ---------- Рендер ---------- */
+function h(html) { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
+function setProgress(i, total, done) {
+  $("metaLeft").textContent = done ? "Готово" : ("Вопрос " + (i + 1) + " из " + total);
+  $("metaRight").textContent = done ? "" : ("~" + Math.max(1, Math.round((total - i) * 0.25)) + " мин осталось");
+  const f = $("progressFill");
+  f.style.width = (done ? 100 : Math.round(((i + 1) / (total + 1)) * 100)) + "%";
+  f.classList.toggle("done", !!done);
+}
+
+function stepComplete(st) {
+  if (st.contact) return true;
+  return st.groups.every(g => {
+    if (g.showIf && !g.showIf(answers)) return true;
+    if (g.optional || g.type === "input") return true;
+    const v = answers[g.key];
+    if (g.type === "multi" || g.type === "chips-multi") return Array.isArray(v) && v.length > 0;
+    return !!v;
+  });
+}
+
+function persist() {
+  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex })); } catch (e) {}
+}
+
+function renderStep() {
+  const st = STEPS[stepIndex];
+  persist();
+  setProgress(stepIndex, STEPS.length, false);
+  track("quiz_step", { step: stepIndex + 1, id: st.id });
+  if (st.contact) return renderContact();
+
+  screen.innerHTML = "";
+  screen.appendChild(h('<div class="quiz-q">' + st.q + "</div>"));
+  if (st.why) screen.appendChild(h('<div class="quiz-why">' + st.why + "</div>"));
+  const wrap = h('<div style="display:flex; flex-direction:column; gap:18px"></div>');
+  screen.appendChild(wrap);
+
+  st.groups.forEach(g => {
+    if (g.showIf && !g.showIf(answers)) return;
+    const gEl = h('<div style="display:flex; flex-direction:column; gap:9px"></div>');
+    if (g.label) gEl.appendChild(h('<div style="font-size:13px; font-weight:700; color:var(--muted)">' + g.label + "</div>"));
+
+    if (g.type === "input") { // свободный ввод (необязательные уточнения)
+      const inp = h('<input class="input" placeholder="' + (g.placeholder || "") + '">');
+      inp.value = answers[g.key] || "";
+      inp.addEventListener("change", () => { answers[g.key] = inp.value.trim(); persist(); saveLead(flatAnswers()); });
+      gEl.appendChild(inp);
+      wrap.appendChild(gEl);
+      return;
+    }
+
+    const isMulti = g.type === "multi" || g.type === "chips-multi";
+    const box = h(g.type.startsWith("chips") ? '<div class="chips"></div>' : '<div class="opts"></div>');
+
+    g.options.filter(o => !o.showIf || o.showIf(answers)).forEach(o => {
+      const isChip = g.type.startsWith("chips");
+      const el = h(isChip
+        ? '<button type="button" class="chip">' + o.t + "</button>"
+        : '<button type="button" class="opt"><span>' + o.t + (o.s ? '<span class="sub">' + o.s + "</span>" : "") + '</span><span class="opt-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>');
+
+      el.addEventListener("click", () => {
+        if (isMulti) {
+          let arr = answers[g.key] || [];
+          if (o.exclusive) { arr = arr.includes(o.v) ? [] : [o.v]; }
+          else {
+            arr = arr.filter(x => x !== "none");
+            if (arr.includes(o.v)) arr = arr.filter(x => x !== o.v);
+            else if (!g.max || arr.length < g.max) arr = arr.concat(o.v); // мягкий лимит выбора
+          }
+          answers[g.key] = arr;
+        } else {
+          answers[g.key] = o.v;
+        }
+        saveLead(flatAnswers());
+        renderStep(); // перерисовка отражает выбор и showIf-группы
+      });
+
+      const val = answers[g.key];
+      const selected = isMulti ? (val || []).includes(o.v) : val === o.v;
+      if (selected) el.classList.add("selected");
+      box.appendChild(el);
+    });
+    gEl.appendChild(box);
+    wrap.appendChild(gEl);
+  });
+
+  const nav = h('<div class="quiz-nav"></div>');
+  if (stepIndex > 0) {
+    const back = h('<button type="button" class="btn btn-ghost" style="width:auto">← Назад</button>');
+    back.addEventListener("click", prev);
+    nav.appendChild(back);
+  }
+  const fwd = h('<button type="button" class="btn btn-primary">Далее</button>');
+  fwd.disabled = !stepComplete(st);
+  fwd.addEventListener("click", next);
+  nav.appendChild(fwd);
+  screen.appendChild(nav);
+}
+
+function flatAnswers() {
+  const out = {};
+  Object.keys(answers).forEach(k => { out[k] = Array.isArray(answers[k]) ? answers[k].join(",") : answers[k]; });
+  return out;
+}
+function next() { if (stepIndex < STEPS.length - 1) { stepIndex++; renderStep(); } }
+function prev() { if (stepIndex > 0) { stepIndex--; renderStep(); } }
+
+/* ---------- Экран 8: контакты ---------- */
+function renderContact() {
+  screen.innerHTML = "";
+  screen.appendChild(h('<div class="quiz-q">Куда прислать результат?</div>'));
+  screen.appendChild(h('<div class="quiz-why">Расчёт уже почти готов. Пришлём вердикт и превью на WhatsApp</div>'));
+  const form = h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="field"><label for="fName">Имя</label><input id="fName" class="input" autocomplete="name" placeholder="Аида"></div>' +
+      '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __"></div>' +
+      '<div class="fineprint" style="text-align:left">Нажимая «Показать результат», ты соглашаешься с <a href="oferta.html" target="_blank">офертой</a> и <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Не звоним без предупреждения — сначала пишем в WhatsApp.</div>' +
+    "</div>");
+  screen.appendChild(form);
+  const nav = h('<div class="quiz-nav"></div>');
+  const back = h('<button type="button" class="btn btn-ghost" style="width:auto">← Назад</button>');
+  back.addEventListener("click", prev);
+  const go = h('<button type="button" class="btn btn-primary">Показать результат</button>');
+  go.addEventListener("click", () => {
+    const name = $("fName").value.trim();
+    const wa = $("fWa").value.replace(/[^\d+]/g, "");
+    if (name.length < 2) { $("fName").focus(); return; }
+    if (wa.replace(/\D/g, "").length < 10) { $("fWa").focus(); return; }
+    answers.name = name; answers.whatsapp = wa;
+    saveLead(Object.assign(flatAnswers(), { name: name, whatsapp: wa }));
+    track("quiz_done");
+    renderPaywall();
+  });
+  nav.appendChild(back); nav.appendChild(go);
+  screen.appendChild(nav);
+}
+
+/* =====================================================================
+   ПРЕВЬЮ-РАСЧЁТ для пейволла — через ScholaryEngine (js/report-engine.js).
+   Тот же движок использует бэкенд для полного отчёта: одна логика, два места.
+   ===================================================================== */
+function previewCalc() {
+  if (window.ScholaryEngine) {
+    const r = ScholaryEngine.evaluate(answers);
+    return { programs: r.programsCount, country: r.topCountry, verdict: r.verdict };
+  }
+  return previewCalcFallback();
+}
+function previewCalcFallback() {
+  let programs = 8, country = "Венгрия";
+  const isGrad = answers.level === "master" || answers.level === "phd";
+  const gradGpa = answers.level === "phd" ? answers.gpa_phd : answers.gpa_uni;
+  const gpaScore = isGrad
+    ? ({ "3.67+": 3, "3.33-3.66": 2, "3.0-3.32": 1, "<3.0": 0, "unknown": 1 }[gradGpa] || 0)
+    : ({ "5.0-4.5": 3, "4.4-4.0": 2, "3.9-3.5": 1, "<3.5": 0 }[answers.gpa_band] || 0);
+  const langScore = answers.lang_status === "have" ? 2 : answers.lang_status === "soon" ? 1 : 0;
+  const fields = answers.field || [];
+  programs = 6 + gpaScore + langScore + ((answers.achievements || []).filter(a => a !== "none").length ? 1 : 0) + (fields.length > 1 ? 1 : 0);
+  const COUNTRY_NAMES = { hu: "Венгрия", de: "Германия", it: "Италия", cz: "Чехия", tr: "Турция", cn: "Китай", kr: "Корея", jp: "Япония", pl: "Польша", us: "США", uk: "Британия", ca: "Канада", fr: "Франция", nl: "Нидерланды", ae: "ОАЭ" };
+  const tc = (answers.target_countries || [])[0];
+  if (answers.priority === "country" && COUNTRY_NAMES[tc]) country = COUNTRY_NAMES[tc];
+  else if (answers.budget === "3m+") country = "Германия";
+  else if (answers.priority === "scholarship") country = "Венгрия";
+  else if (fields.includes("med")) country = "Италия";
+  else if (answers.budget === "0") country = "Венгрия";
+  else country = "Италия";
+  const verdict = (gpaScore + langScore >= 3)
+    ? { t: "Поступление со стипендией — реалистичная цель", s: "Полный отчёт покажет, какие программы дают лучший шанс и что усилить." }
+    : (gpaScore + langScore >= 1)
+      ? { t: "Реалистично — при одном условии", s: "Есть слабое место, которое можно закрыть. В отчёте видно, что именно это меняет." }
+      : { t: "Прямо сейчас шансы низкие — но есть план", s: "В отчёте — программы, куда путь открыт, и что даст наибольший прирост." };
+  return { programs: Math.min(programs, 12), country, verdict };
+}
+
+/* ---------- Пейволл ---------- */
+function renderPaywall() {
+  const p = previewCalc();
+  setProgress(0, STEPS.length, true);
+  track("paywall_view");
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; gap:10px">' +
+        '<div style="font-size:13px; font-weight:700; color:var(--muted)">Готово, ' + esc(answers.name) + '! Мы рассчитали твой профиль против 59 программ</div>' +
+        '<div style="display:flex; align-items:center; gap:10px">' +
+          '<span class="verdict-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E9E6A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
+          '<div style="font-size:18px; line-height:1.3; font-weight:800; letter-spacing:-0.3px">' + p.verdict.t + "</div>" +
+        "</div>" +
+        '<div style="font-size:13.5px; color:var(--muted)">' + p.verdict.s + "</div>" +
+        '<div class="stat-pair">' +
+          '<div class="stat"><div class="num">' + p.programs + '</div><div class="lbl">подходящих программ</div></div>' +
+          '<div class="stat"><div class="num">' + p.country + '</div><div class="lbl">лучшее направление</div></div>' +
+        "</div>" +
+      "</div>" +
+      '<div class="locked">' +
+        '<div class="locked-content">' +
+          lockedRow("Stipendium Hungaricum", 62, true) + lockedRow("EDISU Piemonte, Италия", 57, true) + lockedRow("Türkiye Burslari", 34, false) +
+        "</div>" +
+        '<div class="locked-overlay">' +
+          '<span class="lock-badge"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>' +
+          '<div style="font-size:13.5px; font-weight:700">Вероятности по каждой программе, портфель и дедлайны — в полном отчёте</div>' +
+          '<a href="report-demo.html" target="_blank" style="font-size:13px; font-weight:700">Посмотреть пример отчёта →</a>' +
+        "</div>" +
+      "</div>" +
+      '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px">' +
+        '<button type="button" class="btn btn-primary" id="toPay" style="min-height:54px; font-size:16.5px">Получить полный отчёт — ' + fmt(C.PRICE_REPORT) + '&nbsp;₸</button>' +
+        '<div class="fineprint">PDF сразу на WhatsApp · карта / Apple Pay / Google Pay / Kaspi<br>Если отчёт не придёт за 10 минут — вернём деньги</div>' +
+      "</div>" +
+    "</div>"));
+  $("toPay").addEventListener("click", () => { track("pay_click"); renderPayment(); });
+}
+function lockedRow(name, pct, ok) {
+  return '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px">' +
+    '<div style="display:flex; justify-content:space-between"><span style="font-size:14px; font-weight:700">' + name + '</span><span class="bar-val ' + (ok ? "ok" : "warn") + '">' + pct + "%</span></div>" +
+    '<div class="bar' + (ok ? "" : " warn") + '"><i style="width:' + pct + '%"></i></div></div>';
+}
+
+/* ---------- Оплата ---------- */
+function renderPayment() {
+  screen.innerHTML = "";
+  const terminalReady = C.TIPTOP_PUBLIC_TERMINAL_ID && !C.TIPTOP_PUBLIC_TERMINAL_ID.startsWith("TODO");
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="quiz-q" style="font-size:21px">Оплата</div>' +
+      '<div class="card" style="display:flex; justify-content:space-between; align-items:center">' +
+        '<div><div style="font-size:15px; font-weight:800">Отчёт о вероятности</div><div style="font-size:12.5px; color:var(--muted); font-weight:600">персональный PDF · для ' + esc(answers.name) + '</div></div>' +
+        '<div style="font-size:20px; font-weight:800; color:var(--accent)">' + fmt(C.PRICE_REPORT) + ' ₸</div>' +
+      "</div>" +
+      '<div class="field"><label for="fEmail">Email для отчёта (и чека)</label><input id="fEmail" class="input" inputmode="email" autocomplete="email" placeholder="aida@example.com"></div>' +
+      '<div style="display:flex; flex-direction:column; gap:10px" id="payButtons">' +
+        (terminalReady
+          ? '<button type="button" class="btn btn-dark" id="payCard" style="min-height:52px">Оплатить картой / Apple Pay / Google Pay</button>'
+          : '<div class="notice">Онлайн-оплата картой подключается. Пока можно оплатить через Kaspi — отчёт пришлём вручную в течение часа.</div>') +
+        '<a class="btn btn-kaspi" id="payKaspi" href="#">Оплатить через Kaspi</a>' +
+      "</div>" +
+      '<div class="fineprint">Нажимая «Оплатить», ты принимаешь <a href="oferta.html" target="_blank">оферту</a>. Данные карты обрабатывает TipTop Pay (PCI DSS) — мы их не видим и не храним.</div>' +
+      '<button type="button" class="btn btn-ghost" id="payBack">← Вернуться к результату</button>' +
+    "</div>"));
+
+  $("payBack").addEventListener("click", renderPaywall);
+  $("payKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
+    "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
+  $("payKaspi").addEventListener("click", () => track("pay_kaspi_click"));
+
+  if (terminalReady) $("payCard").addEventListener("click", () => {
+    const email = $("fEmail").value.trim();
+    if (email) { phase2.email = email; saveLead({ email: email }); }
+    startTipTop(email);
+  });
+}
+
+// Интеграция по официальной документации TipTop Pay (developers.tiptoppay.kz)
+function startTipTop(email) {
+  if (typeof tiptop === "undefined") { alertBox("Виджет оплаты не загрузился. Проверь интернет или оплати через Kaspi."); return; }
+  const widget = new tiptop.Widget();
+  widget.oncomplete = (result) => {
+    track("pay_result", { type: result && result.type, status: result && result.status });
+    if (result && result.type === "payment" && result.status === "success") {
+      saveLead({ paid: true, paid_at: new Date().toISOString() });
+      renderSuccess();
+    } else if (result && result.type !== "cancel") {
+      renderPayFail(); // ошибка или отклонённый платёж; отмена — просто остаёмся на экране
+    }
+  };
+  widget.start({
+    publicTerminalId: C.TIPTOP_PUBLIC_TERMINAL_ID,
+    description: "Scholary — персональный отчёт о вероятности поступления",
+    paymentSchema: "Single",
+    currency: "KZT",
+    amount: C.PRICE_REPORT,
+    externalId: window.scholaryLeadId(),
+    receiptEmail: email || undefined
+  });
+}
+function alertBox(text) {
+  const n = h('<div class="notice" style="margin-top:10px">' + text + "</div>");
+  $("payButtons").appendChild(n);
+}
+
+/* ---------- Оплата не прошла ---------- */
+function renderPayFail() {
+  track("pay_fail_screen");
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
+        '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--yellow-soft); border-radius:999px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D9A413" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.5" r=".5" fill="#D9A413"/></svg></span>' +
+        '<div style="font-size:21px; font-weight:800">Оплата не прошла</div>' +
+        '<div style="font-size:14px; color:var(--muted); line-height:1.55">Деньги не списаны. Твои ответы сохранены — ничего заново проходить не нужно.<br>Частая причина: в приложении банка выключены интернет-платежи или стоит лимит.</div>' +
+      "</div>" +
+      '<button type="button" class="btn btn-primary" id="failRetry">Попробовать ещё раз</button>' +
+      '<a class="btn btn-kaspi" id="failKaspi" href="#">Оплатить через Kaspi</a>' +
+      '<a class="btn btn-ghost" id="failWa" href="#">Не получается — напишите мне в WhatsApp</a>' +
+    "</div>"));
+  $("failRetry").addEventListener("click", () => { track("pay_retry"); renderPayment(); });
+  $("failKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
+    "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
+  $("failWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
+    "Здравствуйте! Не проходит оплата отчёта на сайте. Заявка: " + window.scholaryLeadId());
+}
+
+/* ---------- Успех + фаза 2 ---------- */
+const PHASE2 = [
+  { key: "gpa_exact", label: "Точный средний балл (например 4.63)", type: "input", mode: "decimal" },
+  { key: "city_school", label: "Город и школа / вуз", type: "input" },
+  { key: "ielts_date", label: "Когда сдан или запланирован IELTS/TOEFL?", type: "chips", options: ["Уже сдан", "До декабря", "Зимой", "Весной", "Не планирую"] },
+  { key: "docs_ready", label: "Какие документы уже готовы?", type: "chips-multi", options: ["Аттестат/диплом", "Переводы", "Апостиль", "Мотивационное", "Рекомендации", "Пока ничего"] },
+  { key: "blocked_account", label: "Возможен ли блокированный счёт для Германии (~6 млн ₸)?", type: "chips", options: ["Да", "Возможно", "Нет"] },
+  { key: "lang_year", label: "Готов(а) к подготовительному языковому году?", type: "chips", options: ["Да", "Скорее да", "Нет"] },
+  { key: "decision_maker", label: "Кто принимает решение об оплате обучения?", type: "chips", options: ["Я сам(а)", "Родители", "Вместе"] }
+];
+
+function renderSuccess() {
+  track("pay_success_screen");
+  try { localStorage.removeItem("scholary_quiz_v1"); } catch (e) {}
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
+        '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--green-soft); border-radius:999px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E9E6A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
+        '<div style="font-size:21px; font-weight:800">Оплата прошла</div>' +
+        '<div style="font-size:14px; color:var(--muted)">Отчёт генерируется — придёт на WhatsApp ' + esc(answers.whatsapp || "") + ' в течение 2–3 минут</div>' +
+      "</div>" +
+      '<div class="card" style="display:flex; flex-direction:column; gap:6px">' +
+        '<div style="font-size:15.5px; font-weight:800">Сделай отчёт точнее — 7 коротких уточнений</div>' +
+        '<div style="font-size:13px; color:var(--muted)">Ответы сразу уходят в модель: пересчитаем отчёт и добавим план документов</div>' +
+      "</div>" +
+      '<div id="phase2box" style="display:flex; flex-direction:column; gap:16px"></div>' +
+      '<div class="fineprint">Не пришло за 10 минут? <a href="https://wa.me/' + C.WHATSAPP_NUMBER + '">Напиши нам в WhatsApp</a> — отправим вручную или вернём деньги</div>' +
+    "</div>"));
+  renderPhase2();
+}
+
+function renderPhase2() {
+  const box = $("phase2box");
+  box.innerHTML = "";
+  PHASE2.forEach(f => {
+    const fEl = h('<div class="field"></div>');
+    fEl.appendChild(h("<label>" + f.label + "</label>"));
+    if (f.type === "input") {
+      const inp = h('<input class="input"' + (f.mode ? ' inputmode="' + f.mode + '"' : "") + ">");
+      inp.value = phase2[f.key] || "";
+      inp.addEventListener("change", () => { phase2[f.key] = inp.value.trim(); saveP2(f.key); });
+      fEl.appendChild(inp);
+    } else {
+      const chips = h('<div class="chips"></div>');
+      f.options.forEach(o => {
+        const c = h('<button type="button" class="chip">' + o + "</button>");
+        const isMulti = f.type === "chips-multi";
+        const val = phase2[f.key];
+        if (isMulti ? (val || []).includes(o) : val === o) c.classList.add("selected");
+        c.addEventListener("click", () => {
+          if (isMulti) {
+            let arr = phase2[f.key] || [];
+            arr = arr.includes(o) ? arr.filter(x => x !== o) : arr.concat(o);
+            phase2[f.key] = arr;
+          } else phase2[f.key] = o;
+          saveP2(f.key);
+          renderPhase2();
+        });
+        chips.appendChild(c);
+      });
+      fEl.appendChild(chips);
+    }
+    box.appendChild(fEl);
+  });
+  const doneBtn = h('<button type="button" class="btn btn-primary">Готово — жду отчёт</button>');
+  doneBtn.addEventListener("click", () => {
+    track("phase2_done");
+    doneBtn.replaceWith(h('<div class="notice" style="background:var(--green-soft); color:var(--green)">Принято! Отчёт учтёт все уточнения. Можно закрыть страницу — всё придёт на WhatsApp.</div>'));
+  });
+  box.appendChild(doneBtn);
+}
+function saveP2(key) {
+  track("phase2_field", { field: key });
+  const v = phase2[key];
+  const o = {}; o["p2_" + key] = Array.isArray(v) ? v.join(",") : v;
+  saveLead(o);
+}
+
+/* ---------- Утилиты ---------- */
+function esc(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+
+// Восстановление прогресса: закрыл вкладку — продолжает с того же места
+try {
+  const saved = JSON.parse(localStorage.getItem("scholary_quiz_v1") || "null");
+  if (saved && saved.answers && Object.keys(saved.answers).length) {
+    Object.assign(answers, saved.answers);
+    stepIndex = Math.min(saved.step || 0, STEPS.length - 1);
+    track("quiz_resume", { step: stepIndex + 1 });
+  }
+} catch (e) {}
+
+track("quiz_start");
+renderStep();
+});
+</script>
+</body>
+</html>

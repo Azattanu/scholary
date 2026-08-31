@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Пример отчёта | Scholary</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">Scholary</a>
+  <nav class="nav"><a class="nav-cta" href="quiz.html">Рассчитать свой отчёт</a></nav>
+</header>
+
+<main class="narrow" style="padding-top:18px; padding-bottom:40px; display:flex; flex-direction:column; gap:14px">
+
+  <div class="notice" style="background:var(--accent-soft); color:var(--accent)">Это пример отчёта с образцовыми данными. Твой отчёт будет рассчитан по твоему профилю.</div>
+
+  <!-- 1. Вердикт -->
+  <div style="display:flex; flex-direction:column; gap:12px; background:#1A1D27; border-radius:18px; padding:22px 20px; color:#fff">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <strong style="font-size:15px">Scholary</strong>
+      <span style="font-size:11.5px; color:#7C8290; font-weight:600">пример · сентябрь 2026</span>
+    </div>
+    <div style="font-size:12.5px; font-weight:700; color:#9AA0AC; text-transform:uppercase; letter-spacing:.8px">Отчёт для Aida Serikova</div>
+    <div style="font-size:22px; line-height:1.3; font-weight:800; letter-spacing:-.3px">Поступление за границу со стипендией — реалистичная цель при двух условиях</div>
+    <div style="font-size:13.5px; color:#C9CCD4">Условия: поднять IELTS до 6.5 и подать в 9 программ, а не в одну. Ниже — твой план.</div>
+  </div>
+
+  <!-- 1б. ТОЧКА Б -->
+  <div class="card" style="display:flex; flex-direction:column; gap:8px; border:1.5px solid var(--accent); background:#FBFAFF">
+    <div style="font-size:12px; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:.8px">Точка Б · сентябрь 2027</div>
+    <div style="font-size:16.5px; font-weight:800; line-height:1.35">Ты — студентка бакалавриата в Европе, обучение 0 ₸, стипендия покрывает жильё и еду</div>
+    <div style="font-size:13px; color:var(--muted); line-height:1.5">Наиболее вероятный сценарий по твоему профилю: Венгрия или Италия. Запасной трек: Турция с языковым годом. До Точки Б — 12 месяцев и 4 фазы (роадмап ниже).</div>
+  </div>
+
+  <!-- 2. Главное число -->
+  <div class="card" style="display:flex; align-items:center; gap:18px">
+    <svg width="92" height="92" viewBox="0 0 42 42" style="flex-shrink:0">
+      <circle cx="21" cy="21" r="16" fill="none" stroke="#EDEBE6" stroke-width="5"/>
+      <circle cx="21" cy="21" r="16" fill="none" stroke="#1E9E6A" stroke-width="5" stroke-linecap="round" stroke-dasharray="68.4 32.1" transform="rotate(-90 21 21)"/>
+      <text x="21" y="23" text-anchor="middle" font-size="10.5" font-weight="800" fill="#1A1D27" font-family="Manrope, sans-serif">68%</text>
+    </svg>
+    <div style="display:flex; flex-direction:column; gap:3px">
+      <strong style="font-size:15px">шанс хотя бы одного оффера</strong>
+      <span style="font-size:12.5px; color:var(--muted); line-height:1.5">при подаче в 9 программ портфеля. По каждой программе ниже — две вероятности: на поступление и на стипендию</span>
+    </div>
+  </div>
+  <div class="stat-pair">
+    <div class="card" style="flex:1; padding:16px">
+      <div style="font-size:12px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:.5px">Сильная сторона</div>
+      <div style="font-size:16px; font-weight:800">Академика</div>
+      <div style="font-size:12px; color:var(--muted); font-weight:600">GPA 4.7 — выше требований 8 из 9 программ</div>
+    </div>
+    <div class="card" style="flex:1; padding:16px">
+      <div style="font-size:12px; font-weight:700; color:var(--yellow); text-transform:uppercase; letter-spacing:.5px">Слабое место</div>
+      <div style="font-size:16px; font-weight:800">Язык</div>
+      <div style="font-size:12px; color:var(--muted); font-weight:600">IELTS 6.0 — на грани для 4 программ</div>
+    </div>
+  </div>
+
+  <!-- 3. Что усилить -->
+  <div class="card" style="display:flex; flex-direction:column; gap:10px">
+    <strong style="font-size:17px; letter-spacing:-.3px">Что поднимет шансы сильнее всего</strong>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border-radius:12px; padding:12px 14px"><span style="font-size:13.5px; font-weight:700">IELTS 6.0 → 6.5</span><span style="font-size:14px; font-weight:800; color:var(--green)">+18 п.п.</span></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border-radius:12px; padding:12px 14px"><span style="font-size:13.5px; font-weight:700">Мотивационное под каждую программу</span><span style="font-size:14px; font-weight:800; color:var(--green)">+9 п.п.</span></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border-radius:12px; padding:12px 14px"><span style="font-size:13.5px; font-weight:700">+2 якорные программы в портфель</span><span style="font-size:14px; font-weight:800; color:var(--green)">+7 п.п.</span></div>
+  </div>
+
+  <!-- 4. Портфель -->
+  <div>
+    <strong style="font-size:17px; letter-spacing:-.3px">Твой портфель: 9 программ</strong>
+    <div style="font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:10px">сначала якорные — с высоким шансом, затем амбициозные. Дедлайн — у каждой</div>
+    <div class="card" style="padding:0; overflow-x:auto; margin-bottom:10px">
+      <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:340px">
+        <tr style="color:var(--muted); font-weight:700; text-align:left">
+          <th style="padding:10px 12px; border-bottom:1px solid var(--border)">Программа</th>
+          <th style="padding:10px 6px; border-bottom:1px solid var(--border); text-align:right">Поступл.</th>
+          <th style="padding:10px 6px; border-bottom:1px solid var(--border); text-align:right">Стипенд.</th>
+          <th style="padding:10px 12px; border-bottom:1px solid var(--border); text-align:right">Дедлайн</th>
+        </tr>
+        <tr><td style="padding:9px 12px; font-weight:700">🇭🇺 Stipendium Hungaricum</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">71%</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">62%</td><td style="padding:9px 12px; text-align:right; font-weight:700">15 янв</td></tr>
+        <tr style="background:var(--bg)"><td style="padding:9px 12px; font-weight:700">🇮🇹 EDISU Piemonte</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">66%</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">57%</td><td style="padding:9px 12px; text-align:right; font-weight:700">~апр</td></tr>
+        <tr><td style="padding:9px 12px; font-weight:700">🇮🇹 DiSCo Lazio</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">64%</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">55%</td><td style="padding:9px 12px; text-align:right; font-weight:700">~май</td></tr>
+        <tr style="background:var(--bg)"><td style="padding:9px 12px; font-weight:700">🇨🇿 Charles University (чеш.)</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--green)">58%</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--yellow)">—</td><td style="padding:9px 12px; text-align:right; font-weight:700">28 фев</td></tr>
+        <tr><td style="padding:9px 12px; font-weight:700">🇹🇷 Türkiye Burslari</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--yellow)">41%</td><td style="padding:9px 6px; text-align:right; font-weight:800; color:var(--yellow)">34%</td><td style="padding:9px 12px; text-align:right; font-weight:700">~фев</td></tr>
+        <tr style="background:var(--bg)"><td style="padding:9px 12px; font-weight:700; color:var(--muted)">…ещё 4 в полном отчёте</td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px">
+      <div class="card" style="display:flex; flex-direction:column; gap:10px; padding:16px">
+        <div style="display:flex; justify-content:space-between; gap:8px">
+          <div><strong style="font-size:14.5px">Stipendium Hungaricum</strong><div style="font-size:12px; color:var(--muted); font-weight:600">Венгрия · бакалавриат · обучение 0 ₸ + стипендия</div></div>
+          <span style="background:var(--green-soft); color:var(--green); font-size:11px; font-weight:800; border-radius:999px; padding:4px 9px; height:fit-content; white-space:nowrap">якорная</span>
+        </div>
+        <div class="bar-row"><span class="bar-label">Поступление</span><div class="bar"><i style="width:71%"></i></div><span class="bar-val ok">71%</span></div>
+        <div class="bar-row"><span class="bar-label">Стипендия</span><div class="bar"><i style="width:62%"></i></div><span class="bar-val ok">62%</span></div>
+        <div class="notice">дедлайн 15 января · обязателен второй трек через Sending Partner — его дедлайн раньше основного</div>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; gap:10px; padding:16px">
+        <div style="display:flex; justify-content:space-between; gap:8px">
+          <div><strong style="font-size:14.5px">EDISU Piemonte</strong><div style="font-size:12px; color:var(--muted); font-weight:600">Италия · до 100% + стипендия · отбор по доходу семьи</div></div>
+          <span style="background:var(--green-soft); color:var(--green); font-size:11px; font-weight:800; border-radius:999px; padding:4px 9px; height:fit-content; white-space:nowrap">якорная</span>
+        </div>
+        <div class="bar-row"><span class="bar-label">Поступление</span><div class="bar"><i style="width:66%"></i></div><span class="bar-val ok">66%</span></div>
+        <div class="bar-row"><span class="bar-label">Стипендия</span><div class="bar"><i style="width:57%"></i></div><span class="bar-val ok">57%</span></div>
+        <div class="notice">дедлайн ~апрель 2027 · справка ISEE делается месяцами — начать в сентябре</div>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; gap:10px; padding:16px">
+        <div style="display:flex; justify-content:space-between; gap:8px">
+          <div><strong style="font-size:14.5px">Türkiye Burslari</strong><div style="font-size:12px; color:var(--muted); font-weight:600">Турция · 100% + стипендия + языковой год</div></div>
+          <span style="background:var(--accent-soft); color:var(--accent); font-size:11px; font-weight:800; border-radius:999px; padding:4px 9px; height:fit-content; white-space:nowrap">амбициозная</span>
+        </div>
+        <div class="bar-row"><span class="bar-label">Поступление</span><div class="bar warn"><i style="width:41%"></i></div><span class="bar-val warn">41%</span></div>
+        <div class="bar-row"><span class="bar-label">Стипендия</span><div class="bar warn"><i style="width:34%"></i></div><span class="bar-val warn">34%</span></div>
+        <div class="notice">дедлайн ~февраль 2027 · интервью на английском — подготовим</div>
+        <div style="font-size:12px; color:var(--muted); font-weight:600">34% — нормальный шанс для амбициозной программы: именно поэтому в портфеле их несколько</div>
+      </div>
+      <div style="display:flex; justify-content:center; align-items:center; height:44px; border:1.5px dashed #C9C6BE; border-radius:12px; font-size:13px; font-weight:700; color:var(--muted)">… ещё 6 программ в полном отчёте</div>
+    </div>
+  </div>
+
+  <!-- 5. Роадмап до Точки Б -->
+  <div class="card" style="display:flex; flex-direction:column; gap:14px">
+    <div>
+      <strong style="font-size:17px; letter-spacing:-.3px">Роадмап до Точки Б</strong>
+      <div style="font-size:12.5px; color:var(--muted); font-weight:600">4 фазы за 12 месяцев · со сроками изготовления документов — их не отмотать назад</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:0">
+      <div style="display:flex; gap:12px">
+        <div style="display:flex; flex-direction:column; align-items:center"><div style="display:flex; justify-content:center; align-items:center; width:28px; height:28px; background:var(--accent); color:#fff; border-radius:999px; font-size:12px; font-weight:800; flex-shrink:0">1</div><div style="width:2px; flex-grow:1; background:var(--accent-border)"></div></div>
+        <div style="padding-bottom:16px">
+          <div style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap"><strong style="font-size:14px">Фундамент</strong><span style="font-size:11.5px; font-weight:800; color:var(--accent)">СЕН – ОКТ 2026</span></div>
+          <div style="font-size:12.5px; color:var(--muted); font-weight:600; line-height:1.55">Записаться на IELTS (цель 6.5) · запросить ISEE для Италии — делается месяцами · перевод + апостиль аттестата (10–20 раб. дней) · черновик мотивационного</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div style="display:flex; flex-direction:column; align-items:center"><div style="display:flex; justify-content:center; align-items:center; width:28px; height:28px; background:var(--accent); color:#fff; border-radius:999px; font-size:12px; font-weight:800; flex-shrink:0">2</div><div style="width:2px; flex-grow:1; background:var(--accent-border)"></div></div>
+        <div style="padding-bottom:16px">
+          <div style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap"><strong style="font-size:14px">Подача</strong><span style="font-size:11.5px; font-weight:800; color:var(--accent)">НОЯ 2026 – ФЕВ 2027</span></div>
+          <div style="font-size:12.5px; color:var(--muted); font-weight:600; line-height:1.55">Сдать IELTS · окно SH открывается в ноябре, дедлайн 15 января, второй трек через Sending Partner — раньше · Чехия до 28 февраля · Турция в феврале</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div style="display:flex; flex-direction:column; align-items:center"><div style="display:flex; justify-content:center; align-items:center; width:28px; height:28px; background:var(--accent); color:#fff; border-radius:999px; font-size:12px; font-weight:800; flex-shrink:0">3</div><div style="width:2px; flex-grow:1; background:var(--accent-border)"></div></div>
+        <div style="padding-bottom:16px">
+          <div style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap"><strong style="font-size:14px">Офферы и выбор</strong><span style="font-size:11.5px; font-weight:800; color:var(--accent)">МАРТ – МАЙ 2027</span></div>
+          <div style="font-size:12.5px; color:var(--muted); font-weight:600; line-height:1.55">Интервью SH и Турции (подготовим) · Италия: подача на гранты EDISU/DiSCo · сравнение офферов и решение</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div style="display:flex; justify-content:center; align-items:center; width:28px; height:28px; background:var(--green); color:#fff; border-radius:999px; font-size:12px; font-weight:800; flex-shrink:0">4</div>
+        <div>
+          <div style="display:flex; gap:8px; align-items:baseline; flex-wrap:wrap"><strong style="font-size:14px">Виза и переезд → Точка Б</strong><span style="font-size:11.5px; font-weight:800; color:var(--green)">ИЮНЬ – СЕН 2027</span></div>
+          <div style="font-size:12.5px; color:var(--muted); font-weight:600; line-height:1.55">Студенческая виза · жильё · перелёт · 1 сентября 2027 — первый учебный день</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Шесть осей -->
+  <div class="card" style="display:flex; flex-direction:column; gap:10px">
+    <div>
+      <strong style="font-size:17px; letter-spacing:-.3px">Профиль по шести осям</strong>
+      <div style="font-size:12.5px; color:var(--muted); font-weight:600">для тех, кто хочет глубже — и для родителей</div>
+    </div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Академика</span><div class="bar"><i style="width:88%"></i></div><span class="bar-val">8.8</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Язык</span><div class="bar warn"><i style="width:52%"></i></div><span class="bar-val">5.2</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Достижения</span><div class="bar"><i style="width:64%"></i></div><span class="bar-val">6.4</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Мотивационное</span><div class="bar"><i style="width:58%"></i></div><span class="bar-val">5.8</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Бюджет</span><div class="bar"><i style="width:72%"></i></div><span class="bar-val">7.2</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:118px">Соответствие</span><div class="bar"><i style="width:76%"></i></div><span class="bar-val">7.6</span></div>
+  </div>
+
+  <!-- 7. Следующий шаг -->
+  <div class="card" style="display:flex; flex-direction:column; gap:12px; background:var(--accent-soft); border-color:var(--accent-border)">
+    <strong style="font-size:17px; letter-spacing:-.3px">Что дальше</strong>
+    <p style="margin:0; font-size:13.5px; color:#4B5060">Дальше самое сложное — документы. Большинство отказов случается по формальностям, а не по способностям: просроченный сертификат, не тот перевод, пропущенный второй трек.</p>
+    <a class="btn btn-primary" id="waConsult" href="#">Разбор со специалистом — 15&nbsp;000&nbsp;₸</a>
+    <a class="btn btn-outline" id="waPackage" href="#" style="background:#fff">Документы и подача — 25&nbsp;000&nbsp;₸</a>
+  </div>
+
+  <div class="fineprint">Scholary · scholary.kz · пример отчёта<br>Оценка модели не является гарантией поступления</div>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const C = window.SCHOLARY_CONFIG;
+    const wa = (t) => "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(t);
+    document.getElementById("waConsult").href = wa("Здравствуйте! Хочу разбор со специалистом за 15 000 ₸");
+    document.getElementById("waPackage").href = wa("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸");
+    track("report_demo_view");
+  });
+</script>
+</body>
+</html>
