@@ -1,0 +1,1123 @@
+{
+ "_readme": "Кандидаты на добавление в базу Scholary (сверх текущих 59). КАЖДУЮ запись перед публикацией проверяет Диас А. по source_url (поле verified: false → true + дата). Дедлайны указаны ориентировочно по прошлым циклам — их обязательно уточнять на цикл 2027.",
+ "programs": [
+  {
+   "country": "Германия",
+   "name": "DAAD EPOS (development-related postgraduate)",
+   "level": [
+    "master"
+   ],
+   "funding": "стипендия €992/мес + обучение",
+   "language": "англ/нем",
+   "window": "авг–окт (зависит от программы)",
+   "kz_note": "нужен опыт работы 2 года",
+   "source_url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/epos/",
+   "verified": false
+  },
+  {
+   "country": "ЕС (разные)",
+   "name": "Erasmus Mundus Joint Masters",
+   "level": [
+    "master"
+   ],
+   "funding": "полная: обучение + €1400/мес",
+   "language": "англ",
+   "window": "окт–янв (по консорциумам)",
+   "kz_note": "можно подать в 3 консорциума",
+   "source_url": "https://www.eacea.ec.europa.eu/scholarships/emjm-catalogue_en",
+   "verified": false
+  },
+  {
+   "country": "Франция",
+   "name": "Eiffel Excellence",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "€1181/мес + перелёт",
+   "language": "англ/фр",
+   "window": "номинация вузом, осень–янв",
+   "kz_note": "подаёт вуз, не студент — сначала admission",
+   "source_url": "https://www.campusfrance.org/en/eiffel-scholarship-program-of-excellence",
+   "verified": false
+  },
+  {
+   "country": "Швеция",
+   "name": "SI Scholarship for Global Professionals",
+   "level": [
+    "master"
+   ],
+   "funding": "полная + SEK 12000/мес",
+   "language": "англ",
+   "window": "фев",
+   "kz_note": "Казахстан в списке стран",
+   "source_url": "https://si.se/en/apply/scholarships/",
+   "verified": false
+  },
+  {
+   "country": "Швейцария",
+   "name": "Swiss Government Excellence",
+   "level": [
+    "phd"
+   ],
+   "funding": "CHF 1920/мес",
+   "language": "англ",
+   "window": "авг–ноя через посольство",
+   "kz_note": "research/PhD, нужен профессор-хост",
+   "source_url": "https://www.sbfi.admin.ch/scholarships_eng",
+   "verified": false
+  },
+  {
+   "country": "Австрия",
+   "name": "Ernst Mach Grant",
+   "level": [
+    "phd",
+    "research"
+   ],
+   "funding": "€1250/мес",
+   "language": "англ/нем",
+   "window": "до марта",
+   "kz_note": "",
+   "source_url": "https://grants.at/",
+   "verified": false
+  },
+  {
+   "country": "Италия",
+   "name": "MAECI (стипендия правительства Италии)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "€900/мес + освобождение от платы",
+   "language": "итал/англ",
+   "window": "весна",
+   "kz_note": "KZ в списке",
+   "source_url": "https://studyinitaly.esteri.it/en/call-for-procedure",
+   "verified": false
+  },
+  {
+   "country": "Италия",
+   "name": "ER.GO (Эмилия-Романья: Болонья, Модена)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "грант до ~€7000/год + жильё + столовая",
+   "language": "англ/итал",
+   "window": "июль–сент (после зачисления)",
+   "kz_note": "по доходу семьи (ISEE) — как EDISU",
+   "source_url": "https://www.er-go.it/",
+   "verified": false
+  },
+  {
+   "country": "Италия",
+   "name": "DSU Toscana (Флоренция, Пиза)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "грант + жильё по ISEE",
+   "language": "англ/итал",
+   "window": "июль–сент",
+   "kz_note": "",
+   "source_url": "https://www.dsu.toscana.it/",
+   "verified": false
+  },
+  {
+   "country": "Польша",
+   "name": "NAWA Banach",
+   "level": [
+    "master"
+   ],
+   "funding": "стипендия + без платы",
+   "language": "польск/англ",
+   "window": "весна",
+   "kz_note": "проверить актуальный список стран (менялся)",
+   "source_url": "https://nawa.gov.pl/en/students/foreign-students/the-banach-scholarship-programme",
+   "verified": false
+  },
+  {
+   "country": "Польша",
+   "name": "NAWA Ulam",
+   "level": [
+    "phd",
+    "research"
+   ],
+   "funding": "PLN 10000/мес",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "",
+   "source_url": "https://nawa.gov.pl/en/scientists/the-ulam-programme",
+   "verified": false
+  },
+  {
+   "country": "Чехия",
+   "name": "Czech Government Scholarship",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полная + стипендия",
+   "language": "чеш/англ",
+   "window": "до 30 сент",
+   "kz_note": "проверить список стран на цикл",
+   "source_url": "https://www.mzv.cz/jnp/en/information_for_aliens/scholarships/",
+   "verified": false
+  },
+  {
+   "country": "Словакия",
+   "name": "National Scholarship Programme SK",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "€620–1025/мес",
+   "language": "англ/словац",
+   "window": "апр и окт",
+   "kz_note": "",
+   "source_url": "https://www.scholarships.sk/",
+   "verified": false
+  },
+  {
+   "country": "Венгрия",
+   "name": "Diaspora/Bilateral state scholarships (сверх SH)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная",
+   "language": "англ/венг",
+   "window": "янв",
+   "kz_note": "двусторонние соглашения — отдельный трек от SH",
+   "source_url": "https://tka.hu/international-programmes",
+   "verified": false
+  },
+  {
+   "country": "Румыния",
+   "name": "Romania Government Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "без платы + стипендия + общежитие",
+   "language": "рум (год языка)",
+   "window": "март",
+   "kz_note": "",
+   "source_url": "https://www.mae.ro/en/node/10251",
+   "verified": false
+  },
+  {
+   "country": "Латвия",
+   "name": "Latvian State Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "€500–670/мес",
+   "language": "англ",
+   "window": "до 1 апр",
+   "kz_note": "KZ в списке",
+   "source_url": "https://www.viaa.gov.lv/en/latvian-state-scholarships",
+   "verified": false
+  },
+  {
+   "country": "Литва",
+   "name": "Lithuanian State Scholarships",
+   "level": [
+    "master"
+   ],
+   "funding": "стипендия + без платы",
+   "language": "англ/лит",
+   "window": "весна",
+   "kz_note": "",
+   "source_url": "https://scholarships.lt/",
+   "verified": false
+  },
+  {
+   "country": "Эстония",
+   "name": "Estonian National Scholarship",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "€350–660/мес",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "",
+   "source_url": "https://haridus.ee/en/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Британия",
+   "name": "Chevening",
+   "level": [
+    "master"
+   ],
+   "funding": "полная: обучение + стипендия + перелёт",
+   "language": "англ",
+   "window": "авг–ноя",
+   "kz_note": "KZ участвует; нужен опыт работы 2 года",
+   "source_url": "https://www.chevening.org/",
+   "verified": false
+  },
+  {
+   "country": "Британия",
+   "name": "GREAT Scholarships",
+   "level": [
+    "master"
+   ],
+   "funding": "£10 000 к обучению",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "проверить, есть ли KZ в текущем списке",
+   "source_url": "https://study-uk.britishcouncil.org/scholarships-funding/great-scholarships",
+   "verified": false
+  },
+  {
+   "country": "Ирландия",
+   "name": "Government of Ireland IES",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "€10 000 + обучение",
+   "language": "англ",
+   "window": "до марта",
+   "kz_note": "",
+   "source_url": "https://hea.ie/policy/internationalisation/government-of-ireland-international-education-scholarships/",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "name": "Fulbright Foreign Student Program (KZ)",
+   "level": [
+    "master"
+   ],
+   "funding": "полная",
+   "language": "англ (TOEFL)",
+   "window": "до мая (годом раньше)",
+   "kz_note": "администрирует посольство США в РК",
+   "source_url": "https://kz.usembassy.gov/education-culture/fulbright/",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "name": "Global UGRAD (семестровый обмен)",
+   "level": [
+    "bachelor-exchange"
+   ],
+   "funding": "полная на семестр",
+   "language": "англ",
+   "window": "дек–фев",
+   "kz_note": "не degree, но сильный буст профиля",
+   "source_url": "https://www.worldlearning.org/program/global-undergraduate-exchange-program/",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "name": "Need-based aid топ-вузов (Harvard, Yale, MIT, Amherst…)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "до 100% по доходу семьи",
+   "language": "англ + SAT",
+   "window": "1 ноя (EA) / 1 янв (RD)",
+   "kz_note": "международникам нужен очень сильный профиль",
+   "source_url": "https://college.harvard.edu/financial-aid",
+   "verified": false
+  },
+  {
+   "country": "Канада",
+   "name": "Lester B. Pearson (University of Toronto)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полная на 4 года",
+   "language": "англ",
+   "window": "номинация школой, ноя",
+   "kz_note": "нужна номинация школы",
+   "source_url": "https://future.utoronto.ca/pearson/",
+   "verified": false
+  },
+  {
+   "country": "Канада",
+   "name": "UBC International Scholars (IMES/Karen McKellin)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полная по need+merit",
+   "language": "англ",
+   "window": "ноя–дек",
+   "kz_note": "",
+   "source_url": "https://you.ubc.ca/financial-planning/scholarships-awards-international-students/",
+   "verified": false
+  },
+  {
+   "country": "Канада",
+   "name": "Vanier CGS",
+   "level": [
+    "phd"
+   ],
+   "funding": "CAD 50 000/год",
+   "language": "англ/фр",
+   "window": "номинация вузом, осень",
+   "kz_note": "",
+   "source_url": "https://vanier.gc.ca/",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "CSC (Chinese Government Scholarship)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "полная + стипендия",
+   "language": "кит/англ",
+   "window": "янв–апр",
+   "kz_note": "тип A через МОН РК, тип B напрямую в вуз",
+   "source_url": "https://www.campuschina.org/",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "ANSO Scholarship (Chinese Academy of Sciences)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полная + CNY 3000–7000/мес",
+   "language": "англ",
+   "window": "до марта",
+   "kz_note": "STEM, сильный трек для магистров",
+   "source_url": "http://www.anso.org.cn/programmes/talent/",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "Schwarzman Scholars (Tsinghua)",
+   "level": [
+    "master"
+   ],
+   "funding": "полная, престижная",
+   "language": "англ",
+   "window": "до сент",
+   "kz_note": "лидерский профиль",
+   "source_url": "https://www.schwarzmanscholars.org/",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "Confucius Institute Scholarship",
+   "level": [
+    "language-year",
+    "bachelor"
+   ],
+   "funding": "полная",
+   "language": "кит (HSK)",
+   "window": "март–май",
+   "kz_note": "вход через HSK — есть центры в РК",
+   "source_url": "https://cis.chinese.cn/",
+   "verified": false
+  },
+  {
+   "country": "Корея",
+   "name": "GKS (Global Korea Scholarship)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "полная + язык. год + перелёт",
+   "language": "кор/англ",
+   "window": "бакалавр: сент–окт; магистр: фев–март",
+   "kz_note": "трек через посольство и через вуз — два шанса",
+   "source_url": "https://www.studyinkorea.go.kr/",
+   "verified": false
+  },
+  {
+   "country": "Корея",
+   "name": "KAIST International Student Scholarship",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная + стипендия",
+   "language": "англ",
+   "window": "сент (EA)",
+   "kz_note": "STEM",
+   "source_url": "https://admission.kaist.ac.kr/intl-undergraduate/",
+   "verified": false
+  },
+  {
+   "country": "Япония",
+   "name": "MEXT (посольский трек)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "полная + ¥117–145 тыс/мес",
+   "language": "яп/англ",
+   "window": "апр–июнь через посольство",
+   "kz_note": "экзамены в посольстве в Астане",
+   "source_url": "https://www.kz.emb-japan.go.jp/",
+   "verified": false
+  },
+  {
+   "country": "Япония",
+   "name": "ADB-JSP (Asian Development Bank)",
+   "level": [
+    "master"
+   ],
+   "funding": "полная",
+   "language": "англ",
+   "window": "за 6 мес до старта",
+   "kz_note": "KZ — член АБР; нужен опыт 2 года",
+   "source_url": "https://www.adb.org/work-with-us/careers/japan-scholarship-program",
+   "verified": false
+  },
+  {
+   "country": "Сингапур",
+   "name": "SINGA (A*STAR PhD)",
+   "level": [
+    "phd"
+   ],
+   "funding": "полная + SGD 2200–2700/мес",
+   "language": "англ",
+   "window": "1 июня / 1 дек",
+   "kz_note": "STEM research",
+   "source_url": "https://www.a-star.edu.sg/Scholarships/for-graduate-studies/singapore-international-graduate-award-singa",
+   "verified": false
+  },
+  {
+   "country": "Гонконг",
+   "name": "Hong Kong PhD Fellowship",
+   "level": [
+    "phd"
+   ],
+   "funding": "HKD 27 600/мес",
+   "language": "англ",
+   "window": "до 1 дек",
+   "kz_note": "",
+   "source_url": "https://cerg1.ugc.edu.hk/hkpfs/",
+   "verified": false
+  },
+  {
+   "country": "Тайвань",
+   "name": "Taiwan MOE Scholarship + Huayu (язык)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "обучение + NTD 15–20 тыс/мес",
+   "language": "кит/англ",
+   "window": "фев–март",
+   "kz_note": "",
+   "source_url": "https://taiwanscholarship.moe.gov.tw/",
+   "verified": false
+  },
+  {
+   "country": "Малайзия",
+   "name": "MIS (Malaysia International Scholarship)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полная",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "",
+   "source_url": "https://biasiswa.mohe.gov.my/INTER/",
+   "verified": false
+  },
+  {
+   "country": "Бруней",
+   "name": "Brunei Darussalam Government Scholarship",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная + перелёт + BND 500/мес",
+   "language": "англ",
+   "window": "янв–фев",
+   "kz_note": "",
+   "source_url": "https://www.mfa.gov.bn/pages/bdgs.aspx",
+   "verified": false
+  },
+  {
+   "country": "ОАЭ",
+   "name": "Khalifa University Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "полная + стипендия",
+   "language": "англ",
+   "window": "круглогодично, основное — весна",
+   "kz_note": "STEM",
+   "source_url": "https://www.ku.ac.ae/admissions",
+   "verified": false
+  },
+  {
+   "country": "ОАЭ",
+   "name": "MBZUAI (магистратура/PhD по AI)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полная + AED 8–10 тыс/мес",
+   "language": "англ",
+   "window": "окт–апр",
+   "kz_note": "для IT-профилей — топ-вариант",
+   "source_url": "https://mbzuai.ac.ae/admissions/",
+   "verified": false
+  },
+  {
+   "country": "ОАЭ",
+   "name": "NYU Abu Dhabi (need-based)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "до 100% по доходу",
+   "language": "англ",
+   "window": "1 ноя / 1 янв",
+   "kz_note": "Common App",
+   "source_url": "https://nyuad.nyu.edu/en/admissions.html",
+   "verified": false
+  },
+  {
+   "country": "Катар",
+   "name": "Education City (Qatar Foundation вузы)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "need-based + займы QF",
+   "language": "англ",
+   "window": "янв–фев",
+   "kz_note": "филиалы Georgetown, CMU, Northwestern",
+   "source_url": "https://www.qf.org.qa/education/hbku",
+   "verified": false
+  },
+  {
+   "country": "Саудовская Аравия",
+   "name": "KAUST Fellowship",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полная + $20–30 тыс/год",
+   "language": "англ",
+   "window": "круглогодично, основное — до янв",
+   "kz_note": "STEM, кампус мирового уровня",
+   "source_url": "https://admissions.kaust.edu.sa/",
+   "verified": false
+  },
+  {
+   "country": "Турция",
+   "name": "Diyanet Vakfı (теология и не только)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная",
+   "language": "тур",
+   "window": "весна",
+   "kz_note": "отдельный трек от Türkiye Burslari",
+   "source_url": "https://burs.diyanet.gov.tr/",
+   "verified": false
+  },
+  {
+   "country": "Азербайджан",
+   "name": "ADA University Scholarship",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "до 100%",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "близко и дёшево жить",
+   "source_url": "https://www.ada.edu.az/en/admission",
+   "verified": false
+  },
+  {
+   "country": "Вишеград (V4)",
+   "name": "Visegrad Scholarship",
+   "level": [
+    "master"
+   ],
+   "funding": "€3000/семестр",
+   "language": "англ",
+   "window": "до 15 марта",
+   "kz_note": "проверить eligible-страны на цикл",
+   "source_url": "https://www.visegradfund.org/apply/mobilities/visegrad-scholarship/",
+   "verified": false
+  },
+  {
+   "country": "Международные",
+   "name": "Islamic Development Bank Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "полная (в форме беспроцентного займа/гранта)",
+   "language": "англ",
+   "window": "дек–фев",
+   "kz_note": "KZ — член ИБР",
+   "source_url": "https://www.isdb.org/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Германия",
+   "name": "Deutschlandstipendium (после поступления)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "€300/мес",
+   "language": "нем/англ",
+   "window": "после зачисления, лето–осень",
+   "kz_note": "добивка к бесплатному обучению",
+   "source_url": "https://www.deutschlandstipendium.de/",
+   "verified": false
+  },
+  {
+   "country": "Франция",
+   "name": "France Excellence Europa / посольские",
+   "level": [
+    "master"
+   ],
+   "funding": "стипендия + соцпакет Campus France",
+   "language": "фр/англ",
+   "window": "зима–весна",
+   "kz_note": "уточнить трек посольства Франции в РК",
+   "source_url": "https://www.kazakhstan.campusfrance.org/",
+   "verified": false
+  },
+  {
+   "country": "Россия",
+   "name": "Госквота РФ (Россотрудничество)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "бюджетное место + стипендия + общежитие",
+   "language": "рус",
+   "window": "янв–март на education-in-russia.com",
+   "kz_note": "крупнейший по объёму трек для КЗ",
+   "source_url": "https://education-in-russia.com/",
+   "verified": false
+  },
+  {
+   "country": "Россия",
+   "name": "Олимпиада Open Doors (магистратура/PhD без экзаменов)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "бюджетное место",
+   "language": "рус/англ",
+   "window": "сен–дек",
+   "kz_note": "",
+   "source_url": "https://od.globaluni.ru/",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "Правительственные стипендии провинций (Jiangsu, Shanghai, Beijing)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная или частичная",
+   "language": "кит/англ",
+   "window": "фев–июнь",
+   "kz_note": "конкурс мягче CSC",
+   "source_url": "https://www.campuschina.org/scholarships/index.html",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "name": "Belt & Road / университетские (Tsinghua, PKU и др.)",
+   "level": [
+    "master"
+   ],
+   "funding": "до полной",
+   "language": "англ",
+   "window": "дек–март",
+   "kz_note": "",
+   "source_url": "https://yz.tsinghua.edu.cn/en/",
+   "verified": false
+  },
+  {
+   "country": "Индия",
+   "name": "ICCR Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "обучение + стипендия + жильё",
+   "language": "англ",
+   "window": "янв–апр",
+   "kz_note": "через посольство Индии в РК",
+   "source_url": "https://a2ascholarships.iccr.gov.in/",
+   "verified": false
+  },
+  {
+   "country": "Индонезия",
+   "name": "KNB Scholarship",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная + язык. год",
+   "language": "индонез/англ",
+   "window": "янв–фев",
+   "kz_note": "",
+   "source_url": "https://knb.kemdikbud.go.id/",
+   "verified": false
+  },
+  {
+   "country": "Таиланд",
+   "name": "AIT / SIIT scholarships",
+   "level": [
+    "master"
+   ],
+   "funding": "до 100%",
+   "language": "англ",
+   "window": "март/сент",
+   "kz_note": "инженерия",
+   "source_url": "https://ait.ac.th/admissions/scholarships/",
+   "verified": false
+  },
+  {
+   "country": "Сингапур",
+   "name": "SgIS (Singapore International Graduate Award — undergrad SGIS)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "обучение + SGD 6000/год",
+   "language": "англ",
+   "window": "дек–янв",
+   "kz_note": "",
+   "source_url": "https://www.moe.gov.sg/financial-matters/awards-scholarships",
+   "verified": false
+  },
+  {
+   "country": "Япония",
+   "name": "University of Tokyo PEAK / вузовские",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "частичная-полная",
+   "language": "англ",
+   "window": "дек–янв",
+   "kz_note": "англоязычный бакалавриат",
+   "source_url": "https://peak.c.u-tokyo.ac.jp/",
+   "verified": false
+  },
+  {
+   "country": "Корея",
+   "name": "SNU / POSTECH / Yonsei вузовские",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "до полной",
+   "language": "англ/кор",
+   "window": "сен и март",
+   "kz_note": "параллельно с GKS",
+   "source_url": "https://en.snu.ac.kr/admission",
+   "verified": false
+  },
+  {
+   "country": "Швейцария",
+   "name": "ETH Excellence Scholarship",
+   "level": [
+    "master"
+   ],
+   "funding": "CHF 12000/семестр + плата",
+   "language": "англ",
+   "window": "ноя–дек",
+   "kz_note": "топ-профили",
+   "source_url": "https://ethz.ch/en/studies/financial/scholarships/excellencescholarship.html",
+   "verified": false
+  },
+  {
+   "country": "Нидерланды",
+   "name": "TU Delft Excellence / Justus & Louise van Effen",
+   "level": [
+    "master"
+   ],
+   "funding": "полная",
+   "language": "англ",
+   "window": "до 1 дек",
+   "kz_note": "",
+   "source_url": "https://www.tudelft.nl/en/education/practical-matters/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Нидерланды",
+   "name": "Holland Scholarship + вузовские (Radboud, UvA...)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "€5000+ (частичная)",
+   "language": "англ",
+   "window": "фев–май",
+   "kz_note": "",
+   "source_url": "https://www.studyinnl.org/finances/holland-scholarship",
+   "verified": false
+  },
+  {
+   "country": "Италия",
+   "name": "Bocconi Merit / Politecnico di Milano merit",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "50–100% платы (+ жильё у Bocconi)",
+   "level_note": "",
+   "language": "англ",
+   "window": "вместе с admission, зима–весна",
+   "kz_note": "",
+   "source_url": "https://www.unibocconi.eu/",
+   "verified": false
+  },
+  {
+   "country": "Австрия",
+   "name": "CEU (Central European University, Вена)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "до полной + стипендия",
+   "language": "англ",
+   "window": "до 1 фев",
+   "kz_note": "щедрый financial aid",
+   "source_url": "https://www.ceu.edu/financialaid",
+   "verified": false
+  },
+  {
+   "country": "Германия",
+   "name": "Constructor University (Bremen) need-based",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "до 100% по нужде (займы/гранты)",
+   "language": "англ",
+   "window": "май",
+   "kz_note": "частный, англ. бакалавриат",
+   "source_url": "https://constructor.university/admission-aid/financing-options",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "name": "Berea College (100% всем поступившим)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полная всем + работа на кампусе",
+   "language": "англ",
+   "window": "осень",
+   "kz_note": "очень маленький приём международников",
+   "source_url": "https://www.berea.edu/admissions",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "name": "Community colleges + transfer (дёшево → топ-вуз)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "низкая цена, стипендии при переводе",
+   "language": "англ",
+   "window": "круглый год",
+   "kz_note": "обходной маршрут в США",
+   "source_url": "https://www.educationusa.state.gov/",
+   "verified": false
+  },
+  {
+   "country": "Катар",
+   "name": "Qatar University International Scholarships",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "плата + жильё + перелёт",
+   "language": "англ/араб",
+   "window": "март–апр",
+   "kz_note": "",
+   "source_url": "https://www.qu.edu.qa/en-us/students/scholarships/",
+   "verified": false
+  },
+  {
+   "country": "Оман/Кувейт/Египет",
+   "name": "Гранты арабских государств (Al-Azhar и гос. квоты)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полная",
+   "language": "араб",
+   "window": "лето",
+   "kz_note": "через МОН РК / посольства",
+   "source_url": "https://www.gov.kz/memleket/entities/edu",
+   "verified": false
+  },
+  {
+   "country": "Грузия",
+   "name": "Вузовские скидки (Tbilisi State, Ilia State)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "низкая плата, частичные скидки",
+   "language": "англ/груз",
+   "window": "лето",
+   "kz_note": "бюджетный запасной вариант",
+   "source_url": "https://www.tsu.ge/en",
+   "verified": false
+  },
+  {
+   "country": "Сербия",
+   "name": "World in Serbia",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная + общежитие",
+   "language": "серб",
+   "window": "весна",
+   "kz_note": "проверить актуальность программы",
+   "source_url": "http://www.mpn.gov.rs/",
+   "verified": false
+  },
+  {
+   "country": "Словения",
+   "name": "Стипендии словенских вузов (Ljubljana)",
+   "level": [
+    "master"
+   ],
+   "funding": "частичные",
+   "language": "англ/словен",
+   "window": "весна",
+   "kz_note": "",
+   "source_url": "https://www.uni-lj.si/study/",
+   "verified": false
+  },
+  {
+   "country": "Хорватия/Болгария",
+   "name": "Гос. стипендии по двусторонним соглашениям",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная-частичная",
+   "language": "местный/англ",
+   "window": "весна",
+   "kz_note": "через МОН РК",
+   "source_url": "https://www.gov.kz/memleket/entities/edu",
+   "verified": false
+  },
+  {
+   "country": "Финляндия",
+   "name": "Стипендии вузов (Aalto, Helsinki: 50–100% платы)",
+   "level": [
+    "master"
+   ],
+   "funding": "50–100% платы + грант",
+   "language": "англ",
+   "window": "дек–янв",
+   "kz_note": "",
+   "source_url": "https://www.aalto.fi/en/admission-services/scholarships-and-tuition-fees",
+   "verified": false
+  },
+  {
+   "country": "Дания",
+   "name": "Danish Government Scholarship (через вузы)",
+   "level": [
+    "master"
+   ],
+   "funding": "плата + грант",
+   "language": "англ",
+   "window": "янв–март",
+   "kz_note": "кол-во мест невелико",
+   "source_url": "https://studyindenmark.dk/",
+   "verified": false
+  },
+  {
+   "country": "Бельгия",
+   "name": "KU Leuven Science@Leuven и др.",
+   "level": [
+    "master"
+   ],
+   "funding": "€12000/год",
+   "language": "англ",
+   "window": "фев",
+   "kz_note": "",
+   "source_url": "https://www.kuleuven.be/english/apply-for-admission/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Испания",
+   "name": "Fundación Carolina (для граждан? проверить) / вузовские скидки",
+   "level": [
+    "master"
+   ],
+   "funding": "частичные",
+   "language": "исп",
+   "window": "весна",
+   "kz_note": "Carolina — только Латам; для КЗ смотреть вузовские",
+   "source_url": "https://www.studyinspain.info/",
+   "verified": false
+  },
+  {
+   "country": "Азербайджан/Узбекистан",
+   "name": "Двусторонние гос. квоты МОН РК (разные страны)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "полная",
+   "language": "разный",
+   "window": "объявления МОН весной",
+   "kz_note": "следить за приказами МОН РК",
+   "source_url": "https://www.gov.kz/memleket/entities/edu",
+   "verified": false
+  },
+  {
+   "country": "Международные",
+   "name": "Aga Khan Foundation ISP (50% грант / 50% заём)",
+   "level": [
+    "master"
+   ],
+   "funding": "частичная",
+   "language": "англ",
+   "window": "до марта",
+   "kz_note": "KZ в списке стран",
+   "source_url": "https://the.akdn/en/how-we-work/our-agencies/aga-khan-foundation/international-scholarship-programme",
+   "verified": false
+  },
+  {
+   "country": "Международные",
+   "name": "OFID / OPEC Fund? (проверить статус) и Joint Japan World Bank",
+   "level": [
+    "master"
+   ],
+   "funding": "полная",
+   "language": "англ",
+   "window": "весна",
+   "kz_note": "JJ/WBGSP — только dev-темы, KZ уточнить",
+   "source_url": "https://www.worldbank.org/en/programs/scholarships",
+   "verified": false
+  }
+ ]
+}
