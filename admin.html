@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Scholary — панель управления</title>
+  <link rel="stylesheet" href="css/style.css?v=24">
+  <style>
+    .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 80px; }
+    .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .admin-top h1 { font-size: clamp(24px, 4vw, 34px); margin: 0; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .kpi { background: #fff; border: 1px solid var(--border, #E8E8ED); border-radius: 18px; padding: 16px; }
+    .kpi .n { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+    .kpi .l { color: #6E6E73; font-size: 13px; margin-top: 2px; }
+    .kpi.hl { background: #1D1D1F; color: #fff; border-color: #1D1D1F; }
+    .kpi.hl .l { color: rgba(255,255,255,.6); }
+    .funnel { background: #fff; border: 1px solid #E8E8ED; border-radius: 18px; padding: 20px; margin-bottom: 24px; }
+    .funnel h2, .tblbox h2 { font-size: 20px; margin: 0 0 14px; }
+    .frow { display: grid; grid-template-columns: 170px 1fr 90px; gap: 10px; align-items: center; margin: 8px 0; font-size: 14px; }
+    .fbar { height: 22px; border-radius: 8px; background: #F5F5F7; overflow: hidden; }
+    .fbar i { display: block; height: 100%; background: #5B4BFF; border-radius: 8px; min-width: 2px; }
+    .fnum { text-align: right; font-variant-numeric: tabular-nums; color: #1D1D1F; }
+    .fnum small { color: #6E6E73; }
+    .tblbox { background: #fff; border: 1px solid #E8E8ED; border-radius: 18px; padding: 20px; margin-bottom: 24px; overflow-x: auto; }
+    table.adm { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+    table.adm th { text-align: left; color: #6E6E73; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid #E8E8ED; white-space: nowrap; }
+    table.adm td { padding: 9px 10px; border-bottom: 1px solid #F0F0F4; vertical-align: top; }
+    table.adm tr:last-child td { border-bottom: none; }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .pill.ok { background: #E7F8EE; color: #0B7A3E; }
+    .pill.no { background: #F5F5F7; color: #6E6E73; }
+    .pill.warn { background: #FFF3E0; color: #B26A00; }
+    .keybox { max-width: 460px; margin: 12vh auto 0; background: #fff; border: 1px solid #E8E8ED; border-radius: 22px; padding: 28px; }
+    .keybox h1 { font-size: 24px; margin: 0 0 8px; }
+    .keybox p { color: #6E6E73; font-size: 14px; line-height: 1.5; }
+    .keybox input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; margin: 10px 0 14px; }
+    .btn-adm { display: inline-block; background: #5B4BFF; color: #fff; border: none; border-radius: 999px; padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .btn-ghost { background: #F5F5F7; color: #1D1D1F; }
+    .muted { color: #6E6E73; font-size: 13px; }
+    .err { color: #C0392B; font-size: 14px; margin-top: 8px; }
+    body { background: #F5F5F7; }
+  </style>
+</head>
+<body>
+
+<div id="gate" class="keybox" hidden>
+  <h1>Панель Scholary</h1>
+  <p>Вставь <b>секретный ключ</b> Supabase (начинается с <code>sb_secret_</code>).
+  Найти: Supabase → Project Settings → API Keys → Secret keys.
+  Ключ хранится только в этом браузере и никуда не отправляется, кроме твоей базы.</p>
+  <input id="keyInput" type="password" placeholder="sb_secret_...">
+  <button class="btn-adm" onclick="saveKey()">Войти</button>
+  <div id="gateErr" class="err" hidden></div>
+</div>
+
+<div id="panel" class="admin-wrap" hidden>
+  <div class="admin-top">
+    <h1>Панель Scholary</h1>
+    <div>
+      <button class="btn-adm" onclick="loadAll()">Обновить</button>
+      <button class="btn-adm btn-ghost" onclick="logout()">Выйти</button>
+    </div>
+  </div>
+  <div class="muted" id="updatedAt" style="margin:-10px 0 16px"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="funnel">
+    <h2>Воронка (уникальные посетители)</h2>
+    <div id="funnel"></div>
+    <div class="muted" style="margin-top:10px">Считается по уникальным lead_id за всё время. События: заход → квиз → пейволл → оплата.</div>
+  </div>
+
+  <div class="tblbox">
+    <h2>Оплатившие <span class="muted" id="paidCount"></span></h2>
+    <div id="paidTbl"></div>
+  </div>
+
+  <div class="tblbox">
+    <h2>Последние анкеты <span class="muted" id="leadCount"></span></h2>
+    <div id="leadsTbl"></div>
+  </div>
+
+  <div class="tblbox">
+    <h2>Заявки с формы (документы / консультация / вопрос)</h2>
+    <div id="formTbl"></div>
+  </div>
+</div>
+
+<script src="js/config.js?v=24"></script>
+<script>
+const SB = window.SCHOLARY_CONFIG.SUPABASE_URL;
+const LS_KEY = "scholary_admin_key";
+
+function getKey() { try { return localStorage.getItem(LS_KEY) || ""; } catch(e){ return ""; } }
+function saveKey() {
+  const v = document.getElementById("keyInput").value.trim();
+  if (!v.startsWith("sb_secret_") && !v.startsWith("eyJ")) {
+    const e = document.getElementById("gateErr");
+    e.textContent = "Это не похоже на секретный ключ (sb_secret_...)."; e.hidden = false; return;
+  }
+  try { localStorage.setItem(LS_KEY, v); } catch(e){}
+  boot();
+}
+function logout() { try { localStorage.removeItem(LS_KEY); } catch(e){} location.reload(); }
+
+async function api(path) {
+  const k = getKey();
+  const r = await fetch(SB + "/rest/v1/" + path, {
+    headers: { "apikey": k, "Authorization": "Bearer " + k }
+  });
+  if (!r.ok) throw new Error("HTTP " + r.status + " на " + path.split("?")[0]);
+  return r.json();
+}
+
+function esc(s){ return String(s==null?"":s).replace(/[<>&"]/g, c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c])); }
+function fmtDate(s){ if(!s) return "—"; const d=new Date(s); return d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}); }
+
+const LEVELS = { school: "школьник", bachelor: "бакалавр", master: "магистратура", phd: "PhD" };
+
+async function loadAll() {
+  document.getElementById("updatedAt").textContent = "Загружаю…";
+  try {
+    const [events, leads] = await Promise.all([
+      api("events?select=lead_id,event,ts&order=ts.desc&limit=20000"),
+      api("leads?select=*&order=updated_at.desc&limit=300")
+    ]);
+    render(events, leads);
+    document.getElementById("updatedAt").textContent = "Обновлено: " + new Date().toLocaleTimeString("ru-RU");
+  } catch (e) {
+    document.getElementById("updatedAt").textContent = "Ошибка: " + e.message + " — проверь ключ (кнопка «Выйти» → вставь заново).";
+  }
+}
+
+function uniq(events, names) {
+  const s = new Set();
+  events.forEach(ev => { if (names.includes(ev.event)) s.add(ev.lead_id); });
+  return s.size;
+}
+
+function render(events, leads) {
+  const visits = uniq(events, ["landing_view", "quiz_start", "tariffs_view"]);
+  const qStart = uniq(events, ["quiz_start"]);
+  const qDone  = uniq(events, ["quiz_done", "paywall_view"]);
+  const paywall= uniq(events, ["paywall_view"]);
+  const payClk = uniq(events, ["pay_click", "pay_kaspi_click"]);
+  const paid   = leads.filter(l => l.paid).length;
+  const forms  = leads.filter(l => l.lead_interest || l.lead_source).length;
+
+  // KPI
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayVisits = new Set(events.filter(e => new Date(e.ts) >= today).map(e => e.lead_id)).size;
+  document.getElementById("kpis").innerHTML = [
+    ["Посетителей", visits], ["Сегодня", todayVisits], ["Прошли квиз", qDone],
+    ["Заявок с формы", forms], ["Оплат", paid, true],
+    ["Выручка", (paid * (window.SCHOLARY_CONFIG.PRICE_REPORT||4000)).toLocaleString("ru-RU") + " ₸", true]
+  ].map(([l,n,hl]) => `<div class="kpi${hl?" hl":""}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+
+  // Funnel
+  const steps = [["Зашли на сайт",visits],["Начали квиз",qStart],["Дошли до результата",qDone],["Увидели пейволл",paywall],["Нажали «Оплатить»",payClk],["Оплатили",paid]];
+  const max = Math.max(1, visits);
+  document.getElementById("funnel").innerHTML = steps.map(([l,n],i) => {
+    const prev = i ? steps[i-1][1] : n;
+    const pct = prev ? Math.round(n/prev*100) : 0;
+    return `<div class="frow"><div>${l}</div><div class="fbar"><i style="width:${Math.max(1,n/max*100)}%"></i></div><div class="fnum">${n} <small>${i? pct+"%":""}</small></div></div>`;
+  }).join("");
+
+  // Paid table
+  const paidLeads = leads.filter(l => l.paid);
+  document.getElementById("paidCount").textContent = paidLeads.length ? "· " + paidLeads.length : "";
+  document.getElementById("paidTbl").innerHTML = paidLeads.length ? tbl(paidLeads, true)
+    : `<div class="muted">Пока нет оплат. Как только пройдёт первая оплата через TipTop — она появится здесь.</div>`;
+
+  // Recent leads
+  document.getElementById("leadCount").textContent = "· " + leads.length;
+  document.getElementById("leadsTbl").innerHTML = leads.length ? tbl(leads.slice(0, 60), false)
+    : `<div class="muted">Анкет пока нет.</div>`;
+
+  // Lead form
+  const formLeads = leads.filter(l => l.lead_interest || (l.lead_source && l.name));
+  document.getElementById("formTbl").innerHTML = formLeads.length
+    ? `<table class="adm"><tr><th>Когда</th><th>Имя</th><th>WhatsApp</th><th>Интерес</th></tr>` +
+      formLeads.map(l => `<tr><td>${fmtDate(l.updated_at)}</td><td>${esc(l.name)}</td><td>${wa(l.whatsapp)}</td><td>${esc(l.lead_interest||l.lead_source)}</td></tr>`).join("") + `</table>`
+    : `<div class="muted">Заявок с нижней формы пока нет.</div>`;
+}
+
+function wa(n){ if(!n) return "—"; const d=String(n).replace(/\D/g,""); return `<a href="https://wa.me/${d}" target="_blank">${esc(n)}</a>`; }
+
+function tbl(rows, paidMode) {
+  return `<table class="adm"><tr><th>Когда</th><th>Имя</th><th>WhatsApp</th><th>Уровень</th><th>Направление</th><th>GPA/IELTS</th>` +
+    (paidMode ? `<th>Оплата</th><th>Отчёт</th>` : `<th>Статус</th>`) + `</tr>` +
+    rows.map(l => {
+      const gpa = l.gpa_band || l.gpa_uni || l.gpa_phd || "—";
+      const ie = l.ielts_band ? " / " + esc(l.ielts_band) : "";
+      let statusTd;
+      if (paidMode) {
+        statusTd = `<td>${fmtDate(l.paid_at)}</td><td>${
+          l.report_sent_at ? `<span class="pill ok">отправлен ${fmtDate(l.report_sent_at)}</span>`
+          : `<span class="pill warn">готовится</span>`}</td>`;
+      } else {
+        statusTd = `<td>${l.paid ? `<span class="pill ok">оплатил</span>` : (l.whatsapp ? `<span class="pill warn">лид с контактом</span>` : `<span class="pill no">анкета</span>`)}</td>`;
+      }
+      return `<tr><td>${fmtDate(l.updated_at)}</td><td>${esc(l.name)||"—"}</td><td>${wa(l.whatsapp)}</td><td>${LEVELS[l.level]||esc(l.level)||"—"}</td><td>${esc(l.field)||"—"}</td><td>${esc(gpa)}${ie}</td>${statusTd}</tr>`;
+    }).join("") + `</table>`;
+}
+
+function boot() {
+  if (getKey()) {
+    document.getElementById("gate").hidden = true;
+    document.getElementById("panel").hidden = false;
+    loadAll();
+  } else {
+    document.getElementById("gate").hidden = false;
+    document.getElementById("panel").hidden = true;
+  }
+}
+boot();
+</script>
+</body>
+</html>
