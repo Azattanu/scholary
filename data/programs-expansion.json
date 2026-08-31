@@ -1118,6 +1118,127 @@
    "kz_note": "JJ/WBGSP — только dev-темы, KZ уточнить",
    "source_url": "https://www.worldbank.org/en/programs/scholarships",
    "verified": false
+  },
+  {
+   "country": "Австралия",
+   "name": "Вузовские merit-стипендии (Melbourne, Monash, UNSW, Sydney: 25–50%)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "25–50% платы",
+   "language": "англ (IELTS 6.5+)",
+   "window": "вместе с admission, 2 интейка",
+   "kz_note": "полных стипендий почти нет — считать с бюджетом",
+   "source_url": "https://www.unimelb.edu.au/study/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Новая Зеландия",
+   "name": "University of Auckland International Student Scholarships",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "NZ$10–20 тыс",
+   "language": "англ",
+   "window": "с admission",
+   "kz_note": "",
+   "source_url": "https://www.auckland.ac.nz/en/study/scholarships-and-awards.html",
+   "verified": false
+  },
+  {
+   "country": "Гонконг",
+   "name": "Полные undergrad-стипендии (HKU, HKUST, CUHK)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "до 100% + проживание",
+   "language": "англ",
+   "window": "ноя–янв",
+   "kz_note": "сильная альтернатива США: топ-30 QS с полным фондированием",
+   "source_url": "https://admissions.hku.hk/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Макао",
+   "name": "University of Macau Full Scholarship",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полная + проживание",
+   "language": "англ",
+   "window": "фев–март",
+   "kz_note": "низкий конкурс относительно Гонконга",
+   "source_url": "https://reg.um.edu.mo/admissions/",
+   "verified": false
+  },
+  {
+   "country": "Израиль",
+   "name": "Международные магистратуры TAU/HUJI/Technion со стипендиями",
+   "level": [
+    "master"
+   ],
+   "funding": "до полной у STEM-программ",
+   "language": "англ",
+   "window": "зима–весна",
+   "kz_note": "",
+   "source_url": "https://international.tau.ac.il/scholarships",
+   "verified": false
+  },
+  {
+   "country": "Португалия",
+   "name": "Вузовские скидки и merit (Porto, NOVA, Coimbra)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "низкая плата €3–7 тыс + скидки",
+   "language": "англ/порт",
+   "window": "весна–лето",
+   "kz_note": "бюджетная Европа",
+   "source_url": "https://www.up.pt/portal/en/study/",
+   "verified": false
+  },
+  {
+   "country": "Испания",
+   "name": "Merit-стипендии частных школ (IE, ESADE, Navarra)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "10–100% по merit",
+   "language": "англ",
+   "window": "круглый год, раунды",
+   "kz_note": "",
+   "source_url": "https://www.ie.edu/financial-aid/",
+   "verified": false
+  },
+  {
+   "country": "ЕС (обмен)",
+   "name": "Erasmus+ ICM — обменный семестр для студентов вузов РК",
+   "level": [
+    "exchange"
+   ],
+   "funding": "стипендия + перелёт",
+   "language": "англ",
+   "window": "через межвузовские соглашения",
+   "kz_note": "апгрейд профиля для магистратуры",
+   "source_url": "https://erasmus-plus.ec.europa.eu/",
+   "verified": false
+  },
+  {
+   "country": "Норвегия",
+   "name": "Гос. вузы Норвегии",
+   "level": [
+    "master"
+   ],
+   "funding": "⚠ с 2023 платно для не-ЕС (~€10–15 тыс/год)",
+   "language": "англ",
+   "window": "до 1 дек",
+   "kz_note": "больше НЕ бесплатно — частая ошибка в старых списках",
+   "source_url": "https://www.studyinnorway.no/",
+   "verified": false
   }
  ]
 }

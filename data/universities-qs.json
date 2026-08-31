@@ -1,0 +1,907 @@
+{
+ "_readme": "Каталог университетов по QS World University Rankings 2026. Топ-20 сверен с рейтингом (phdportal.com/QS), остальные позиции — ориентировочные (+/- несколько мест), проверять по topuniversities.com. kz_aid — чем реально может финансироваться казахстанец. verified:false до проверки Диасом.",
+ "source": "https://www.topuniversities.com/world-university-rankings",
+ "year": 2026,
+ "universities": [
+  {
+   "rank": 1,
+   "name": "MIT",
+   "country": "США",
+   "cc": "us",
+   "tier": "top10",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 2,
+   "name": "Imperial College London",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top10",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 3,
+   "name": "Stanford University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top10",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 4,
+   "name": "University of Oxford",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top10",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 5,
+   "name": "Harvard University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top10",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 6,
+   "name": "University of Cambridge",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top10",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 7,
+   "name": "ETH Zurich",
+   "country": "Швейцария",
+   "cc": "ch",
+   "tier": "top10",
+   "kz_aid": "ETH Excellence (магистратура), Swiss Gov (PhD)",
+   "verified": false
+  },
+  {
+   "rank": 8,
+   "name": "National University of Singapore",
+   "country": "Сингапур",
+   "cc": "sg",
+   "tier": "top10",
+   "kz_aid": "стипендии ограничены, SINGA для PhD",
+   "verified": false
+  },
+  {
+   "rank": 9,
+   "name": "UCL",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top10",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 10,
+   "name": "Caltech",
+   "country": "США",
+   "cc": "us",
+   "tier": "top10",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 11,
+   "name": "University of Hong Kong",
+   "country": "Гонконг",
+   "cc": "hk",
+   "tier": "top50",
+   "kz_aid": "полные undergrad-стипендии для сильных международников",
+   "verified": false
+  },
+  {
+   "rank": 12,
+   "name": "Nanyang Technological University",
+   "country": "Сингапур",
+   "cc": "sg",
+   "tier": "top50",
+   "kz_aid": "стипендии ограничены, SINGA для PhD",
+   "verified": false
+  },
+  {
+   "rank": 13,
+   "name": "University of Chicago",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 14,
+   "name": "Peking University",
+   "country": "Китай",
+   "cc": "cn",
+   "tier": "top50",
+   "kz_aid": "CSC, вузовские и провинциальные гранты",
+   "verified": false
+  },
+  {
+   "rank": 15,
+   "name": "University of Pennsylvania",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 16,
+   "name": "Cornell University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 17,
+   "name": "Tsinghua University",
+   "country": "Китай",
+   "cc": "cn",
+   "tier": "top50",
+   "kz_aid": "CSC, вузовские и провинциальные гранты",
+   "verified": false
+  },
+  {
+   "rank": 18,
+   "name": "UC Berkeley",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 19,
+   "name": "University of Melbourne",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top50",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 20,
+   "name": "University of New South Wales",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top50",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 21,
+   "name": "Yale University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 22,
+   "name": "University of Sydney",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top50",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 23,
+   "name": "University of Toronto",
+   "country": "Канада",
+   "cc": "ca",
+   "tier": "top50",
+   "kz_aid": "Pearson (Toronto), UBC IMES, вузовские",
+   "verified": false
+  },
+  {
+   "rank": 24,
+   "name": "Johns Hopkins University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 25,
+   "name": "University of Tokyo",
+   "country": "Япония",
+   "cc": "jp",
+   "tier": "top50",
+   "kz_aid": "MEXT + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 26,
+   "name": "Columbia University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 27,
+   "name": "Princeton University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 28,
+   "name": "McGill University",
+   "country": "Канада",
+   "cc": "ca",
+   "tier": "top50",
+   "kz_aid": "Pearson (Toronto), UBC IMES, вузовские",
+   "verified": false
+  },
+  {
+   "rank": 29,
+   "name": "University of Edinburgh",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top50",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 30,
+   "name": "EPFL",
+   "country": "Швейцария",
+   "cc": "ch",
+   "tier": "top50",
+   "kz_aid": "ETH Excellence (магистратура), Swiss Gov (PhD)",
+   "verified": false
+  },
+  {
+   "rank": 31,
+   "name": "Technical University of Munich",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top50",
+   "kz_aid": "обучение ~0 € в гос. вузах; DAAD",
+   "verified": false
+  },
+  {
+   "rank": 32,
+   "name": "Chinese University of Hong Kong",
+   "country": "Гонконг",
+   "cc": "hk",
+   "tier": "top50",
+   "kz_aid": "полные undergrad-стипендии для сильных международников",
+   "verified": false
+  },
+  {
+   "rank": 33,
+   "name": "University of Manchester",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top50",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 34,
+   "name": "King's College London",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top50",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 35,
+   "name": "Seoul National University",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top50",
+   "kz_aid": "GKS + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 36,
+   "name": "Fudan University",
+   "country": "Китай",
+   "cc": "cn",
+   "tier": "top50",
+   "kz_aid": "CSC, вузовские и провинциальные гранты",
+   "verified": false
+  },
+  {
+   "rank": 37,
+   "name": "Kyoto University",
+   "country": "Япония",
+   "cc": "jp",
+   "tier": "top50",
+   "kz_aid": "MEXT + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 38,
+   "name": "UCLA",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 39,
+   "name": "University of British Columbia",
+   "country": "Канада",
+   "cc": "ca",
+   "tier": "top50",
+   "kz_aid": "Pearson (Toronto), UBC IMES, вузовские",
+   "verified": false
+  },
+  {
+   "rank": 40,
+   "name": "KAIST",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top50",
+   "kz_aid": "GKS + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 41,
+   "name": "Universiti Malaya",
+   "country": "Малайзия",
+   "cc": "my",
+   "tier": "top50",
+   "kz_aid": "MIS (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 42,
+   "name": "NYU",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 43,
+   "name": "University of Michigan",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 44,
+   "name": "Shanghai Jiao Tong University",
+   "country": "Китай",
+   "cc": "cn",
+   "tier": "top50",
+   "kz_aid": "CSC, вузовские и провинциальные гранты",
+   "verified": false
+  },
+  {
+   "rank": 45,
+   "name": "LSE",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top50",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 46,
+   "name": "Zhejiang University",
+   "country": "Китай",
+   "cc": "cn",
+   "tier": "top50",
+   "kz_aid": "CSC, вузовские и провинциальные гранты",
+   "verified": false
+  },
+  {
+   "rank": 47,
+   "name": "Delft University of Technology",
+   "country": "Нидерланды",
+   "cc": "nl",
+   "tier": "top50",
+   "kz_aid": "Holland Scholarship + вузовские excellence",
+   "verified": false
+  },
+  {
+   "rank": 48,
+   "name": "Yonsei University",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top50",
+   "kz_aid": "GKS + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 49,
+   "name": "University of Illinois Urbana-Champaign",
+   "country": "США",
+   "cc": "us",
+   "tier": "top50",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 50,
+   "name": "HKUST",
+   "country": "Гонконг",
+   "cc": "hk",
+   "tier": "top50",
+   "kz_aid": "полные undergrad-стипендии для сильных международников",
+   "verified": false
+  },
+  {
+   "rank": 51,
+   "name": "Universite PSL",
+   "country": "Франция",
+   "cc": "fr",
+   "tier": "top100",
+   "kz_aid": "Eiffel (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 52,
+   "name": "Korea University",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top100",
+   "kz_aid": "GKS + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 53,
+   "name": "University of Bristol",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 54,
+   "name": "University of Amsterdam",
+   "country": "Нидерланды",
+   "cc": "nl",
+   "tier": "top100",
+   "kz_aid": "Holland Scholarship + вузовские excellence",
+   "verified": false
+  },
+  {
+   "rank": 55,
+   "name": "Monash University",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top100",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 56,
+   "name": "University of Queensland",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top100",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 57,
+   "name": "Institut Polytechnique de Paris",
+   "country": "Франция",
+   "cc": "fr",
+   "tier": "top100",
+   "kz_aid": "Eiffel (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 58,
+   "name": "City University of Hong Kong",
+   "country": "Гонконг",
+   "cc": "hk",
+   "tier": "top100",
+   "kz_aid": "полные undergrad-стипендии для сильных международников",
+   "verified": false
+  },
+  {
+   "rank": 59,
+   "name": "University of Warwick",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 60,
+   "name": "Ludwig-Maximilians-Universitat Munchen",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top100",
+   "kz_aid": "обучение ~0 € в гос. вузах; DAAD",
+   "verified": false
+  },
+  {
+   "rank": 61,
+   "name": "Universiti Kebangsaan Malaysia",
+   "country": "Малайзия",
+   "cc": "my",
+   "tier": "top100",
+   "kz_aid": "MIS (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 62,
+   "name": "Australian National University",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top100",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 63,
+   "name": "Duke University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 64,
+   "name": "KU Leuven",
+   "country": "Бельгия",
+   "cc": "be",
+   "tier": "top100",
+   "kz_aid": "вузовские (Science@Leuven)",
+   "verified": false
+  },
+  {
+   "rank": 65,
+   "name": "Carnegie Mellon University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 66,
+   "name": "Northwestern University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 67,
+   "name": "Sorbonne University",
+   "country": "Франция",
+   "cc": "fr",
+   "tier": "top100",
+   "kz_aid": "Eiffel (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 68,
+   "name": "University of Glasgow",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 69,
+   "name": "Sungkyunkwan University",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top100",
+   "kz_aid": "GKS + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 70,
+   "name": "Universiti Sains Malaysia",
+   "country": "Малайзия",
+   "cc": "my",
+   "tier": "top100",
+   "kz_aid": "MIS (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 71,
+   "name": "University of Washington",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 72,
+   "name": "University of Auckland",
+   "country": "Новая Зеландия",
+   "cc": "nz",
+   "tier": "top100",
+   "kz_aid": "вузовские стипендии для международников",
+   "verified": false
+  },
+  {
+   "rank": 73,
+   "name": "Ruprecht-Karls-Universitat Heidelberg",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top100",
+   "kz_aid": "обучение ~0 € в гос. вузах; DAAD",
+   "verified": false
+  },
+  {
+   "rank": 74,
+   "name": "KTH Royal Institute of Technology",
+   "country": "Швеция",
+   "cc": "se",
+   "tier": "top100",
+   "kz_aid": "SI Scholarship (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 75,
+   "name": "University of Birmingham",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 76,
+   "name": "Trinity College Dublin",
+   "country": "Ирландия",
+   "cc": "ie",
+   "tier": "top100",
+   "kz_aid": "Government of Ireland IES",
+   "verified": false
+  },
+  {
+   "rank": 77,
+   "name": "Lund University",
+   "country": "Швеция",
+   "cc": "se",
+   "tier": "top100",
+   "kz_aid": "SI Scholarship (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 78,
+   "name": "University of Copenhagen",
+   "country": "Дания",
+   "cc": "dk",
+   "tier": "top100",
+   "kz_aid": "гос. стипендии через вузы (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 79,
+   "name": "Georgia Tech",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 80,
+   "name": "Politecnico di Milano",
+   "country": "Италия",
+   "cc": "it",
+   "tier": "top100",
+   "kz_aid": "региональные гранты по ISEE + merit вузов",
+   "verified": false
+  },
+  {
+   "rank": 81,
+   "name": "UT Austin",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 82,
+   "name": "University of Leeds",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 83,
+   "name": "Osaka University",
+   "country": "Япония",
+   "cc": "jp",
+   "tier": "top100",
+   "kz_aid": "MEXT + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 84,
+   "name": "University of Southampton",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 85,
+   "name": "UC San Diego",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 86,
+   "name": "University of Zurich",
+   "country": "Швейцария",
+   "cc": "ch",
+   "tier": "top100",
+   "kz_aid": "ETH Excellence (магистратура), Swiss Gov (PhD)",
+   "verified": false
+  },
+  {
+   "rank": 87,
+   "name": "Freie Universitat Berlin",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top100",
+   "kz_aid": "обучение ~0 € в гос. вузах; DAAD",
+   "verified": false
+  },
+  {
+   "rank": 88,
+   "name": "Aalto University",
+   "country": "Финляндия",
+   "cc": "fi",
+   "tier": "top100",
+   "kz_aid": "скидки 50–100% + гранты вузов",
+   "verified": false
+  },
+  {
+   "rank": 89,
+   "name": "Universidad de Buenos Aires",
+   "country": "Аргентина",
+   "cc": "ar",
+   "tier": "top100",
+   "kz_aid": "«бесплатно» для всех в гос. вузах, но испанский",
+   "verified": false
+  },
+  {
+   "rank": 90,
+   "name": "University of St Andrews",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 91,
+   "name": "University of Wisconsin-Madison",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 92,
+   "name": "Tohoku University",
+   "country": "Япония",
+   "cc": "jp",
+   "tier": "top100",
+   "kz_aid": "MEXT + вузовские",
+   "verified": false
+  },
+  {
+   "rank": 93,
+   "name": "Durham University",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 94,
+   "name": "Universite Paris-Saclay",
+   "country": "Франция",
+   "cc": "fr",
+   "tier": "top100",
+   "kz_aid": "Eiffel (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 95,
+   "name": "University of Adelaide",
+   "country": "Австралия",
+   "cc": "au",
+   "tier": "top100",
+   "kz_aid": "вузовские merit 25–50% для международников",
+   "verified": false
+  },
+  {
+   "rank": 96,
+   "name": "Uppsala University",
+   "country": "Швеция",
+   "cc": "se",
+   "tier": "top100",
+   "kz_aid": "SI Scholarship (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 97,
+   "name": "Technical University of Denmark",
+   "country": "Дания",
+   "cc": "dk",
+   "tier": "top100",
+   "kz_aid": "гос. стипендии через вузы (магистратура)",
+   "verified": false
+  },
+  {
+   "rank": 98,
+   "name": "University of Sheffield",
+   "country": "Британия",
+   "cc": "uk",
+   "tier": "top100",
+   "kz_aid": "Chevening (магистратура), вузовские merit-стипендии",
+   "verified": false
+  },
+  {
+   "rank": 99,
+   "name": "RWTH Aachen University",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top100",
+   "kz_aid": "обучение ~0 € в гос. вузах; DAAD",
+   "verified": false
+  },
+  {
+   "rank": 100,
+   "name": "Pennsylvania State University",
+   "country": "США",
+   "cc": "us",
+   "tier": "top100",
+   "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  }
+ ]
+}
