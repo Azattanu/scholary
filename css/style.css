@@ -203,7 +203,39 @@ p { margin: 0; text-wrap: pretty; }
 .hero-cta { max-width: 420px; margin-top: var(--s6); display: flex; flex-direction: column; gap: var(--s3); }
 .badge-pill { display: inline-flex; align-items: center; gap: var(--s2); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; color: var(--accent); }
 
-.mini-report { background: #1A1D27; border-radius: var(--radius-lg); padding: var(--s6); color: #fff; box-shadow: var(--shadow-pop); transform: rotate(1.5deg); max-width: 420px; margin-inline: auto; }
+/* Стек отчётов в хиро: три карточки + плавающие бейджи */
+.hero-visual { position: relative; max-width: 440px; margin-inline: auto; padding: 34px 0 44px; }
+.mini-report { background: #1A1D27; border-radius: var(--radius-lg); padding: var(--s6); color: #fff; box-shadow: var(--shadow-pop); max-width: 420px; margin-inline: auto; position: relative; z-index: 3; transform: rotate(1.2deg); }
+.mr-back { position: absolute; inset-inline: 0; margin-inline: auto; border-radius: var(--radius-lg); padding: 16px 18px; max-width: 400px; box-shadow: 0 18px 44px -20px rgba(26,29,39,.4); }
+.mr-back-1 { top: -12px; transform: rotate(-5deg) translateX(-36px); background: #FFFFFF; border: 1px solid var(--border); z-index: 1; }
+.mr-back-2 { bottom: -14px; transform: rotate(4deg) translateX(52px); background: var(--accent); color: #fff; z-index: 2; }
+.mr-back .b-title { font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+.mr-back .b-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 700; }
+.mr-back-1 .b-title { color: var(--faint); }
+.mr-back-2 .b-title { color: #DCD6FF; }
+.float-badge { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 7px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 999px; padding: 9px 14px; font-size: 12.5px; font-weight: 700; box-shadow: 0 12px 30px -12px rgba(26,29,39,.28); white-space: nowrap; }
+.fb-1 { top: 6px; right: -6px; }
+.fb-2 { top: 79%; left: -16px; }
+@media (max-width: 640px) { .fb-1 { right: 4px; } .fb-2 { left: 4px; } .mr-back-1 { transform: rotate(-4deg) translateX(-12px); } .mr-back-2 { transform: rotate(3deg) translateX(14px); } }
+
+/* Мини-превью отчёта (секция «Так выглядит отчёт») */
+.report-peek { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--s4); }
+.peek { border-radius: var(--radius-lg); padding: var(--s5); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.peek-dark { background: #1A1D27; color: #fff; }
+.peek-light { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card); }
+.peek-accent { background: var(--accent); color: #fff; }
+.peek .p-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .65; }
+.peek .p-big { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.peek .p-text { font-size: 13px; font-weight: 600; line-height: 1.5; }
+@media (max-width: 760px) { .report-peek { grid-template-columns: 1fr; } }
+
+/* Мягкие градиентные пятна в хиро */
+.hero { position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; width: 560px; height: 560px; right: -160px; top: -220px; background: radial-gradient(closest-side, rgba(91,75,255,.10), transparent); pointer-events: none; }
+.hero::after { content: ""; position: absolute; width: 420px; height: 420px; left: -180px; bottom: -220px; background: radial-gradient(closest-side, rgba(30,158,106,.08), transparent); pointer-events: none; }
+.hero .container { position: relative; }
+
+.step-ic { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; background: var(--accent-soft); border-radius: 12px; color: var(--accent); }
 .mini-report .mr-head { display: flex; justify-content: space-between; gap: var(--s3); font-size: 11.5px; font-weight: 700; color: #9AA0AC; margin-bottom: var(--s3); letter-spacing: .04em; }
 .mini-report .mr-big { font-size: clamp(36px, 4vw, 46px); font-weight: 800; color: #4ADE95; letter-spacing: -0.02em; line-height: 1; }
 .mini-report .mr-cap { font-size: 12.5px; font-weight: 600; color: #C9CCD4; margin: 4px 0 var(--s4); }
