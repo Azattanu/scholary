@@ -25,30 +25,40 @@
     } catch (e) { return {}; }
   }
 
+  function hdrs() {
+    return {
+      "Content-Type": "application/json",
+      "apikey": C.SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + C.SUPABASE_ANON_KEY,
+      "Prefer": "return=minimal"
+    };
+  }
+
   async function post(table, body) {
     if (!configured) { console.log("[scholary]", table, body); return; }
     try {
+      if (table === "leads") {
+        // Запись лида идёт через RPC upsert_lead (insert-or-update на стороне базы)
+        const p = Object.assign({}, body); const id = p.id; delete p.id;
+        await fetch(C.SUPABASE_URL + "/rest/v1/rpc/upsert_lead", {
+          method: "POST", headers: hdrs(), body: JSON.stringify({ p_id: id, p: p })
+        });
+        return;
+      }
       await fetch(C.SUPABASE_URL + "/rest/v1/" + table, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": C.SUPABASE_ANON_KEY,
-          "Authorization": "Bearer " + C.SUPABASE_ANON_KEY,
-          "Prefer": "resolution=merge-duplicates"
-        },
-        body: JSON.stringify(body)
+        method: "POST", headers: hdrs(), body: JSON.stringify(body)
       });
     } catch (e) { /* не мешаем пользователю */ }
   }
 
   // Событие аналитики: track('quiz_step', {step: 3})
   window.track = function (event, data) {
-    post("events", { lead_id: leadId(), event: event, data: data || {}, utm: utm(), ts: new Date().toISOString(), page: location.pathname });
+    return post("events", { lead_id: leadId(), event: event, data: data || {}, utm: utm(), ts: new Date().toISOString(), page: location.pathname });
   };
 
   // Сохранение/дополнение анкеты лида: saveLead({gpa_band: '4.4-4.0'})
   window.saveLead = function (fields) {
-    post("leads", Object.assign({ id: leadId(), updated_at: new Date().toISOString(), utm: utm() }, fields));
+    return post("leads", Object.assign({ id: leadId(), updated_at: new Date().toISOString(), utm: utm() }, fields));
   };
 
   window.scholaryLeadId = leadId;
