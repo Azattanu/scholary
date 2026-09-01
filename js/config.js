@@ -24,7 +24,7 @@ window.SCHOLARY_CONFIG = {
 
   // --- Ссылки ---
   DEMO_VIDEO_URL: "TODO_https://www.youtube.com/embed/XXXX", // видеодемо (unlisted)
-  INSTAGRAM_URL: "https://instagram.com/TODO",
+  INSTAGRAM_URL: "https://www.instagram.com/scholary.ai",
   TIKTOK_URL: "https://tiktok.com/@TODO",
   TELEGRAM_URL: "https://t.me/azattanux"
 };
