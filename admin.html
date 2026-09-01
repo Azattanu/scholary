@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Scholary — панель управления</title>
-  <link rel="stylesheet" href="css/style.css?v=28">
+  <link rel="stylesheet" href="css/style.css?v=30">
   <style>
     .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 80px; }
     .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -73,6 +73,28 @@
     <div class="muted" style="margin-top:10px">Считается по уникальным lead_id за всё время. События: заход → квиз → пейволл → оплата.</div>
   </div>
 
+  <div class="funnel">
+    <h2>Кабинет: что происходит внутри</h2>
+    <div id="cabKpis" class="kpis" style="margin-bottom:6px"><div class="muted">Загружаю…</div></div>
+    <div class="muted" style="font-size:13px">Регистрации, подачи и документы обновляются в реальном времени. «Готовность» — средний процент собранности активных подач.</div>
+  </div>
+
+  <div class="tblbox">
+    <h2>Что выбирают: топ программ по подачам</h2>
+    <div id="topProgTbl"><div class="muted">Загружаю…</div></div>
+  </div>
+
+  <div class="tblbox">
+    <h2>Выдать Scholary Pro вручную</h2>
+    <div class="muted" style="font-size:13.5px;margin-bottom:10px">Пока не подключён эквайринг: человек оплатил переводом — выдай доступ здесь. Почта = та, с которой он зарегистрировался в кабинете.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input id="proEmail" placeholder="почта пользователя" style="flex:1;min-width:220px;padding:11px 13px;border:1px solid #D2D2D7;border-radius:12px;font-size:15px">
+      <input id="proDays" value="30" style="width:90px;padding:11px 13px;border:1px solid #D2D2D7;border-radius:12px;font-size:15px">
+      <button id="proBtn" style="padding:11px 20px;border-radius:999px;border:none;background:#5B4BFF;color:#fff;font-weight:650;cursor:pointer">Выдать</button>
+    </div>
+    <div id="proMsg" class="muted" style="margin-top:10px"></div>
+  </div>
+
   <div class="tblbox">
     <h2>Оплатившие <span class="muted" id="paidCount"></span></h2>
     <div id="paidTbl"></div>
@@ -89,7 +111,7 @@
   </div>
 </div>
 
-<script src="js/config.js?v=28"></script>
+<script src="js/config.js?v=30"></script>
 <script>
 const SB = window.SCHOLARY_CONFIG.SUPABASE_URL;
 const LS_KEY = "scholary_admin_key";
@@ -104,6 +126,7 @@ function saveKey() {
   try { localStorage.setItem(LS_KEY, v); } catch(e){}
   boot();
 }
+document.addEventListener("click", function (e) { if (e.target && e.target.id === "proBtn") grantPro(); });
 function logout() { try { localStorage.removeItem(LS_KEY); } catch(e){} location.reload(); }
 
 async function api(path) {
@@ -123,6 +146,7 @@ const LEVELS = { school: "школьник", bachelor: "бакалавр", maste
 async function loadAll() {
   document.getElementById("updatedAt").textContent = "Загружаю…";
   try {
+    loadCabinet();
     const [events, leads] = await Promise.all([
       api("events?select=lead_id,event,ts&order=ts.desc&limit=20000"),
       api("leads?select=*&order=updated_at.desc&limit=300")
@@ -132,6 +156,45 @@ async function loadAll() {
   } catch (e) {
     document.getElementById("updatedAt").textContent = "Ошибка: " + e.message + " — проверь ключ (кнопка «Выйти» → вставь заново).";
   }
+}
+
+async function loadCabinet() {
+  try {
+    const [ov, top] = await Promise.all([api("admin_overview?select=*"), api("admin_top_programs?select=*&limit=12")]);
+    const o = (ov && ov[0]) || {};
+    document.getElementById("cabKpis").innerHTML = [
+      ["Регистраций", o.users_total], ["За 7 дней", o.users_7d], ["С анкетой", o.profiles_with_quiz],
+      ["Подач ведут", o.applications_total], ["Отправлено", o.applications_submitted, true],
+      ["Средняя готовность", (o.avg_readiness == null ? "—" : o.avg_readiness + "%")],
+      ["Документов", o.documents_total], ["Из них готовы", o.documents_ready],
+      ["Pro активных", o.pro_active, true], ["Событий за сутки", o.events_24h]
+    ].map(([l, n, hl]) => `<div class="kpi${hl ? " hl" : ""}"><div class="n">${n == null ? "—" : n}</div><div class="l">${l}</div></div>`).join("");
+    document.getElementById("topProgTbl").innerHTML = (top && top.length)
+      ? `<table class="adm"><tr><th>Программа</th><th>Страна</th><th>Ведут</th><th>Отправлено</th><th>Ср. готовность</th></tr>` +
+        top.map(r => `<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.country)}</td><td>${r.picks}</td><td>${r.submitted}</td><td>${r.avg_readiness == null ? "—" : r.avg_readiness + "%"}</td></tr>`).join("") + `</table>`
+      : `<div class="muted">Пока никто не добавил программы в подачи.</div>`;
+  } catch (e) {
+    document.getElementById("cabKpis").innerHTML = `<div class="muted">Не удалось загрузить: ${esc(e.message)}. Если ошибка про admin_overview — накати миграцию 008 в SQL-редакторе Supabase.</div>`;
+  }
+}
+
+async function grantPro() {
+  const email = document.getElementById("proEmail").value.trim();
+  const days = parseInt(document.getElementById("proDays").value, 10) || 30;
+  const msg = document.getElementById("proMsg");
+  if (!email) { msg.textContent = "Впиши почту"; return; }
+  msg.textContent = "Выдаю…";
+  try {
+    const k = getKey();
+    const r = await fetch(SB + "/rest/v1/rpc/grant_pro", {
+      method: "POST", headers: { "apikey": k, "Authorization": "Bearer " + k, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_email: email, p_days: days, p_plan: "manual" })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.message || ("HTTP " + r.status));
+    msg.textContent = (j && j.length) ? `Готово: Pro до ${j[0].pro_until}` : "Пользователь с такой почтой не найден (он должен сначала зарегистрироваться в кабинете).";
+    loadCabinet();
+  } catch (e) { msg.textContent = "Ошибка: " + e.message; }
 }
 
 function uniq(events, names) {

@@ -73,6 +73,21 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   .topbar,.screen{margin-left:calc(222px + (100vw - 222px - 560px)/2)}
   .screen{max-width:560px}
 }
+/* виджет справа: скрыт по умолчанию, появляется на широком экране */
+#side-widget{display:none}
+#side-widget .w-card{margin-bottom:12px}
+@media(min-width:1240px){
+  .topbar,.screen{margin-left:262px;margin-right:340px;max-width:620px}
+  #side-widget{display:block;position:fixed;top:0;right:0;width:320px;height:100vh;overflow-y:auto;
+    padding:18px 16px 24px;background:var(--bg);border-left:1px solid var(--border)}
+}
+/* плавающая кнопка помощи (мобайл) */
+.fab-help{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;
+  background:#25D366;color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:45;
+  box-shadow:0 12px 26px -10px rgba(37,211,102,.7)}
+.fab-help svg{width:26px;height:26px}
+@media(min-width:960px){.fab-help{bottom:24px;right:24px}}
+@media(min-width:1240px){.fab-help{display:none}}
 
 /* ---- компоненты ---- */
 .pointb{background:#1D1D1F;color:#fff;border-radius:20px;padding:16px 18px;margin:14px 0}
@@ -292,6 +307,9 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   <div class="screen" id="tab-profile" hidden></div>
   <div class="screen" id="sub-view" hidden></div>
 
+  <aside id="side-widget"></aside>
+  <button class="fab-help" data-act="help" aria-label="Помощь"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-2.6-.8-4.9-2.9-6.2-5.3-.5-.9-.9-2-.6-2.9.2-.6.9-1.5 1.5-1.5h.5c.3 0 .5.1.7.6l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.2.2-.3.4-.1.7.7 1.2 1.8 2.2 3.1 2.8.3.1.5.1.7-.1l.8-.9c.2-.2.4-.3.6-.2l2 1c.4.2.6.3.6.6 0 .1 0 .4-.2.7z"/></svg></button>
+
   <nav class="tabbar" id="tabbar">
     <button data-tab="today" class="on"><svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/></svg>Сегодня</button>
     <button data-tab="apps"><svg fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Подачи</button>
@@ -305,10 +323,10 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 <div id="toast-root"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=29"></script>
-<script src="js/report-engine.js?v=29"></script>
-<script src="js/app.js?v=29"></script>
-<script src="js/doc-rules.js?v=29"></script>
-<script src="js/cabinet2.js?v=29"></script>
+<script src="js/config.js?v=30"></script>
+<script src="js/report-engine.js?v=30"></script>
+<script src="js/app.js?v=30"></script>
+<script src="js/doc-rules.js?v=30"></script>
+<script src="js/cabinet2.js?v=30"></script>
 </body>
 </html>
