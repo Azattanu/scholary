@@ -53,6 +53,13 @@
 
   // Событие аналитики: track('quiz_step', {step: 3})
   window.track = function (event, data) {
+    // то же событие уходит в продуктовую аналитику — без персональных полей
+    try {
+      if (window.posthog && window.posthog.capture) {
+        var clean = window.scholaryClean || function (x) { return x; };
+        window.posthog.capture(event, Object.assign({ page: location.pathname }, clean(data || {})));
+      }
+    } catch (e) {}
     return post("events", { lead_id: leadId(), event: event, data: data || {}, utm: utm(), ts: new Date().toISOString(), page: location.pathname });
   };
 
