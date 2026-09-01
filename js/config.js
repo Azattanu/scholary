@@ -24,6 +24,8 @@ window.SCHOLARY_CONFIG = {
 
   // --- ИИ-слой (PHP-бэкенд на хостинге, ключ Anthropic лежит вне httpdocs) ---
   AI_URL: "/api/ai.php",
+  NOTIFY_URL: "/api/notify.php",
+  TELEGRAM_BOT: "",           // @имя бота — заполнить, когда будет рабочий токен
 
   // --- Ссылки ---
   DEMO_VIDEO_URL: "TODO_https://www.youtube.com/embed/XXXX", // видеодемо (unlisted)

@@ -824,8 +824,28 @@
         '<button class="chip ' + (uniFilter.budget === 0 ? "on" : "") + '" data-act="unibudget">Только 0 ₸</button>' +
         '<button class="chip ' + (uniFilter.noIelts ? "on" : "") + '" data-act="uniielts">Можно без IELTS</button>' +
       "</div>" +
-      (vs.length ? vs.slice(0, 40).map(uniCard).join("") : uniEmpty()) +
-      (vs.length > 40 ? '<p class="xs mut" style="text-align:center">Показаны 40 из ' + vs.length + " — уточни фильтры</p>" : "");
+      uniListHTML(vs);
+  }
+  /* Программы с очень низким совпадением прячем под кнопку: стена нулей
+     демотивирует и выглядит как ошибка, но скрывать их совсем нечестно. */
+  var uniShowWeak = false;
+  function uniListHTML(vs) {
+    if (!vs.length) return uniEmpty();
+    var strong = vs.filter(function (v) { return v.match >= 20; });
+    var weak = vs.filter(function (v) { return v.match < 20; });
+    if (!strong.length) { strong = vs.slice(0, 12); weak = vs.slice(12); }
+    var html = '<div class="grid2">' + strong.slice(0, 40).map(uniCard).join("") + "</div>";
+    if (weak.length) {
+      html += '<div class="moreline"><i></i><span>слабое совпадение · ' + weak.length + "</span><i></i></div>";
+      if (uniShowWeak) {
+        html += '<div class="grid2">' + weak.slice(0, 40).map(uniCard).join("") + "</div>" +
+          '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-act="uniweak">Свернуть</button>';
+      } else {
+        html += '<p class="sm mut" style="margin:0 0 10px">Тут пороги выше твоего профиля прямо сейчас. Это не «никогда»: подтяни язык или достижения — и проценты вырастут.</p>' +
+          '<button class="btn btn-soft btn-sm btn-block" data-act="uniweak">Показать ' + weak.length + " " + plural(weak.length, "программу", "программы", "программ") + "</button>";
+      }
+    }
+    return html;
   }
   function uniEmpty() {
     return '<div class="empty"><div class="art">🔎</div><h3>Под эти фильтры ничего нет</h3>' +
@@ -835,7 +855,7 @@
   function uniCard(v) {
     return '<div class="prog tappable" data-act="prog" data-id="' + esc(v.prog.id) + '">' +
       '<div class="h-row" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>' + flag(v.prog.cc) + " " + esc(v.prog.name) + "</b>" +
-      '<div class="xs mut">' + esc(v.prog.country) + " · " + esc(v.prog.funding || "") + "</div></div>" +
+      '<div class="xs mut">' + [esc(v.prog.country), esc(v.prog.funding || "")].filter(Boolean).join(" · ") + "</div></div>" +
       '<span class="pill ' + (v.match >= 70 ? "pill-ok" : v.match >= 45 ? "pill-warn" : "pill-mut") + '">' + v.match + "%</span></div>" +
       (v.p ? '<div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:' + pct(v.p.adm) + '%"></i></div><span class="v">' + pct(v.p.adm) + "%</span></div>" +
         (v.p.sch != null ? '<div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:' + pct(v.p.sch) + '%"></i></div><span class="v">' + pct(v.p.sch) + "%</span></div>" : "") : "") +
@@ -1079,8 +1099,10 @@
   }
 
   function openTg() {
-    var code = (S.tg && S.tg.code) || Math.random().toString(36).slice(2, 8).toUpperCase();
+    // код одноразовый и стирается на сервере после привязки, поэтому берём длинный
+    var code = (S.tg && S.tg.code) || (Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6)).toUpperCase();
     if (!S.tg) { S.tg = { code: code }; sb.from("tg_links").upsert({ user_id: S.session.user.id, code: code }).then(function () {}); }
+    var bot = (C.TELEGRAM_BOT || "").replace(/^@/, "");
     openSub(function () {
       return subHead("Уведомления в Telegram", "шаг дня, дедлайны, дайджест") +
         '<div class="card" style="margin-bottom:12px"><b class="sm">Что будет приходить</b>' +
@@ -1089,8 +1111,12 @@
         '<div class="feat">📊 Дайджест недели по воскресеньям</div>' +
         '<p class="xs mut" style="margin:8px 0 0">Не больше одного сообщения в день. Тихие часы 22:00–08:00.</p></div>' +
         '<div class="card" style="margin-bottom:12px"><b class="sm">Твой код привязки</b><div style="font-size:26px;font-weight:800;letter-spacing:.12em;margin:6px 0">' + esc(code) + "</div>" +
-        '<p class="xs mut" style="margin:0">Бот запускается на следующей неделе: код сохранён, привяжем автоматически. Пока дедлайны присылаем в WhatsApp.</p></div>' +
-        '<a class="btn btn-ghost btn-block" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Хочу напоминания о дедлайнах в WhatsApp. Код: " + code) + '" target="_blank" rel="noopener">Пока присылайте в WhatsApp</a>';
+        (bot
+          ? '<p class="xs mut" style="margin:0 0 10px">Код одноразовый: после привязки он перестаёт работать.</p>' +
+            '<a class="btn btn-primary btn-block" href="https://t.me/' + esc(bot) + "?start=" + esc(code) + '" target="_blank" rel="noopener">Открыть бота и привязать</a>'
+          : '<p class="xs mut" style="margin:0">Бот на подключении: код уже сохранён, привяжем автоматически, как только он заработает. Пока дедлайны присылаем в WhatsApp.</p>') +
+        "</div>" +
+        '<a class="btn btn-ghost btn-block" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Хочу напоминания о дедлайнах в WhatsApp. Код: " + code) + '" target="_blank" rel="noopener">' + (bot ? "Или присылайте в WhatsApp" : "Пока присылайте в WhatsApp") + "</a>";
     });
   }
 
@@ -1267,7 +1293,8 @@
     if (act === "unicc") { uniFilter.cc = v || null; renderUnis(); return; }
     if (act === "unibudget") { uniFilter.budget = uniFilter.budget === 0 ? null : 0; renderUnis(); return; }
     if (act === "uniielts") { uniFilter.noIelts = !uniFilter.noIelts; renderUnis(); return; }
-    if (act === "unireset") { uniFilter = { q: "", cc: null, budget: null, noIelts: false }; renderUnis(); return; }
+    if (act === "unireset") { uniFilter = { q: "", cc: null, budget: null, noIelts: false }; uniShowWeak = false; renderUnis(); return; }
+    if (act === "uniweak") { uniShowWeak = !uniShowWeak; renderUnis(); return; }
     if (act === "prog") { openProg(id); return; }
     if (act === "add") { addProgram(id, function () { if (S.stack.length) drawSub(); else renderUnis(); }); return; }
     if (act === "custom-add") {
