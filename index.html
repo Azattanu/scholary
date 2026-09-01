@@ -84,31 +84,34 @@
 <section class="section">
   <div class="container">
     <h2>Как мы считаем вероятность</h2>
-    <p class="lead">Не гадание и не «шансы высокие». Алгоритм с весами + база требований + ИИ, который собирает из этого твой личный план.</p>
+    <p class="lead">Никакой магии: ответы становятся числами, числа сверяются с порогами реальных программ — и по каждой выходит два шанса.</p>
     <div class="report-peek">
       <div class="peek peek-dark">
-        <div class="p-label">Шаг 1 · Твои данные → 6 осей</div>
-        <div class="axes">
-          <div class="ax"><span>Академика</span><i style="width:82%"></i></div>
-          <div class="ax"><span>Язык (IELTS)</span><i style="width:64%"></i></div>
-          <div class="ax"><span>Достижения</span><i style="width:48%"></i></div>
-          <div class="ax"><span>Мотивационное</span><i style="width:55%"></i></div>
-          <div class="ax"><span>Бюджет</span><i style="width:30%"></i></div>
-          <div class="ax"><span>Соответствие</span><i style="width:70%"></i></div>
+        <div class="p-label">Шаг 1 · Ответы → профиль</div>
+        <div class="axesv">
+          <div class="axv"><span>Академика</span><div class="trk"><i style="width:82%"></i></div><b>8.2</b></div>
+          <div class="axv"><span>Язык</span><div class="trk"><i style="width:64%"></i></div><b>6.4</b></div>
+          <div class="axv"><span>Достижения</span><div class="trk"><i style="width:48%"></i></div><b>4.8</b></div>
+          <div class="axv"><span>Мотивация</span><div class="trk"><i style="width:55%"></i></div><b>5.5</b></div>
+          <div class="axv"><span>Бюджет</span><div class="trk"><i style="width:30%"></i></div><b>3.0</b></div>
+          <div class="axv"><span>Соответствие</span><div class="trk"><i style="width:70%"></i></div><b>7.0</b></div>
         </div>
-        <div class="p-text" style="color:#C9CCD4">Аттестат или GPA, сертификат языка, олимпиады, бюджет семьи, приоритеты — всё, что ты указал, превращается в профиль с весами</div>
+        <div class="p-text" style="color:#C9CCD4">6 осей от 0 до 10: аттестат, IELTS, олимпиады, бюджет. У каждой оси — свой вес в формуле</div>
       </div>
       <div class="peek peek-light">
-        <div class="p-label">Шаг 2 · Профиль × база требований</div>
-        <div class="calc-row"><span class="calc-n" data-count="129">129</span><span class="calc-t">программ с порогами GPA и IELTS, дедлайнами и условиями финансирования</span></div>
-        <div class="calc-row"><span class="calc-n">57</span><span class="calc-t">стран — от Венгрии и Италии до Кореи и Катара</span></div>
-        <div class="calc-row"><span class="calc-n">×2</span><span class="calc-t">по каждой программе считаются две вероятности: на место и на деньги</span></div>
-        <div class="p-text" style="color:var(--muted)">ИИ сверяет твой профиль с требованиями каждой программы: где порог пройден, где не хватает полбалла — и как это влияет на шанс</div>
+        <div class="p-label">Шаг 2 · Профиль × пороги программ</div>
+        <div style="margin:2px 0 4px">
+          <div class="mrow"><span class="m-n">Венгрия <em>· Stipendium</em></span><span class="chip-ok">порог пройден</span></div>
+          <div class="mrow"><span class="m-n">Италия <em>· DiSCo</em></span><span class="chip-ok">порог пройден</span></div>
+          <div class="mrow"><span class="m-n">Корея <em>· GKS</em></span><span class="chip-warn">−0.5 IELTS</span></div>
+          <div class="mrow"><span class="m-n">Британия <em>· Chevening</em></span><span class="chip-warn">нужен опыт</span></div>
+        </div>
+        <div class="p-text" style="color:var(--muted)">так профиль проходит через все 129 программ в 57 странах: GPA, язык, дедлайны, деньги</div>
       </div>
       <div class="peek peek-accent">
-        <div class="p-label" style="color:#DCD6FF; opacity:1">Шаг 3 · Персональный отчёт</div>
-        <div class="p-big">Твой план</div>
-        <div class="p-text" style="color:#EDEBFF">Портфель из 8–10 программ под твой профиль, календарь дедлайнов со сроками документов, что усилить в первую очередь — и Точка Б с датой. Каждый отчёт генерируется индивидуально: два человека с разными ответами не получат одинаковый</div>
+        <div class="p-label" style="color:#DCD6FF; opacity:1">Шаг 3 · Два шанса → план</div>
+        <div class="p-duo duo-acc"><span><b>×2</b><i>на место и на деньги</i></span><span><b>8–10</b><i>программ в портфеле</i></span></div>
+        <div class="p-text" style="color:#EDEBFF">Где порог пройден — шанс растёт, где не хватает полбалла — честно падает. Из лучших программ собирается твой портфель с календарём дедлайнов. Два разных профиля не получат одинаковый отчёт</div>
       </div>
     </div>
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px">
