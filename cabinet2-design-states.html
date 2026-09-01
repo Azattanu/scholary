@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Scholary · Кабинет 2.0 — часть 2: состояния, вузы, подписка, ошибки, поддержка</title>
+<style>
+:root{
+  --bg:#F5F5F7; --surface:#fff; --surface-2:#FBFBFD; --ink:#1D1D1F; --ink-soft:#424245; --muted:#6E6E73; --faint:#8E8E93;
+  --border:#E8E8ED; --border-2:#DFDFE6; --accent:#5B4BFF; --accent-dark:#4739E0; --accent-soft:#F0EEFF; --accent-border:#DCD6FF;
+  --ok:#0B7A3E; --ok-soft:#E7F8EE; --warn:#B26A00; --warn-soft:#FFF3E0; --bad:#C0392B; --bad-soft:#FDEEEC;
+  --tg:#2AABEE; --wa:#25D366;
+  --r-lg:22px; --r-md:16px; --r-sm:12px;
+  --sh-1:0 1px 2px rgba(16,17,24,.05), 0 6px 18px -8px rgba(16,17,24,.10);
+  --sh-2:0 18px 44px -20px rgba(16,17,24,.30);
+}
+.dark{
+  --bg:#0C0C10; --surface:#16161D; --surface-2:#1C1C25; --ink:#F5F5F7; --ink-soft:#D6D6DC; --muted:#9A9AA4; --faint:#7B7B85;
+  --border:#25252F; --border-2:#2E2E3A; --accent:#8B7CFF; --accent-dark:#A79BFF; --accent-soft:#211D3D; --accent-border:#332C5E;
+  --ok:#4ADE95; --ok-soft:#12291F; --warn:#F0B646; --warn-soft:#2A2113; --bad:#F87171; --bad-soft:#2B1616;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;
+  background:#E9E9EE;color:#1D1D1F;font-size:17px;line-height:1.47;-webkit-font-smoothing:antialiased}
+.stage{max-width:1460px;margin:0 auto;padding:40px 24px 120px}
+.stage>h1{font-size:clamp(28px,4vw,44px);letter-spacing:-0.035em;margin:0 0 6px}
+.stage>.sub{color:#6E6E73;margin:0 0 12px;max-width:78ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 36px}
+.legend span{background:#fff;border:1px solid #DFDFE6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;margin-bottom:52px}
+.frame{width:378px;flex:0 0 378px}
+.frame .cap{font-weight:700;margin:0 0 4px;font-size:15px}
+.frame .capsub{color:#6E6E73;font-size:13px;margin:0 0 10px;min-height:56px;line-height:1.45}
+.phone{background:var(--bg);border:1px solid #D7D7DE;border-radius:34px;overflow:hidden;box-shadow:var(--sh-2);position:relative;color:var(--ink)}
+.phone.dark{border-color:#2A2A34}
+.desktop{width:100%;background:var(--bg);border:1px solid #D7D7DE;border-radius:20px;overflow:hidden;box-shadow:var(--sh-2);color:var(--ink)}
+.secthead{font-size:23px;font-weight:800;letter-spacing:-0.025em;margin:56px 0 6px;padding-top:24px;border-top:1px solid #D7D7DE}
+.sectsub{color:#6E6E73;font-size:14.5px;margin:0 0 22px;max-width:90ch}
+/* ---- примитивы ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;border-radius:999px;
+  padding:13px 22px;font-size:16px;font-weight:600;font-family:inherit;text-decoration:none;line-height:1.2}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border-2)}
+.btn-soft{background:var(--accent-soft);color:var(--accent-dark)}
+.btn-quiet{background:transparent;color:var(--muted)}
+.btn-block{width:100%} .btn-sm{padding:9px 15px;font-size:14px} .btn-lg{padding:16px 24px;font-size:17px}
+.btn-wa{background:var(--wa);color:#fff} .btn-tg{background:var(--tg);color:#fff}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-1)}
+.card-flat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:650}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)}
+.pill-bad{background:var(--bad-soft);color:var(--bad)} .pill-mut{background:var(--bg);color:var(--muted)}
+.pill-acc{background:var(--accent-soft);color:var(--accent-dark)}
+.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mut{color:var(--muted)} .sm{font-size:13.5px} .xs{font-size:12px} .b{font-weight:700}
+.h2{font-size:25px;font-weight:800;letter-spacing:-0.028em;margin:10px 0 2px}
+.h3{font-size:18px;font-weight:750;letter-spacing:-0.015em;margin:0 0 4px}
+.screen{padding:6px 16px 92px;min-height:660px}
+.screen-c{display:flex;flex-direction:column;justify-content:center;min-height:700px;padding:26px 22px 92px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:var(--bg)}
+.topbar .logo{font-weight:800;font-size:18px;letter-spacing:-0.02em}
+.topbar .logo span{color:var(--accent)}
+.ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5B4BFF,#9B8CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.tabbar{position:absolute;left:0;right:0;bottom:0;background:color-mix(in srgb, var(--surface) 92%, transparent);backdrop-filter:blur(14px);
+  border-top:1px solid var(--border);display:flex;padding:9px 6px 14px}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:650;color:var(--muted);text-decoration:none}
+.tabbar a.on{color:var(--accent)}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:17px;height:17px}
+.ic-lg{width:30px;height:30px}
+/* ---- поля ---- */
+.fld{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:11px 13px;font-size:15px;color:var(--muted)}
+.fld.focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1px solid var(--border-2);border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* ---- пустые состояния ---- */
+.empty{text-align:center;padding:26px 10px}
+.empty .art{width:104px;height:104px;margin:0 auto 16px;border-radius:28px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.empty h3{font-size:19px;font-weight:750;margin:0 0 6px;letter-spacing:-0.02em}
+.empty p{color:var(--muted);font-size:14px;margin:0 auto 16px;max-width:30ch;line-height:1.5}
+/* ---- скелетоны ---- */
+@keyframes shim{0%{background-position:-320px 0}100%{background-position:320px 0}}
+.skel{background:linear-gradient(90deg,#EDEDF2 25%,#F7F7FA 50%,#EDEDF2 75%);background-size:640px 100%;animation:shim 1.4s infinite linear;border-radius:8px;height:12px;margin-bottom:8px}
+.dark .skel{background:linear-gradient(90deg,#1E1E27 25%,#26262F 50%,#1E1E27 75%);background-size:640px 100%}
+/* ---- тосты ---- */
+.toast{display:flex;gap:11px;align-items:flex-start;background:#1D1D1F;color:#fff;border-radius:16px;padding:13px 15px;box-shadow:var(--sh-2);margin-bottom:10px;font-size:14px;line-height:1.4}
+.toast .u{margin-left:auto;font-weight:700;color:#9B8CFF;white-space:nowrap}
+.toast.ok{background:#0B7A3E} .toast.bad{background:#8E2A20}
+/* ---- bottom sheet ---- */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:26px 26px 0 0;padding:10px 18px 22px;box-shadow:0 -20px 50px -22px rgba(0,0,0,.4);border-top:1px solid var(--border)}
+.grab{width:38px;height:5px;border-radius:99px;background:var(--border-2);margin:0 auto 12px}
+.scrim{position:absolute;inset:0;background:rgba(12,12,16,.42);backdrop-filter:blur(1.5px)}
+/* ---- прогресс/шкалы ---- */
+.pb-line{display:flex;align-items:center;gap:8px;margin:7px 0 0}
+.pb-line .nm{font-size:12.5px;color:var(--muted);width:92px;flex-shrink:0}
+.pb{flex:1;height:7px;border-radius:99px;background:var(--bg);overflow:hidden}
+.pb i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.pb i.sch{background:#22C55E}
+.pb-line .v{font-size:13.5px;font-weight:750;width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.prog{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:var(--sh-1)}
+.ready{position:relative;width:56px;height:56px;flex-shrink:0}
+.ready svg{transform:rotate(-90deg)}
+.ready b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+/* ---- ИИ ---- */
+.ai{background:linear-gradient(135deg,var(--accent-soft),color-mix(in srgb,var(--ok-soft) 70%,transparent));border:1px solid var(--accent-border);border-radius:18px;padding:14px;margin-bottom:10px}
+.ai .who{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.09em;color:var(--accent-dark);text-transform:uppercase;margin-bottom:6px}
+.ai .who i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+.verd{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;font-size:13.5px;line-height:1.45;margin-bottom:8px}
+.verd.ok{background:var(--ok-soft);color:var(--ink)} .verd.warn{background:var(--warn-soft);color:var(--ink)} .verd.bad{background:var(--bad-soft);color:var(--ink)}
+.verd b{display:block}
+/* ---- тарифы ---- */
+.plan{border:1.5px solid var(--border-2);border-radius:20px;padding:16px;margin-bottom:12px;background:var(--surface)}
+.plan.on{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.plan .pr{font-size:27px;font-weight:800;letter-spacing:-0.03em}
+.feat{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;padding:5px 0;line-height:1.4}
+.feat svg{flex-shrink:0;margin-top:2px}
+/* ---- поддержка ---- */
+.fab{position:absolute;right:16px;bottom:104px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(91,75,255,.65)}
+.chanl{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:13px 14px;margin-bottom:10px}
+.chanl .ic-c{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.msg{max-width:82%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.45;margin-bottom:8px}
+.msg.them{background:var(--surface);border:1px solid var(--border)}
+.msg.me{background:var(--accent);color:#fff;margin-left:auto}
+/* ---- прочее ---- */
+.sw{width:44px;height:26px;border-radius:99px;background:var(--accent);position:relative;flex-shrink:0}
+.sw::after{content:"";position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.off{background:var(--border-2)} .sw.off::after{left:3px}
+.lst{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--border)}
+.lst:last-child{border-bottom:none}
+.cmdk{background:var(--surface);border:1px solid var(--border-2);border-radius:18px;box-shadow:var(--sh-2);overflow:hidden;width:520px;max-width:100%}
+.cmdk .q{display:flex;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--border);font-size:16px;color:var(--muted)}
+.cmdk .it{display:flex;align-items:center;gap:11px;padding:11px 17px;font-size:14.5px}
+.cmdk .it.on{background:var(--accent-soft)}
+.kbd{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--border-2);border-radius:6px;padding:2px 6px}
+.dwrap{display:grid;grid-template-columns:236px 1fr;min-height:640px}
+.side{background:var(--surface);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column}
+.side .logo{font-weight:800;font-size:20px;padding:0 10px 18px}
+.side .logo span{color:var(--accent)}
+.side a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:var(--ink-soft);font-weight:600;font-size:15px;text-decoration:none;margin-bottom:2px}
+.side a.on{background:var(--accent-soft);color:var(--accent-dark)}
+.dmain{padding:26px 30px}
+.note{background:var(--warn-soft);border:1px solid #FDE68A;color:#92400E;padding:10px 14px;border-radius:14px;font-size:13.5px}
+.dark .note{border-color:#4A3A15;color:#F0C46A}
+.ann{background:#FFF;border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 12px 12px 0;font-size:13.5px;color:#424245;margin:0 0 14px;max-width:1100px}
+</style>
+</head>
+<body>
+<svg style="display:none">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+<symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 4 2 9l10 5 10-5-10-5Z"/><path d="M6 11.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M14 3v5h5"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 13 4.5 4.5L19 7"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6l-7-3Z"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.8.7-.8 1.3v.4M12 17h.01"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v6M15 3v6M6 9h12v3a6 6 0 0 1-12 0V9ZM12 18v3"/></symbol>
+<symbol id="i-cloud-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M7.5 17H7a4 4 0 0 1-.6-8A6 6 0 0 1 16 7.3"/><path d="M18.3 11.2A4 4 0 0 1 18 17h-6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 6h18M6.5 12h11M10 18h4"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9ZM3 7h18v4H3zM12 7v14"/><path d="M12 7S10.5 3 8.5 3 6 6 8 7M12 7s1.5-4 3.5-4S18 6 16 7"/></symbol>
+</svg>
+<div class="stage">
+<h1>Кабинет 2.0 · часть 2 — состояния, вузы, деньги, ошибки, поддержка</h1>
+<p class="sub">Всё, чего не было в первой партии: пустые состояния, полноценный раздел «Вузы» с поиском и карточкой программы, покупка и управление подпиской, страницы ошибок, поддержка с эскалацией в WhatsApp/Telegram, системный UI 2026 (тосты, bottom sheet, ⌘K, тёмная тема, доступность) и настройки с приватностью и рефералкой.</p>
+<div class="legend">
+  <span>🎨 SF Pro · акцент #5B4BFF · радиусы 12/16/22</span>
+  <span>📱 мобайл 378px · десктоп в конце</span>
+  <span>🌓 светлая и тёмная тема</span>
+  <span>♿ контраст ≥4.5:1, цели касания ≥44px</span>
+  <span>🤖 ИИ помечен точкой и подписью источника</span>
+</div>
+
+<!-- ============ H · ПУСТЫЕ СОСТОЯНИЯ ============ -->
+<div class="secthead">H · Пустые состояния — самые важные экраны продукта</div>
+<p class="sectsub">Правило Scholary: <b>пустого экрана не существует</b>. Каждое «пусто» — это или следующий шаг, или доказательство ценности. Пустой экран = отток, поэтому в каждом zero-state есть: что это, зачем, одна кнопка и превью того, что появится.</p>
+<div class="ann">Что часто делают неправильно: показывают «У вас пока нет документов» и точку. Мы показываем, <i>что</i> появится (превью-скелет реального контента), <i>сколько это займёт</i> и <i>что даст</i> — три вещи, которые снимают трение первого действия.</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">H1 · Кабинет без квиза (холодный вход)</p>
+    <p class="capsub">Человек зарегистрировался с сайта, отчёта нет. Не пустота, а «демо-режим»: реальный интерфейс с размытыми цифрами + 2 минуты до своих. Это главный экран конверсии кабинет→квиз.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="card" style="background:linear-gradient(135deg,#1D1D1F,#2A2440);color:#fff;border:none;margin-bottom:14px">
+          <div class="xs" style="letter-spacing:.14em;font-weight:700;color:#A78BFA">ТВОЙ КАБИНЕТ ПУСТ — ПОКА</div>
+          <div class="h3" style="margin:6px 0 8px;font-size:20px;color:#fff">7 вопросов — и здесь появятся твои цифры</div>
+          <div style="display:flex;gap:14px;margin-bottom:12px">
+            <div><div style="font-size:26px;font-weight:800;filter:blur(6px);color:#9B8CFF">74%</div><div class="xs" style="color:#9AA0AC">поступление</div></div>
+            <div><div style="font-size:26px;font-weight:800;filter:blur(6px);color:#4ADE95">68%</div><div class="xs" style="color:#9AA0AC">стипендия</div></div>
+          </div>
+          <button class="btn btn-primary btn-block" style="background:#fff;color:#1D1D1F">Пройти квиз · 2 минуты</button>
+        </div>
+        <p class="sm b" style="margin:0 0 8px">А пока — посмотри, что внутри</p>
+        <div class="prog" style="opacity:.55">
+          <div class="h-row"><div><b class="sm">Stipendium Hungaricum</b><div class="xs mut">Венгрия · полное покрытие</div></div><span class="pill pill-mut">?%</span></div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:0"></i></div><span class="v">—</span></div>
+        </div>
+        <div class="prog" style="opacity:.4">
+          <div class="h-row"><div><b class="sm">EDISU Piemonte</b><div class="xs mut">Италия · гранты по доходу</div></div><span class="pill pill-mut">?%</span></div>
+        </div>
+        <div class="ai">
+          <div class="who"><i></i>Почему так</div>
+          <span class="sm">Вероятности считаются от твоих данных: аттестат, язык, бюджет. Без них любые проценты были бы враньём.</span>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a class="on"><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">H2 · Подачи пусты (отчёт есть, ничего не выбрано)</p>
+    <p class="capsub">Редкий случай: снял все галочки в онбординге. Возвращаем одним тапом — «добавить 9 из отчёта», без ручного выбора.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Подачи</div>
+        <div class="empty" style="padding-top:44px">
+          <div class="art"><svg class="ic-lg ic"><use href="#i-list"/></svg></div>
+          <h3>Ни одной подачи</h3>
+          <p>В твоём отчёте 9 подходящих программ. Добавь их — к каждой сразу придёт чек-лист документов и дедлайны.</p>
+          <button class="btn btn-primary">Добавить 9 из отчёта</button>
+          <div style="margin-top:10px"><button class="btn btn-quiet btn-sm">Выбрать вручную в каталоге</button></div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a class="on"><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">H3 · Документы пусты</p>
+    <p class="capsub">Самый ценный zero-state: показываем не «загрузите файл», а конкретный первый документ, который нужен во всех 8 подачах. Минимум решений — максимум движения.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Документы</div>
+        <p class="sm mut" style="margin:2px 0 14px">0 из 9 · начнём с самого нужного</p>
+        <div class="card" style="border-color:var(--accent-border);background:var(--accent-soft);margin-bottom:12px">
+          <div class="pill pill-acc" style="margin-bottom:8px">НАЧНИ С ЭТОГО</div>
+          <div class="h3">Диплом и транскрипт</div>
+          <p class="sm mut" style="margin:0 0 12px">Нужен во всех 8 твоих подачах. Загрузи скан — ИИ сверит GPA с порогами программ за 15 секунд.</p>
+          <button class="btn btn-primary btn-block">Загрузить файл</button>
+        </div>
+        <p class="sm b" style="margin:0 0 6px">Потом понадобятся</p>
+        <div class="lst"><svg class="ic mut"><use href="#i-doc"/></svg><div style="flex:1"><b class="sm">IELTS / TOEFL</b><div class="xs mut">8 подач</div></div><span class="pill pill-mut">позже</span></div>
+        <div class="lst"><svg class="ic mut"><use href="#i-doc"/></svg><div style="flex:1"><b class="sm">Паспорт</b><div class="xs mut">8 подач</div></div><span class="pill pill-mut">позже</span></div>
+        <div class="lst"><svg class="ic mut"><use href="#i-doc"/></svg><div style="flex:1"><b class="sm">Медсправка + апостиль</b><div class="xs mut">Венгрия · 14 дней на изготовление</div></div><span class="pill pill-warn">заранее</span></div>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a class="on"><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">H4 · Ничего не найдено (фильтры)</p>
+    <p class="capsub">Вместо тупика — ИИ предлагает ослабить конкретный фильтр и показывает, сколько это даст. Пользователь не должен догадываться, какой фильтр лишний.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="fld" style="margin:8px 0 10px"><svg class="ic ic-sm"><use href="#i-search"/></svg>медицина в Японии</div>
+        <div class="chips" style="margin-bottom:14px"><span class="chip on">Япония <svg class="ic ic-sm"><use href="#i-x"/></svg></span><span class="chip on">Медицина <svg class="ic ic-sm"><use href="#i-x"/></svg></span><span class="chip on">0 ₸ <svg class="ic ic-sm"><use href="#i-x"/></svg></span></div>
+        <div class="empty">
+          <div class="art" style="background:var(--warn-soft);color:var(--warn)"><svg class="ic-lg ic"><use href="#i-search"/></svg></div>
+          <h3>Под эти три фильтра — ничего</h3>
+          <p>Медицина в Японии с полным покрытием для иностранцев почти не встречается.</p>
+        </div>
+        <div class="ai">
+          <div class="who"><i></i>Что предлагает ИИ</div>
+          <div class="verd ok" style="margin-bottom:6px"><svg class="ic ic-sm"><use href="#i-arrow"/></svg><span><b>Убрать «0 ₸» → 4 программы</b>MEXT покрывает обучение + стипендию, но формально это не «0 ₸ бюджет семьи».</span></div>
+          <div class="verd ok"><svg class="ic ic-sm"><use href="#i-arrow"/></svg><span><b>Добавить Корею и Китай → 11 программ</b>Медицина с полным финансированием реальна в CSC и GKS.</span></div>
+        </div>
+        <button class="btn btn-soft btn-block">Применить оба и показать 15</button>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a class="on"><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">H5 · «Мой шанс»: мало данных</p>
+    <p class="capsub">График истории пуст в первую неделю. Показываем одну точку и что произойдёт дальше — и сразу даём симулятор, который работает без истории.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Мой шанс</div>
+        <div style="display:flex;gap:16px;margin:8px 0 14px">
+          <div><b style="font-size:27px;font-weight:800;color:var(--accent)">74%</b><div class="xs mut">поступление</div></div>
+          <div><b style="font-size:27px;font-weight:800;color:var(--ok)">68%</b><div class="xs mut">стипендия</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <svg width="100%" height="96" viewBox="0 0 300 96" preserveAspectRatio="none">
+            <line x1="0" y1="48" x2="300" y2="48" stroke="var(--border)" stroke-dasharray="4 6"/>
+            <circle cx="26" cy="48" r="5" fill="#5B4BFF"/>
+            <text x="42" y="52" font-size="11" fill="#8E8E93">первая точка · сегодня</text>
+          </svg>
+          <p class="xs mut" style="margin:0">График оживёт через неделю: каждое действие — новая точка. Загрузишь IELTS, добавишь достижение — увидишь, как линия идёт вверх.</p>
+        </div>
+        <div class="card">
+          <b class="sm">А пока — попробуй «что если»</b>
+          <p class="xs mut" style="margin:4px 0 10px">Симулятор работает сразу, история не нужна.</p>
+          <div class="chips"><span class="chip">IELTS 7.0</span><span class="chip">+ SAT</span><span class="chip">+ публикация</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">H6 · Скелетоны загрузки</p>
+    <p class="capsub">Никаких спиннеров: скелет повторяет форму будущего контента, поэтому переход ощущается мгновенным. ИИ-проверка идёт дольше — у неё свой прогресс с честными этапами.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Подачи</div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start"><div style="flex:1"><div class="skel" style="width:62%;height:15px"></div><div class="skel" style="width:40%"></div><div class="skel" style="width:75%;height:10px"></div></div><div class="skel" style="width:56px;height:56px;border-radius:50%;margin-left:12px"></div></div>
+        </div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start"><div style="flex:1"><div class="skel" style="width:52%;height:15px"></div><div class="skel" style="width:44%"></div><div class="skel" style="width:66%;height:10px"></div></div><div class="skel" style="width:56px;height:56px;border-radius:50%;margin-left:12px"></div></div>
+        </div>
+        <div class="card" style="margin-top:14px;border-color:var(--accent-border)">
+          <div class="who" style="display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.09em;color:var(--accent-dark);text-transform:uppercase;margin-bottom:8px"><i style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block"></i>ИИ проверяет документ</div>
+          <div class="sm" style="display:flex;gap:8px;align-items:center;margin-bottom:5px"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Распознал: IELTS, 6.5, до 12.03.2027</div>
+          <div class="sm" style="display:flex;gap:8px;align-items:center;margin-bottom:5px"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Сверил с 8 подачами</div>
+          <div class="sm mut" style="display:flex;gap:8px;align-items:center">⏳ Проверяет сроки против дедлайнов…</div>
+          <div class="pb" style="margin-top:10px"><i style="width:72%"></i></div>
+          <p class="xs mut" style="margin:6px 0 0">Обычно 10–20 секунд. Можно закрыть — пришлём в Telegram.</p>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a class="on"><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ I · ВУЗЫ ============ -->
+<div class="secthead">I · Вузы — раздел целиком: поиск, фильтры, карточка программы, вуз</div>
+<p class="sectsub">Отличие от любого агрегатора (Studyportals, Masterstudies): у нас каталог знает <b>твой</b> профиль, поэтому у каждой программы стоят твои вероятности и «чего не хватает». Это превращает поиск из чтения в примерку.</p>
+<div class="ann">Решение по навигации: поиск — не отдельный экран, а состояние раздела. Три способа найти: <b>запрос словами</b> (ИИ-поиск понимает «дешёвая Европа без IELTS»), <b>фильтры</b> (bottom sheet, не выкидывает со страницы) и <b>подборки</b> (готовые ответы на частые задачи). Подборки закрывают 60% случаев — школьник редко знает, что искать.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">I1 · Вузы — главный экран раздела</p>
+    <p class="capsub">Сверху ИИ-поиск обычным языком, ниже подборки под профиль, ниже лента с твоими процентами. «Совпадение 92%» — понятная метрика соответствия, отдельно от вероятности.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Вузы и программы</div>
+        <p class="sm mut" style="margin:2px 0 10px">129 программ · 57 стран · проценты — твои</p>
+        <div class="fld focus" style="margin-bottom:10px"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-spark"/></svg><span style="color:var(--ink)">дешёвая Европа без IELTS</span></div>
+        <div class="chips" style="margin-bottom:14px"><span class="chip"><svg class="ic ic-sm"><use href="#i-filter"/></svg>Фильтры</span><span class="chip">Магистратура</span><span class="chip">0 ₸</span></div>
+        <p class="sm b" style="margin:0 0 8px">Подборки под твой профиль</p>
+        <div style="display:flex;gap:10px;overflow:hidden;margin-bottom:16px">
+          <div class="card" style="min-width:158px;padding:13px"><div style="font-size:20px">🎯</div><b class="sm" style="display:block;margin-top:6px">Высокий шанс</b><span class="xs mut">12 программ · от 60%</span></div>
+          <div class="card" style="min-width:158px;padding:13px"><div style="font-size:20px">💸</div><b class="sm" style="display:block;margin-top:6px">Полное покрытие</b><span class="xs mut">31 программа</span></div>
+          <div class="card" style="min-width:70px;padding:13px;opacity:.6"><div style="font-size:20px">⏰</div></div>
+        </div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start">
+            <div><b>Stipendium Hungaricum</b><div class="xs mut">Венгрия · обучение + стипендия + жильё</div></div>
+            <span class="pill pill-ok">92% совпадение</span>
+          </div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:71%"></i></div><span class="v">71%</span></div>
+          <div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:64%"></i></div><span class="v">64%</span></div>
+          <div class="h-row" style="margin-top:11px"><button class="btn btn-soft btn-sm"><svg class="ic ic-sm"><use href="#i-plus"/></svg>В подачи</button><span class="xs mut">дедлайн 15 янв</span></div>
+        </div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start">
+            <div><b>Univerzita Karlova</b><div class="xs mut">Чехия · 0 ₸ на чешском</div></div>
+            <span class="pill pill-warn">64% совпадение</span>
+          </div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:52%"></i></div><span class="v">52%</span></div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a class="on"><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">I2 · Фильтры — bottom sheet</p>
+    <p class="capsub">Лист поверх страницы, а не новый экран: видно, как меняется счётчик результатов. Кнопка внизу под большой палец и всегда показывает число — «Показать 23».</p>
+    <div class="phone" style="min-height:700px">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen" style="filter:blur(1px);opacity:.5"><div class="h2">Вузы и программы</div><div class="prog" style="height:110px"></div><div class="prog" style="height:110px"></div></div>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="h-row" style="margin-bottom:12px"><b style="font-size:18px">Фильтры</b><span class="sm" style="color:var(--accent);font-weight:650">Сбросить</span></div>
+        <p class="xs mut b" style="margin:0 0 6px;letter-spacing:.06em">УРОВЕНЬ</p>
+        <div class="chips" style="margin-bottom:14px"><span class="chip">Бакалавр</span><span class="chip on">Магистратура</span><span class="chip">PhD</span></div>
+        <p class="xs mut b" style="margin:0 0 6px;letter-spacing:.06em">БЮДЖЕТ СЕМЬИ В ГОД</p>
+        <div class="chips" style="margin-bottom:14px"><span class="chip on">0 ₸</span><span class="chip">до 1 млн</span><span class="chip">1–3 млн</span><span class="chip">3+</span></div>
+        <p class="xs mut b" style="margin:0 0 6px;letter-spacing:.06em">ЯЗЫК И ТРЕБОВАНИЯ</p>
+        <div class="chips" style="margin-bottom:14px"><span class="chip on">Можно без IELTS</span><span class="chip">Английский</span><span class="chip">Местный язык</span></div>
+        <p class="xs mut b" style="margin:0 0 6px;letter-spacing:.06em">РЕГИОН</p>
+        <div class="chips" style="margin-bottom:16px"><span class="chip on">Европа</span><span class="chip">Азия</span><span class="chip">Сев. Америка</span><span class="chip">Ближ. Восток</span></div>
+        <button class="btn btn-primary btn-block btn-lg">Показать 23 программы</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">I3 · Карточка программы</p>
+    <p class="capsub">Главный экран принятия решения. Сверху — твои цифры и разбор «почему столько», ниже требования с отметкой «пройдено/нет», деньги, дедлайны, источник. Кнопка добавления липкая внизу.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><span class="sm mut">Поделиться</span></div>
+      <div class="screen" style="padding-bottom:96px">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin:6px 0 12px">
+          <div style="width:52px;height:52px;border-radius:15px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🇭🇺</div>
+          <div><div class="h2" style="font-size:21px;margin:0">Stipendium Hungaricum</div><div class="sm mut">Венгрия · магистратура · Budapest University of Technology</div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;gap:18px">
+            <div><b style="font-size:25px;font-weight:800;color:var(--accent)">71%</b><div class="xs mut">поступление</div></div>
+            <div><b style="font-size:25px;font-weight:800;color:var(--ok)">64%</b><div class="xs mut">стипендия</div></div>
+            <div style="margin-left:auto;align-self:center"><span class="pill pill-ok">якорная</span></div>
+          </div>
+          <div class="ai" style="margin:12px 0 0;background:none;border:none;padding:0">
+            <div class="who"><i></i>Почему 71%</div>
+            <span class="sm">Твой GPA 3.4 выше порога 3.0 (+), IELTS 6.5 выше 6.0 (+), но конкурс на IT-треки в 2026 вырос, а мотивационное ещё не написано (−). Допиши письмо — станет ~77%.</span>
+          </div>
+        </div>
+        <p class="sm b" style="margin:0 0 4px">Требования</p>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg><div style="flex:1" class="sm">GPA от 3.0 <span class="mut">— у тебя 3.4</span></div></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg><div style="flex:1" class="sm">IELTS от 6.0 <span class="mut">— у тебя 6.5</span></div></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-x"/></svg><div style="flex:1" class="sm">Мотивационное письмо <span class="mut">— нет</span></div></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-x"/></svg><div style="flex:1" class="sm">Медсправка с апостилем <span class="mut">— 14 дней</span></div></div>
+        <p class="sm b" style="margin:12px 0 4px">Деньги и сроки</p>
+        <div class="card-flat" style="padding:12px">
+          <div class="h-row sm"><span class="mut">Обучение</span><b>0 ₸ · покрывает грант</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Стипендия</span><b>~43 700 HUF/мес</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Жильё</span><b>общежитие или пособие</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Дедлайн</span><b style="color:var(--bad)">15 января · 45 дней</b></div>
+        </div>
+        <p class="xs mut" style="margin:10px 0 0">Данные из официального источника программы · обновлено 28.11.2026 · <a style="color:var(--accent)">сообщить об ошибке</a></p>
+      </div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px 18px;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--border)">
+        <button class="btn btn-primary btn-block btn-lg">Добавить в подачи</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">I4 · Страница вуза</p>
+    <p class="capsub">Открывается из программы: сам университет, его программы под тебя, факты для родителей (рейтинг, город, стоимость жизни). Родители — второй пользователь продукта, у них свои вопросы.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><span class="sm mut">Поделиться</span></div>
+      <div class="screen">
+        <div style="height:96px;border-radius:18px;background:linear-gradient(135deg,#2A2440,#5B4BFF);margin:6px 0 12px;display:flex;align-items:flex-end;padding:14px;color:#fff"><b style="font-size:18px">Budapest University of Technology</b></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <span class="pill pill-mut">QS #801–1000</span><span class="pill pill-mut">Будапешт</span><span class="pill pill-mut">осн. 1782</span><span class="pill pill-mut">21 000 студентов</span>
+        </div>
+        <div class="card-flat" style="padding:12px;margin-bottom:12px">
+          <div class="h-row sm"><span class="mut">Жизнь в месяц</span><b>~180 000 ₸</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Язык обучения</span><b>английский</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Казахстанцев учится</span><b>~40 (по данным программы)</b></div>
+        </div>
+        <p class="sm b" style="margin:0 0 8px">Программы для тебя · 3</p>
+        <div class="prog" style="padding:13px">
+          <div class="h-row"><div><b class="sm">MSc Computer Engineering</b><div class="xs mut">Stipendium Hungaricum</div></div><b class="sm" style="color:var(--accent)">71%</b></div>
+        </div>
+        <div class="prog" style="padding:13px">
+          <div class="h-row"><div><b class="sm">MSc Electrical Engineering</b><div class="xs mut">Stipendium Hungaricum</div></div><b class="sm" style="color:var(--accent)">69%</b></div>
+        </div>
+        <div class="ai">
+          <div class="who"><i></i>Взгляд ИИ</div>
+          <span class="sm">Технический вуз с сильной инженерией и низкой стоимостью жизни — под твой бюджет подходит лучше, чем Вена при том же уровне программы.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ J · ДЕНЬГИ ============ -->
+<div class="secthead">J · Деньги — тарифы, оплата, управление подпиской, отмена</div>
+<p class="sectsub">Принцип: <b>деньги просят только там, где только что была польза</b>. Пейволл никогда не первый экран — он появляется после того, как ИИ уже нашёл проблему в документе или разобрал письмо. Плюс полный цикл: чек, управление, пауза, отмена — по закону РК и просто по-человечески.</p>
+<div class="ann">Почему пауза, а не только отмена: у абитуриента сезонный цикл. Летом кабинет не нужен, в ноябре нужен каждый день. «Пауза до сентября» сохраняет клиента вместо возврата к нулю — это прямой прирост LTV и лучшее удержание, чем скидка.</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">J1 · Тарифы (в кабинете)</p>
+    <p class="capsub">Три колонки, но честно: бесплатный полноценен. Pro продаёт не «доступ», а безлимит ИИ. Третья ступень — человек, и она нарочно дороже в 8 раз: так видно, что Pro дёшев.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Тарифы</div>
+        <p class="sm mut" style="margin:2px 0 14px">Бесплатный остаётся навсегда. Платишь только за ИИ без ограничений.</p>
+        <div class="plan">
+          <div class="h-row"><b>Бесплатный</b><span class="pill pill-mut">сейчас у тебя</span></div>
+          <div class="pr" style="margin:4px 0 8px">0 ₸</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Все подачи, чек-листы, дедлайны</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Каталог с твоими вероятностями</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>1 ИИ-проверка документа и 1 разбор письма</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Пуши о дедлайнах в Telegram</div>
+        </div>
+        <div class="plan on">
+          <div class="h-row"><b>Scholary Pro</b><span class="pill pill-acc">выгодно в сезон</span></div>
+          <div class="pr" style="margin:4px 0 2px">2 990 ₸<span class="sm mut" style="font-weight:600">/мес</span></div>
+          <p class="xs mut" style="margin:0 0 8px">или 9 900 ₸ за 4 месяца сезона — экономия 2 060 ₸</p>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-check"/></svg><b>Безлимит ИИ-проверок документов</b></div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-check"/></svg><b>Безлимит разборов мотивационных</b></div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-check"/></svg>Симулятор «что если» и сравнение</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-check"/></svg>Ответ ИИ вне очереди · приоритет в сезон</div>
+          <button class="btn btn-primary btn-block" style="margin-top:12px">Попробовать 7 дней бесплатно</button>
+          <p class="xs mut" style="text-align:center;margin:8px 0 0">Отменить можно в один тап. Спишем только после пробного.</p>
+        </div>
+        <div class="plan">
+          <div class="h-row"><b>Документы и подача</b><span class="pill pill-mut">человек</span></div>
+          <div class="pr" style="margin:4px 0 8px">25 000 ₸</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Живой консультант проверяет пакет до 5 программ</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Правки мотивационного вручную</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">J2 · Оплата</p>
+    <p class="capsub">Apple Pay / Google Pay первыми — школьник платит картой родителя с телефона. Kaspi обязателен: в РК это дефолт. Всё, что списывается, названо словами до кнопки.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><span class="sm mut" style="display:flex;gap:5px;align-items:center"><svg class="ic ic-sm"><use href="#i-shield"/></svg>Защищено TipTop Pay</span></div>
+      <div class="screen">
+        <div class="h2" style="font-size:22px">Оформление Pro</div>
+        <div class="card" style="margin:12px 0">
+          <div class="h-row"><span class="sm">Пробный период</span><b class="sm">7 дней · 0 ₸</b></div>
+          <div class="h-row" style="margin-top:8px"><span class="sm">Потом ежемесячно</span><b class="sm">2 990 ₸</b></div>
+          <div class="h-row" style="margin-top:8px"><span class="sm mut">Первое списание</span><b class="sm">8 декабря 2026</b></div>
+          <div style="border-top:1px solid var(--border);margin:10px 0 8px"></div>
+          <div class="h-row"><b>Сегодня к оплате</b><b style="font-size:19px">0 ₸</b></div>
+        </div>
+        <button class="btn btn-block" style="background:#000;color:#fff;margin-bottom:8px"> Apple Pay</button>
+        <button class="btn btn-ghost btn-block" style="margin-bottom:8px">G Pay</button>
+        <div class="fld" style="margin-bottom:8px">💳 Карта · номер, срок, CVC</div>
+        <button class="btn btn-ghost btn-block" style="margin-bottom:14px;color:#E4002B;border-color:#F3C7CF">Kaspi перевод</button>
+        <button class="btn btn-primary btn-block btn-lg">Начать пробные 7 дней</button>
+        <p class="xs mut" style="text-align:center;margin:10px 0 0;line-height:1.5">Нажимая, ты принимаешь <a style="color:var(--accent)">оферту</a>. Отмена в любой момент в Профиле — доступ сохранится до конца оплаченного периода.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">J3 · Оплата прошла</p>
+    <p class="capsub">Успех не заканчивается галочкой: сразу ведём в действие, ради которого покупали. Иначе человек закрывает приложение и подписка «сгорает» неиспользованной — первый шаг к отмене.</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="width:88px;height:88px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg class="ic" style="width:42px;height:42px;stroke-width:2.4"><use href="#i-check"/></svg></div>
+      <div class="h2" style="font-size:24px">Pro включён</div>
+      <p class="sm mut" style="margin:6px auto 20px;max-width:30ch">Пробный до 8 декабря. ИИ-проверки и разборы теперь без ограничений.</p>
+      <div class="card" style="text-align:left;margin-bottom:14px">
+        <b class="sm">Что сделать прямо сейчас</b>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-doc"/></svg><div style="flex:1" class="sm">Проверить 4 документа, которые ждали</div><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-spark"/></svg><div style="flex:1" class="sm">Разобрать мотивационное · версия 3</div><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+      </div>
+      <button class="btn btn-primary btn-block">Проверить документы</button>
+      <p class="xs mut" style="margin-top:12px">Чек отправлен на azattanu@gmail.com</p>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">J4 · Управление подпиской</p>
+    <p class="capsub">Всё видно без переписки с поддержкой: когда спишут, сколько, история чеков, пауза и отмена в один тап. Скрытая отмена = чарджбэки и злые отзывы.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:22px">Подписка</div>
+        <div class="card" style="margin:12px 0">
+          <div class="h-row"><b>Scholary Pro</b><span class="pill pill-ok">активна</span></div>
+          <div class="h-row sm" style="margin-top:10px"><span class="mut">Следующее списание</span><b>8 января · 2 990 ₸</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Способ</span><b>Visa •• 4417</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Использовано в этом месяце</span><b>14 проверок · 6 разборов</b></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <b class="sm">Чеки</b>
+          <div class="lst sm"><span style="flex:1">8 декабря · 2 990 ₸</span><a style="color:var(--accent);font-weight:650">скачать</a></div>
+          <div class="lst sm"><span style="flex:1">8 ноября · 0 ₸ · пробный</span><a style="color:var(--accent);font-weight:650">скачать</a></div>
+        </div>
+        <button class="btn btn-ghost btn-block" style="margin-bottom:8px">Поставить на паузу до сентября</button>
+        <button class="btn btn-quiet btn-block">Отменить подписку</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">J5 · Отмена — экран удержания</p>
+    <p class="capsub">Честное удержание: сначала спрашиваем причину (это данные для продукта), затем предлагаем ровно то, что решает названную причину. Кнопка «всё равно отменить» видна сразу — тёмные паттерны запрещены.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:22px">Жаль, что уходишь</div>
+        <p class="sm mut" style="margin:4px 0 14px">Скажи почему — починим. Это займёт 5 секунд.</p>
+        <div class="chips" style="flex-direction:column;align-items:stretch;gap:8px;margin-bottom:16px">
+          <span class="chip on" style="justify-content:flex-start;padding:12px 15px">Дорого</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">Уже подал документы — пока не нужно</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">ИИ ошибался</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">Не разобрался, как пользоваться</span>
+        </div>
+        <div class="card" style="border-color:var(--accent-border);background:var(--accent-soft);margin-bottom:12px">
+          <b class="sm">Тогда вот вариант</b>
+          <p class="sm" style="margin:6px 0 10px">Сезонный тариф: 9 900 ₸ за 4 месяца вместо 11 960 ₸. Или пауза до сентября — данные и подачи сохранятся.</p>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm">Сезонный тариф</button><button class="btn btn-ghost btn-sm">Пауза</button></div>
+        </div>
+        <button class="btn btn-quiet btn-block">Всё равно отменить</button>
+        <p class="xs mut" style="text-align:center;margin-top:10px">Доступ к Pro останется до 8 января. Подачи, документы и отчёт не удаляются никогда.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">J6 · Ошибка оплаты</p>
+    <p class="capsub">Никогда не «Ошибка 402». Называем причину человеческим языком, даём альтернативный путь и оставляем доступ к бесплатному, чтобы человек не почувствовал себя выключенным.</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="width:84px;height:84px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg class="ic" style="width:38px;height:38px"><use href="#i-x"/></svg></div>
+      <div class="h2" style="font-size:23px">Банк отклонил платёж</div>
+      <p class="sm mut" style="margin:6px auto 18px;max-width:32ch">Чаще всего это лимит на интернет-покупки или карта родителя без подтверждения. Деньги не списаны.</p>
+      <button class="btn btn-primary btn-block">Другая карта</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px;color:#E4002B;border-color:#F3C7CF">Оплатить через Kaspi</button>
+      <div class="chanl" style="margin-top:16px;text-align:left">
+        <div class="ic-c" style="background:var(--wa)"><svg class="ic ic-sm"><use href="#i-help"/></svg></div>
+        <div style="flex:1"><b class="sm">Написать нам в WhatsApp</b><div class="xs mut">Поможем оплатить · обычно отвечаем за 20 минут</div></div>
+      </div>
+      <p class="xs mut" style="margin-top:12px">Бесплатный доступ никуда не делся — можно продолжить работу.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ K · ОШИБКИ ============ -->
+<div class="secthead">K · Ошибки и системные состояния</div>
+<p class="sectsub">Каждая ошибка отвечает на три вопроса: <b>что случилось</b> (человеческим языком), <b>что делать сейчас</b> (одна кнопка) и <b>что с моими данными</b> (главный страх). Технические коды прячем в «подробности» для поддержки.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">K1 · 404 — страница не найдена</p>
+    <p class="capsub">С юмором, но полезно: три реальных места, куда человек, скорее всего, шёл. Иллюстрация — не грустный робот, а компас: тон продукта — «доведём», а не «извините».</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="font-size:64px;margin-bottom:6px">🧭</div>
+      <div class="h2" style="font-size:26px">Такой страницы нет</div>
+      <p class="sm mut" style="margin:6px auto 20px;max-width:30ch">Возможно, ссылка старая или в адресе опечатка. Твои данные на месте.</p>
+      <div class="card" style="text-align:left">
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-home"/></svg><span class="sm" style="flex:1">На главную кабинета</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-list"/></svg><span class="sm" style="flex:1">Мои подачи</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-help"/></svg><span class="sm" style="flex:1">Помощь</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">K2 · Сбой сервиса (500)</p>
+    <p class="capsub">Признаём вину, обещаем конкретику и снимаем главный страх: «данные не потеряны». Плюс автоповтор и канал, где мы точно ответим.</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="width:84px;height:84px;border-radius:26px;background:var(--warn-soft);color:var(--warn);display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg class="ic" style="width:38px;height:38px"><use href="#i-plug"/></svg></div>
+      <div class="h2" style="font-size:23px">У нас что-то сломалось</div>
+      <p class="sm mut" style="margin:6px auto 16px;max-width:32ch">Это на нашей стороне, не на твоей. Уже видим проблему и чиним.</p>
+      <div class="card" style="text-align:left;margin-bottom:14px">
+        <div class="sm" style="display:flex;gap:8px;align-items:flex-start"><svg class="ic ic-sm" style="color:var(--ok);flex-shrink:0"><use href="#i-shield"/></svg><span><b>Документы и подачи в безопасности</b><br><span class="mut">Ничего не потеряно, всё вернётся как было.</span></span></div>
+      </div>
+      <button class="btn btn-primary btn-block">Попробовать снова</button>
+      <button class="btn btn-quiet btn-block" style="margin-top:6px">Написать в Telegram</button>
+      <p class="xs mut" style="margin-top:14px">Код для поддержки: SCH-5031-A7 · <a style="color:var(--accent)">скопировать</a></p>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">K3 · Нет интернета (офлайн)</p>
+    <p class="capsub">2026-стандарт: офлайн — не стоп. Кэш последних экранов доступен для чтения, действия ставятся в очередь и уходят при связи. Плашка сверху, а не пустой экран.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div style="display:flex;gap:9px;align-items:center;background:var(--warn-soft);border:1px solid #FDE68A;border-radius:14px;padding:11px 13px;margin-bottom:14px">
+          <svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-cloud-off"/></svg>
+          <div style="flex:1"><b class="sm">Нет сети — показываем сохранённое</b><div class="xs mut">Обновлено 12 минут назад</div></div>
+        </div>
+        <div class="prog" style="opacity:.85">
+          <div class="h-row" style="align-items:flex-start"><div><b>Stipendium Hungaricum</b><div class="xs mut">Венгрия · 15 янв</div></div>
+          <div class="ready"><svg width="56" height="56"><circle cx="28" cy="28" r="23" fill="none" stroke="#EEE" stroke-width="6"/><circle cx="28" cy="28" r="23" fill="none" stroke="#B26A00" stroke-width="6" stroke-linecap="round" stroke-dasharray="87 145"/></svg><b>60%</b></div></div>
+        </div>
+        <div class="card" style="border-style:dashed">
+          <div class="sm" style="display:flex;gap:9px;align-items:flex-start"><span>⏳</span><span><b>1 действие ждёт отправки</b><br><span class="mut">«Медсправка — готово» уйдёт, как только появится сеть.</span></span></div>
+        </div>
+        <p class="xs mut" style="margin-top:12px">Загрузка файлов и ИИ-проверки требуют интернета — они станут доступны автоматически.</p>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a class="on"><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">K4 · Отчёт по ссылке не найден</p>
+    <p class="capsub">Реальный кейс: ссылку из WhatsApp переслали другу или она обрезалась. Не обвиняем пользователя — даём три рабочих пути, включая восстановление по номеру телефона.</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="font-size:60px;margin-bottom:8px">🔗</div>
+      <div class="h2" style="font-size:23px">Отчёт по этой ссылке не открылся</div>
+      <p class="sm mut" style="margin:6px auto 18px;max-width:32ch">Возможно, ссылка скопировалась не полностью — так часто бывает при пересылке в мессенджере.</p>
+      <button class="btn btn-primary btn-block">Войти и открыть свой отчёт</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px">Прислать ссылку заново в WhatsApp</button>
+      <div class="ai" style="margin-top:16px;text-align:left">
+        <div class="who"><i></i>Если отчёт покупали не вы</div>
+        <span class="sm">Отчёт персональный и содержит данные конкретного человека — открыть его может только владелец. Свой можно рассчитать за 2 минуты.</span>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">K5 · Файл не подошёл</p>
+    <p class="capsub">Ошибка загрузки решается на месте: сжать, сфотографировать заново, выбрать другой. Требования показываем до загрузки, а не после — но если уж случилось, чиним в один тап.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Загрузка документа</div>
+        <div class="card" style="border-color:#F3C7CF;background:var(--bad-soft);margin:12px 0">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <svg class="ic" style="color:var(--bad);flex-shrink:0"><use href="#i-x"/></svg>
+            <div><b class="sm">Файл 24 МБ — это больше лимита 10 МБ</b><p class="sm mut" style="margin:4px 0 0">Скорее всего, это фото в максимальном качестве. Сожмём без потери читаемости?</p></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary btn-sm">Сжать и загрузить</button><button class="btn btn-ghost btn-sm">Другой файл</button></div>
+        </div>
+        <div class="card-flat">
+          <b class="sm">Что подходит</b>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>PDF, JPG, PNG · до 10 МБ</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Читаемый скан или ровное фото при дневном свете</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-x"/></svg>Скриншоты экрана с бликами ИИ распознаёт хуже</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">K6 · Сессия истекла</p>
+    <p class="capsub">Не выкидываем на пустой логин: помним, что человек делал, и возвращаем ровно туда. Вход одним тапом через Google — школьник не помнит пароль.</p>
+    <div class="phone"><div class="screen screen-c" style="text-align:center">
+      <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg class="ic" style="width:36px;height:36px"><use href="#i-shield"/></svg></div>
+      <div class="h2" style="font-size:23px">Нужно войти заново</div>
+      <p class="sm mut" style="margin:6px auto 18px;max-width:31ch">Мы разлогинили тебя для безопасности — так бывает раз в несколько месяцев.</p>
+      <button class="btn btn-ghost btn-block" style="margin-bottom:8px">Войти через Google</button>
+      <button class="btn btn-quiet btn-block">Почта и пароль</button>
+      <div class="card" style="margin-top:16px;text-align:left">
+        <div class="sm"><b>Вернём туда, где остановилась</b><br><span class="mut">Черновик мотивационного для Stipendium сохранён.</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ L · ПОДДЕРЖКА ============ -->
+<div class="secthead">L · Поддержка — ИИ первым, человек в один тап</div>
+<p class="sectsub">Модель поддержки: <b>ИИ отвечает на «как», человек решает «мне страшно» и «у меня деньги»</b>. Каждый экран ИИ-помощи заканчивается кнопкой живого канала — в Казахстане доверие строится на том, что за сервисом есть люди в WhatsApp.</p>
+<div class="ann">Почему не встроенный чат-виджет типа Intercom: у школьника нет привычки писать в веб-чат и ждать. Он пишет в WhatsApp/Telegram. Поэтому наша «поддержка» — это ИИ в кабинете + переход в тот мессенджер, где человек уже живёт, с контекстом (номер подачи, экран) в первом сообщении.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">L1 · Помощь — центр</p>
+    <p class="capsub">Сверху поиск по базе знаний, ниже частые вопросы именно этого сезона, внизу живые каналы с честным временем ответа. Время ответа — обещание, которое мы держим.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Помощь</div>
+        <div class="fld" style="margin:10px 0 14px"><svg class="ic ic-sm"><use href="#i-search"/></svg>Опиши проблему своими словами</div>
+        <p class="sm b" style="margin:0 0 6px">Сейчас спрашивают чаще всего</p>
+        <div class="lst"><span class="sm" style="flex:1">Как заказать апостиль на медсправку в Алматы</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><span class="sm" style="flex:1">Отчёт не пришёл в WhatsApp — что делать</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><span class="sm" style="flex:1">Можно ли подать без IELTS</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><span class="sm" style="flex:1">Как отменить подписку</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <p class="sm b" style="margin:16px 0 8px">Написать живому человеку</p>
+        <div class="chanl">
+          <div class="ic-c" style="background:var(--wa)"><svg class="ic ic-sm" style="stroke:#fff"><use href="#i-help"/></svg></div>
+          <div style="flex:1"><b class="sm">WhatsApp</b><div class="xs mut">Отвечаем 10:00–20:00 · обычно за 20 мин</div></div>
+          <svg class="ic ic-sm mut"><use href="#i-arrow"/></svg>
+        </div>
+        <div class="chanl">
+          <div class="ic-c" style="background:var(--tg)"><svg class="ic ic-sm" style="stroke:#fff"><use href="#i-bell"/></svg></div>
+          <div style="flex:1"><b class="sm">Telegram</b><div class="xs mut">Там же приходят твои дедлайны</div></div>
+          <svg class="ic ic-sm mut"><use href="#i-arrow"/></svg>
+        </div>
+        <p class="xs mut" style="margin-top:10px">В выходные отвечаем медленнее — но до понедельника не оставим.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">L2 · ИИ-помощник с эскалацией</p>
+    <p class="capsub">ИИ отвечает по нашей базе и знает контекст экрана. Ключевое: когда вопрос про деньги, сроки или «мне кажется, ошибка» — сразу предлагает человека, не спорит и не мучает пользователя.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><span class="sm mut">Помощь</span></div>
+      <div class="screen" style="display:flex;flex-direction:column">
+        <div class="msg me">Почему у Кореи 41%, если у меня GPA хороший?</div>
+        <div class="msg them"><b>Смотрю твой профиль.</b><br>GKS требует IELTS 7.0 — у тебя 6.5. Формально подать можно, но конкурс отбирает по языку в первую очередь, поэтому модель снижает шанс.<br><br>Пересдача на 7.0 поднимет Корею до ~63%.</div>
+        <div class="msg them" style="padding:0;border:none;background:none;max-width:100%">
+          <div class="card" style="padding:12px">
+            <div class="sm b" style="margin-bottom:8px">Помогло?</div>
+            <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm">👍 Да</button><button class="btn btn-ghost btn-sm">👎 Нет</button><button class="btn btn-soft btn-sm">Человеку</button></div>
+          </div>
+        </div>
+        <div class="msg me">Нет, у меня 7.0, вы неправильно посчитали</div>
+        <div class="msg them" style="border-color:var(--accent-border);background:var(--accent-soft)"><b>Понял — это вопрос к людям.</b><br>Передаю в поддержку вместе с твоим профилем и расчётом, чтобы не пересказывать заново.</div>
+        <button class="btn btn-wa btn-block" style="margin-top:auto">Открыть WhatsApp с контекстом</button>
+        <p class="xs mut" style="text-align:center;margin-top:8px">Отправим: № подачи, твой IELTS в профиле, дату расчёта</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">L3 · Кнопка помощи (FAB) и её раскрытие</p>
+    <p class="capsub">Плавающая кнопка есть на всех экранах, но не мешает: над таббаром, сжимается при скролле. Раскрывается в три канала — ИИ, WhatsApp, Telegram — плюс «сообщить об ошибке в данных».</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen" style="filter:blur(1px);opacity:.45"><div class="h2">Подачи</div><div class="prog" style="height:120px"></div><div class="prog" style="height:120px"></div></div>
+      <div class="scrim"></div>
+      <div style="position:absolute;right:16px;bottom:104px;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <div style="display:flex;gap:10px;align-items:center"><span class="pill" style="background:#fff">Сообщить об ошибке в данных</span><div style="width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1)"><svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-x"/></svg></div></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="pill" style="background:#fff">Telegram</span><div style="width:44px;height:44px;border-radius:50%;background:var(--tg);display:flex;align-items:center;justify-content:center"><svg class="ic ic-sm" style="stroke:#fff"><use href="#i-bell"/></svg></div></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="pill" style="background:#fff">WhatsApp · 20 мин</span><div style="width:44px;height:44px;border-radius:50%;background:var(--wa);display:flex;align-items:center;justify-content:center"><svg class="ic ic-sm" style="stroke:#fff"><use href="#i-help"/></svg></div></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="pill" style="background:#fff">Спросить ИИ</span><div class="fab" style="position:static"><svg class="ic"><use href="#i-spark"/></svg></div></div>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a class="on"><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">L4 · Сообщить об ошибке в данных программы</p>
+    <p class="capsub">Механика, которая превращает пользователей в редакторов базы: каждое сообщение чинит данные для всех. Обещаем срок проверки и благодарим — это дешёвый источник качества.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><span class="sm mut">Отмена</span></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Что не так с данными?</div>
+        <p class="sm mut" style="margin:2px 0 12px">Stipendium Hungaricum · Венгрия</p>
+        <div class="chips" style="flex-direction:column;align-items:stretch;gap:8px;margin-bottom:12px">
+          <span class="chip on" style="justify-content:flex-start;padding:12px 15px">Дедлайн изменился</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">Другие требования к языку</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">Сумма стипендии не та</span>
+          <span class="chip" style="justify-content:flex-start;padding:12px 15px">Программа закрыта</span>
+        </div>
+        <div class="fld" style="align-items:flex-start;min-height:84px;color:var(--muted)">На сайте программы написано 20 января, а у вас 15-е</div>
+        <div class="fld" style="margin-top:10px"><svg class="ic ic-sm"><use href="#i-doc"/></svg>Ссылка на источник (необязательно)</div>
+        <button class="btn btn-primary btn-block" style="margin-top:14px">Отправить</button>
+        <div class="ai" style="margin-top:14px">
+          <div class="who"><i></i>Что дальше</div>
+          <span class="sm">Проверим за 48 часов. Если подтвердится — обновим для всех и пришлём тебе спасибо: месяц Pro бесплатно.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ M · СИСТЕМНЫЙ UI ============ -->
+<div class="secthead">M · Системный UI 2026 — тосты, тёмная тема, ⌘K, доступность</div>
+<p class="sectsub">Мелочи, которые отличают «сайт» от «продукта»: подтверждение каждого действия без перезагрузки, тёмная тема по системной настройке (школьники сидят в кабинете ночью), клавиатурная навигация на десктопе, крупный шрифт и контраст для родителей.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">M1 · Тосты и подтверждения</p>
+    <p class="capsub">Каждое действие даёт мгновенный ответ и возможность отменить. «Отменить» вместо диалога «вы уверены?» — быстрее и не раздражает.</p>
+    <div class="phone"><div class="screen" style="display:flex;flex-direction:column;justify-content:flex-end;min-height:660px">
+      <div class="toast ok"><svg class="ic ic-sm"><use href="#i-check"/></svg><div><b>Документ отмечен готовым</b><br><span style="opacity:.85">Готовность Stipendium: 60% → 72%</span></div><span class="u">Отменить</span></div>
+      <div class="toast"><svg class="ic ic-sm"><use href="#i-spark"/></svg><div><b>ИИ закончил проверку</b><br><span style="opacity:.85">Нашёл 1 проблему в сроках IELTS</span></div><span class="u">Открыть</span></div>
+      <div class="toast bad"><svg class="ic ic-sm"><use href="#i-cloud-off"/></svg><div><b>Не удалось сохранить</b><br><span style="opacity:.85">Повторим автоматически при связи</span></div><span class="u">Повторить</span></div>
+      <div class="toast" style="background:var(--tg)"><svg class="ic ic-sm"><use href="#i-bell"/></svg><div><b>Telegram подключён</b><br><span style="opacity:.85">Первый пуш придёт завтра в 9:00</span></div></div>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">M2 · Тёмная тема</p>
+    <p class="capsub">Не инверсия, а отдельная палитра: акцент осветлён до #8B7CFF для контраста на тёмном, зелёный и красный подняты по яркости. Включается по системной настройке телефона.</p>
+    <div class="phone dark">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="card" style="background:#000;border-color:#26262F;margin-bottom:14px">
+          <div class="xs" style="letter-spacing:.14em;font-weight:700;color:#A78BFA">ТОЧКА Б · СЕНТЯБРЬ 2027</div>
+          <div style="font-size:19px;font-weight:750;margin:3px 0 10px">Осталось 375 дней</div>
+          <div class="pb" style="background:#26262F"><i style="width:18%;background:linear-gradient(90deg,#7C6CFF,#B7A8FF)"></i></div>
+        </div>
+        <div class="card" style="border-color:var(--accent-border);background:var(--accent-soft);margin-bottom:12px">
+          <div class="xs b" style="letter-spacing:.12em;color:var(--accent-dark)">СЛЕДУЮЩИЙ ШАГ</div>
+          <div class="h3" style="margin:6px 0 4px">Черновик мотивационного</div>
+          <p class="sm mut" style="margin:0 0 10px">Дедлайн Stipendium через 45 дней</p>
+          <button class="btn btn-primary btn-sm">Открыть редактор</button>
+        </div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start"><div><b>Stipendium Hungaricum</b><div class="xs mut">Венгрия · 15 янв</div></div>
+          <div class="ready"><svg width="56" height="56"><circle cx="28" cy="28" r="23" fill="none" stroke="#26262F" stroke-width="6"/><circle cx="28" cy="28" r="23" fill="none" stroke="#F0B646" stroke-width="6" stroke-linecap="round" stroke-dasharray="87 145"/></svg><b>60%</b></div></div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:71%"></i></div><span class="v">71%</span></div>
+        </div>
+        <div class="ai"><div class="who"><i></i>Совет ИИ</div><span class="sm">Медсправку с апостилем закажи до 20 декабря — делается 14 дней.</span></div>
+      </div>
+      <div class="tabbar">
+        <a class="on"><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">M3 · Доступность и крупный текст</p>
+    <p class="capsub">Тот же экран при системном шрифте 120% — ничего не ломается, кнопки не наезжают. Родители, которые платят, часто читают именно так.</p>
+    <div class="phone" style="font-size:19.5px">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:27px">Сегодня</div>
+        <div class="card" style="border-color:var(--accent-border);background:var(--accent-soft);margin:12px 0">
+          <div class="xs b" style="letter-spacing:.12em;color:var(--accent-dark)">СЛЕДУЮЩИЙ ШАГ</div>
+          <div style="font-size:20px;font-weight:750;margin:7px 0 5px;line-height:1.25">Запишись на пересдачу IELTS</div>
+          <p style="font-size:15px;color:var(--muted);margin:0 0 12px">До 15 октября · откроет 4 программы</p>
+          <button class="btn btn-primary btn-block" style="min-height:52px">Записалась</button>
+        </div>
+        <div class="lst"><span class="dot" style="width:11px;height:11px;border-radius:50%;background:var(--bad)"></span><div style="flex:1"><b style="font-size:17px">Stipendium Hungaricum</b><div style="font-size:14px" class="mut">15 января · готовность 60%</div></div></div>
+        <div class="lst"><span class="dot" style="width:11px;height:11px;border-radius:50%;background:var(--warn)"></span><div style="flex:1"><b style="font-size:17px">EDISU Piemonte</b><div style="font-size:14px" class="mut">20 февраля · готовность 30%</div></div></div>
+      </div>
+      <div class="tabbar">
+        <a class="on"><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Док-ты</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ N · ПРОФИЛЬ И НАСТРОЙКИ ============ -->
+<div class="secthead">N · Профиль, уведомления, приватность, рефералка</div>
+<p class="sectsub">Здесь живёт доверие. Данные абитуриента — это диплом, паспорт и справки; если человек не понимает, что с ними происходит, он не загрузит второй документ. Поэтому приватность — не мелкий пункт в конце, а отдельный экран с понятными словами и кнопкой удаления.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">N1 · Профиль</p>
+    <p class="capsub">Данные анкеты с честной подписью: «изменишь — пересчитаем». Ниже — подписка, каналы, помощь. Выход внизу, чтобы не нажать случайно.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div style="display:flex;gap:14px;align-items:center;margin:10px 0 16px">
+          <div class="ava" style="width:58px;height:58px;font-size:22px">А</div>
+          <div><b style="font-size:19px">Айгерим Смагулова</b><div class="sm mut">azattanu@gmail.com</div><span class="pill pill-acc" style="margin-top:4px">Pro · до 8 января</span></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="h-row" style="margin-bottom:8px"><b class="sm">Данные для расчёта</b><a class="sm" style="color:var(--accent);font-weight:650">Изменить</a></div>
+          <div class="h-row sm"><span class="mut">Уровень</span><b>Магистратура · 2027</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">GPA</span><b>3.4 / 4.0</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">IELTS</span><b>6.5</b></div>
+          <div class="h-row sm" style="margin-top:6px"><span class="mut">Бюджет</span><b>до 1 млн ₸/год</b></div>
+          <p class="xs mut" style="margin:10px 0 0">Изменишь — вероятности по всем 8 подачам пересчитаются автоматически.</p>
+        </div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-bell"/></svg><span class="sm" style="flex:1">Уведомления</span><span class="xs mut">Telegram</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-shield"/></svg><span class="sm" style="flex:1">Данные и приватность</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-gift"/></svg><span class="sm" style="flex:1">Пригласить друга</span><span class="pill pill-ok">+1 месяц</span></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-doc"/></svg><span class="sm" style="flex:1">Мои отчёты · архив</span><span class="xs mut">3</span></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-help"/></svg><span class="sm" style="flex:1">Помощь</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <button class="btn btn-quiet btn-block" style="margin-top:10px">Выйти</button>
+      </div>
+      <div class="tabbar">
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a class="on"><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">N2 · Уведомления</p>
+    <p class="capsub">Пользователь управляет каждым типом отдельно и видит, во сколько придёт. «Тихие часы» — обязательны: ночной пуш школьнику стоит нам отписки.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:22px">Уведомления</div>
+        <div class="card" style="margin:12px 0">
+          <div class="h-row"><div><b class="sm">Telegram</b><div class="xs mut">@aigerim_s · подключён</div></div><span class="pill pill-ok">основной</span></div>
+          <div class="h-row" style="margin-top:10px"><div><b class="sm">WhatsApp</b><div class="xs mut">+7 705 ••• 41 88</div></div><span class="pill pill-mut">только отчёты</span></div>
+        </div>
+        <div class="lst"><div style="flex:1"><b class="sm">Шаг дня</b><div class="xs mut">Каждое утро в 9:00</div></div><span class="sw"></span></div>
+        <div class="lst"><div style="flex:1"><b class="sm">Дедлайны</b><div class="xs mut">За 30, 14, 7, 3 и 1 день</div></div><span class="sw"></span></div>
+        <div class="lst"><div style="flex:1"><b class="sm">Готов вердикт ИИ</b><div class="xs mut">Сразу после проверки</div></div><span class="sw"></span></div>
+        <div class="lst"><div style="flex:1"><b class="sm">Дайджест недели</b><div class="xs mut">Воскресенье, 12:00</div></div><span class="sw"></span></div>
+        <div class="lst"><div style="flex:1"><b class="sm">Новые программы под профиль</b><div class="xs mut">Не чаще раза в неделю</div></div><span class="sw off"></span></div>
+        <div class="card" style="margin-top:12px">
+          <div class="h-row"><div><b class="sm">Тихие часы</b><div class="xs mut">22:00 – 08:00 · ничего не присылаем</div></div><span class="sw"></span></div>
+        </div>
+        <p class="xs mut" style="margin-top:12px">Максимум 1 уведомление в день. Мы считаем это правилом, а не настройкой.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">N3 · Данные и приватность</p>
+    <p class="capsub">Прямым текстом: что храним, зачем, кто видит, как удалить. Отдельно — согласие на обезличенную аналитику (будущий продукт для вузов), выключаемое без потери функций.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:22px">Данные и приватность</div>
+        <div class="card" style="margin:12px 0">
+          <b class="sm">Что у нас хранится</b>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Ответы анкеты и расчёты вероятности</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Загруженные документы — 4 файла</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Контакты: почта, Telegram, WhatsApp</div>
+          <p class="xs mut" style="margin:8px 0 0">Файлы лежат в защищённом хранилище. Их видишь только ты: доступ по твоему аккаунту, у сотрудников — нет.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="h-row"><div style="padding-right:10px"><b class="sm">Обезличенная аналитика</b><div class="xs mut">Помогает уточнять модель. Без имени, почты и файлов.</div></div><span class="sw"></span></div>
+        </div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-doc"/></svg><span class="sm" style="flex:1">Скачать все мои данные</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <div class="lst"><svg class="ic ic-sm" style="color:var(--bad)"><use href="#i-x"/></svg><span class="sm" style="flex:1;color:var(--bad)">Удалить аккаунт и все файлы</span><svg class="ic ic-sm mut"><use href="#i-arrow"/></svg></div>
+        <p class="xs mut" style="margin-top:12px">Удаление необратимо и происходит за 24 часа. Оплаченный отчёт можно скачать до удаления.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">N4 · Пригласить друга</p>
+    <p class="capsub">Рефералка на языке школьника: не «10% комиссия», а «месяц Pro тебе и скидка другу». Поступают классами — это самый дешёвый канал роста, который у нас есть.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="empty" style="padding-bottom:6px">
+          <div class="art" style="background:var(--ok-soft);color:var(--ok)"><svg class="ic-lg ic"><use href="#i-gift"/></svg></div>
+          <h3>Позови одноклассника</h3>
+          <p>Ему — 1 000 ₸ скидки на отчёт. Тебе — месяц Pro за каждого, кто дойдёт до отчёта.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="h-row"><div><b class="sm">Твоя ссылка</b><div class="xs mut">scholary.kz/r/aigerim</div></div><button class="btn btn-soft btn-sm">Копировать</button></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-wa btn-sm" style="flex:1">WhatsApp</button>
+          <button class="btn btn-tg btn-sm" style="flex:1">Telegram</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1">Instagram</button>
+        </div>
+        <div class="card">
+          <b class="sm">Приглашено · 3</b>
+          <div class="lst sm"><span style="flex:1">Дана А.</span><span class="pill pill-ok">отчёт куплен</span></div>
+          <div class="lst sm"><span style="flex:1">Ерасыл К.</span><span class="pill pill-mut">прошёл квиз</span></div>
+          <div class="lst sm"><span style="flex:1">Амина Т.</span><span class="pill pill-mut">открыла ссылку</span></div>
+          <p class="xs mut" style="margin:8px 0 0">Заработано: 1 месяц Pro</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ O · ДЕСКТОП ============ -->
+<div class="secthead">O · Десктоп — где сидят родители и где работают долго</div>
+<p class="sectsub">Мобайл — для ежедневных 90 секунд. Десктоп — для сезонной работы: письма, сравнение, документы. Поэтому на десктопе появляются вещи, которых нет на телефоне: ⌘K, две колонки в редакторе, таблица сравнения на 3 программы.</p>
+<div class="row">
+  <div style="flex:1;min-width:920px">
+    <p class="cap">O1 · Вузы на десктопе + ⌘K</p>
+    <p class="capsub" style="min-height:0">Слева фильтры постоянно видны (не прячем в лист — на десктопе есть место), карточки в две колонки. ⌘K открывает поиск по всему кабинету: программы, документы, действия.</p>
+    <div class="desktop"><div class="dwrap">
+      <div class="side">
+        <div class="logo">Scholary<span>.</span></div>
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a class="on"><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+        <div style="margin-top:auto" class="card"><b class="sm">Pro активен</b><div class="xs mut" style="margin-top:4px">Безлимит ИИ до 8 января</div></div>
+      </div>
+      <div class="dmain" style="position:relative">
+        <div class="h-row" style="margin-bottom:16px"><div class="h2" style="margin:0">Вузы и программы</div><div class="fld" style="width:280px"><svg class="ic ic-sm"><use href="#i-search"/></svg>Поиск<span class="kbd">⌘K</span></div></div>
+        <div style="display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start">
+          <div class="card">
+            <b class="sm">Фильтры</b>
+            <p class="xs mut b" style="margin:12px 0 6px;letter-spacing:.06em">УРОВЕНЬ</p>
+            <div class="chips"><span class="chip on">Магистратура</span></div>
+            <p class="xs mut b" style="margin:12px 0 6px;letter-spacing:.06em">БЮДЖЕТ</p>
+            <div class="chips"><span class="chip on">0 ₸</span><span class="chip">до 1 млн</span></div>
+            <p class="xs mut b" style="margin:12px 0 6px;letter-spacing:.06em">РЕГИОН</p>
+            <div class="chips"><span class="chip on">Европа</span><span class="chip">Азия</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="prog" style="margin:0">
+              <div class="h-row" style="align-items:flex-start"><div><b>Stipendium Hungaricum</b><div class="xs mut">Венгрия · полное покрытие</div></div><span class="pill pill-ok">92%</span></div>
+              <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:71%"></i></div><span class="v">71%</span></div>
+              <div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:64%"></i></div><span class="v">64%</span></div>
+              <div class="h-row" style="margin-top:10px"><button class="btn btn-soft btn-sm">В подачи</button><span class="xs mut">15 янв</span></div>
+            </div>
+            <div class="prog" style="margin:0">
+              <div class="h-row" style="align-items:flex-start"><div><b>EDISU Piemonte</b><div class="xs mut">Италия · гранты по доходу</div></div><span class="pill pill-ok">88%</span></div>
+              <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:66%"></i></div><span class="v">66%</span></div>
+              <div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:61%"></i></div><span class="v">61%</span></div>
+              <div class="h-row" style="margin-top:10px"><button class="btn btn-soft btn-sm">В подачи</button><span class="xs mut">20 фев</span></div>
+            </div>
+            <div class="prog" style="margin:0;opacity:.5"><div class="h-row"><div><b>Orange Tulip</b><div class="xs mut">Нидерланды</div></div><span class="pill pill-mut">64%</span></div></div>
+            <div class="prog" style="margin:0;opacity:.5"><div class="h-row"><div><b>NL Scholarship</b><div class="xs mut">Нидерланды</div></div><span class="pill pill-mut">55%</span></div></div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(12,12,16,.36);display:flex;align-items:flex-start;justify-content:center;padding-top:60px">
+          <div class="cmdk">
+            <div class="q"><svg class="ic ic-sm"><use href="#i-search"/></svg>венг</div>
+            <div class="it on"><svg class="ic ic-sm" style="color:var(--accent)"><use href="#i-cap"/></svg>Stipendium Hungaricum<span class="kbd">программа</span></div>
+            <div class="it"><svg class="ic ic-sm mut"><use href="#i-list"/></svg>Моя подача · Венгрия · готовность 60%<span class="kbd">подача</span></div>
+            <div class="it"><svg class="ic ic-sm mut"><use href="#i-doc"/></svg>Медсправка для Венгрии<span class="kbd">документ</span></div>
+            <div class="it"><svg class="ic ic-sm mut"><use href="#i-spark"/></svg>Спросить ИИ: «что нужно для Венгрии»<span class="kbd">действие</span></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row">
+  <div style="flex:1;min-width:920px">
+    <p class="cap">O2 · Редактор мотивационного на десктопе</p>
+    <p class="capsub" style="min-height:0">Две колонки: слева пишешь, справа ИИ комментирует конкретные куски — как живой ментор на полях. Внизу — версии и рост оценки, это и есть ощущение прогресса.</p>
+    <div class="desktop"><div class="dwrap">
+      <div class="side">
+        <div class="logo">Scholary<span>.</span></div>
+        <a><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a class="on"><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+      <div class="dmain">
+        <div class="h-row" style="margin-bottom:14px">
+          <div><div class="h2" style="margin:0;font-size:22px">Мотивационное · Stipendium Hungaricum</div><span class="sm mut">версия 3 · сохранено только что</span></div>
+          <div style="display:flex;gap:10px;align-items:center"><span class="pill pill-ok">оценка 7.8 ▲ с 6.1</span><button class="btn btn-primary btn-sm">Разобрать заново</button></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start">
+          <div class="card" style="line-height:1.7;font-size:14px;color:var(--ink-soft)">
+            <p style="margin:0 0 12px">Dear Admissions Committee,</p>
+            <p style="margin:0 0 12px">During my bachelor's at KBTU I built <span style="background:var(--ok-soft);border-bottom:2px solid #86D5A8">a telemetry system for agro-drones that now covers 1 200 hectares across two farms in Almaty region</span>, cutting their fuel costs by 18%.</p>
+            <p style="margin:0 0 12px">The <span style="background:var(--accent-soft);border-bottom:2px solid var(--accent-border)">Precision Agriculture track at BUTE</span> is the reason I am applying: my system stops at data collection, and your lab works exactly on the decision layer I am missing.</p>
+            <p style="margin:0 0 12px"><span style="background:var(--warn-soft);border-bottom:2px solid #E8C87A">I am a hardworking person who always achieves goals</span> and I hope to contribute to your university.</p>
+          </div>
+          <div>
+            <div class="ai" style="margin-bottom:10px">
+              <div class="who"><i></i>Комментарии ИИ · 3</div>
+              <div class="verd ok" style="margin-bottom:6px"><span>✅</span><span><b>Отлично: цифры вместо слов</b>1 200 га и −18% — именно то, что отличает сильное письмо. Оставь как есть.</span></div>
+              <div class="verd ok" style="margin-bottom:6px"><span>✅</span><span><b>Связь с программой появилась</b>Назван конкретный трек и лаборатория — это +1.2 балла к прошлой версии.</span></div>
+              <div class="verd warn"><span>⚠️</span><span><b>Последний абзац — шаблон</b>«Hardworking person who always achieves goals» ничего не сообщает. Замени на то, что сделаешь после выпуска в Казахстане: комиссия Stipendium ценит возврат пользы домой.</span></div>
+            </div>
+            <div class="card">
+              <b class="sm">Версии</b>
+              <div class="lst sm"><span style="flex:1">v3 · сегодня</span><span class="pill pill-ok">7.8</span></div>
+              <div class="lst sm"><span style="flex:1">v2 · 26 ноября</span><span class="pill pill-warn">6.1</span></div>
+              <div class="lst sm"><span style="flex:1">v1 · 24 ноября</span><span class="pill pill-bad">4.3</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+
+<!-- ============ P · ФАЗЫ, КОТОРЫЕ ОБЫЧНО ЗАБЫВАЮТ ============ -->
+<div class="secthead">P · Экраны поздних фаз — ожидание, результат, родители</div>
+<p class="sectsub">Продукты для поступления обычно заканчиваются на «подал» — и теряют человека на четыре месяца ожидания, а вместе с ним и самые ценные данные (исход подачи) и самый дешёвый рост (рекомендация поступившего). Эти четыре экрана закрывают фазы 5–7 из CJM.</p>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">P1 · Поделиться с родителями</p>
+    <p class="capsub">Разблокировка бюджета — отдельная работа (JTBD №2). Родителю уходит не «ссылка на кабинет», а страница на его языке: деньги, сроки, что от него нужно. Без входа и регистрации.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Показать родителям</div>
+        <p class="sm mut" style="margin:2px 0 12px">Отправим страницу без входа — откроется прямо в WhatsApp.</p>
+        <div class="card" style="margin-bottom:12px">
+          <div class="xs b mut" style="letter-spacing:.1em;margin-bottom:8px">ЧТО УВИДЯТ</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Две вероятности и 8 программ с деньгами</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Сколько стоит год в каждой стране</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--ok)"><use href="#i-check"/></svg>Календарь: что и когда нужно оплатить</div>
+          <div class="feat"><svg class="ic ic-sm" style="color:var(--warn)"><use href="#i-x"/></svg>Не увидят: твои документы и черновики писем</div>
+        </div>
+        <div class="card" style="background:var(--accent-soft);border-color:var(--accent-border);margin-bottom:14px">
+          <div class="sm b" style="margin-bottom:6px">Сопроводительное — можно отправить как есть</div>
+          <p class="sm" style="margin:0">«Мам, вот расчёт по моему аттестату и IELTS. Из восьми программ пять с полным покрытием — обучение 0 ₸. От вас нужны только 40 000 ₸ на апостиль и переводы до 20 декабря.»</p>
+        </div>
+        <button class="btn btn-wa btn-block">Отправить в WhatsApp</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px">Скопировать ссылку</button>
+        <p class="xs mut" style="text-align:center;margin-top:10px">Ссылка живёт 30 дней и не требует регистрации.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">P2 · Режим ожидания (фев–апр)</p>
+    <p class="capsub">Опасная фаза: делать нечего, тревога есть. Даём таймер до ответа, полезные дела на время ожидания и вторую волну программ — это то, что удерживает WAU, когда подачи уже отправлены.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="card" style="background:linear-gradient(135deg,#1D1D1F,#2A2440);color:#fff;border:none;margin-bottom:14px">
+          <div class="xs b" style="letter-spacing:.14em;color:#A78BFA">ВСЕ 8 ПОДАЧ ОТПРАВЛЕНЫ</div>
+          <div style="font-size:19px;font-weight:750;margin:6px 0 4px">Первый ответ ждём 15 марта</div>
+          <div class="xs" style="color:#9AA0AC">Stipendium обычно отвечает в течение 8 недель</div>
+        </div>
+        <div class="nextstep" style="background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin-bottom:14px">
+          <div class="xs b" style="letter-spacing:.12em;color:var(--accent-dark)">ПОКА ЖДЁШЬ</div>
+          <div class="h3" style="margin:6px 0 4px">Вторая волна: 3 программы с дедлайном в апреле</div>
+          <p class="sm mut" style="margin:0 0 10px">Подстраховка ничего не стоит: документы уже собраны, нужно только письмо.</p>
+          <button class="btn btn-primary btn-sm">Посмотреть 3</button>
+        </div>
+        <b class="sm">Полезное на время ожидания</b>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-doc"/></svg><span class="sm" style="flex:1">Что нужно для студенческой визы Венгрии</span><span class="pill pill-mut">5 мин</span></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-doc"/></svg><span class="sm" style="flex:1">Сколько стоит жизнь в Будапеште на самом деле</span><span class="pill pill-mut">4 мин</span></div>
+        <div class="lst"><svg class="ic ic-sm mut"><use href="#i-spark"/></svg><span class="sm" style="flex:1">Подготовка к интервью EDISU</span><span class="pill pill-acc">ИИ-тренажёр</span></div>
+      </div>
+      <div class="tabbar">
+        <a class="on"><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">P3 · Пришёл ответ — фиксация исхода</p>
+    <p class="capsub">Самый ценный экран для компании: исходы калибруют модель. Поэтому просим отметить в момент эмоции и честно платим за это месяцем Pro — а не выпрашиваем «оставьте отзыв».</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="card" style="border-color:var(--ok);background:var(--ok-soft);margin:10px 0 14px;text-align:center">
+          <div style="font-size:42px">🎉</div>
+          <div class="h3" style="margin:6px 0 2px;font-size:20px">Stipendium Hungaricum — принята!</div>
+          <p class="sm mut" style="margin:0">Мы считали 71%. Ты в этих 71%.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <b class="sm">Отметь остальные 7 — это займёт 20 секунд</b>
+          <p class="xs mut" style="margin:4px 0 10px">Твои исходы делают расчёт точнее для тех, кто идёт следом. За полный набор — месяц Pro в подарок.</p>
+          <div class="lst sm"><span style="flex:1">EDISU Piemonte</span><div style="display:flex;gap:6px"><span class="pill pill-ok">принят</span><span class="pill pill-mut">отказ</span><span class="pill pill-mut">ждём</span></div></div>
+          <div class="lst sm"><span style="flex:1">Türkiye Burslari</span><div style="display:flex;gap:6px"><span class="pill pill-mut">принят</span><span class="pill pill-bad">отказ</span><span class="pill pill-mut">ждём</span></div></div>
+          <div class="lst sm"><span style="flex:1">DAAD Helmut-Schmidt</span><div style="display:flex;gap:6px"><span class="pill pill-mut">принят</span><span class="pill pill-mut">отказ</span><span class="pill pill-acc">ждём</span></div></div>
+        </div>
+        <div class="ai">
+          <div class="who"><i></i>Разбор ИИ</div>
+          <span class="sm">Отказ Турции ожидаем: там решает не GPA, а мотивационное на турецком контексте — мы отмечали это как слабое место. На Венгрии сработали проект с дронами и точный трек в письме.</span>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:4px">Что дальше: виза и жильё</button>
+      </div>
+      <div class="tabbar">
+        <a class="on"><svg class="ic"><use href="#i-home"/></svg>Сегодня</a>
+        <a><svg class="ic"><use href="#i-list"/></svg>Подачи</a>
+        <a><svg class="ic"><use href="#i-cap"/></svg>Вузы</a>
+        <a><svg class="ic"><use href="#i-doc"/></svg>Документы</a>
+        <a><svg class="ic"><use href="#i-user"/></svg>Профиль</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">P4 · Отказ — план Б</p>
+    <p class="capsub">Момент истины №5. Ни слова «попробуйте в следующем году»: разбор причины, что ещё открыто прямо сейчас, и предложение человека — здесь оно уместно и здесь его покупают.</p>
+    <div class="phone">
+      <div class="topbar"><svg class="ic mut"><use href="#i-back"/></svg><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="card" style="margin:10px 0 14px">
+          <div class="h3" style="font-size:19px">DAAD Helmut-Schmidt — отказ</div>
+          <p class="sm mut" style="margin:4px 0 0">Мы считали 48%: это была амбициозная позиция портфеля, а не якорная.</p>
+        </div>
+        <div class="ai">
+          <div class="who"><i></i>Что, скорее всего, решило</div>
+          <div class="verd warn" style="margin-bottom:6px"><span>⚠️</span><span><b>Опыт работы</b>DAAD Helmut-Schmidt отбирает кандидатов с 2+ годами в госсекторе или НКО. У тебя 8 месяцев стажировки.</span></div>
+          <div class="verd ok"><span>✅</span><span><b>Профиль был сильным</b>GPA и язык выше порога — дело не в академике.</span></div>
+        </div>
+        <div class="card" style="border-color:var(--accent-border);background:var(--accent-soft);margin-bottom:12px">
+          <b class="sm">Ещё открыто под твой профиль · 3</b>
+          <div class="lst sm"><span style="flex:1">NL Scholarship · дедлайн 1 мая</span><b>55%</b></div>
+          <div class="lst sm"><span style="flex:1">Orange Tulip · 1 апреля</span><b>58%</b></div>
+          <div class="lst sm"><span style="flex:1">Visegrad Fund · 15 марта</span><b>49%</b></div>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px">Добавить все три</button>
+        </div>
+        <div class="chanl">
+          <div class="ic-c" style="background:var(--accent)"><svg class="ic ic-sm" style="stroke:#fff"><use href="#i-user"/></svg></div>
+          <div style="flex:1"><b class="sm">Разобрать отказ с консультантом</b><div class="xs mut">45 минут · 15 000 ₸ · за 2 дня</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ КАРТА ЭКРАНОВ ============ -->
+<div class="secthead">Карта всех экранов кабинета</div>
+<p class="sectsub">Полный инвентарь: что нарисовано в части 1, что в части 2, и что сознательно отложено в v3 — с причиной.</p>
+<div style="background:#fff;border:1px solid #DFDFE6;border-radius:18px;padding:6px 18px 14px;max-width:1100px">
+<table class="cmp" style="font-size:13px">
+<tr><th>Блок</th><th>Экраны</th><th>Где</th></tr>
+<tr><td>Вход</td><td>логин · регистрация · сброс пароля · клейм отчёта</td><td>часть 1 (v1-макеты)</td></tr>
+<tr><td>Онбординг</td><td>профиль из квиза · выбор подач · подключение сигналов</td><td>часть 1 (A1–A3)</td></tr>
+<tr><td>Сегодня</td><td>главный экран · десктоп-версия</td><td>часть 1 (B1, G1)</td></tr>
+<tr><td>Подачи</td><td>список · паспорт подачи</td><td>часть 1 (C1–C2)</td></tr>
+<tr><td>Вузы</td><td>каталог · сравнение · <b>поиск ИИ · фильтры · карточка программы · страница вуза · десктоп+⌘K</b></td><td>ч.1 (D1–D2) + <b>ч.2 (I1–I4, O1)</b></td></tr>
+<tr><td>Документы</td><td>vault · вердикт ИИ · редактор письма · <b>десктоп-редактор</b></td><td>ч.1 (E1–E3) + <b>ч.2 (O2)</b></td></tr>
+<tr><td>Мой шанс</td><td>динамика и what-if · <b>мало данных</b></td><td>ч.1 (F1) + <b>ч.2 (H5)</b></td></tr>
+<tr><td>Telegram</td><td>пуши и быстрые действия</td><td>часть 1 (F2)</td></tr>
+<tr><td><b>Пустые состояния</b></td><td>кабинет без квиза · подачи · документы · поиск без результата · мало данных · скелетоны</td><td><b>часть 2 (H1–H6)</b></td></tr>
+<tr><td><b>Деньги</b></td><td>тарифы · оплата · успех · управление · отмена с удержанием · ошибка платежа</td><td><b>часть 2 (J1–J6)</b></td></tr>
+<tr><td><b>Ошибки</b></td><td>404 · 500 · офлайн · отчёт не найден · файл не подошёл · сессия истекла</td><td><b>часть 2 (K1–K6)</b></td></tr>
+<tr><td><b>Поддержка</b></td><td>центр помощи · ИИ с эскалацией · FAB-меню · сообщить об ошибке в данных</td><td><b>часть 2 (L1–L4)</b></td></tr>
+<tr><td><b>Системный UI</b></td><td>тосты · тёмная тема · крупный шрифт и контраст</td><td><b>часть 2 (M1–M3)</b></td></tr>
+<tr><td><b>Профиль</b></td><td>профиль · уведомления · приватность и удаление · рефералка</td><td><b>часть 2 (N1–N4)</b></td></tr>
+<tr><td><b>Поздние фазы</b></td><td>шаринг родителям · режим ожидания · фиксация исхода · разбор отказа</td><td><b>часть 2 (P1–P4)</b></td></tr>
+<tr><td>Отложено в v3</td><td>визовый чек-лист и блокированный счёт · режим профориентолога (10–30 учеников) · отдельный вход для родителя · трек 10-классника на год вперёд</td><td>причина: нет подтверждённого спроса до кастдевов и до первого сезона исходов</td></tr>
+</table>
+</div>
+
+<p class="mut sm" style="margin-top:44px">Кабинет 2.0 · часть 2 — 26 экранов · Логика, CJM, JTBD и AI-архитектура — в документах «22 · КАБИНЕТ 2.0» и «23 · CJM, JTBD, AI-FIRST» · Scholary, сентябрь 2026</p>
+</div>
+</body>
+</html>

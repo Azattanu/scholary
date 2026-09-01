@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Scholary · Кабинет 2.0 — дизайн всех экранов</title>
+<style>
+:root{
+  --bg:#F5F5F7; --surface:#fff; --ink:#1D1D1F; --ink-soft:#424245; --muted:#6E6E73;
+  --border:#E8E8ED; --accent:#5B4BFF; --accent-dark:#4739E0; --accent-soft:#F0EEFF; --accent-border:#DCD6FF;
+  --ok:#0B7A3E; --ok-soft:#E7F8EE; --warn:#B26A00; --warn-soft:#FFF3E0; --bad:#C0392B; --bad-soft:#FDEEEC;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;
+  background:#E9E9EE;color:var(--ink);font-size:17px;line-height:1.47;-webkit-font-smoothing:antialiased}
+.stage{max-width:1400px;margin:0 auto;padding:40px 24px 120px}
+.stage>h1{font-size:clamp(28px,4vw,44px);letter-spacing:-0.03em;margin:0 0 6px}
+.stage>.sub{color:var(--muted);margin:0 0 40px;max-width:74ch}
+.row{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start;margin-bottom:56px}
+.frame{width:390px;flex:0 0 390px}
+.frame .cap{font-weight:700;margin:0 0 4px;font-size:15px}
+.frame .capsub{color:var(--muted);font-size:13px;margin:0 0 10px;min-height:38px}
+.phone{background:var(--bg);border:1px solid #D7D7DE;border-radius:32px;overflow:hidden;
+  box-shadow:0 24px 48px -24px rgba(0,0,0,.25);position:relative}
+.desktop{width:100%;background:var(--bg);border:1px solid #D7D7DE;border-radius:20px;overflow:hidden;
+  box-shadow:0 24px 48px -24px rgba(0,0,0,.25)}
+.secthead{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin:56px 0 18px;padding-top:24px;border-top:1px solid #D7D7DE}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;
+  border-radius:999px;padding:13px 22px;font-size:16px;font-weight:600;font-family:inherit;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+.btn-soft{background:var(--accent-soft);color:var(--accent-dark)}
+.btn-block{width:100%}
+.btn-sm{padding:8px 14px;font-size:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:650}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)}
+.pill-bad{background:var(--bad-soft);color:var(--bad)} .pill-mut{background:var(--bg);color:var(--muted)}
+.pill-acc{background:var(--accent-soft);color:var(--accent-dark)}
+.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mut{color:var(--muted)} .sm{font-size:13.5px} .xs{font-size:12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:var(--bg)}
+.topbar .logo{font-weight:800;font-size:18px;letter-spacing:-0.02em}
+.topbar .logo span{color:var(--accent)}
+.ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5B4BFF,#9B8CFF);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.screen{padding:6px 16px 86px;min-height:640px}
+.tabbar{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--border);display:flex;padding:8px 6px 12px}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:650;
+  color:var(--muted);text-decoration:none}
+.tabbar a.on{color:var(--accent)}
+.h2{font-size:24px;font-weight:800;letter-spacing:-0.02em;margin:10px 0 2px}
+.pointb{background:#1D1D1F;color:#fff;border-radius:20px;padding:16px 18px;margin:14px 0}
+.pointb .lbl{font-size:11px;letter-spacing:.14em;font-weight:700;color:#A78BFA;text-transform:uppercase}
+.pointb .big{font-size:19px;font-weight:750;margin:3px 0 10px}
+.pbar{height:5px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7C6CFF,#B7A8FF)}
+.nextstep{background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin:0 0 14px}
+.nextstep .tag{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent-dark);text-transform:uppercase}
+.nextstep h3{margin:6px 0 4px;font-size:18px;letter-spacing:-0.01em}
+.dl{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border)}
+.dl:last-child{border-bottom:none}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dl b{font-size:15px;display:block;line-height:1.25}
+.prog{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px}
+.pb-line{display:flex;align-items:center;gap:8px;margin:7px 0 0}
+.pb-line .nm{font-size:12.5px;color:var(--muted);width:96px;flex-shrink:0}
+.pb{flex:1;height:7px;border-radius:99px;background:var(--bg);overflow:hidden}
+.pb i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.pb i.sch{background:#22C55E}
+.pb-line .v{font-size:13.5px;font-weight:750;width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.seg{display:flex;background:var(--bg);border-radius:99px;padding:3px;margin-top:12px}
+.seg span{flex:1;text-align:center;font-size:12.5px;font-weight:650;padding:6px 2px;border-radius:99px;color:var(--muted)}
+.seg span.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.doc{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+.doc .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.upload{border:1.5px dashed #C9C9D2;border-radius:18px;padding:18px;text-align:center;color:var(--muted);font-size:14.5px;background:transparent}
+.chk{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:14.5px}
+.box{width:21px;height:21px;border-radius:7px;border:1.5px solid #C9C9D2;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.box.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-size:13px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:999px;
+  border:1px solid #D2D2D7;background:#fff;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+.dwrap{display:grid;grid-template-columns:232px 1fr;min-height:720px}
+.side{background:#fff;border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column}
+.side .logo{font-weight:800;font-size:20px;padding:0 10px 18px}
+.side .logo span{color:var(--accent)}
+.side a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;color:var(--ink-soft);
+  font-weight:600;font-size:15px;text-decoration:none;margin-bottom:2px}
+.side a.on{background:var(--accent-soft);color:var(--accent-dark)}
+.dmain{padding:26px 30px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+.note{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:10px 14px;border-radius:14px;font-size:13.5px}
+/* ==== новое в 2.0 ==== */
+.ready{position:relative;width:58px;height:58px;flex-shrink:0}
+.ready svg{transform:rotate(-90deg)}
+.ready b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800}
+.duo{display:flex;gap:14px;margin:4px 0 2px}
+.duo span{font-size:13px;color:var(--muted);font-weight:600}
+.duo b{font-size:16px;font-weight:800;margin-right:3px}
+.ai{background:linear-gradient(135deg,#F6F4FF,#EEF9F3);border:1px solid var(--accent-border);border-radius:18px;padding:14px;margin-bottom:10px}
+.ai .who{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.08em;color:var(--accent-dark);text-transform:uppercase;margin-bottom:6px}
+.ai .who i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+.verd{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;font-size:13.5px;line-height:1.45;margin-bottom:8px}
+.verd.ok{background:var(--ok-soft)} .verd.warn{background:var(--warn-soft)} .verd.bad{background:var(--bad-soft)}
+.verd b{display:block}
+.cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+.cmp th,.cmp td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+.cmp th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cmp td:first-child{color:var(--muted);font-weight:650;width:88px}
+.tg{background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;font-size:14px;line-height:1.5}
+.tg .from{font-size:12px;font-weight:800;color:#2AABEE;margin-bottom:3px}
+.tg .act{display:inline-flex;gap:8px;margin-top:8px}
+.tg .act span{border:1px solid #2AABEE;color:#2AABEE;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:650}
+.chart{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px}
+.slider{display:flex;align-items:center;gap:10px;margin:10px 0}
+.slider .lab{font-size:13.5px;font-weight:650;width:120px;flex-shrink:0}
+.track{flex:1;height:6px;border-radius:99px;background:var(--bg);position:relative}
+.track i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--accent)}
+.track u{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.letter{font-size:12.5px;line-height:1.65;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;position:relative}
+.hl{background:#FDEEEC;border-bottom:2px solid #E8A79E;border-radius:3px;padding:0 2px}
+.hl2{background:#E7F8EE;border-bottom:2px solid #86D5A8;border-radius:3px;padding:0 2px}
+.score{display:flex;align-items:baseline;gap:8px}
+.score b{font-size:30px;font-weight:800;letter-spacing:-0.02em}
+</style>
+</head>
+<body>
+<div class="stage">
+<h1>Кабинет 2.0 — все экраны</h1>
+<p class="sub">«CRM поступления»: единица продукта — подача. 5 разделов: Сегодня · Подачи · Вузы · Документы · Профиль, плюс экраны глубины «Мой шанс» и «Сравнение». ИИ живёт в местах действия: проверка документов, разбор мотивационного, следующий шаг, what-if. Демо-данные: Айгерим, магистратура, 9 подач. Полная логика — в документе «22 · КАБИНЕТ 2.0».</p>
+
+<!-- ======== A. ОНБОРДИНГ ======== -->
+<div class="secthead">A · Онбординг 2.0 — три экрана, 90 секунд</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">A1 · Шаг 1: профиль из квиза</p>
+    <p class="capsub">Ничего не вводит заново — подтверждает. Вероятность видна сразу: ценность до первого действия.</p>
+    <div class="phone"><div class="screen" style="padding-top:20px">
+      <div class="xs mut" style="font-weight:700;letter-spacing:.1em">ШАГ 1 ИЗ 3</div>
+      <div class="h2">Мы уже всё знаем из квиза</div>
+      <p class="sm mut" style="margin:4px 0 14px">Проверь — от этих данных считаются твои шансы.</p>
+      <div class="card" style="margin-bottom:10px">
+        <div class="h-row"><span class="sm mut">Уровень</span><b class="sm">Магистратура · 2027</b></div>
+        <div class="h-row" style="margin-top:8px"><span class="sm mut">GPA бакалавриата</span><b class="sm">3.4 / 4.0 <a style="color:var(--accent);font-weight:650">изменить</a></b></div>
+        <div class="h-row" style="margin-top:8px"><span class="sm mut">IELTS</span><b class="sm">6.5</b></div>
+        <div class="h-row" style="margin-top:8px"><span class="sm mut">Бюджет семьи</span><b class="sm">до 1 млн ₸/год</b></div>
+      </div>
+      <div class="pointb" style="margin:10px 0 14px">
+        <div class="lbl">Твой расчёт</div>
+        <div class="duo" style="margin-top:6px"><span><b style="color:#9B8CFF">74%</b>поступление</span><span><b style="color:#4ADE95">68%</b>стипендия</span></div>
+      </div>
+      <button class="btn btn-primary btn-block">Всё верно — дальше</button>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">A2 · Шаг 2: выбери, что ведём</p>
+    <p class="capsub">9 программ отчёта становятся подачами. Каждая сразу получает чек-лист требований — ручной работы ноль.</p>
+    <div class="phone"><div class="screen" style="padding-top:20px">
+      <div class="xs mut" style="font-weight:700;letter-spacing:.1em">ШАГ 2 ИЗ 3</div>
+      <div class="h2">Какие программы ведём?</div>
+      <p class="sm mut" style="margin:4px 0 14px">Мы включили все 9 из отчёта. Каждая получит свой чек-лист документов и дедлайны.</p>
+      <div class="chk"><span class="box ok">✓</span><span><b>Stipendium Hungaricum</b> · Венгрия <span class="pill pill-ok">71%</span></span></div>
+      <div class="chk"><span class="box ok">✓</span><span><b>EDISU Piemonte</b> · Италия <span class="pill pill-ok">66%</span></span></div>
+      <div class="chk"><span class="box ok">✓</span><span><b>DAAD Helmut-Schmidt</b> · Германия <span class="pill pill-warn">48%</span></span></div>
+      <div class="chk"><span class="box ok">✓</span><span><b>Türkiye Burslari</b> · Турция <span class="pill pill-warn">41%</span></span></div>
+      <div class="chk"><span class="box">
+      </span><span class="mut"><b>GKS</b> · Корея — не хватает 0.5 IELTS</span></div>
+      <div class="xs mut" style="margin:6px 0 12px">…ещё 4 программы</div>
+      <button class="btn btn-primary btn-block">Создать 8 подач</button>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">A3 · Шаг 3: подключи сигналы</p>
+    <p class="capsub">Telegram — главный драйвер возвратов. Пропустить можно, но экран честно называет цену пропуска.</p>
+    <div class="phone"><div class="screen" style="padding-top:20px;display:flex;flex-direction:column">
+      <div class="xs mut" style="font-weight:700;letter-spacing:.1em">ШАГ 3 ИЗ 3</div>
+      <div class="h2">Куда присылать сигналы?</div>
+      <p class="sm mut" style="margin:4px 0 16px">Один пуш в день максимум: следующий шаг утром и дедлайны заранее. Без спама.</p>
+      <div class="card" style="margin-bottom:10px">
+        <div class="h-row"><b class="sm">⏰ Дедлайн за 30 / 14 / 7 / 3 дня</b><span class="pill pill-acc">вкл</span></div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="h-row"><b class="sm">🎯 Следующий шаг — утром</b><span class="pill pill-acc">вкл</span></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="h-row"><b class="sm">📊 Дайджест недели — воскресенье</b><span class="pill pill-acc">вкл</span></div>
+      </div>
+      <button class="btn btn-primary btn-block" style="background:#2AABEE">Подключить Telegram</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px">Позже</button>
+      <p class="xs mut" style="text-align:center;margin-top:10px">Без уведомлений средний абитуриент пропускает 2 дедлайна из 9.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- ======== B. СЕГОДНЯ ======== -->
+<div class="secthead">B · Сегодня — ежедневная сессия 60–120 секунд</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">B1 · Сегодня 2.0</p>
+    <p class="capsub">Один следующий шаг + виджет шанса со стрелкой недели + дедлайны с готовностью. Всё тапабельно и ведёт в место действия.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="pointb">
+          <div class="lbl">Точка Б · сентябрь 2027</div>
+          <div class="big">Осталось 375 дней</div>
+          <div class="pbar"><i style="width:18%"></i></div>
+        </div>
+        <div class="nextstep">
+          <div class="tag">Следующий шаг</div>
+          <h3>Запишись на пересдачу IELTS до 15 октября</h3>
+          <p class="sm mut" style="margin:2px 0 10px">6.5 → 7.0 откроет Германию и Корею: +9 пп к шансу.</p>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm">Записалась ✓</button><button class="btn btn-ghost btn-sm">Позже</button></div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="h-row"><b class="sm">Мой шанс</b><span class="pill pill-ok">▲ +2 за неделю</span></div>
+          <div class="duo"><span><b style="color:var(--accent)">76%</b>поступление</span><span><b style="color:var(--ok)">69%</b>стипендия</span></div>
+          <div class="xs mut">тап — динамика и «что если» →</div>
+        </div>
+        <b class="sm">Горит первым</b>
+        <div class="dl"><span class="dot" style="background:var(--bad)"></span><div style="flex:1"><b>Stipendium Hungaricum</b><span class="xs mut">15 января · готовность 60%</span></div><span class="pill pill-bad">45 дн</span></div>
+        <div class="dl"><span class="dot" style="background:var(--warn)"></span><div style="flex:1"><b>EDISU Piemonte</b><span class="xs mut">20 февраля · готовность 30%</span></div><span class="pill pill-warn">81 дн</span></div>
+        <div class="ai" style="margin-top:14px">
+          <div class="who"><i></i>Совет ИИ · сегодня</div>
+          <span class="sm">Ноябрь — месяц мотивационных. У тебя 3 письма без черновика: начни со Stipendium — оно самое раннее.</span>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a class="on">●<br>Сегодня</a><a>▤<br>Подачи</a><a>🎓<br>Вузы</a><a>📄<br>Документы</a><a>☰<br>Профиль</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== C. ПОДАЧИ ======== -->
+<div class="secthead">C · Подачи — сердце 2.0: каждая программа доводится до «отправлено»</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">C1 · Список подач</p>
+    <p class="capsub">Сортировка по срочности (дедлайн × готовность). Кольцо готовности — главный прогресс-индикатор продукта.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Подачи</div>
+        <p class="sm mut" style="margin:2px 0 12px">8 активных · 1 отправлена</p>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start">
+            <div><b>Stipendium Hungaricum</b><div class="xs mut">Венгрия · дедлайн 15 янв · <span style="color:var(--bad);font-weight:700">45 дней</span></div>
+            <div class="duo"><span><b style="color:var(--accent)">71%</b>поступл.</span><span><b style="color:var(--ok)">64%</b>стипендия</span></div></div>
+            <div class="ready"><svg width="58" height="58"><circle cx="29" cy="29" r="24" fill="none" stroke="#EEE" stroke-width="6"/><circle cx="29" cy="29" r="24" fill="none" stroke="#B26A00" stroke-width="6" stroke-linecap="round" stroke-dasharray="90 151"/></svg><b>60%</b></div>
+          </div>
+          <div class="seg"><span>Изучаю</span><span class="on">Готовлю</span><span>Подала</span><span>Ответ</span></div>
+        </div>
+        <div class="prog">
+          <div class="h-row" style="align-items:flex-start">
+            <div><b>EDISU Piemonte</b><div class="xs mut">Италия · 20 фев · 81 день</div>
+            <div class="duo"><span><b style="color:var(--accent)">66%</b>поступл.</span><span><b style="color:var(--ok)">61%</b>стипендия</span></div></div>
+            <div class="ready"><svg width="58" height="58"><circle cx="29" cy="29" r="24" fill="none" stroke="#EEE" stroke-width="6"/><circle cx="29" cy="29" r="24" fill="none" stroke="#C0392B" stroke-width="6" stroke-linecap="round" stroke-dasharray="45 151"/></svg><b>30%</b></div>
+          </div>
+          <div class="seg"><span>Изучаю</span><span class="on">Готовлю</span><span>Подала</span><span>Ответ</span></div>
+        </div>
+        <div class="prog" style="opacity:.75">
+          <div class="h-row"><div><b>Türkiye Burslari</b><div class="xs mut">Турция · подана 20 ноя</div></div><span class="pill pill-ok">✓ отправлена</span></div>
+        </div>
+        <button class="btn btn-soft btn-block">+ Добавить программу из каталога</button>
+      </div>
+      <div class="tabbar"><a>●<br>Сегодня</a><a class="on">▤<br>Подачи</a><a>🎓<br>Вузы</a><a>📄<br>Документы</a><a>☰<br>Профиль</a></div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">C2 · Паспорт подачи</p>
+    <p class="capsub">Всё об одной программе: пороги (пройден/нет), чек-лист документов из vault, письмо, кнопка «Подала».</p>
+    <div class="phone">
+      <div class="topbar"><span class="sm" style="font-weight:650">← Подачи</span><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Stipendium Hungaricum</div>
+        <p class="sm mut" style="margin:2px 0 10px">Венгрия · магистратура · полное покрытие</p>
+        <div class="card" style="margin-bottom:10px">
+          <div class="h-row"><span class="sm mut">Дедлайн</span><b class="sm" style="color:var(--bad)">15 января · через 45 дней</b></div>
+          <div class="h-row" style="margin-top:8px"><span class="sm mut">Твои шансы</span><b class="sm">71% поступление · 64% стипендия</b></div>
+        </div>
+        <b class="sm">Пороги программы</b>
+        <div class="chk"><span class="box ok">✓</span><span>GPA от 3.0 — <b>у тебя 3.4</b></span></div>
+        <div class="chk"><span class="box ok">✓</span><span>IELTS от 6.0 — <b>у тебя 6.5</b></span></div>
+        <div class="chk"><span class="box ok">✓</span><span>Возраст, гражданство РК</span></div>
+        <b class="sm" style="display:block;margin-top:10px">Документы · 3 из 5</b>
+        <div class="chk"><span class="box ok">✓</span><span>Диплом + транскрипт <span class="pill pill-ok">проверен ИИ</span></span></div>
+        <div class="chk"><span class="box ok">✓</span><span>IELTS 6.5 <span class="pill pill-warn">истекает 03.2027</span></span></div>
+        <div class="chk"><span class="box ok">✓</span><span>Паспорт</span></div>
+        <div class="chk"><span class="box"></span><span>Мотивационное письмо <span class="pill pill-acc">черновик · разбор ИИ</span></span></div>
+        <div class="chk"><span class="box"></span><span>Медсправка (апостиль!) <span class="pill pill-mut">14 дней на изготовление</span></span></div>
+        <button class="btn btn-primary btn-block" style="margin-top:10px">Отметить «Подала»</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== D. ВУЗЫ ======== -->
+<div class="secthead">D · Вузы — каталог с персональными вероятностями + сравнение</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">D1 · Каталог</p>
+    <p class="capsub">129+ программ, у каждой — ТВОИ вероятности (такого нет ни у одного агрегатора). Фильтры + «сравнить».</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Вузы и программы</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+          <span class="pill pill-acc">Магистратура</span><span class="pill pill-mut">Страна ▾</span><span class="pill pill-mut">Бюджет ▾</span><span class="pill pill-mut">Без IELTS</span>
+        </div>
+        <div class="prog">
+          <div class="h-row"><div><b>Orange Tulip</b><div class="xs mut">Нидерланды · скидки до 100%</div></div><span class="box"></span></div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:58%"></i></div><span class="v">58%</span></div>
+          <div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:44%"></i></div><span class="v">44%</span></div>
+          <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-soft btn-sm">+ В подачи</button><span class="pill pill-mut" style="align-self:center">дедлайн 1 апр</span></div>
+        </div>
+        <div class="prog">
+          <div class="h-row"><div><b>Swiss Excellence</b><div class="xs mut">Швейцария · стипендия + соцпакет</div></div><span class="box ok">✓</span></div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:34%"></i></div><span class="v">34%</span></div>
+          <div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:29%"></i></div><span class="v">29%</span></div>
+        </div>
+        <div class="prog">
+          <div class="h-row"><div><b>NL Scholarship</b><div class="xs mut">Нидерланды · €5 000</div></div><span class="box ok">✓</span></div>
+          <div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:55%"></i></div><span class="v">55%</span></div>
+        </div>
+        <button class="btn btn-primary btn-block">Сравнить выбранные (2)</button>
+      </div>
+      <div class="tabbar"><a>●<br>Сегодня</a><a>▤<br>Подачи</a><a class="on">🎓<br>Вузы</a><a>📄<br>Документы</a><a>☰<br>Профиль</a></div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">D2 · Сравнение (до 3 программ)</p>
+    <p class="capsub">Бок-о-бок: шансы, деньги, дедлайн, чего не хватает. Решение «куда добавить» принимается здесь.</p>
+    <div class="phone">
+      <div class="topbar"><span class="sm" style="font-weight:650">← Вузы</span><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Сравнение</div>
+        <table class="cmp" style="margin-top:10px">
+          <tr><th></th><th>Swiss Excellence</th><th>NL Scholarship</th></tr>
+          <tr><td>Поступление</td><td><b style="color:var(--warn)">34%</b></td><td><b style="color:var(--ok)">55%</b></td></tr>
+          <tr><td>Стипендия</td><td><b>29%</b></td><td><b>41%</b></td></tr>
+          <tr><td>Покрытие</td><td>полное + соцпакет</td><td>€5 000 разово</td></tr>
+          <tr><td>Дедлайн</td><td>1 ноября</td><td>1 мая</td></tr>
+          <tr><td>IELTS</td><td>7.0 <span class="pill pill-bad">не хватает 0.5</span></td><td>6.5 <span class="pill pill-ok">пройден</span></td></tr>
+          <tr><td>Не хватает</td><td class="sm">реком. письмо профессора</td><td class="sm">ничего</td></tr>
+        </table>
+        <div class="ai" style="margin-top:12px">
+          <div class="who"><i></i>ИИ</div>
+          <span class="sm">NL Scholarship даёт лучший шанс при твоём профиле уже сейчас. Swiss стоит добавить, если пересдашь IELTS до ноября — но дедлайн жёсткий.</span>
+        </div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm">+ NL в подачи</button><button class="btn btn-ghost btn-sm">+ Swiss тоже</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== E. ДОКУМЕНТЫ ======== -->
+<div class="secthead">E · Документы — vault + ИИ-проверка + письма (ядро AI-first)</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">E1 · Vault документов</p>
+    <p class="capsub">Один документ — много подач. Статусы, сроки действия, вердикты ИИ. Письма — тип документа, не отдельная вкладка.</p>
+    <div class="phone">
+      <div class="topbar"><div class="logo">Scholary<span>.</span></div><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2">Документы</div>
+        <p class="sm mut" style="margin:2px 0 12px">5 из 9 готово · 1 требует внимания</p>
+        <div class="doc"><div class="ic" style="background:var(--ok-soft)">🎓</div><div style="flex:1"><b class="sm">Диплом + транскрипт</b><div class="xs mut">3 подачи · загружен 12 окт</div></div><span class="pill pill-ok">✓ проверен ИИ</span></div>
+        <div class="doc"><div class="ic" style="background:var(--warn-soft)">🇬🇧</div><div style="flex:1"><b class="sm">IELTS 6.5</b><div class="xs mut">8 подач · истекает 03.2027</div></div><span class="pill pill-warn">⚠ смотри вердикт</span></div>
+        <div class="doc"><div class="ic" style="background:var(--accent-soft)">✍️</div><div style="flex:1"><b class="sm">Мотивационное · Stipendium</b><div class="xs mut">версия 2 · оценка ИИ 6.1</div></div><span class="pill pill-acc">улучшить</span></div>
+        <div class="doc"><div class="ic" style="background:var(--bg)">🪪</div><div style="flex:1"><b class="sm">Паспорт</b><div class="xs mut">8 подач</div></div><span class="pill pill-ok">✓</span></div>
+        <div class="doc" style="opacity:.7"><div class="ic" style="background:var(--bg)">🏥</div><div style="flex:1"><b class="sm">Медсправка + апостиль</b><div class="xs mut">нужна для Венгрии · 14 дней на изготовление</div></div><span class="pill pill-bad">нет</span></div>
+        <div class="upload">＋ Загрузить документ<br><span class="xs">PDF, JPG · до 10 МБ · ИИ проверит сам</span></div>
+      </div>
+      <div class="tabbar"><a>●<br>Сегодня</a><a>▤<br>Подачи</a><a>🎓<br>Вузы</a><a class="on">📄<br>Документы</a><a>☰<br>Профиль</a></div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">E2 · Вердикт ИИ по документу</p>
+    <p class="capsub">Момент истины продукта: ИИ ловит проблему ДО дедлайна. Формулировка «похоже, что…» + источник — честность против галлюцинаций.</p>
+    <div class="phone">
+      <div class="topbar"><span class="sm" style="font-weight:650">← Документы</span><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">IELTS · 6.5</div>
+        <p class="sm mut" style="margin:2px 0 12px">Проверено против 8 твоих подач · 28 ноября</p>
+        <div class="verd ok">✅<span><b>7 подач — всё в порядке</b>Балл выше порога, срок действия покрывает дедлайны.</span></div>
+        <div class="verd warn">⚠️<span><b>Гейдельберг: сертификат истечёт 12.03.2027 — за 20 дней ДО их дедлайна</b>Похоже, потребуется пересдача. Проверь на сайте программы — и, если планируешь 7.0, сдай до января: успеешь и для Кореи.</span></div>
+        <div class="verd bad">⛔<span><b>NU: нужен 7.0 — не хватает 0.5</b>Подача возможна только после пересдачи. Слот в Алматы есть 14 декабря.</span></div>
+        <div class="xs mut" style="margin:8px 0 12px">Источники: официальные требования программ · <a style="color:var(--accent)">сообщить об ошибке</a></div>
+        <button class="btn btn-primary btn-block">Добавить «пересдать IELTS» в план</button>
+        <div class="note" style="margin-top:12px">Первая проверка — бесплатно. Безлимит проверок — в <b>Scholary Pro</b>, 2 990 ₸/мес.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">E3 · Мотивационное — ИИ-редактор</p>
+    <p class="capsub">Письмо пишется ПОД программу. Разбор: оценка, структура, конкретные правки с подсветкой. Версии показывают прогресс.</p>
+    <div class="phone">
+      <div class="topbar"><span class="sm" style="font-weight:650">← Документы</span><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:20px">Мотивационное · Stipendium</div>
+        <div class="h-row" style="margin:6px 0 10px"><div class="score"><b style="color:var(--warn)">6.1</b><span class="sm mut">→ цель 8+</span></div><span class="pill pill-mut">версия 2</span></div>
+        <div class="letter">…I have always dreamed of studying abroad. <span class="hl">Hungary is a beautiful country with rich culture</span>. During my bachelor's at KBTU I built <span class="hl2">a telemetry system for agro-drones that is now used by two farms</span>. I believe this program will help me grow…</div>
+        <div class="ai" style="margin-top:12px">
+          <div class="who"><i></i>Разбор ИИ</div>
+          <div class="verd bad" style="margin-bottom:6px">⛔<span><b>Красный флаг: клише про «beautiful country»</b>Комиссия читает это 400 раз в день. Замени на связь программы с твоим проектом дронов.</span></div>
+          <div class="verd ok">✅<span><b>Сильно: конкретный проект с результатом</b>Разверни цифрами: сколько гектаров, что изменилось.</span></div>
+          <div class="verd warn">⚠️<span><b>Нет блока «почему именно эта программа»</b>У Stipendium есть трек Precision Agriculture — назови его.</span></div>
+        </div>
+        <button class="btn btn-primary btn-block">Разобрать версию 3</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== F. МОЙ ШАНС ======== -->
+<div class="secthead">F · Мой шанс — динамика + симулятор «что если»</div>
+<div class="row">
+
+  <div class="frame">
+    <p class="cap">F1 · Динамика вероятности</p>
+    <p class="capsub">Шанс — живая величина: растёт от действий. График превращает работу в прогресс, дайджест ссылается сюда.</p>
+    <div class="phone">
+      <div class="topbar"><span class="sm" style="font-weight:650">← Сегодня</span><div class="ava">А</div></div>
+      <div class="screen">
+        <div class="h2" style="font-size:21px">Мой шанс</div>
+        <div class="duo" style="margin:6px 0 12px"><span><b style="color:var(--accent);font-size:26px">76%</b>поступление</span><span><b style="color:var(--ok);font-size:26px">69%</b>стипендия</span></div>
+        <div class="chart">
+          <svg width="100%" height="120" viewBox="0 0 320 120" preserveAspectRatio="none">
+            <polyline points="0,70 60,66 120,64 180,52 240,50 320,38" fill="none" stroke="#5B4BFF" stroke-width="3" stroke-linecap="round"/>
+            <polyline points="0,86 60,84 120,80 180,72 240,70 320,58" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+            <circle cx="180" cy="52" r="4" fill="#5B4BFF"/>
+          </svg>
+          <div class="xs mut" style="display:flex;justify-content:space-between"><span>сен</span><span>окт</span><span>ноя</span></div>
+          <div class="xs" style="margin-top:6px;color:var(--ink-soft)">▲ Скачок 14 окт — добавила проект в достижения (+6 пп)</div>
+        </div>
+        <b class="sm" style="display:block;margin:14px 0 4px">Что если…</b>
+        <div class="card">
+          <div class="slider"><span class="lab">IELTS 6.5 → 7.0</span><div class="track"><i style="width:70%"></i><u style="left:70%"></u></div></div>
+          <div class="slider"><span class="lab">+ SAT 1300</span><div class="track"><i style="width:0%"></i><u style="left:0%"></u></div></div>
+          <div class="verd ok" style="margin-top:8px">📈<span><b>76% → 85% · откроются 4 программы Германии</b>Самое выгодное действие сейчас. Пересдача — 14 декабря в Алматы.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">F2 · Telegram-бот</p>
+    <p class="capsub">Бот — канал возврата, не второй интерфейс: пуши с deep-link + быстрые действия. ≤1 пуш/день.</p>
+    <div class="phone"><div class="screen" style="background:#EBEDF0;padding-top:20px">
+      <div style="text-align:center;margin-bottom:12px"><b class="sm">@ScholaryBot</b></div>
+      <div class="tg"><div class="from">Scholary</div>Доброе утро, Айгерим! 🎯 Шаг на сегодня: <b>черновик мотивационного для Stipendium</b> — дедлайн через 45 дней, а письма ещё нет.<div class="act"><span>Открыть редактор</span><span>Отложить</span></div></div>
+      <div class="tg"><div class="from">Scholary</div>⚠️ До дедлайна <b>Stipendium Hungaricum — 14 дней</b>. Готовность 80%: остались медсправка (апостиль — 14 дней!) и финал письма. Впритык, но успеваешь.<div class="act"><span>Что осталось</span></div></div>
+      <div class="tg"><div class="from">Scholary</div>📊 Дайджест недели: шанс 74→76% ▲. Закрыто 3 пункта. Новое в базе: <b>Польша NAWA</b> под твой профиль — 62%.<div class="act"><span>Посмотреть</span></div></div>
+      <div class="tg" style="background:#DCF2FF;margin-left:60px"><div class="from" style="color:var(--muted)">Айгерим</div>✅ Готово</div>
+    </div></div>
+  </div>
+
+  <div class="frame">
+    <p class="cap">F3 · Scholary Pro — пейволл в момент боли</p>
+    <p class="capsub">Продаётся при 2-й проверке, не баннером. Бесплатный слой полноценен: чек-листы, дедлайны, 1 проверка, 1 разбор.</p>
+    <div class="phone"><div class="screen" style="display:flex;flex-direction:column;justify-content:center;padding:24px">
+      <div style="text-align:center"><span class="pill pill-acc" style="font-size:13px">SCHOLARY PRO</span></div>
+      <div class="h2" style="text-align:center;font-size:22px;margin-top:10px">ИИ без лимитов на весь сезон</div>
+      <div style="margin:16px 0">
+        <div class="chk"><span class="box ok">✓</span><span>Безлимит ИИ-проверок документов</span></div>
+        <div class="chk"><span class="box ok">✓</span><span>Безлимит разборов мотивационного</span></div>
+        <div class="chk"><span class="box ok">✓</span><span>Симулятор «что если» и сравнение</span></div>
+        <div class="chk"><span class="box ok">✓</span><span>Приоритетные пуши дедлайнов</span></div>
+      </div>
+      <div style="text-align:center;margin-bottom:14px"><b style="font-size:30px">2 990 ₸</b><span class="mut">/мес</span><div class="xs mut">консультант берёт 50 000 ₸ за сезон</div></div>
+      <button class="btn btn-primary btn-block">Включить Pro</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px">Остаться на бесплатном</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ======== G. ДЕСКТОП ======== -->
+<div class="secthead">G · Десктоп — сайдбар, те же 5 разделов</div>
+<div class="row">
+  <div style="flex:1;min-width:900px">
+    <p class="cap">G1 · Десктоп «Сегодня» (сезон документов)</p>
+    <p class="capsub" style="min-height:0">Слева навигация, по центру шаг и дедлайны, справа шанс и совет. Родители смотрят именно десктоп — цифры крупно.</p>
+    <div class="desktop"><div class="dwrap">
+      <div class="side">
+        <div class="logo">Scholary<span>.</span></div>
+        <a class="on">● Сегодня</a><a>▤ Подачи <span class="pill pill-bad" style="margin-left:auto">2</span></a><a>🎓 Вузы</a><a>📄 Документы <span class="pill pill-warn" style="margin-left:auto">1</span></a><a>☰ Профиль</a>
+        <div style="margin-top:auto" class="card"><b class="sm">Scholary Pro</b><div class="xs mut" style="margin:4px 0 8px">Безлимит ИИ на сезон</div><button class="btn btn-soft btn-sm btn-block">2 990 ₸/мес</button></div>
+      </div>
+      <div class="dmain">
+        <div class="h-row" style="margin-bottom:16px"><div><div class="h2" style="margin:0">Салем, Айгерим!</div><span class="sm mut">До Точки Б — 375 дней · сезон документов</span></div><div class="ava">А</div></div>
+        <div class="grid2">
+          <div>
+            <div class="nextstep">
+              <div class="tag">Следующий шаг</div>
+              <h3>Черновик мотивационного для Stipendium Hungaricum</h3>
+              <p class="sm mut" style="margin:2px 0 10px">Дедлайн через 45 дней. Письмо блокирует готовность подачи (60%).</p>
+              <button class="btn btn-primary btn-sm">Открыть редактор с ИИ</button>
+            </div>
+            <div class="card">
+              <b class="sm">Горящие подачи</b>
+              <div class="dl"><span class="dot" style="background:var(--bad)"></span><div style="flex:1"><b>Stipendium Hungaricum</b><span class="xs mut">15 янв · готовность 60% · нет письма и медсправки</span></div><span class="pill pill-bad">45 дн</span></div>
+              <div class="dl"><span class="dot" style="background:var(--warn)"></span><div style="flex:1"><b>EDISU Piemonte</b><span class="xs mut">20 фев · готовность 30%</span></div><span class="pill pill-warn">81 дн</span></div>
+              <div class="dl"><span class="dot" style="background:var(--ok)"></span><div style="flex:1"><b>Türkiye Burslari</b><span class="xs mut">подана · ответ в марте</span></div><span class="pill pill-ok">✓</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="pointb" style="margin:0 0 14px">
+              <div class="lbl">Мой шанс</div>
+              <div class="duo" style="margin-top:6px"><span><b style="color:#9B8CFF">76%</b>поступление ▲</span><span><b style="color:#4ADE95">69%</b>стипендия ▲</span></div>
+              <div class="xs" style="color:#9AA0AC;margin-top:6px">+2 пп за неделю · динамика →</div>
+            </div>
+            <div class="ai">
+              <div class="who"><i></i>Совет ИИ</div>
+              <span class="sm">Медсправка с апостилем делается 14 дней — закажи до 20 декабря, иначе Венгрия не успеет.</span>
+            </div>
+            <div class="card" style="margin-top:12px">
+              <b class="sm">Telegram подключён</b>
+              <div class="xs mut" style="margin-top:4px">Пуши: шаг дня · дедлайны · дайджест вс</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<p class="mut sm" style="margin-top:40px">Кабинет 2.0 · дизайн-макеты для утверждения · логика, CJM, LTV и retention — в документе «22 · КАБИНЕТ 2.0 — ПРОДУКТ» · Scholary, сентябрь 2026</p>
+</div>
+</body>
+</html>
