@@ -912,17 +912,25 @@
         var xs = pts.map(function (p, i) { return i / (pts.length - 1) * w; });
         line = '<polyline points="' + pts.map(function (p, i) { return xs[i].toFixed(0) + "," + (h - (p.p_adm || 0) * h * 0.9).toFixed(0); }).join(" ") + '" fill="none" stroke="#5B4BFF" stroke-width="3" stroke-linecap="round"/>';
       }
-      var sims = [
-        { k: "ielts", label: "IELTS 7.0", patch: { lang_status: "have", ielts_band: "7+" } },
-        { k: "proj", label: "+ проект в достижения", patch: { achievements: (S.ans.achievements || []).concat(["project"]) } },
-        { k: "budget", label: "Бюджет 1–3 млн", patch: { budget: "1-3m" } }
-      ].map(function (s) {
+      // симулируем только то, чего у человека ещё нет — иначе строка «без изменений» выглядит багом
+      var have = S.ans.achievements || [];
+      var simList = [];
+      if ((S.ans.ielts_band || "") !== "7+")
+        simList.push({ label: "Сдать IELTS на 7.0", patch: { lang_status: "have", ielts_band: "7+" } });
+      if (have.indexOf("project") === -1)
+        simList.push({ label: "Довести проект до результата", patch: { achievements: have.concat(["project"]) } });
+      if (have.indexOf("rep_olymp") === -1)
+        simList.push({ label: "Призовое место на респ. олимпиаде", patch: { achievements: have.concat(["rep_olymp"]) } });
+      if ((S.ans.budget || "") === "0" || (S.ans.budget || "") === "<1m")
+        simList.push({ label: "Бюджет семьи 1–3 млн ₸ в год", patch: { budget: "1-3m" } });
+      var sims = simList.slice(0, 4).map(function (s) {
         var alt = Object.assign({}, S.ans, s.patch);
         var r = null; try { r = E.evaluate(alt); } catch (e) {}
         var d = r ? Math.round((bestOf(r) - o.adm) * 100) : 0;
         return '<div class="lst"><div style="flex:1"><b class="sm">' + esc(s.label) + "</b></div>" +
-          '<span class="pill ' + (d > 0 ? "pill-ok" : "pill-mut") + '">' + (d > 0 ? "+" + d + " пп" : "без изменений") + "</span></div>";
+          '<span class="pill ' + (d > 0 ? "pill-ok" : "pill-mut") + '">' + (d > 0 ? "+" + d + " пп" : "почти не влияет") + "</span></div>";
       }).join("");
+      if (!sims) sims = '<p class="sm mut" style="margin:6px 0 0">По анкете ты уже на потолке этих осей. Дальше растёт не профиль, а качество подачи: письмо, рекомендации, сроки.</p>';
       return subHead("Мой шанс", "динамика и «что если»") +
         '<div class="card" style="margin-bottom:12px">' + duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) +
         (pts.length > 1 ? '<svg width="100%" height="' + h + '" viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" style="margin-top:8px">' + line + "</svg>"
@@ -1072,18 +1080,18 @@
     openSub(function () {
       return subHead("Scholary Pro", pro ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ без ограничений на весь сезон") +
         (pro ? '<div class="card" style="border-color:var(--ok);background:var(--ok-soft);margin-bottom:12px"><b class="sm">Подписка активна</b>' +
-              '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · проверки и разборы без лимита</div></div>" : "") +
+              '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 120 разборов ИИ в день и модель посильнее</div></div>" : "") +
         '<div class="card" style="margin-bottom:12px"><div class="h-row"><b>Бесплатно</b><span class="pill pill-mut">сейчас у тебя</span></div>' +
           '<div class="feat">✅ Все подачи, чек-листы и дедлайны</div>' +
           '<div class="feat">✅ Каталог 129 программ с твоими вероятностями</div>' +
-          '<div class="feat">✅ Проверка документов по правилам</div>' +
-          '<div class="feat">✅ 1 глубокий разбор мотивационного</div></div>' +
+          '<div class="feat">✅ Проверка документов по правилам — без лимита</div>' +
+          '<div class="feat">✅ 8 разборов с ИИ в день: документы и письмо</div></div>' +
         '<div class="card" style="border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft);margin-bottom:12px">' +
           '<div class="h-row"><b>Scholary Pro</b><span class="pill pill-acc">выгодно в сезон</span></div>' +
           '<div style="font-size:27px;font-weight:800;letter-spacing:-0.03em;margin:6px 0 2px">2 990 ₸<span class="sm mut" style="font-weight:600">/мес</span></div>' +
           '<p class="xs mut" style="margin:0 0 8px">или 9 900 ₸ за 4 месяца сезона — экономия 2 060 ₸</p>' +
-          '<div class="feat">⚡ Безлимит ИИ-проверок документов</div>' +
-          '<div class="feat">⚡ Безлимит разборов писем с оценкой</div>' +
+          '<div class="feat">⚡ 120 разборов ИИ в день вместо 8</div>' +
+          '<div class="feat">⚡ Разбор делает более сильная модель — глубже</div>' +
           '<div class="feat">⚡ Симулятор «что если» и сравнение программ</div>' +
           '<div class="feat">⚡ Приоритетные напоминания о дедлайнах</div>' +
           '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="pay-pro" data-v="month">Оформить за 2 990 ₸/мес</button>' +
@@ -1119,6 +1127,21 @@
         '<a class="btn btn-ghost btn-block" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Хочу напоминания о дедлайнах в WhatsApp. Код: " + code) + '" target="_blank" rel="noopener">' + (bot ? "Или присылайте в WhatsApp" : "Пока присылайте в WhatsApp") + "</a>";
     });
   }
+
+  /* Кнопка помощи прячется, когда человек листает вниз: иначе она
+     перекрывает цифры в списках. Возвращается, как только скролл замер. */
+  (function () {
+    var fab = document.querySelector(".fab-help");
+    if (!fab) return;
+    var last = window.scrollY, t = null;
+    window.addEventListener("scroll", function () {
+      var y = window.scrollY;
+      if (y > last + 6 && y > 120) fab.classList.add("hide");
+      else if (y < last - 6) fab.classList.remove("hide");
+      last = y;
+      clearTimeout(t); t = setTimeout(function () { fab.classList.remove("hide"); }, 700);
+    }, { passive: true });
+  })();
 
   /* ================= действия ================= */
   function pushHistory(reason) {
