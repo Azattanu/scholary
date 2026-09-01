@@ -138,6 +138,130 @@
       S.docs.push(r.data); if (cb) cb(r.data);
     });
   }
+  /* ================= ИИ-слой ==================================
+     Правила doc-rules.js работают всегда и бесплатно.
+     Этот слой добавляет разбор модели поверх правил: пользователь
+     жмёт кнопку сам, ответ кэшируется в БД, при любой ошибке
+     остаёмся на правилах. Лимиты приходят с сервера. */
+  var AI = { url: C.AI_URL || "/api/ai.php", busy: {}, err: {}, quota: null };
+  function aiOn() { return !!AI.url; }
+  function aiToken() { return S.session && S.session.access_token; }
+  function aiCall(payload, cb) {
+    var tk = aiToken();
+    if (!tk) { cb({ error: "noauth" }); return; }
+    var done = false;
+    var to = setTimeout(function () { if (!done) { done = true; cb({ error: "timeout" }); } }, 60000);
+    fetch(AI.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ token: tk }, payload))
+    }).then(function (r) {
+      return r.json().catch(function () { return { error: "bad_response" }; })
+        .then(function (j) { return { s: r.status, j: j || {} }; });
+    }).then(function (o) {
+      if (done) return; done = true; clearTimeout(to);
+      if (o.j && o.j.limit != null) AI.quota = { used: o.j.used, limit: o.j.limit, pro: !!o.j.pro };
+      if (o.s === 200 && o.j.ok) cb(null, o.j); else cb(o.j || { error: "http_" + o.s });
+    }).catch(function () {
+      if (done) return; done = true; clearTimeout(to); cb({ error: "network" });
+    });
+  }
+  /* Полезные для модели данные — только человекочитаемые названия полей:
+     иначе модель цитирует в ответе технические ключи вроде has_file. */
+  function aiAppsPayload() {
+    return appsForDoc().slice(0, 12).map(function (a) {
+      var p = a.prog || {};
+      return { "программа": a.title, "страна": p.country,
+               "уровень": L.level[p.level] || p.level,
+               "дедлайн": a.deadline ? a.deadline.toISOString().slice(0, 10) : "не указан",
+               "нужен балл IELTS": p.req_ielts || "не указан",
+               "нужен средний балл": p.req_gpa || "не указан",
+               "какие документы просит": (p.docs && p.docs.length) ? p.docs : "не указаны" };
+    });
+  }
+  function aiProfilePayload() {
+    var a = S.ans || {};
+    return { "уровень поступления": L.level[a.level] || a.level,
+             "направления": (a.field || []).map(function (f) { return L.field[f] || f; }),
+             "средний балл": L.gpa_band[a.gpa_band] || L.gpa4[a.gpa4] || "не указан",
+             "английский": L.ielts[a.ielts_band] || L.lang_status[a.lang_status] || "не указан",
+             "бюджет семьи в год": L.budget[a.budget] || "не указан",
+             "достижения": (a.achievements || []).map(function (x) { return L.ach[x] || x; }),
+             "год окончания": a.grad_year || "не указан" };
+  }
+  function aiErrText(e) {
+    if (!e) return "";
+    if (e.error === "limit") return "limit";
+    if (e.error === "noauth") return "Нужно войти заново.";
+    if (e.error === "timeout") return "ИИ не ответил за минуту. Проверка по правилам ниже — она полная.";
+    return "ИИ сейчас недоступен. Проверка по правилам ниже работает как обычно.";
+  }
+  function aiCheckDoc(d) {
+    if (AI.busy["d" + d.id]) return;
+    AI.busy["d" + d.id] = true; AI.err["d" + d.id] = null; drawSub();
+    aiCall({
+      kind: "doc",
+      doc: { "тип документа": (D.TYPES[d.doc_type] || {}).title || d.doc_type,
+             "как назвал абитуриент": d.title,
+             "статус": { none: "ещё не начат", progress: "в работе", ready: "отмечен готовым" }[d.status] || "ещё не начат",
+             "скан загружен": d.file_path ? "да" : "нет",
+             "указанные данные": d.fields || {},
+             "текст документа": (d.content || "").slice(0, 4000) || "не заполнен" },
+      apps: aiAppsPayload(), profile: aiProfilePayload()
+    }, function (e, j) {
+      AI.busy["d" + d.id] = false;
+      if (e) { AI.err["d" + d.id] = aiErrText(e); drawSub(); return; }
+      saveDoc(d, { verdicts: j.verdicts || [], checked_at: new Date().toISOString() }, function () { drawSub(); });
+      if (window.track) track("ai_doc_check", { type: d.doc_type });
+    });
+  }
+  function aiCheckLetter(d, prog) {
+    if (AI.busy["l" + d.id]) return;
+    var txt = (d.content || "").trim();
+    if (txt.length < 40) { toast("Сначала напиши хотя бы несколько предложений", "bad"); return; }
+    AI.busy["l" + d.id] = true; AI.err["l" + d.id] = null; drawSub();
+    aiCall({
+      kind: "letter", text: txt.slice(0, 9000),
+      program: prog ? { "программа": prog.name, "страна": prog.country,
+                        "уровень": L.level[prog.level] || prog.level,
+                        "язык обучения": prog.lang || "не указан",
+                        "финансирование": prog.funding || "не указано" } : null
+    }, function (e, j) {
+      AI.busy["l" + d.id] = false;
+      if (e) { AI.err["l" + d.id] = aiErrText(e); drawSub(); return; }
+      saveDoc(d, { score: j.score, verdicts: { score: j.score, criteria: j.criteria || [], verdicts: j.verdicts || [] },
+                   checked_at: new Date().toISOString() }, function () { drawSub(); });
+      if (window.track) track("ai_letter_check", {});
+    });
+  }
+  function aiQuotaHTML() {
+    var q = AI.quota;
+    if (!q) return "";
+    var left = Math.max(0, q.limit - q.used);
+    return '<span class="xs mut">осталось ' + left + " " + plural(left, "разбор", "разбора", "разборов") + " сегодня" +
+      (q.pro ? " · Pro" : ' · <a href="#" data-act="subscribe">в Pro — 120 и модель посильнее</a>') + "</span>";
+  }
+  function aiLimitCardHTML() {
+    return '<div class="aicard"><div class="who"><i></i>Лимит на сегодня исчерпан</div>' +
+      '<p class="sm" style="margin:4px 0 10px">На бесплатном тарифе — 8 разборов ИИ в день, чтобы всем хватало. Проверка по правилам ниже работает без ограничений и не тратит лимит.</p>' +
+      '<button class="btn btn-primary btn-sm" data-act="subscribe">Scholary Pro · 120 разборов в день</button></div>';
+  }
+  function aiRunHTML(key, label, labelAgain, hasResult, dataAttrs) {
+    if (AI.busy[key]) {
+      return '<div class="aicard"><div class="who"><i></i>ИИ читает документ</div>' +
+        '<div class="ai-run"><span class="spinner spin-sm"></span><span class="sm">Обычно 10–20 секунд. Сверяем текст с требованиями твоих подач.</span></div>' +
+        '<div class="sk" style="width:90%"></div><div class="sk" style="width:70%"></div></div>';
+    }
+    var err = AI.err[key];
+    var errHTML = "";
+    if (err === "limit") errHTML = aiLimitCardHTML();
+    else if (err) errHTML = '<div class="verd warn"><span>⚠️</span><span><b>Разбор ИИ не получился</b>' + esc(err) + "</span></div>";
+    return errHTML +
+      '<div class="ai-run">' +
+      '<button class="btn ' + (hasResult ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="' + dataAttrs.act + '" data-id="' + dataAttrs.id + '">' +
+      (hasResult ? labelAgain : label) + "</button>" + aiQuotaHTML() + "</div>";
+  }
+
   function docsOfType(t) { return S.docs.filter(function (d) { return d.doc_type === t; }); }
   function docFor(t, programId) {
     var list = docsOfType(t);
@@ -243,7 +367,7 @@
   function verdHTML(v) {
     var cls = v.level === "blocker" ? "bad" : v.level === "warn" ? "warn" : "ok";
     var ic = v.level === "blocker" ? "⛔" : v.level === "warn" ? "⚠️" : "✅";
-    return '<div class="verd ' + cls + '"><span>' + ic + '</span><span><b>' + esc(v.title) + "</b>" + esc(v.text || "") +
+    return '<div class="verd ' + cls + '"><span>' + ic + '</span><span><b>' + esc(v.title) + (v.ai ? '<span class="ai-badge">ИИ</span>' : "") + "</b>" + esc(v.text || "") +
       (v.action ? '<button class="btn btn-primary btn-sm" style="margin-top:8px" data-act="' + esc(v.action.kind) + '" data-doc="' + esc(v.action.doc || "") + '">' + esc(v.action.label) + "</button>" : "") +
       (v.source ? '<a class="srcline" href="' + esc(v.source) + '" target="_blank" rel="noopener">официальный источник</a>' : "") +
       "</span></div>";
@@ -519,7 +643,7 @@
       '<p class="sm mut" style="margin:0 0 12px">' + ready + " из " + types.length + " готово · список собран из требований твоих подач</p>" +
       rows +
       '<div class="upload tappable" data-act="doc-pick">＋ Загрузить документ<div class="xs">PDF или фото · до 10 МБ · проверим по требованиям программ</div></div>' +
-      '<p class="xs mut" style="margin-top:12px">Файлы видишь только ты: доступ закрыт по твоему аккаунту. <a href="privacy.html" target="_blank" rel="noopener">Как мы храним данные</a></p>';
+      '<p class="xs mut" style="margin-top:12px">Файлы видишь только ты: доступ закрыт по твоему аккаунту. <a href="/privacy/" target="_blank" rel="noopener">Как мы храним данные</a></p>';
   }
 
   /* ---------- карточка документа ---------- */
@@ -555,11 +679,27 @@
       '<div class="aicard" style="margin-bottom:10px"><div class="who"><i></i>Проверка по требованиям твоих подач</div>' +
       '<span class="xs mut">Сверено с ' + apps.length + " " + plural(apps.length, "подачей", "подачами", "подачами") + (d.checked_at ? " · " + fmtDL(new Date(d.checked_at)) : "") + "</span></div>" +
       vers.map(verdHTML).join("") +
+      aiDocSectionHTML(d) +
       (how ? '<div class="card" style="margin-top:12px"><b class="sm">' + esc(how.title) + "</b>" +
         how.steps.map(function (s, i) {
           return '<div class="lst"><span class="pill pill-acc">' + (i + 1) + '</span><div style="flex:1"><b class="sm">' + esc(s.t) + '</b><div class="xs mut">' + esc(s.d) + "</div></div></div>";
         }).join("") + (how.note ? '<p class="xs mut" style="margin:8px 0 0">' + esc(how.note) + "</p>" : "") + "</div>" : "") +
       '<p class="xs mut" style="margin-top:12px">Проверка по правилам Scholary: сроки и требования ориентировочные. <a href="#" data-act="ai-wrong" data-id="' + d.id + '">Что-то не так?</a></p>';
+  }
+  function aiDocSectionHTML(d) {
+    if (!aiOn()) return "";
+    var av = Array.isArray(d.verdicts) ? d.verdicts : [];
+    var head = '<div class="aicard" style="margin-top:14px"><div class="who"><i></i>Разбор ИИ' +
+      (av.length ? '<span class="ai-badge">Claude</span>' : "") + "</div>" +
+      '<p class="sm" style="margin:2px 0 0">' +
+      (av.length
+        ? "Модель прочитала документ и сверила его с твоими подачами. Правила выше — обязательная база, разбор ниже — детали."
+        : "Правила выше проверили формальности. ИИ прочитает содержание и подскажет, что исправить под конкретные программы.") +
+      "</p>" +
+      aiRunHTML("d" + d.id, "Разобрать с ИИ", "Проверить заново", av.length > 0, { act: "ai-doc", id: d.id }) +
+      '<p class="ai-note">Текст уходит на наш сервер и в модель Claude только для этой проверки. Модель не обучается на твоих документах.</p>' +
+      "</div>";
+    return head + av.map(verdHTML).join("");
   }
   function docFieldsHTML(d) {
     var f = d.fields || {};
@@ -584,16 +724,30 @@
   function letterHTML(d) {
     var prog = d.program_ids && d.program_ids.length ? progById(d.program_ids[0]) : null;
     var rev = D.letterReview(d.content || "", prog, S.ans);
+    var ai = (d.verdicts && !Array.isArray(d.verdicts) && d.verdicts.criteria) ? d.verdicts : null;
+    var useAi = !!ai;
+    var score = useAi ? Number(ai.score) : rev.score;
+    var crit = useAi ? ai.criteria : rev.criteria;
     return subHead("Мотивационное письмо", prog ? prog.name : "общее") +
       '<div class="card" style="margin-bottom:10px"><div class="h-row">' +
-        '<div><b style="font-size:24px;color:' + (rev.score >= 7 ? "var(--ok)" : rev.score >= 5 ? "#B26A00" : "#C0392B") + '">' + rev.score.toFixed(1) + '</b><span class="sm mut"> / 10 · ' + rev.words + " слов</span></div>" +
+        '<div><b style="font-size:24px;color:' + (score >= 7 ? "var(--ok)" : score >= 5 ? "#B26A00" : "#C0392B") + '">' + score.toFixed(1) + '</b><span class="sm mut"> / 10 · ' + rev.words + " слов" + (useAi ? " · оценка ИИ" : " · по правилам") + "</span></div>" +
         '<button class="btn btn-ghost btn-sm" data-act="letter-wizard" data-id="' + d.id + '">Помощь с текстом</button></div>' +
-        rev.criteria.map(function (c) {
-          return '<div class="pb-line"><span class="nm">' + esc(c.k) + '</span><div class="pb"><i style="width:' + c.v * 10 + "%;background:" + (c.v >= 7 ? "#5B4BFF" : "#E5C558") + '"></i></div><span class="v">' + c.v.toFixed(1) + "</span></div>";
+        crit.map(function (c) {
+          var cv = Number(c.v) || 0;
+          return '<div class="pb-line"><span class="nm">' + esc(c.k) + '</span><div class="pb"><i style="width:' + cv * 10 + "%;background:" + (cv >= 7 ? "#5B4BFF" : "#E5C558") + '"></i></div><span class="v">' + cv.toFixed(1) + "</span></div>";
         }).join("") + "</div>" +
       '<textarea class="f ta big" id="letter-text" placeholder="Пиши здесь. Разбор обновится, когда нажмёшь «Проверить».">' + esc(d.content || "") + "</textarea>" +
-      '<div style="display:flex;gap:8px;margin:8px 0 12px"><button class="btn btn-primary btn-sm" data-act="letter-save" data-id="' + d.id + '">Сохранить и проверить</button>' +
+      '<div style="display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" data-act="letter-save" data-id="' + d.id + '">Сохранить и проверить</button>' +
       '<button class="btn btn-ghost btn-sm" data-act="docst" data-v="ready" data-id="' + d.id + '">Отметить готовым</button></div>' +
+      (aiOn() ? '<div class="aicard"><div class="who"><i></i>Глубокий разбор ИИ' + (useAi ? '<span class="ai-badge">Claude</span>' : "") + "</div>" +
+        '<p class="sm" style="margin:2px 0 0">' +
+        (useAi ? "Модель разобрала письмо под эту программу и предложила конкретные правки. Сохрани новый текст и проверь заново — оценка пересчитается."
+               : "Правила ниже ловят клише и структуру. ИИ прочитает письмо целиком и скажет, что заменить и на что — с цитатами из твоего текста.") +
+        "</p>" +
+        aiRunHTML("l" + d.id, "Разобрать письмо с ИИ", "Разобрать заново", useAi, { act: "ai-letter", id: d.id }) +
+        '<p class="ai-note">Текст письма уходит на наш сервер и в модель Claude только для разбора. Модель на нём не обучается.</p></div>' : "") +
+      (useAi ? (ai.verdicts || []).map(verdHTML).join("") : "") +
+      (useAi ? '<div class="h-row" style="margin:14px 0 6px"><b class="sm">Проверка по правилам</b><span class="xs mut">без лимита</span></div>' : "") +
       rev.verdicts.map(verdHTML).join("") +
       '<p class="xs mut" style="margin-top:10px">Разбор идёт по критериям, которые смотрят приёмные комиссии: конкретика, связь с программой, структура, отсутствие клише, планы после выпуска.</p>';
   }
@@ -857,7 +1011,7 @@
         '<div class="feat">✅ Загруженные документы — ' + S.docs.filter(function (d) { return d.file_path; }).length + " " + plural(S.docs.filter(function (d) { return d.file_path; }).length, "файл", "файла", "файлов") + "</div>" +
         '<div class="feat">✅ Контакты: почта' + (S.profile && S.profile.whatsapp ? ", WhatsApp" : "") + "</div>" +
         '<p class="xs mut" style="margin:8px 0 0">Файлы лежат в защищённом хранилище с доступом только по твоему аккаунту. Мы не передаём документы третьим лицам.</p></div>' +
-        '<a class="btn btn-ghost btn-block" href="privacy.html" target="_blank" rel="noopener">Политика конфиденциальности</a>' +
+        '<a class="btn btn-ghost btn-block" href="/privacy/" target="_blank" rel="noopener">Политика конфиденциальности</a>' +
         '<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="export">Скачать мои данные</button>' +
         '<button class="btn btn-ghost btn-block" style="margin-top:8px;color:#C0392B" data-act="delacc">Удалить аккаунт</button>' +
         '<p class="xs mut" style="margin-top:10px">Удаление аккаунта необратимо: подачи, документы и файлы стираются. Оплаченный отчёт лучше скачать заранее.</p>';
@@ -885,11 +1039,11 @@
       var rs = S.reports || [];
       return subHead("Мои отчёты", rs.length ? "" : "пока пусто") +
         (rs.length ? rs.map(function (r) {
-          return '<a class="lst" href="r.html?t=' + esc(r.token) + '" target="_blank" rel="noopener"><div style="flex:1"><b class="sm">Отчёт от ' + new Date(r.created_at).toLocaleDateString("ru-RU") + "</b>" +
+          return '<a class="lst" href="/report/?t=' + esc(r.token) + '" target="_blank" rel="noopener"><div style="flex:1"><b class="sm">Отчёт от ' + new Date(r.created_at).toLocaleDateString("ru-RU") + "</b>" +
             '<div class="xs mut">открыть в новой вкладке</div></div><span class="xs mut">→</span></a>';
         }).join("")
         : '<div class="empty"><div class="art">📄</div><h3>Отчётов пока нет</h3><p>Отчёт появляется после оплаты и живёт здесь навсегда.</p>' +
-          '<a class="btn btn-primary" href="quiz.html" target="_blank" rel="noopener">Пройти квиз</a></div>');
+          '<a class="btn btn-primary" href="/quiz/" target="_blank" rel="noopener">Пройти квиз</a></div>');
     });
   }
   function openSubscribe() {
@@ -920,7 +1074,7 @@
           '<div class="feat">👤 Консультант проверяет пакет до 5 программ</div>' +
           '<div class="feat">👤 Правки мотивационного вручную</div>' +
           '<a class="btn btn-ghost btn-block" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸") + '">Написать в WhatsApp</a></div>' +
-        '<p class="xs mut" style="margin-top:12px">Оплата картой подключается на этой неделе. Пока оформляем через WhatsApp — доступ включим вручную в тот же день. <a href="oferta.html" target="_blank" rel="noopener">Оферта</a></p>';
+        '<p class="xs mut" style="margin-top:12px">Оплата картой подключается на этой неделе. Пока оформляем через WhatsApp — доступ включим вручную в тот же день. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p>';
     });
   }
 
@@ -1072,6 +1226,16 @@
       saveDoc(doc, { content: t ? t.value : "", version: (doc.version || 1) + 1, checked_at: new Date().toISOString() }, function () { drawSub(); });
       toast("Сохранено · разбор обновлён"); return;
     }
+    if (act === "ai-doc" && doc) { aiCheckDoc(doc); return; }
+    if (act === "ai-letter" && doc) {
+      var tl = document.getElementById("letter-text");
+      var body = tl ? tl.value : (doc.content || "");
+      var progL = doc.program_ids && doc.program_ids.length ? progById(doc.program_ids[0]) : null;
+      if (tl && tl.value !== doc.content) {
+        saveDoc(doc, { content: body, version: (doc.version || 1) + 1 }, function () { aiCheckLetter(doc, progL); });
+      } else aiCheckLetter(doc, progL);
+      return;
+    }
     if (act === "letter-wizard") { openWizard(id, appId); return; }
     if (act === "wiz-next") {
       var ta2 = document.getElementById("wiz-a");
@@ -1179,7 +1343,7 @@
   };
   $("f-forgot").onsubmit = function (e) {
     e.preventDefault(); $("fg-err").hidden = true;
-    sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet.html" })
+    sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet/" })
       .then(function (r) { if (r.error) { authErr("fg-err", r.error); return; } $("fg-ok").hidden = false; });
   };
   $("f-recovery").onsubmit = function (e) {
@@ -1189,7 +1353,7 @@
     });
   };
   $("btn-google").onclick = function () {
-    sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet.html" } })
+    sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet/" } })
       .then(function (r) { if (r.error) toast("Google-вход недоступен — войди по почте", "bad"); });
   };
   $("btn-empty-out").onclick = function () { sb.auth.signOut(); };

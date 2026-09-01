@@ -22,6 +22,9 @@ window.SCHOLARY_CONFIG = {
   SUPABASE_ANON_KEY: "sb_publishable_XQ39e3HavSUXxXMEo9NWvg_XV5ZQ0Up",
   // Ожидаемые таблицы: leads (анкеты), events (аналитика). См. README-DEPLOY.md.
 
+  // --- ИИ-слой (PHP-бэкенд на хостинге, ключ Anthropic лежит вне httpdocs) ---
+  AI_URL: "/api/ai.php",
+
   // --- Ссылки ---
   DEMO_VIDEO_URL: "TODO_https://www.youtube.com/embed/XXXX", // видеодемо (unlisted)
   INSTAGRAM_URL: "https://www.instagram.com/scholary.ai",

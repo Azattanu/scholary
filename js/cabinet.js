@@ -220,7 +220,7 @@
         '<div class="h-row"><div style="min-width:0"><b style="font-size:16.5px">' + esc(v.prog.name) + "</b>" +
         '<div class="sm mut">' + (L.cflag[v.prog.cc] || "") + " " + esc(v.prog.country) + (v.prog.note ? " · " + esc(v.prog.note) : "") + "</div></div>" +
         '<span class="pill ' + pi.cls + '">' + fmtD(v.date) + "</span></div>" +
-        (v.locked ? '<div class="sm mut" style="margin-top:8px">🔒 Точные вероятности по всем программам — в <a href="quiz.html">полном отчёте за 4 000&nbsp;₸</a></div>'
+        (v.locked ? '<div class="sm mut" style="margin-top:8px">🔒 Точные вероятности по всем программам — в <a href="/quiz/">полном отчёте за 4 000&nbsp;₸</a></div>'
           : v.p ? '<div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:' + pct(v.p.adm) + '"></i></div><span class="v">' + pct(v.p.adm) + "</span></div>" +
           (v.p.sch != null ? '<div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:' + pct(v.p.sch) + '"></i></div><span class="v">' + pct(v.p.sch) + "</span></div>"
             : '<div class="sm mut" style="margin-top:6px">обучение бесплатное — отдельной стипендии нет</div>') : "") +
@@ -384,16 +384,16 @@
     var repHtml;
     if (S.reports === null) repHtml = '<div class="sm mut">Загружаю отчёты…</div>';
     else if (S.reports.length) {
-      repHtml = '<a class="btn btn-primary btn-block" href="r.html?t=' + encodeURIComponent(S.reports[0].token) + '">Открыть полный отчёт</a>' +
+      repHtml = '<a class="btn btn-primary btn-block" href="/report/?t=' + encodeURIComponent(S.reports[0].token) + '">Открыть полный отчёт</a>' +
         '<a class="btn btn-ghost btn-block" style="margin-top:10px" href="https://wa.me/?text=' +
-        encodeURIComponent("Мой план поступления от Scholary: " + location.origin + "/r.html?t=" + S.reports[0].token) + '">Поделиться с родителями</a>' +
+        encodeURIComponent("Мой план поступления от Scholary: " + location.origin + "/report/?t=" + S.reports[0].token) + '">Поделиться с родителями</a>' +
         (S.reports.length > 1 ? '<div class="card" style="margin-top:14px;padding:8px 16px"><b style="font-size:16px">Прошлые версии</b>' +
           S.reports.slice(1).map(function (r) {
-            return '<div class="dl"><div style="flex:1"><b>' + new Date(r.created_at).toLocaleDateString("ru-RU") + '</b></div><a class="sm" href="r.html?t=' + encodeURIComponent(r.token) + '">открыть</a></div>';
+            return '<div class="dl"><div style="flex:1"><b>' + new Date(r.created_at).toLocaleDateString("ru-RU") + '</b></div><a class="sm" href="/report/?t=' + encodeURIComponent(r.token) + '">открыть</a></div>';
           }).join("") + "</div>" : "");
     } else {
       repHtml = '<div class="note" style="margin-bottom:12px">Полного отчёта пока нет. Выше — живой расчёт по твоему профилю; полный отчёт добавит разбор всех программ, Точку Б и план по месяцам.</div>' +
-        '<a class="btn btn-primary btn-block" href="quiz.html">Получить полный отчёт · 4 000 ₸</a>';
+        '<a class="btn btn-primary btn-block" href="/quiz/">Получить полный отчёт · 4 000 ₸</a>';
     }
 
     host.innerHTML = '<div class="h2">Мой отчёт</div>' + mini + repHtml +
@@ -436,7 +436,7 @@
       "</div>" +
       '<div class="card" style="padding:6px 16px;margin-bottom:14px">' +
       '<div class="dl"><div style="flex:1"><span class="sm mut">Тариф</span><b>' + (S.reports && S.reports.length ? "Отчёт · оплачен" : "Бесплатный расчёт") + "</b></div>" +
-      (S.reports && S.reports.length ? '<span class="pill pill-ok">активен</span>' : '<a class="sm" href="quiz.html" style="font-weight:700">Купить отчёт</a>') + "</div>" +
+      (S.reports && S.reports.length ? '<span class="pill pill-ok">активен</span>' : '<a class="sm" href="/quiz/" style="font-weight:700">Купить отчёт</a>') + "</div>" +
       '<div class="dl"><div style="flex:1"><span class="sm mut">Апгрейд</span><b>Документы + подача</b></div>' +
       '<a class="sm" style="font-weight:700" href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Интересует пакет за 25 000 ₸ (из кабинета)") + '">25 000 ₸</a></div></div>' +
       '<button class="btn btn-ghost btn-block" id="btn-passwd">Сменить пароль</button>' +
@@ -636,7 +636,7 @@
   };
   $("f-forgot").onsubmit = function (e) {
     e.preventDefault(); $("fg-err").hidden = true;
-    sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet.html" })
+    sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet/" })
       .then(function (r) {
         if (r.error) { authErr("fg-err", r.error); return; }
         $("fg-ok").hidden = false;
@@ -650,7 +650,7 @@
     });
   };
   $("btn-google").onclick = function () {
-    sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet.html" } })
+    sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet/" } })
       .then(function (r) {
         if (r.error) toast("Google-вход ещё подключается — войди по почте, это минута");
       });
