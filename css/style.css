@@ -419,3 +419,21 @@ p { margin: 0; text-wrap: pretty; }
   .rv{opacity:1;transform:none;transition:none}
 }
 @media(max-width:640px){.mr-duo{gap:12px}.mr-duo .mr-big{font-size:28px}.p-duo b{font-size:26px}}
+
+/* ===== v26: блок скидок (перенос со старого сайта) + кликабельные фото-карточки ===== */
+.dsc{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.dsc-c{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:18px;color:var(--ink);text-decoration:none;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.dsc-c:hover{transform:translateY(-4px);box-shadow:0 16px 34px -20px rgba(29,29,31,.3);border-color:var(--accent-border);color:var(--ink)}
+.dsc-top{display:flex;align-items:center;justify-content:space-between}
+.dsc-fl{font-size:22px}
+.dsc-cut{font-size:12px;font-weight:750;color:var(--accent-dark);background:var(--accent-soft);border-radius:999px;padding:4px 11px}
+.dsc-n{font-size:16.5px;font-weight:800;letter-spacing:-0.01em}
+.dsc-u{font-size:12.5px;font-weight:650;color:var(--accent)}
+.dsc-d{font-size:13.5px;color:var(--muted);line-height:1.55;flex:1}
+.dsc-m{display:flex;gap:6px;flex-wrap:wrap}
+.dsc-t{font-size:11.5px;font-weight:650;color:var(--ink-soft);background:var(--bg);border-radius:999px;padding:3px 10px}
+.dsc-l{font-size:13px;font-weight:750;color:var(--accent);margin-top:2px}
+.dsc-c:hover .dsc-l{color:var(--accent-dark)}
+a.photo-card{display:block;text-decoration:none;color:inherit;cursor:pointer}
+a.photo-card:hover .pc-cap{color:#fff}
