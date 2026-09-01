@@ -165,6 +165,32 @@
 
   /* ================= навигация ================= */
   var TABS = ["today", "apps", "unis", "docs", "profile"];
+  function renderWidget() {
+    var el = $("side-widget"); if (!el) return;
+    var vs = appViews(), o = overall(), ns = nextStep();
+    var burning = vs.filter(function (v) { return !v.a.submitted_at && v.days != null; }).slice(0, 3);
+    var docsLeft = docTypesForUser().filter(function (t) { var d = docsOfType(t)[0]; return !d || d.status !== "ready"; }).length;
+    el.innerHTML =
+      '<div class="card w-card"><div class="h-row"><b class="sm">Мой шанс</b><span class="pill pill-mut">→</span></div>' +
+        duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) +
+        '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:10px" data-act="chance">Динамика и «что если»</button></div>' +
+      (ns ? '<div class="card w-card" style="background:var(--accent-soft);border-color:var(--accent-border)">' +
+        '<div class="xs b" style="letter-spacing:.1em;color:var(--accent-dark)">СЛЕДУЮЩИЙ ШАГ</div>' +
+        '<div class="sm b" style="margin:6px 0 8px;line-height:1.35">' + esc(ns.title) + "</div>" +
+        '<button class="btn btn-primary btn-sm btn-block" data-act="step-go" data-app="' + ns.v.a.id + '" data-doc="' + (ns.t || "") + '">' + (ns.check ? "Проверить пакет" : "Заняться") + "</button></div>" : "") +
+      '<div class="card w-card"><b class="sm">Ближайшие дедлайны</b>' +
+        (burning.length ? burning.map(function (v) {
+          return '<div class="lst tappable" data-act="app" data-app="' + v.a.id + '" style="padding:9px 0"><div style="flex:1;min-width:0"><b class="xs">' + esc(v.title) + '</b>' +
+            '<div class="xs mut">' + fmtDL(v.date) + " · " + v.rd.pct + "%</div></div>" +
+            '<span class="pill ' + dlClass(v.days) + '">' + v.days + " дн</span></div>";
+        }).join("") : '<p class="xs mut" style="margin:6px 0 0">Дедлайнов пока нет — добавь программы.</p>') + "</div>" +
+      '<div class="card w-card"><b class="sm">Документы</b><div class="xs mut" style="margin:4px 0 8px">' +
+        (docsLeft ? "осталось собрать " + docsLeft : "всё собрано") + "</div>" +
+        '<button class="btn btn-ghost btn-sm btn-block" data-act="tab-docs">Открыть документы</button></div>' +
+      '<div class="card w-card"><b class="sm">Нужна помощь?</b><div class="xs mut" style="margin:4px 0 8px">Ответим в WhatsApp в рабочее время</div>' +
+        '<button class="btn btn-ghost btn-sm btn-block" data-act="help">Написать нам</button></div>';
+  }
+
   function setTab(t) {
     S.tab = t; S.stack = [];
     TABS.forEach(function (x) { var el = $("tab-" + x); if (el) el.hidden = x !== t; });
@@ -178,6 +204,7 @@
     if (t === "unis") renderUnis();
     if (t === "docs") renderDocs();
     if (t === "profile") renderProfile();
+    renderWidget();
     if (window.track) track("cab_tab", { tab: t });
   }
   function openSub(render) {
@@ -191,6 +218,7 @@
     var f = S.stack[S.stack.length - 1];
     if (!f) { setTab(S.tab); return; }
     $("sub-view").innerHTML = f();
+    renderWidget();
     wireSub();
   }
   function backSub() {
@@ -209,7 +237,7 @@
     var r = size / 2 - 4, c = 2 * Math.PI * r, col = p >= 80 ? "#0B7A3E" : p >= 50 ? "#B26A00" : "#C0392B";
     return '<div class="ready" style="width:' + size + "px;height:" + size + 'px">' +
       '<svg width="' + size + '" height="' + size + '"><circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="#ECECF1" stroke-width="5"/>' +
-      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (c * p / 100).toFixed(1) + " " + c.toFixed(1) + '"/></svg>' +
+      (p > 0 ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (c * p / 100).toFixed(1) + " " + c.toFixed(1) + '"/>' : "") + "</svg>" +
       "<b>" + p + "%</b></div>";
   }
   function verdHTML(v) {
@@ -299,7 +327,7 @@
   }
 
   /* ================= 2 · ПОДАЧИ ================= */
-  var appsFilter = "hot";
+  var appsFilter = "all";   // по умолчанию показываем ВСЕ подачи: фильтр «Горит» прятал портфель
   function renderApps() {
     var vs = appViews();
     var hot = vs.filter(function (v) { return !v.a.submitted_at && v.days != null && v.days < 90; });
@@ -760,6 +788,8 @@
       '<div class="card" style="margin-bottom:12px"><div class="h-row"><div style="padding-right:10px"><b class="sm">Telegram</b><div class="xs mut">' +
         (S.tg && S.tg.chat_id ? "подключён · шаг дня и дедлайны" : "не подключён — уведомления о дедлайнах не придут") + "</div></div>" +
         '<button class="btn ' + (S.tg && S.tg.chat_id ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="tg">' + (S.tg && S.tg.chat_id ? "Настроить" : "Подключить") + "</button></div></div>" +
+      '<div class="lst tappable" data-act="subscribe"><div style="flex:1"><b class="sm">Scholary Pro</b><div class="xs mut">' +
+        (S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date() ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ без лимитов · 2 990 ₸/мес") + '</div></div><span class="xs mut">→</span></div>' +
       '<div class="lst tappable" data-act="reports"><div style="flex:1"><b class="sm">Мои отчёты</b><div class="xs mut">' + ((S.reports || []).length) + " " + plural((S.reports || []).length, "отчёт", "отчёта", "отчётов") + "</div></div><span class=\"xs mut\">→</span></div>" +
       '<div class="lst tappable" data-act="privacy"><div style="flex:1"><b class="sm">Данные и приватность</b><div class="xs mut">что хранится и как удалить</div></div><span class="xs mut">→</span></div>' +
       '<div class="lst tappable" data-act="help"><div style="flex:1"><b class="sm">Помощь</b><div class="xs mut">WhatsApp · Telegram · вопросы</div></div><span class="xs mut">→</span></div>' +
@@ -862,6 +892,38 @@
           '<a class="btn btn-primary" href="quiz.html" target="_blank" rel="noopener">Пройти квиз</a></div>');
     });
   }
+  function openSubscribe() {
+    var pro = S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date();
+    var wa = function (txt) { return "https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" + encodeURIComponent(txt); };
+    openSub(function () {
+      return subHead("Scholary Pro", pro ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ без ограничений на весь сезон") +
+        (pro ? '<div class="card" style="border-color:var(--ok);background:var(--ok-soft);margin-bottom:12px"><b class="sm">Подписка активна</b>' +
+              '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · проверки и разборы без лимита</div></div>" : "") +
+        '<div class="card" style="margin-bottom:12px"><div class="h-row"><b>Бесплатно</b><span class="pill pill-mut">сейчас у тебя</span></div>' +
+          '<div class="feat">✅ Все подачи, чек-листы и дедлайны</div>' +
+          '<div class="feat">✅ Каталог 129 программ с твоими вероятностями</div>' +
+          '<div class="feat">✅ Проверка документов по правилам</div>' +
+          '<div class="feat">✅ 1 глубокий разбор мотивационного</div></div>' +
+        '<div class="card" style="border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft);margin-bottom:12px">' +
+          '<div class="h-row"><b>Scholary Pro</b><span class="pill pill-acc">выгодно в сезон</span></div>' +
+          '<div style="font-size:27px;font-weight:800;letter-spacing:-0.03em;margin:6px 0 2px">2 990 ₸<span class="sm mut" style="font-weight:600">/мес</span></div>' +
+          '<p class="xs mut" style="margin:0 0 8px">или 9 900 ₸ за 4 месяца сезона — экономия 2 060 ₸</p>' +
+          '<div class="feat">⚡ Безлимит ИИ-проверок документов</div>' +
+          '<div class="feat">⚡ Безлимит разборов писем с оценкой</div>' +
+          '<div class="feat">⚡ Симулятор «что если» и сравнение программ</div>' +
+          '<div class="feat">⚡ Приоритетные напоминания о дедлайнах</div>' +
+          '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="pay-pro" data-v="month">Оформить за 2 990 ₸/мес</button>' +
+          '<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="pay-pro" data-v="season">Сезон · 9 900 ₸</button>' +
+        "</div>" +
+        '<div class="card"><div class="h-row"><b>Документы и подача</b><span class="pill pill-mut">человек</span></div>' +
+          '<div style="font-size:22px;font-weight:800;margin:6px 0 2px">25 000 ₸</div>' +
+          '<div class="feat">👤 Консультант проверяет пакет до 5 программ</div>' +
+          '<div class="feat">👤 Правки мотивационного вручную</div>' +
+          '<a class="btn btn-ghost btn-block" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸") + '">Написать в WhatsApp</a></div>' +
+        '<p class="xs mut" style="margin-top:12px">Оплата картой подключается на этой неделе. Пока оформляем через WhatsApp — доступ включим вручную в тот же день. <a href="oferta.html" target="_blank" rel="noopener">Оферта</a></p>';
+    });
+  }
+
   function openTg() {
     var code = (S.tg && S.tg.code) || Math.random().toString(36).slice(2, 8).toUpperCase();
     if (!S.tg) { S.tg = { code: code }; sb.from("tg_links").upsert({ user_id: S.session.user.id, code: code }).then(function () {}); }
@@ -935,6 +997,18 @@
     if (act === "app") { openApp(appId); return; }
     if (act === "af") { appsFilter = v; renderApps(); return; }
     if (act === "tab-unis") { setTab("unis"); return; }
+    if (act === "tab-docs") { setTab("docs"); return; }
+    if (act === "subscribe") { openSubscribe(); return; }
+    if (act === "pay-pro") {
+      var plan = v === "season" ? "сезон · 9 900 ₸" : "месяц · 2 990 ₸";
+      if (window.track) track("pro_click", { plan: v });
+      if (C.TIPTOP_PUBLIC_TERMINAL_ID && String(C.TIPTOP_PUBLIC_TERMINAL_ID).indexOf("TODO") !== 0) {
+        toast("Открываем оплату…");   // подключится, когда эквайринг будет активен
+      }
+      window.open("https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" +
+        encodeURIComponent("Здравствуйте! Хочу Scholary Pro (" + plan + "). Аккаунт: " + ((S.session && S.session.user.email) || "")), "_blank", "noopener");
+      return;
+    }
     if (act === "apptab") { appTab = v; drawSub(); return; }
     if (act === "status" && app) { saveApp(app, { status: v }, function () { drawSub(); }); return; }
     if (act === "outcome" && app) {
@@ -1060,6 +1134,7 @@
     var f = Object.assign({}, d.fields || {});
     f[el.getAttribute("data-key")] = el.value.trim();
     var patch = { fields: f, checked_at: new Date().toISOString() };
+    if (d.status === "none" && el.value.trim()) patch.status = "progress";   // данные внесены — документ уже в работе
     if (d.doc_type === "ielts" && f.issued_on) {
       var dd = new Date(f.issued_on);
       if (!isNaN(dd)) patch.expires_on = new Date(dd.getTime() + 730 * 864e5).toISOString().slice(0, 10);
