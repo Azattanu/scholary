@@ -358,7 +358,7 @@
   /* ---------- общие кусочки разметки ---------- */
   function ringHTML(p, size) {
     size = size || 54;
-    var r = size / 2 - 4, c = 2 * Math.PI * r, col = p >= 80 ? "#0B7A3E" : p >= 50 ? "#B26A00" : "#C0392B";
+    var r = size / 2 - 4, c = 2 * Math.PI * r, col = p >= 80 ? "#0B7A3E" : p >= 50 ? "#A05F00" : "#C0392B";
     return '<div class="ready" style="width:' + size + "px;height:" + size + 'px">' +
       '<svg width="' + size + '" height="' + size + '"><circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="#ECECF1" stroke-width="5"/>' +
       (p > 0 ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (c * p / 100).toFixed(1) + " " + c.toFixed(1) + '"/>' : "") + "</svg>" +
@@ -429,7 +429,7 @@
         '<div class="h-row"><b class="sm">Мой шанс</b>' + (delta != null && delta !== 0 ? '<span class="pill ' + (delta > 0 ? "pill-ok" : "pill-warn") + '">' + (delta > 0 ? "▲ +" : "▼ ") + delta + " за неделю</span>" : '<span class="pill pill-mut">динамика →</span>') + "</div>" +
         duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) + '<div class="xs mut">по ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + " · тап — динамика и «что если»</div></div>" +
       (burning.length ? '<div class="sub-h">Горит первым</div>' + burning.map(function (v) {
-        return '<div class="dl tappable" data-act="app" data-app="' + v.a.id + '"><span class="dot" style="background:' + (v.days < 30 ? "#C0392B" : v.days < 75 ? "#B26A00" : "#0B7A3E") + '"></span>' +
+        return '<div class="dl tappable" data-act="app" data-app="' + v.a.id + '"><span class="dot" style="background:' + (v.days < 30 ? "#C0392B" : v.days < 75 ? "#A05F00" : "#0B7A3E") + '"></span>' +
           '<div style="flex:1"><b>' + esc(v.title) + '</b><span class="xs mut">' + fmtDL(v.date) + " · готовность " + v.rd.pct + "%</span></div>" +
           '<span class="pill ' + dlClass(v.days) + '">' + (v.days != null ? v.days + " дн" : "—") + "</span></div>";
       }).join("") : "") +
@@ -487,7 +487,7 @@
         : blockers.length ? '<div class="verd warn" style="margin-top:10px"><span>⏰</span><span><b>' + (v.days != null ? "Осталось " + v.days + " " + plural(v.days, "день", "дня", "дней") + " · " : "") + blockers.length + " " + plural(blockers.length, "блокер", "блокера", "блокеров") + "</b>" +
             esc(blockers.map(function (m) { return (D.TYPES[m.t] || {}).title || m.t; }).join(", ")) + "</span></div>"
         : "") +
-      '<div class="pb" style="margin-top:10px"><i style="width:' + v.rd.pct + '%;background:' + (v.rd.pct >= 80 ? "#0B7A3E" : v.rd.pct >= 50 ? "#B26A00" : "#C0392B") + '"></i></div>' +
+      '<div class="pb" style="margin-top:10px"><i style="width:' + v.rd.pct + '%;background:' + (v.rd.pct >= 80 ? "#0B7A3E" : v.rd.pct >= 50 ? "#A05F00" : "#C0392B") + '"></i></div>' +
       "</div>";
   }
 
@@ -730,7 +730,7 @@
     var crit = useAi ? ai.criteria : rev.criteria;
     return subHead("Мотивационное письмо", prog ? prog.name : "общее") +
       '<div class="card" style="margin-bottom:10px"><div class="h-row">' +
-        '<div><b style="font-size:24px;color:' + (score >= 7 ? "var(--ok)" : score >= 5 ? "#B26A00" : "#C0392B") + '">' + score.toFixed(1) + '</b><span class="sm mut"> / 10 · ' + rev.words + " слов" + (useAi ? " · оценка ИИ" : " · по правилам") + "</span></div>" +
+        '<div><b style="font-size:24px;color:' + (score >= 7 ? "var(--ok)" : score >= 5 ? "#A05F00" : "#C0392B") + '">' + score.toFixed(1) + '</b><span class="sm mut"> / 10 · ' + rev.words + " слов" + (useAi ? " · оценка ИИ" : " · по правилам") + "</span></div>" +
         '<button class="btn btn-ghost btn-sm" data-act="letter-wizard" data-id="' + d.id + '">Помощь с текстом</button></div>' +
         crit.map(function (c) {
           var cv = Number(c.v) || 0;
