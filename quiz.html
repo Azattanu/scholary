@@ -6,10 +6,10 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=35">
-  <script src="/js/config.js?v=35"></script>
-  <script src="/js/report-engine.js?v=35"></script>
-  <script src="/js/app.js?v=35" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=36">
+  <script src="/js/config.js?v=36"></script>
+  <script src="/js/report-engine.js?v=36"></script>
+  <script src="/js/app.js?v=36" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -410,7 +410,22 @@ function renderPayment() {
   $("payBack").addEventListener("click", renderPaywall);
   $("payKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
     "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
-  $("payKaspi").addEventListener("click", () => track("pay_kaspi_click"));
+  $("payKaspi").addEventListener("click", () => {
+    track("pay_kaspi_click");
+    // сразу дублируем владельцу: покупателя нельзя потерять, пока оплата ручная
+    try {
+      const em = ($("fEmail").value || "").trim();
+      fetch((C.NOTIFY_URL || "/api/notify.php"), {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "lead", name: answers.name || "", phone: answers.whatsapp || answers.phone || "",
+          email: em, level: answers.level || "",
+          note: "ХОЧЕТ ОТЧЁТ за " + fmt(C.PRICE_REPORT) + " ₸, оплата через Kaspi — выставить счёт и прислать PDF",
+          lead_id: (window.scholaryLeadId ? window.scholaryLeadId() : ""), page: "/quiz/"
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  });
 
   if (terminalReady) $("payCard").addEventListener("click", () => {
     const email = $("fEmail").value.trim();
