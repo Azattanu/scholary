@@ -37,3 +37,10 @@ ErrorDocument 503 /error_docs/503.html
     Require all denied
   </FilesMatch>
 </IfModule>
+
+# 4) Аналитика через свой домен: /ph/… уходит на PostHog через api/ph.php.
+#    Иначе блокировщики рекламы режут часть событий и воронка врёт.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^ph/(.*)$ /api/ph.php?p=$1 [QSA,L]
+</IfModule>
