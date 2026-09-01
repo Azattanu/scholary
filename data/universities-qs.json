@@ -1,5 +1,5 @@
 {
- "_readme": "Каталог университетов по QS World University Rankings 2026. Топ-20 сверен с рейтингом (phdportal.com/QS), остальные позиции — ориентировочные (+/- несколько мест), проверять по topuniversities.com. kz_aid — чем реально может финансироваться казахстанец. verified:false до проверки Диасом.",
+ "_readme": "Каталог университетов по QS World University Rankings 2026. Топ-20 сверен с рейтингом (phdportal.com/QS), остальные позиции — ориентировочные (+/- несколько мест), проверять по topuniversities.com. kz_aid — чем реально может финансироваться казахстанец. verified:false до проверки Диасом. | 2026-09-01: +47 вузов (101–275, ранги приблизительные, verified:false; вкл. Al-Farabi KazNU и Nazarbayev University)",
  "source": "https://www.topuniversities.com/world-university-rankings",
  "year": 2026,
  "universities": [
@@ -901,6 +901,429 @@
    "cc": "us",
    "tier": "top100",
    "kz_aid": "need-based/merit aid у части вузов; нужен SAT/TOEFL",
+   "verified": false
+  },
+  {
+   "rank": 101,
+   "name": "Universität Wien",
+   "country": "Австрия",
+   "cc": "at",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 106,
+   "name": "Университет Гронингена",
+   "country": "Нидерланды",
+   "cc": "nl",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 112,
+   "name": "University of Oslo",
+   "country": "Норвегия",
+   "cc": "no",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 119,
+   "name": "Humboldt-Universität zu Berlin",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 120,
+   "name": "Freie Universität Berlin",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 126,
+   "name": "University of Alberta",
+   "country": "Канада",
+   "cc": "ca",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 129,
+   "name": "Университет Хельсинки",
+   "country": "Финляндия",
+   "cc": "fi",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 132,
+   "name": "Университет Болоньи",
+   "country": "Италия",
+   "cc": "it",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 134,
+   "name": "POSTECH",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 139,
+   "name": "Sapienza (Рим)",
+   "country": "Италия",
+   "cc": "it",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 141,
+   "name": "RWTH Aachen",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 150,
+   "name": "Charles University (Прага)",
+   "country": "Чехия",
+   "cc": "cz",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 154,
+   "name": "TU Berlin",
+   "country": "Германия",
+   "cc": "de",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 160,
+   "name": "Al-Farabi Kazakh National University",
+   "country": "Казахстан",
+   "cc": "kz",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 165,
+   "name": "University of Waterloo",
+   "country": "Канада",
+   "cc": "ca",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 170,
+   "name": "Politecnico di Torino",
+   "country": "Италия",
+   "cc": "it",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 173,
+   "name": "Eötvös Loránd University (ELTE)",
+   "country": "Венгрия",
+   "cc": "hu",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 178,
+   "name": "Vienna UT (TU Wien)",
+   "country": "Австрия",
+   "cc": "at",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 180,
+   "name": "Стамбульский технический университет (İTÜ)",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 184,
+   "name": "Koç University",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 188,
+   "name": "Universiti Putra Malaysia",
+   "country": "Малайзия",
+   "cc": "my",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 190,
+   "name": "Qatar University",
+   "country": "Катар",
+   "cc": "qa",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 195,
+   "name": "Sabancı University",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 199,
+   "name": "Vilnius University",
+   "country": "Литва",
+   "cc": "lt",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 205,
+   "name": "University of Tartu",
+   "country": "Эстония",
+   "cc": "ee",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 208,
+   "name": "Warsaw University",
+   "country": "Польша",
+   "cc": "pl",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 210,
+   "name": "Khalifa University",
+   "country": "ОАЭ",
+   "cc": "ae",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 215,
+   "name": "CTU (Czech Technical University)",
+   "country": "Чехия",
+   "cc": "cz",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 220,
+   "name": "Bilkent University",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 225,
+   "name": "Middle East Technical University (METU)",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 230,
+   "name": "Nazarbayev University",
+   "country": "Казахстан",
+   "cc": "kz",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 232,
+   "name": "Boğaziçi University",
+   "country": "Турция",
+   "cc": "tr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 235,
+   "name": "King Saud University",
+   "country": "Сауд. Аравия",
+   "cc": "sa",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 238,
+   "name": "HUFS / Hanyang",
+   "country": "Корея",
+   "cc": "kr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 240,
+   "name": "Jagiellonian University (Краков)",
+   "country": "Польша",
+   "cc": "pl",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 243,
+   "name": "American University of Sharjah",
+   "country": "ОАЭ",
+   "cc": "ae",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 245,
+   "name": "University of Szeged",
+   "country": "Венгрия",
+   "cc": "hu",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 248,
+   "name": "Masaryk University (Брно)",
+   "country": "Чехия",
+   "cc": "cz",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 250,
+   "name": "Université Grenoble Alpes",
+   "country": "Франция",
+   "cc": "fr",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 252,
+   "name": "BME Budapest (техн.)",
+   "country": "Венгрия",
+   "cc": "hu",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 255,
+   "name": "University of Debrecen",
+   "country": "Венгрия",
+   "cc": "hu",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 258,
+   "name": "UAEU (ОАЭ)",
+   "country": "ОАЭ",
+   "cc": "ae",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 260,
+   "name": "Universitas Indonesia",
+   "country": "Индонезия",
+   "cc": "id",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 263,
+   "name": "Chulalongkorn University",
+   "country": "Таиланд",
+   "cc": "th",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 265,
+   "name": "University of Pécs",
+   "country": "Венгрия",
+   "cc": "hu",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 270,
+   "name": "Гданьский политехнический",
+   "country": "Польша",
+   "cc": "pl",
+   "tier": "top300",
+   "kz_aid": "",
+   "verified": false
+  },
+  {
+   "rank": 275,
+   "name": "VU Amsterdam",
+   "country": "Нидерланды",
+   "cc": "nl",
+   "tier": "top300",
+   "kz_aid": "",
    "verified": false
   }
  ]

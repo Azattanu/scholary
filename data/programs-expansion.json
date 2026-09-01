@@ -1,5 +1,5 @@
 {
- "_readme": "Кандидаты на добавление в базу Scholary (сверх текущих 59). КАЖДУЮ запись перед публикацией проверяет Диас А. по source_url (поле verified: false → true + дата). Дедлайны указаны ориентировочно по прошлым циклам — их обязательно уточнять на цикл 2027.",
+ "_readme": "Кандидаты на добавление в базу Scholary (сверх текущих 59). КАЖДУЮ запись перед публикацией проверяет Диас А. по source_url (поле verified: false → true + дата). Дедлайны указаны ориентировочно по прошлым циклам — их обязательно уточнять на цикл 2027. | 2026-09-01: +18 программ (Болашак, Chevening, Fulbright, Gates, Eiffel, IsDB, Schwarzman, KAIST и др.)",
  "programs": [
   {
    "country": "Германия",
@@ -1238,6 +1238,273 @@
    "window": "до 1 дек",
    "kz_note": "больше НЕ бесплатно — частая ошибка в старых списках",
    "source_url": "https://www.studyinnorway.no/",
+   "verified": false
+  },
+  {
+   "country": "Казахстан",
+   "cc": "kz",
+   "name": "Болашак (международная стипендия РК)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полное покрытие + стипендия + перелёт",
+   "language": "по вузу",
+   "window": "обычно май–июль",
+   "kz_note": "обязательство отработки в РК 3–5 лет; топ-вузы из списка",
+   "source_url": "https://bolashak.gov.kz/",
+   "verified": false
+  },
+  {
+   "country": "Казахстан",
+   "cc": "kz",
+   "name": "Гранты Nazarbayev University",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "обучение 0 ₸ + стипендия + общежитие",
+   "language": "англ (IELTS 6.0–6.5)",
+   "window": "осень–зима",
+   "kz_note": "домашний вариант мирового уровня; NUFYP для недобравших",
+   "source_url": "https://nu.edu.kz/admissions",
+   "verified": false
+  },
+  {
+   "country": "Великобритания",
+   "cc": "gb",
+   "name": "Gates Cambridge",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полное покрытие + стипендия",
+   "language": "англ 7.0+",
+   "window": "окт–дек",
+   "kz_note": "сильнейший академический профиль",
+   "source_url": "https://www.gatescambridge.org/",
+   "verified": false
+  },
+  {
+   "country": "Великобритания",
+   "cc": "gb",
+   "name": "Clarendon (Oxford)",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полное покрытие + стипендия",
+   "language": "англ 7.0+",
+   "window": "дек–янв",
+   "kz_note": "автоматически при подаче в Oxford",
+   "source_url": "https://www.ox.ac.uk/clarendon",
+   "verified": false
+  },
+  {
+   "country": "США",
+   "cc": "us",
+   "name": "Fulbright Foreign Student (Казахстан)",
+   "level": [
+    "master"
+   ],
+   "funding": "полное покрытие + стипендия + перелёт",
+   "language": "TOEFL/IELTS",
+   "window": "~май (за 1.5 года)",
+   "kz_note": "через посольство США в РК",
+   "source_url": "https://kz.usembassy.gov/education-culture/",
+   "verified": false
+  },
+  {
+   "country": "Франция",
+   "cc": "fr",
+   "name": "France Excellence (посольство, BGF)",
+   "level": [
+    "master"
+   ],
+   "funding": "стипендия + соцпакет",
+   "language": "фр/англ",
+   "window": "зима–весна",
+   "kz_note": "конкурс посольства Франции в РК",
+   "source_url": "https://www.kz.campusfrance.org/",
+   "verified": false
+  },
+  {
+   "country": "Германия",
+   "cc": "de",
+   "name": "DAAD Helmut-Schmidt (Public Policy)",
+   "level": [
+    "master"
+   ],
+   "funding": "полное покрытие + €992/мес",
+   "language": "англ",
+   "window": "июнь–июль",
+   "kz_note": "госуправление/публичная политика",
+   "source_url": "https://www.daad.de/en/",
+   "verified": false
+  },
+  {
+   "country": "Нидерланды",
+   "cc": "nl",
+   "name": "NL Scholarship (быв. Holland)",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "€5 000 (первый год)",
+   "language": "англ",
+   "window": "фев–май",
+   "kz_note": "частичная; комбинировать с грантами вузов",
+   "source_url": "https://www.studyinnl.org/finances/nl-scholarship",
+   "verified": false
+  },
+  {
+   "country": "Нидерланды",
+   "cc": "nl",
+   "name": "Orange Tulip Scholarship Kazakhstan",
+   "level": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "скидки 30–100% на обучение",
+   "language": "англ",
+   "window": "окт–апр",
+   "kz_note": "специально для граждан РК",
+   "source_url": "https://www.studyinnl.org/finances/orange-tulip-scholarship",
+   "verified": false
+  },
+  {
+   "country": "Канада",
+   "cc": "ca",
+   "name": "Lester B. Pearson (U of Toronto)",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "полное покрытие на 4 года",
+   "language": "англ",
+   "window": "ноя (номинация школы)",
+   "kz_note": "один из самых конкурентных в мире",
+   "source_url": "https://future.utoronto.ca/pearson/",
+   "verified": false
+  },
+  {
+   "country": "Канада",
+   "cc": "ca",
+   "name": "UBC International Scholars",
+   "level": [
+    "bachelor"
+   ],
+   "funding": "need+merit, до полного",
+   "language": "англ",
+   "window": "дек",
+   "kz_note": "IMES/Karen McKellin",
+   "source_url": "https://you.ubc.ca/financial-planning/scholarships-awards-international-students/",
+   "verified": false
+  },
+  {
+   "country": "Румыния",
+   "cc": "ro",
+   "name": "Стипендия правительства Румынии",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "обучение + общежитие + стипендия",
+   "language": "рум (год языка) / англ",
+   "window": "янв–март",
+   "kz_note": "низкий порог входа",
+   "source_url": "https://www.mae.ro/en/node/10251",
+   "verified": false
+  },
+  {
+   "country": "Катар",
+   "cc": "qa",
+   "name": "Hamad Bin Khalifa University",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "полное покрытие + стипендия",
+   "language": "англ",
+   "window": "~фев",
+   "kz_note": "Education City, Доха",
+   "source_url": "https://www.hbku.edu.qa/en/admissions",
+   "verified": false
+  },
+  {
+   "country": "ОАЭ",
+   "cc": "ae",
+   "name": "Khalifa University (полная стипендия)",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "обучение + стипендия + жильё",
+   "language": "англ",
+   "window": "фев–май",
+   "kz_note": "STEM, Абу-Даби",
+   "source_url": "https://www.ku.ac.ae/admissions",
+   "verified": false
+  },
+  {
+   "country": "Китай",
+   "cc": "cn",
+   "name": "Yenching Academy (Peking)",
+   "level": [
+    "master"
+   ],
+   "funding": "полное покрытие",
+   "language": "англ",
+   "window": "~ноя",
+   "kz_note": "China studies, междисциплинарно",
+   "source_url": "https://yenchingacademy.pku.edu.cn/",
+   "verified": false
+  },
+  {
+   "country": "Международные",
+   "cc": null,
+   "name": "ADB–Japan Scholarship (ADB-JSP)",
+   "level": [
+    "master"
+   ],
+   "funding": "полное покрытие + стипендия",
+   "language": "англ",
+   "window": "за 6 мес до программы",
+   "kz_note": "РК — член АБР; вузы-партнёры в Азии",
+   "source_url": "https://www.adb.org/work-with-us/careers/japan-scholarship-program",
+   "verified": false
+  },
+  {
+   "country": "Международные",
+   "cc": null,
+   "name": "Aga Khan Foundation ISP",
+   "level": [
+    "master",
+    "phd"
+   ],
+   "funding": "50% грант + 50% беспроцентный заём",
+   "language": "англ",
+   "window": "янв–март",
+   "kz_note": "есть офис в РК",
+   "source_url": "https://the.akdn/en/how-we-work/our-agencies/aga-khan-foundation/international-scholarship-programme",
+   "verified": false
+  },
+  {
+   "country": "Корея",
+   "cc": "kr",
+   "name": "KAIST International Scholarship",
+   "level": [
+    "bachelor",
+    "master",
+    "phd"
+   ],
+   "funding": "обучение + стипендия",
+   "language": "англ",
+   "window": "сен (early) / янв",
+   "kz_note": "STEM; отдельно от GKS",
+   "source_url": "https://admission.kaist.ac.kr/intl-undergraduate/",
    "verified": false
   }
  ]
