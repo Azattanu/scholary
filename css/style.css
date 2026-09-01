@@ -438,11 +438,18 @@ p { margin: 0; text-wrap: pretty; }
 a.photo-card{display:block;text-decoration:none;color:inherit;cursor:pointer}
 a.photo-card:hover .pc-cap{color:#fff}
 
-/* ===== v27: блок «Как мы считаем вероятность» ===== */
-.axes{display:flex;flex-direction:column;gap:7px;margin:10px 0 12px}
-.ax{display:flex;align-items:center;gap:10px}
-.ax span{font-size:12px;color:#C9CCD4;width:110px;flex-shrink:0}
-.ax i{display:block;height:7px;border-radius:99px;background:linear-gradient(90deg,#7C6CFF,#4ADE95)}
-.calc-row{display:flex;align-items:baseline;gap:12px;margin:10px 0}
-.calc-n{font-size:26px;font-weight:800;letter-spacing:-0.02em;color:var(--accent);flex-shrink:0;min-width:52px}
-.calc-t{font-size:13px;color:var(--ink-soft);line-height:1.45}
+/* ===== v28: блок «Как мы считаем вероятность» ===== */
+.axesv{display:flex;flex-direction:column;gap:9px;margin:8px 0 10px}
+.axv{display:flex;align-items:center;gap:10px}
+.axv span{font-size:12px;font-weight:700;color:#C9CCD4;width:100px;flex-shrink:0}
+.axv .trk{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.13);overflow:hidden}
+.axv .trk i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7C6CFF,#4ADE95)}
+.axv b{font-size:13px;font-weight:800;color:#fff;width:30px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:0}
+.m-n{font-size:13.5px;font-weight:800;min-width:0}
+.m-n em{font-style:normal;color:var(--muted);font-weight:600}
+.chip-ok,.chip-warn{font-size:11px;font-weight:800;border-radius:999px;padding:4px 10px;white-space:nowrap;flex-shrink:0}
+.chip-ok{background:var(--green-soft);color:var(--green)}
+.chip-warn{background:var(--yellow-soft);color:var(--yellow-ink)}
+.duo-acc i{color:#DCD6FF}
