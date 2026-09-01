@@ -482,6 +482,11 @@
         (v.p ? '<div class="duo mini"><span><b style="color:var(--accent)">' + pct(v.p.adm) + '%</b>поступл.</span>' +
           (v.p.sch != null ? '<span><b style="color:var(--ok)">' + pct(v.p.sch) + '%</b>стип.</span>' : '<span class="xs mut">обучение 0 ₸</span>') + "</div>" : "") +
         "</div>" + ringHTML(v.rd.pct) + "</div>" +
+      (v.prog && v.prog.available_kz === false
+        ? '<div class="verd bad" style="margin-top:10px"><span>⛔</span><span><b>Подать нельзя</b>' +
+          esc(v.prog.unavailable_note || "Программа сейчас недоступна для граждан Казахстана.") +
+          " Убери её из подач, чтобы она не тянула вниз общий процент.</span></div>"
+        : "") +
       (v.a.outcome ? '<div class="verd ' + (v.a.outcome === "admit" ? "ok" : v.a.outcome === "reject" ? "bad" : "warn") + '" style="margin-top:10px"><span>' + (v.a.outcome === "admit" ? "🎉" : v.a.outcome === "reject" ? "⛔" : "⏳") + '</span><span><b>' + L.outcome[v.a.outcome] + "</b></span></div>"
         : v.a.submitted_at ? '<div class="verd ok" style="margin-top:10px"><span>✅</span><span><b>Отправлена ' + fmtDL(new Date(v.a.submitted_at)) + "</b>Ждём ответ — отметь его, когда придёт.</span></div>"
         : blockers.length ? '<div class="verd warn" style="margin-top:10px"><span>⏰</span><span><b>' + (v.days != null ? "Осталось " + v.days + " " + plural(v.days, "день", "дня", "дней") + " · " : "") + blockers.length + " " + plural(blockers.length, "блокер", "блокера", "блокеров") + "</b>" +
@@ -795,6 +800,8 @@
     var lvl = (S.ans && S.ans.level) || "bachelor";
     var mine = {}; S.apps.forEach(function (a) { mine[a.program_id] = 1; });
     return S.programs.filter(function (p) {
+      // куда казахстанец подать не может — в каталоге не показываем совсем
+      if (p.available_kz === false) return false;
       if (p.levels && p.levels.indexOf(lvl) === -1) return false;
       if (uniFilter.cc && (p.cc || "").toLowerCase() !== uniFilter.cc) return false;
       if (uniFilter.noIelts && p.req && p.req.language > 4.5) return false;
