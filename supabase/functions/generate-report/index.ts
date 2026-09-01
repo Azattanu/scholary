@@ -90,7 +90,11 @@ Deno.serve(async (req) => {
   if (error || !lead) return Response.json({ error: "lead not found" }, { status: 404 });
 
   // 1–2. Расчёт той же логикой, что на сайте
-  const result = Engine.evaluate(answersFromLead(lead));
+  const answers = answersFromLead(lead);
+  const result = Engine.evaluate(answers);
+  // исходные данные расчёта сохраняются в отчёте: каждый документ индивидуален и это видно
+  (result as Record<string, unknown>).answers = answers;
+  (result as Record<string, unknown>).generatedAt = new Date().toISOString();
 
   // 3. Тексты (не блокируют: без Claude отчёт уходит с типовыми формулировками)
   const texts = await claudeTexts(result, lead.name ?? "друг");
