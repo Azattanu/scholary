@@ -204,19 +204,26 @@ p { margin: 0; text-wrap: pretty; }
 .badge-pill { display: inline-flex; align-items: center; gap: var(--s2); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; color: var(--accent); }
 
 /* Стек отчётов в хиро: три карточки + плавающие бейджи */
-.hero-visual { position: relative; max-width: 440px; margin-inline: auto; padding: 34px 0 44px; }
+.hero-visual { position: relative; max-width: 440px; margin-inline: auto; padding: 172px 0 142px; }
 .mini-report { background: #1A1D27; border-radius: var(--radius-lg); padding: var(--s6); color: #fff; box-shadow: var(--shadow-pop); max-width: 420px; margin-inline: auto; position: relative; z-index: 3; transform: rotate(1.2deg); }
 .mr-back { position: absolute; inset-inline: 0; margin-inline: auto; border-radius: var(--radius-lg); padding: 16px 18px; max-width: 400px; box-shadow: 0 18px 44px -20px rgba(26,29,39,.4); }
-.mr-back-1 { top: -12px; transform: rotate(-5deg) translateX(-36px); background: #FFFFFF; border: 1px solid var(--border); z-index: 1; }
-.mr-back-2 { bottom: -14px; transform: rotate(4deg) translateX(52px); background: var(--accent); color: #fff; z-index: 2; }
+.mr-back-1 { top: 60px; transform: rotate(-3deg) translateX(-30px); background: #FFFFFF; border: 1px solid var(--border); z-index: 1; }
+.mr-back-2 { bottom: 56px; transform: rotate(3deg) translateX(34px); background: var(--accent); color: #fff; z-index: 2; }
 .mr-back .b-title { font-size: 12px; font-weight: 800; letter-spacing: .04em; }
 .mr-back .b-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 700; }
 .mr-back-1 .b-title { color: var(--faint); }
 .mr-back-2 .b-title { color: #DCD6FF; }
 .float-badge { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 7px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 999px; padding: 9px 14px; font-size: 12.5px; font-weight: 700; box-shadow: 0 12px 30px -12px rgba(26,29,39,.28); white-space: nowrap; }
-.fb-1 { top: 6px; right: -6px; }
-.fb-2 { top: 79%; left: -16px; }
-@media (max-width: 640px) { .fb-1 { right: 4px; } .fb-2 { left: 4px; } .mr-back-1 { transform: rotate(-4deg) translateX(-12px); } .mr-back-2 { transform: rotate(3deg) translateX(14px); } }
+.fb-1 { top: 0; right: -6px; }
+.fb-2 { bottom: 0; left: -10px; }
+@media (max-width: 640px) {
+  .hero-visual { padding: 150px 0 126px; }
+  .fb-1 { right: 0; } .fb-2 { left: 0; }
+  .float-badge { font-size: 12px; padding: 8px 12px; }
+  .mr-back { max-width: 330px; padding: 14px 16px; }
+  .mr-back-1 { top: 42px; transform: rotate(-4deg) translateX(-14px); }
+  .mr-back-2 { bottom: 48px; transform: rotate(3deg) translateX(16px); }
+}
 
 /* Мини-превью отчёта (секция «Так выглядит отчёт») */
 .report-peek { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--s4); }
