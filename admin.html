@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Scholary — панель управления</title>
-  <link rel="stylesheet" href="/css/style.css?v=33">
+  <link rel="stylesheet" href="/css/style.css?v=34">
   <style>
     .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 80px; }
     .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -111,7 +111,7 @@
   </div>
 </div>
 
-<script src="/js/config.js?v=33"></script>
+<script src="/js/config.js?v=34"></script>
 <script>
 const SB = window.SCHOLARY_CONFIG.SUPABASE_URL;
 const LS_KEY = "scholary_admin_key";
@@ -167,14 +167,16 @@ async function loadCabinet() {
       ["Подач ведут", o.applications_total], ["Отправлено", o.applications_submitted, true],
       ["Средняя готовность", (o.avg_readiness == null ? "—" : o.avg_readiness + "%")],
       ["Документов", o.documents_total], ["Из них готовы", o.documents_ready],
-      ["Pro активных", o.pro_active, true], ["Событий за сутки", o.events_24h]
+      ["Pro активных", o.pro_active, true], ["Разборов ИИ", o.documents_ai_checked],
+      ["Telegram привязан", o.telegram_linked], ["Событий за сутки", o.events_24h],
+      ["Тестовых аккаунтов", o.test_accounts]
     ].map(([l, n, hl]) => `<div class="kpi${hl ? " hl" : ""}"><div class="n">${n == null ? "—" : n}</div><div class="l">${l}</div></div>`).join("");
     document.getElementById("topProgTbl").innerHTML = (top && top.length)
       ? `<table class="adm"><tr><th>Программа</th><th>Страна</th><th>Ведут</th><th>Отправлено</th><th>Ср. готовность</th></tr>` +
         top.map(r => `<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.country)}</td><td>${r.picks}</td><td>${r.submitted}</td><td>${r.avg_readiness == null ? "—" : r.avg_readiness + "%"}</td></tr>`).join("") + `</table>`
       : `<div class="muted">Пока никто не добавил программы в подачи.</div>`;
   } catch (e) {
-    document.getElementById("cabKpis").innerHTML = `<div class="muted">Не удалось загрузить: ${esc(e.message)}. Если ошибка про admin_overview — накати миграцию 008 в SQL-редакторе Supabase.</div>`;
+    document.getElementById("cabKpis").innerHTML = `<div class="muted">Не удалось загрузить: ${esc(e.message)}. Если ошибка про admin_overview — накати миграции 008 и 011 в SQL-редакторе Supabase.</div>`;
   }
 }
 
