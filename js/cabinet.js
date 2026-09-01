@@ -205,7 +205,12 @@
   function renderPortfolio() {
     var vs = views();
     var pAny = S.evalR ? pct(S.evalR.pAtLeastOne) : "—";
-    var cards = vs.map(function (v) {
+    // без оплаченного отчёта точные цифры видны только по топ-2 программам (тизер, как на пейволле)
+    var paid = !!(S.reports && S.reports.length);
+    var cards = vs.map(function (v, idx) {
+      if (!paid && idx >= 2 && v.p) {
+        v = Object.assign({}, v, { locked: true });
+      }
       var pi = dlPill(v.days);
       var segs = ["study", "prep", "applied"].map(function (st) {
         return '<button data-pid="' + v.it.program_id + '" data-st="' + st + '" class="' + (v.it.status === st ? "on" : "") + '">' + L.status[st] + "</button>";
@@ -215,7 +220,8 @@
         '<div class="h-row"><div style="min-width:0"><b style="font-size:16.5px">' + esc(v.prog.name) + "</b>" +
         '<div class="sm mut">' + (L.cflag[v.prog.cc] || "") + " " + esc(v.prog.country) + (v.prog.note ? " · " + esc(v.prog.note) : "") + "</div></div>" +
         '<span class="pill ' + pi.cls + '">' + fmtD(v.date) + "</span></div>" +
-        (v.p ? '<div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:' + pct(v.p.adm) + '"></i></div><span class="v">' + pct(v.p.adm) + "</span></div>" +
+        (v.locked ? '<div class="sm mut" style="margin-top:8px">🔒 Точные вероятности по всем программам — в <a href="quiz.html">полном отчёте за 4 000&nbsp;₸</a></div>'
+          : v.p ? '<div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:' + pct(v.p.adm) + '"></i></div><span class="v">' + pct(v.p.adm) + "</span></div>" +
           (v.p.sch != null ? '<div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:' + pct(v.p.sch) + '"></i></div><span class="v">' + pct(v.p.sch) + "</span></div>"
             : '<div class="sm mut" style="margin-top:6px">обучение бесплатное — отдельной стипендии нет</div>') : "") +
         '<div class="seg">' + segs + "</div>" + extra +
@@ -254,7 +260,8 @@
         return '<div class="doc" style="align-items:center"><div style="flex:1;min-width:0">' +
           '<b style="font-size:15.5px">' + esc(r.p.name) + "</b>" +
           '<div class="sm mut">' + (L.cflag[r.p.cc] || "") + " " + esc(r.p.country) + " · " + esc(r.p.deadline || "") + "</div>" +
-          (r.pr ? '<div class="pb-line" style="margin-top:6px"><div class="pb"><i style="width:' + pct(r.pr.adm) + '"></i></div><span class="v">' + pct(r.pr.adm) + "</span></div>" : "") +
+          (r.pr && S.reports && S.reports.length ? '<div class="pb-line" style="margin-top:6px"><div class="pb"><i style="width:' + pct(r.pr.adm) + '"></i></div><span class="v">' + pct(r.pr.adm) + "</span></div>"
+            : '<div class="xs mut" style="margin-top:4px">🔒 шанс — в полном отчёте</div>') +
           '</div><button class="btn btn-soft btn-sm" data-add="' + r.p.id + '">+</button></div>';
       }).join("");
     var bg = modal('<div class="h-row"><b style="font-size:19px">Каталог программ</b><button class="btn btn-ghost btn-sm" id="cat-close">Закрыть</button></div>' +
