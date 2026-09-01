@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /data/
+Disallow: /admin.html
+Disallow: /r.html
+Disallow: /cabinet.html
+Sitemap: https://scholary.kz/sitemap.xml
