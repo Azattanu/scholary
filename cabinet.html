@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, follow">
+<title>Кабинет — Scholary</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<style>
+:root{
+  --bg:#F5F5F7; --surface:#fff; --ink:#1D1D1F; --ink-soft:#424245; --muted:#6E6E73;
+  --border:#E8E8ED; --accent:#5B4BFF; --accent-dark:#4739E0; --accent-soft:#F0EEFF; --accent-border:#DCD6FF;
+  --ok:#0B7A3E; --ok-soft:#E7F8EE; --warn:#B26A00; --warn-soft:#FFF3E0; --bad:#C0392B; --bad-soft:#FDEEEC;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:17px;line-height:1.47;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+[hidden]{display:none!important}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;
+  border-radius:999px;padding:13px 22px;font-size:16px;font-weight:600;text-decoration:none;transition:.15s}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+.btn-soft{background:var(--accent-soft);color:var(--accent-dark)}
+.btn-block{width:100%}
+.btn-sm{padding:8px 14px;font-size:14px}
+.btn[disabled]{opacity:.55;cursor:default}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:650;white-space:nowrap}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)}
+.pill-bad{background:var(--bad-soft);color:var(--bad)} .pill-mut{background:var(--bg);color:var(--muted)}
+.pill-acc{background:var(--accent-soft);color:var(--accent-dark)}
+.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mut{color:var(--muted)} .sm{font-size:13.5px} .xs{font-size:12px}
+.h2{font-size:24px;font-weight:800;letter-spacing:-0.02em;margin:10px 0 2px}
+input.f,select.f,textarea.f{width:100%;padding:13px 15px;border:1px solid #D2D2D7;border-radius:13px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);margin:14px 0 5px}
+.err{color:var(--bad);font-size:14px;margin-top:10px}
+.note{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:10px 14px;border-radius:14px;font-size:13.5px}
+
+/* ---- auth ---- */
+.authwrap{max-width:420px;margin:0 auto;padding:8vh 22px 60px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:999px;
+  border:1px solid #D2D2D7;background:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:16px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ---- каркас приложения ---- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 8px;max-width:1080px;margin:0 auto}
+.topbar .logo{font-weight:800;font-size:18px;letter-spacing:-0.02em;color:var(--ink)}
+.topbar .logo span{color:var(--accent)}
+.ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#5B4BFF,#9B8CFF);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:none;cursor:pointer}
+.screen{padding:0 16px 96px;max-width:560px;margin:0 auto}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);display:flex;padding:8px 6px calc(10px + env(safe-area-inset-bottom));z-index:40}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:650;
+  color:var(--muted);background:none;border:none;cursor:pointer;padding:0}
+.tabbar button.on{color:var(--accent)}
+.tabbar svg{width:23px;height:23px}
+/* десктоп: сайдбар */
+@media(min-width:960px){
+  .tabbar{top:0;bottom:0;right:auto;width:222px;flex-direction:column;border-top:none;border-right:1px solid var(--border);
+    padding:18px 12px;align-items:stretch;background:#fff}
+  .tabbar button{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:11px;font-size:15px;padding:11px 12px;border-radius:12px;margin-bottom:2px}
+  .tabbar button.on{background:var(--accent-soft);color:var(--accent-dark)}
+  .tabbar::before{content:"Scholary.";font-weight:800;font-size:20px;padding:0 12px 18px;letter-spacing:-0.02em}
+  .topbar,.screen{margin-left:calc(222px + (100vw - 222px - 560px)/2)}
+  .screen{max-width:560px}
+}
+
+/* ---- компоненты ---- */
+.pointb{background:#1D1D1F;color:#fff;border-radius:20px;padding:16px 18px;margin:14px 0}
+.pointb .lbl{font-size:11px;letter-spacing:.14em;font-weight:700;color:#A78BFA;text-transform:uppercase}
+.pointb .big{font-size:19px;font-weight:750;margin:3px 0 10px}
+.pbar{height:5px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7C6CFF,#B7A8FF)}
+.nextstep{background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin:0 0 14px}
+.nextstep .tag{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent-dark);text-transform:uppercase}
+.nextstep h3{margin:6px 0 4px;font-size:18px;letter-spacing:-0.01em}
+.dl{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border)}
+.dl:last-child{border-bottom:none}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dl b{font-size:15px;display:block;line-height:1.25}
+.ringwrap{display:flex;gap:14px;align-items:center}
+.ring{width:64px;height:64px;flex-shrink:0}
+.prog{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px}
+.pb-line{display:flex;align-items:center;gap:8px;margin:7px 0 0}
+.pb-line .nm{font-size:12.5px;color:var(--muted);width:96px;flex-shrink:0}
+.pb{flex:1;height:7px;border-radius:99px;background:var(--bg);overflow:hidden}
+.pb i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.pb i.sch{background:#22C55E}
+.pb-line .v{font-size:13.5px;font-weight:750;width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.seg{display:flex;background:var(--bg);border-radius:99px;padding:3px;margin-top:12px}
+.seg button{flex:1;text-align:center;font-size:12.5px;font-weight:650;padding:6px 2px;border-radius:99px;color:var(--muted);background:none;border:none;cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.doc{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+.doc .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.upload{border:1.5px dashed #C9C9D2;border-radius:18px;padding:18px;text-align:center;color:var(--muted);font-size:14.5px;background:transparent;width:100%;cursor:pointer}
+.chk{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:14.5px}
+.box{width:21px;height:21px;border-radius:7px;border:1.5px solid #C9C9D2;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+.box.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.minirep{background:#1D1D1F;color:#fff;border-radius:18px;padding:16px;margin:14px 0}
+.minirep .pct{font-size:34px;font-weight:800;letter-spacing:-0.03em}
+.aicard{background:linear-gradient(135deg,#FBFAFF,#F2EFFF);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin-bottom:14px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid #D2D2D7;background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark)}
+/* модалка */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.modal-bg{align-items:center}}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:86vh;overflow-y:auto}
+@media(min-width:640px){.modal{border-radius:22px}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));background:#1D1D1F;color:#fff;
+  padding:11px 20px;border-radius:999px;font-size:14.5px;z-index:80;max-width:90vw;text-align:center}
+.spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;margin:40vh auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.center{max-width:420px;margin:0 auto;padding:10vh 22px 60px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div></div>
+
+<!-- ================= АВТОРИЗАЦИЯ ================= -->
+<div id="v-auth" hidden>
+  <div class="authwrap">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-weight:800;font-size:26px;letter-spacing:-0.02em">Scholary<span style="color:var(--accent)">.</span></div>
+      <div class="h2" style="font-size:26px;margin-top:20px" id="auth-title">Твой путь к Точке Б</div>
+      <div class="mut" style="font-size:15px;margin-top:4px" id="auth-sub">Отчёт, программы, документы и дедлайны — в одном месте</div>
+    </div>
+
+    <button class="gbtn" id="btn-google">
+      <svg width="19" height="19" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 40.4 44 35 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Войти через Google
+    </button>
+    <div class="divider">или по почте</div>
+
+    <form id="f-login">
+      <label class="fl">Email</label>
+      <input class="f" id="li-email" type="email" autocomplete="email" placeholder="you@gmail.com" required>
+      <label class="fl">Пароль</label>
+      <input class="f" id="li-pass" type="password" autocomplete="current-password" placeholder="Минимум 6 символов" required minlength="6">
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Войти</button>
+      <div class="err" id="li-err" hidden></div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px" class="sm">
+        <a href="#" id="lnk-forgot">Забыл пароль</a>
+        <a href="#" id="lnk-signup" style="font-weight:700">Создать аккаунт</a>
+      </div>
+    </form>
+
+    <form id="f-signup" hidden>
+      <label class="fl">Имя</label>
+      <input class="f" id="su-name" placeholder="Как к тебе обращаться" required>
+      <label class="fl">Email</label>
+      <input class="f" id="su-email" type="email" autocomplete="email" placeholder="you@gmail.com" required>
+      <label class="fl">Пароль</label>
+      <input class="f" id="su-pass" type="password" autocomplete="new-password" placeholder="Минимум 6 символов" required minlength="6">
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Создать аккаунт</button>
+      <div class="err" id="su-err" hidden></div>
+      <div style="text-align:center;margin-top:14px" class="sm"><a href="#" id="lnk-login">У меня уже есть аккаунт</a></div>
+    </form>
+
+    <form id="f-forgot" hidden>
+      <label class="fl">Email</label>
+      <input class="f" id="fg-email" type="email" placeholder="you@gmail.com" required>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Прислать ссылку для сброса</button>
+      <div class="err" id="fg-err" hidden></div>
+      <div class="sm mut" id="fg-ok" style="margin-top:12px" hidden>Письмо отправлено — проверь почту (и «Спам»). Ссылка вернёт тебя сюда для нового пароля.</div>
+      <div style="text-align:center;margin-top:14px" class="sm"><a href="#" id="lnk-login2">Назад ко входу</a></div>
+    </form>
+
+    <div class="xs mut" style="text-align:center;margin-top:26px">Входя, ты принимаешь <a href="oferta.html">оферту</a> и <a href="privacy.html">политику данных</a></div>
+  </div>
+</div>
+
+<!-- смена пароля после ссылки восстановления -->
+<div id="v-recovery" hidden>
+  <div class="authwrap">
+    <div class="h2">Новый пароль</div>
+    <form id="f-recovery">
+      <label class="fl">Придумай новый пароль</label>
+      <input class="f" id="rc-pass" type="password" autocomplete="new-password" minlength="6" required>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Сохранить и войти</button>
+      <div class="err" id="rc-err" hidden></div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= ОНБОРДИНГ ================= -->
+<div id="v-claim" hidden>
+  <div class="center">
+    <div style="font-size:44px">🎓</div>
+    <div class="h2" style="font-size:25px">Нашли твой отчёт</div>
+    <div class="mut" style="font-size:15px">Заберём его в кабинет — вместе с портфелем программ и планом документов</div>
+    <div class="minirep" style="text-align:left" id="claim-card"></div>
+    <button class="btn btn-primary btn-block" id="btn-claim">Забрать в кабинет</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-claim-skip">Позже</button>
+    <div class="err" id="claim-err" hidden></div>
+  </div>
+</div>
+
+<div id="v-empty" hidden>
+  <div class="center">
+    <div style="font-size:44px">🧭</div>
+    <div class="h2" style="font-size:25px">Начнём с расчёта</div>
+    <div class="mut" style="font-size:15px;margin-bottom:18px">Кабинет строится вокруг твоих шансов. Пройди квиз — 2 минуты, и здесь появятся твои программы, дедлайны и план документов.</div>
+    <div class="card" style="margin-bottom:18px;text-align:left">
+      <div class="chk"><span class="box ok">✓</span>Вероятность поступления и стипендии</div>
+      <div class="chk"><span class="box ok">✓</span>Портфель из 9 программ под твой профиль</div>
+      <div class="chk"><span class="box ok">✓</span>Персональный план документов</div>
+    </div>
+    <a class="btn btn-primary btn-block" href="quiz.html">Пройти квиз · 2 минуты</a>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-empty-out">Выйти</button>
+  </div>
+</div>
+
+<!-- ================= ПРИЛОЖЕНИЕ ================= -->
+<div id="v-app" hidden>
+  <div class="topbar">
+    <div class="logo">Scholary<span>.</span></div>
+    <button class="ava" id="topbar-ava" title="Профиль">?</button>
+  </div>
+  <div class="screen" id="tab-today"></div>
+  <div class="screen" id="tab-portfolio" hidden></div>
+  <div class="screen" id="tab-docs" hidden></div>
+  <div class="screen" id="tab-report" hidden></div>
+  <div class="screen" id="tab-profile" hidden></div>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="today" class="on"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a2 2 0 01-2 2h-4v-7h-6v7H5a2 2 0 01-2-2z"/></svg>Сегодня</button>
+    <button data-tab="portfolio"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>Портфель</button>
+    <button data-tab="docs"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>Документы</button>
+    <button data-tab="report"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Отчёт</button>
+    <button data-tab="profile"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Профиль</button>
+  </nav>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js?v=25"></script>
+<script src="js/report-engine.js?v=25"></script>
+<script src="js/app.js?v=25"></script>
+<script src="js/cabinet.js?v=25"></script>
+</body>
+</html>

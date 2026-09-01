@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     } else {
       const t = params.get("t");
       if (!t) throw new Error("нет токена");
+      // токен запоминаем: кабинет по нему привязывает отчёт к аккаунту
+      try { localStorage.setItem("scholary_report_token", t); } catch (e) {}
       const res = await fetch(C.SUPABASE_URL + "/rest/v1/rpc/get_report", {
         method: "POST",
         headers: { "Content-Type": "application/json", apikey: C.SUPABASE_ANON_KEY, Authorization: "Bearer " + C.SUPABASE_ANON_KEY },
