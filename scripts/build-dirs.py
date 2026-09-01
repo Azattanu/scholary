@@ -57,7 +57,7 @@ for src, d in PAGES.items():
 shutil.copy(os.path.join(root, "index.html"), os.path.join(out, "index.html"))
 
 # 4. статика и api — как есть
-for d in ("css", "js", "images", "data", "api"):
+for d in ("css", "js", "images", "data", "api", "error_docs"):
     src = os.path.join(root, d)
     if os.path.isdir(src):
         shutil.copytree(src, os.path.join(out, d))
