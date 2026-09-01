@@ -33,7 +33,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   try {
     if (params.get("demo") === "1") {
       // Демо-режим для проверки вёрстки без бэкенда: считаем образцовый профиль движком
-      payload = { data: ScholaryEngine.evaluate({ level: "bachelor", gpa_band: "4.4-4.0", school_type: "lyceum", lang_status: "have", ielts_band: "6.0", sat: "plan", field: ["it"], achievements: ["rep_olymp", "project"], budget: "<1m", priority: "scholarship", name: "Аида" }), texts: null, demoName: "Аида" };
+      const demoAnswers = { level: "bachelor", year: "2027", gpa_band: "4.4-4.0", school_type: "lyceum", lang_status: "have", ielts_band: "6.0", sat: "plan", field: ["it"], achievements: ["rep_olymp", "project"], budget: "<1m", priority: "scholarship", name: "Аида" };
+      payload = { data: ScholaryEngine.evaluate(demoAnswers), texts: null, demoName: "Аида" };
+      payload.data.answers = demoAnswers;
+      payload.data.generatedAt = new Date().toISOString();
     } else {
       const t = params.get("t");
       if (!t) throw new Error("нет токена");
@@ -86,6 +89,31 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const wa = txt => "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(txt);
 
+  // Исходные данные расчёта: отчёт персональный, и это видно (старые отчёты без answers не ломаем)
+  let srcBlock = "";
+  if (d.answers) {
+    const L = {
+      level: { bachelor: "Бакалавриат", master: "Магистратура", phd: "PhD / докторантура" },
+      gpa: { "5.0-4.5": "5.0–4.5", "4.4-4.0": "4.4–4.0", "3.9-3.5": "3.9–3.5", "<3.5": "ниже 3.5", "3.67+": "3.67+", "3.33-3.66": "3.33–3.66", "3.0-3.32": "3.0–3.32", "<3.0": "ниже 3.0", unknown: "не знаю" },
+      lang: { have: "IELTS/TOEFL сдан", soon: "сдаёт в ближайшие полгода", none: "без сертификата" },
+      budget: { "0": "0 ₸ — только полная стипендия", "<1m": "до 1 млн ₸/год", "1-3m": "1–3 млн ₸/год", "3m+": "3+ млн ₸/год" },
+      priority: { scholarship: "стипендия и минимум расходов", country: "конкретная страна", university: "сильный университет", major: "конкретная специальность" }
+    };
+    const a = d.answers, rows = [];
+    const push = (k, v) => { if (v) rows.push('<div style="display:flex; justify-content:space-between; gap:12px; font-size:13px; padding:7px 0; border-bottom:1px solid var(--border)"><span style="color:var(--muted); font-weight:600; flex-shrink:0">' + k + '</span><span style="font-weight:700; text-align:right">' + esc(v) + "</span></div>"); };
+    push("Уровень", (L.level[a.level] || "") + (a.year && a.year !== "later" ? " · " + a.year : ""));
+    push("Академика", L.gpa[a.gpa_band] || L.gpa[a.gpa_uni] || L.gpa[a.gpa_phd] || "");
+    push("Английский", (L.lang[a.lang_status] || "") + (a.ielts_band && a.ielts_band !== "unknown" ? " · " + a.ielts_band : ""));
+    push("Достижения", a.achievements && a.achievements.length && a.achievements[0] !== "none" ? a.achievements.length + " " + (a.achievements.length === 1 ? "пункт" : a.achievements.length < 5 ? "пункта" : "пунктов") : "");
+    push("Бюджет семьи", L.budget[a.budget] || "");
+    push("Приоритет", L.priority[a.priority] || "");
+    if (rows.length) srcBlock =
+      '<div class="card" style="display:flex; flex-direction:column; gap:2px">' +
+        '<strong style="font-size:15px; margin-bottom:6px">Исходные данные расчёта</strong>' + rows.join("") +
+        '<div style="font-size:11.5px; color:var(--faint); font-weight:600; margin-top:8px">Отчёт сгенерирован персонально по этим данным' + (d.generatedAt ? " · " + new Date(d.generatedAt).toLocaleString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "") + ". Изменились вводные — пересчитай в личном кабинете.</div>" +
+      "</div>";
+  }
+
   box.innerHTML =
     // 1. Вердикт
     '<div style="display:flex; flex-direction:column; gap:12px; background:#1A1D27; border-radius:18px; padding:22px 20px; color:#fff">' +
@@ -112,6 +140,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     '<div style="display:flex; flex-direction:column; gap:10px">' + cards + "</div>" +
     // 6. Оси
     '<div class="card" style="display:flex; flex-direction:column; gap:10px"><div><strong style="font-size:17px">Профиль по шести осям</strong><div style="font-size:12.5px; color:var(--muted); font-weight:600">0–10 · для тех, кто хочет глубже — и для родителей</div></div>' + axisRows + "</div>" +
+    // 6б. Исходные данные — доказательство персональности
+    srcBlock +
     // 7. Следующий шаг
     '<div class="card" style="display:flex; flex-direction:column; gap:12px; background:var(--accent-soft); border-color:var(--accent-border)">' +
       '<strong style="font-size:17px">Что дальше</strong>' +
