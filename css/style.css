@@ -12,15 +12,16 @@
   --ink: #1D1D1F;
   --ink-soft: #424245;
   --muted: #6E6E73;
-  --faint: #86868B;
+  --faint: #6F6F75;
   --border: #E8E8ED;
   --accent: #5B4BFF;
   --accent-dark: #4739E0;
   --accent-soft: #F0EEFF;
-  --accent-border: #DCD6FF;
-  --green: #1E9E6A;
+  --accent-border: #ECE8FF;
+  --green: #187E54;
   --green-soft: #E8F6EF;
-  --yellow: #D9A413;
+  --yellow: #8D6A0C;        /* текст: контраст 5.0 на белом, 4.65 на бежевом */
+  --yellow-bar: #E5C558;    /* заливки полос и диаграмм — здесь контраст не нужен */
   --yellow-soft: #FDF6E7;
   --yellow-ink: #8A6A0E;
   --kaspi: #F14635;
@@ -82,7 +83,7 @@ p { margin: 0; text-wrap: pretty; }
 .site-header > * { min-width: 0; }
 .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); flex-shrink: 0; }
 .nav { display: flex; gap: var(--s5); align-items: center; font-size: 14px; font-weight: 600; }
-.nav a { color: var(--muted); white-space: nowrap; display: inline-flex; align-items: center; }
+.nav a { color: var(--muted); white-space: nowrap; display: inline-flex; align-items: center; min-height: 44px; }
 .nav a:hover { color: var(--ink); }
 .nav a.nav-cta {
   color: #fff; background: var(--accent); font-weight: 700;
@@ -188,7 +189,7 @@ p { margin: 0; text-wrap: pretty; }
 .bar-label { font-size: 11.5px; font-weight: 700; color: var(--muted); width: 92px; flex-shrink: 0; }
 .bar { flex: 1; min-width: 40px; height: 6px; background: #EDEBE6; border-radius: 999px; overflow: hidden; }
 .bar > i { display: block; height: 100%; border-radius: 999px; background: var(--green); }
-.bar.warn > i { background: var(--yellow); }
+.bar.warn > i { background: var(--yellow-bar); }
 .bar-val { font-size: 12.5px; font-weight: 800; width: 38px; text-align: right; flex-shrink: 0; }
 .bar-val.ok { color: var(--green); } .bar-val.warn { color: var(--yellow); }
 
@@ -203,6 +204,8 @@ p { margin: 0; text-wrap: pretty; }
 .hero-cta { max-width: 420px; margin-top: var(--s6); display: flex; flex-direction: column; gap: var(--s3); }
 .badge-pill { display: inline-flex; align-items: center; gap: var(--s2); background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; color: var(--accent); }
 
+.logo, a.logo { display: inline-flex; align-items: center; min-height: 44px; }
+
 /* Стек отчётов в хиро: три карточки + плавающие бейджи */
 .hero-visual { position: relative; max-width: 440px; margin-inline: auto; padding: 172px 0 142px; }
 .mini-report { background: #1A1D27; border-radius: var(--radius-lg); padding: var(--s6); color: #fff; box-shadow: var(--shadow-pop); max-width: 420px; margin-inline: auto; position: relative; z-index: 3; transform: rotate(1.2deg); }
@@ -212,7 +215,7 @@ p { margin: 0; text-wrap: pretty; }
 .mr-back .b-title { font-size: 12px; font-weight: 800; letter-spacing: .04em; }
 .mr-back .b-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 700; }
 .mr-back-1 .b-title { color: var(--faint); }
-.mr-back-2 .b-title { color: #DCD6FF; }
+.mr-back-2 .b-title { color: #ECE8FF; }
 .float-badge { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 7px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 999px; padding: 9px 14px; font-size: 12.5px; font-weight: 700; box-shadow: 0 12px 30px -12px rgba(26,29,39,.28); white-space: nowrap; }
 .fb-1 { top: 0; right: -6px; }
 .fb-2 { bottom: 0; left: -10px; }
@@ -305,7 +308,7 @@ p { margin: 0; text-wrap: pretty; }
 
 .cta-band { background: var(--accent); border-radius: var(--radius-lg); padding: clamp(24px, 3vw, 36px) clamp(20px, 3vw, 36px); display: flex; flex-wrap: wrap; gap: var(--s5); align-items: center; justify-content: space-between; }
 .cta-band .t { color: #fff; font-size: clamp(18px, 1.8vw, 24px); font-weight: 800; letter-spacing: -0.02em; max-width: 24ch; text-wrap: balance; }
-.cta-band .s { color: #DCD6FF; font-size: 13.5px; font-weight: 600; margin-top: 4px; }
+.cta-band .s { color: #ECE8FF; font-size: 13.5px; font-weight: 600; margin-top: 4px; }
 .cta-band .btn { background: #fff; color: var(--accent); flex-shrink: 0; }
 .cta-band .btn:hover { background: #F0EEFF; }
 
@@ -335,12 +338,13 @@ p { margin: 0; text-wrap: pretty; }
 .site-footer .logo { color: #fff; }
 .footer-grid { max-width: var(--maxw); margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 48px); }
 .footer-col { display: flex; flex-direction: column; gap: var(--s3); align-items: flex-start; min-width: 0; }
-.footer-title { font-size: 12px; font-weight: 800; color: #7C8290; text-transform: uppercase; letter-spacing: .08em; }
-.footer-links { display: flex; flex-direction: column; gap: var(--s2); font-size: 14px; font-weight: 600; }
-.footer-requisites { font-size: 12.5px; line-height: 1.7; color: #7C8290; }
-.footer-bottom { max-width: var(--maxw); margin: var(--s7) auto 0; padding-top: var(--s5); border-top: 1px solid #2A2E3A; font-size: 12px; line-height: 1.6; color: #5C616E; }
+.footer-title { font-size: 12px; font-weight: 800; color: #9AA0AC; text-transform: uppercase; letter-spacing: .08em; }
+.footer-links { display: flex; flex-direction: column; font-size: 14px; font-weight: 600; }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.footer-requisites { font-size: 12.5px; line-height: 1.7; color: #9AA0AC; }
+.footer-bottom { max-width: var(--maxw); margin: var(--s7) auto 0; padding-top: var(--s5); border-top: 1px solid #2A2E3A; font-size: 12px; line-height: 1.6; color: #8F95A3; }
 .socials { display: flex; gap: var(--s3); }
-.socials a { display: flex; justify-content: center; align-items: center; width: 38px; height: 38px; border: 1px solid #3A3E4A; border-radius: 10px; }
+.socials a { display: flex; justify-content: center; align-items: center; width: 44px; height: 44px; border: 1px solid #3A3E4A; border-radius: 10px; }
 .socials a:hover { border-color: #5C616E; }
 .site-footer .btn-msg { background: transparent; border-color: #3A3E4A; color: #C9CCD4; }
 .site-footer .btn-msg:hover { border-color: #5C616E; color: #fff; }
@@ -459,4 +463,13 @@ a.photo-card:hover .pc-cap{color:#fff}
 .chip-ok,.chip-warn{font-size:11px;font-weight:800;border-radius:999px;padding:4px 10px;white-space:nowrap;flex-shrink:0}
 .chip-ok{background:var(--green-soft);color:var(--green)}
 .chip-warn{background:var(--yellow-soft);color:var(--yellow-ink)}
-.duo-acc i{color:#DCD6FF}
+.duo-acc i{color:#ECE8FF}
+
+/* текст только для скринридеров: заголовок страницы есть в разметке,
+   но не мешает визуальной композиции */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* иконки мессенджеров в шапке: зона нажатия не меньше пальца */
+.nav a[aria-label]{min-width:44px;justify-content:center}
+/* строчная ссылка-подсказка под кнопкой хиро тоже кликается пальцем */
+a.fineprint{min-height:44px;display:inline-flex;align-items:center}
