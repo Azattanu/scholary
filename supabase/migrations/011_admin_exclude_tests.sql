@@ -16,7 +16,8 @@ returns boolean language sql immutable as $$
   , false);
 $$;
 
-create or replace view admin_overview as
+drop view if exists admin_overview;
+create view admin_overview as
 select
   (select count(*) from auth.users u where not is_test_account(u.email))                     as users_total,
   (select count(*) from auth.users u where not is_test_account(u.email)
