@@ -257,8 +257,8 @@ function renderContact() {
   screen.appendChild(h('<div class="quiz-why">Расчёт уже почти готов. Пришлём вердикт и превью на WhatsApp</div>'));
   const form = h(
     '<div style="display:flex; flex-direction:column; gap:14px">' +
-      '<div class="field"><label for="fName">Имя</label><input id="fName" class="input" autocomplete="name" placeholder="Аида"></div>' +
-      '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __"></div>' +
+      '<div class="field"><label for="fName">Имя</label><input id="fName" class="input" autocomplete="name" placeholder="Аида" value="' + esc(answers.name || "") + '"></div>' +
+      '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __" value="' + esc(answers.whatsapp || "") + '"></div>' +
       '<div class="fineprint" style="text-align:left">Нажимая «Показать результат», ты соглашаешься с <a href="oferta.html" target="_blank">офертой</a> и <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Не звоним без предупреждения — сначала пишем в WhatsApp.</div>' +
     "</div>");
   screen.appendChild(form);
@@ -332,6 +332,7 @@ function previewCalcFallback() {
 function renderPaywall() {
   const p = previewCalc();
   setProgress(0, STEPS.length, true);
+  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex, paywall: true })); } catch (e) {}
   track("paywall_view");
   screen.innerHTML = "";
   screen.appendChild(h(
@@ -365,9 +366,14 @@ function renderPaywall() {
       '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px">' +
         '<button type="button" class="btn btn-primary" id="toPay" style="min-height:54px; font-size:16.5px">Получить полный отчёт — ' + fmt(C.PRICE_REPORT) + '&nbsp;₸</button>' +
         '<div class="fineprint">PDF сразу на WhatsApp и почту — регистрация не нужна<br>Карта / Apple Pay / Google Pay / Kaspi · не придёт за 10 минут — вернём деньги</div>' +
+        '<button type="button" class="btn btn-ghost" id="pwBack" style="align-self:center; width:auto">← Изменить ответы</button>' +
       "</div>" +
     "</div>"));
   $("toPay").addEventListener("click", () => { track("pay_click"); renderPayment(); });
+  $("pwBack").addEventListener("click", () => {
+    try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex })); } catch (e) {}
+    renderContact();
+  });
 }
 function lockedRow(name, pct, ok) {
   return '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px">' +
@@ -560,6 +566,7 @@ try {
     Object.assign(answers, saved.answers);
     stepIndex = Math.min(saved.step || 0, STEPS.length - 1);
     track("quiz_resume", { step: stepIndex + 1 });
+    if (saved.paywall && saved.answers.name) { track("quiz_start"); renderPaywall(); return; }
   }
 } catch (e) {}
 
