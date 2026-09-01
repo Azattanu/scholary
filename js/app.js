@@ -62,4 +62,25 @@
   };
 
   window.scholaryLeadId = leadId;
+
+  // UX: все внешние ссылки (мессенджеры, соцсети, чужие сайты) — в новой вкладке
+  function externalizeLinks() {
+    document.querySelectorAll('a[href^="http"]').forEach(function (a) {
+      try {
+        if (new URL(a.href).host !== location.host) {
+          a.target = "_blank";
+          a.rel = a.rel ? a.rel + " noopener" : "noopener";
+        }
+      } catch (e) {}
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", externalizeLinks);
+  else externalizeLinks();
+  window.addEventListener("load", externalizeLinks); // ссылки, чьи href проставляются скриптами страницы
+  // страховка для ссылок, добавляемых динамически (квиз, кабинет)
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="http"]') : null;
+    if (!a || a.target === "_blank") return;
+    try { if (new URL(a.href).host !== location.host) { a.target = "_blank"; a.rel = "noopener"; } } catch (err) {}
+  }, true);
 })();
