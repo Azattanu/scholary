@@ -3,26 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="css/style.css?v=28">
-  <script src="js/config.js?v=28"></script>
-  <script src="js/report-engine.js?v=28"></script>
-  <script src="js/app.js?v=28" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=31">
+  <script src="/js/config.js?v=31"></script>
+  <script src="/js/report-engine.js?v=31"></script>
+  <script src="/js/app.js?v=31" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
 <body>
 
 <header class="site-header">
-  <a class="logo" href="index.html">Scholary</a>
+  <a class="logo" href="/">Scholary</a>
   <div id="topStatus" style="font-size:13px; font-weight:700; color:var(--muted)"></div>
 </header>
 
 <div class="quiz-shell">
   <div class="quiz-top" id="quizTop">
     <div class="quiz-meta">
-      <span id="metaLeft">Вопрос 1 из 8</span>
+      <span id="metaLeft">Вопрос 1 из 7</span>
       <span class="step-count" id="metaRight">~2 минуты</span>
     </div>
     <div class="progress"><div class="progress-fill" id="progressFill" style="width:6%"></div></div>
@@ -145,7 +146,10 @@ const STEPS = [
 /* ---------- Рендер ---------- */
 function h(html) { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
 function setProgress(i, total, done) {
-  $("metaLeft").textContent = done ? "Готово" : ("Вопрос " + (i + 1) + " из " + total);
+  // последний шаг — контакты, а не вопрос: на сайте обещаем «7 вопросов»
+  var qTotal = total - 1;
+  $("metaLeft").textContent = done ? "Готово"
+    : (i >= qTotal ? "Последний шаг" : "Вопрос " + (i + 1) + " из " + qTotal);
   $("metaRight").textContent = done ? "" : ("~" + Math.max(1, Math.round((total - i) * 0.25)) + " мин осталось");
   const f = $("progressFill");
   f.style.width = (done ? 100 : Math.round(((i + 1) / (total + 1)) * 100)) + "%";
@@ -259,7 +263,7 @@ function renderContact() {
     '<div style="display:flex; flex-direction:column; gap:14px">' +
       '<div class="field"><label for="fName">Имя</label><input id="fName" class="input" autocomplete="name" placeholder="Аида" value="' + esc(answers.name || "") + '"></div>' +
       '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __" value="' + esc(answers.whatsapp || "") + '"></div>' +
-      '<div class="fineprint" style="text-align:left">Нажимая «Показать результат», ты соглашаешься с <a href="oferta.html" target="_blank">офертой</a> и <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Не звоним без предупреждения — сначала пишем в WhatsApp.</div>' +
+      '<div class="fineprint" style="text-align:left">Нажимая «Показать результат», ты соглашаешься с <a href="/oferta/" target="_blank">офертой</a> и <a href="/privacy/" target="_blank">политикой конфиденциальности</a>. Не звоним без предупреждения — сначала пишем в WhatsApp.</div>' +
     "</div>");
   screen.appendChild(form);
   const nav = h('<div class="quiz-nav"></div>');
@@ -360,7 +364,7 @@ function renderPaywall() {
         '<div class="locked-overlay">' +
           '<span class="lock-badge"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>' +
           '<div style="font-size:13.5px; font-weight:700">Вероятности по каждой программе, портфель и дедлайны — в полном отчёте</div>' +
-          '<a href="report-demo.html" target="_blank" style="font-size:13px; font-weight:700">Посмотреть пример отчёта →</a>' +
+          '<a href="/demo/" target="_blank" style="font-size:13px; font-weight:700">Посмотреть пример отчёта →</a>' +
         "</div>" +
       "</div>" +
       '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px">' +
@@ -399,7 +403,7 @@ function renderPayment() {
           : '<div class="notice">Онлайн-оплата картой подключается. Пока можно оплатить через Kaspi — отчёт пришлём вручную в течение часа.</div>') +
         '<a class="btn btn-kaspi" id="payKaspi" href="#">Оплатить через Kaspi</a>' +
       "</div>" +
-      '<div class="fineprint">Нажимая «Оплатить», ты принимаешь <a href="oferta.html" target="_blank">оферту</a>. Данные карты обрабатывает TipTop Pay (PCI DSS) — мы их не видим и не храним.</div>' +
+      '<div class="fineprint">Нажимая «Оплатить», ты принимаешь <a href="/oferta/" target="_blank">оферту</a>. Данные карты обрабатывает TipTop Pay (PCI DSS) — мы их не видим и не храним.</div>' +
       '<button type="button" class="btn btn-ghost" id="payBack">← Вернуться к результату</button>' +
     "</div>"));
 
@@ -494,7 +498,7 @@ function renderSuccess() {
       '<div class="card" style="display:flex; flex-direction:column; gap:10px; border-color:var(--accent-border, #DCD6FF); background:linear-gradient(135deg,#FBFAFF,#F4F1FF)">' +
         '<div style="font-size:15.5px; font-weight:800">Личный кабинет — чтобы отчёт не потерялся</div>' +
         '<div style="font-size:13px; color:var(--muted)">Портфель программ, чек-лист документов и дедлайны — соберём из твоих ответов автоматически. Вход через Google за 10 секунд.</div>' +
-        '<a class="btn btn-primary" href="cabinet.html" target="_blank" rel="noopener" onclick="track(\'cta_success_cabinet\')" style="align-self:flex-start">Создать кабинет</a>' +
+        '<a class="btn btn-primary" href="/cabinet/" target="_blank" rel="noopener" onclick="track(\'cta_success_cabinet\')" style="align-self:flex-start">Создать кабинет</a>' +
       "</div>" +
       '<div class="card" style="display:flex; flex-direction:column; gap:8px; border:1.5px solid #F5C6BE; background:#FFF9F7">' +
         '<div style="display:flex; align-items:center; gap:8px"><span style="font-size:11px; font-weight:800; letter-spacing:.1em; color:#B26A00; background:#FFF3E0; border-radius:999px; padding:3px 10px">ТОЛЬКО ДЛЯ ОПЛАТИВШИХ</span></div>' +

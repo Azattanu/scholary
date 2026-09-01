@@ -136,6 +136,13 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;
   animation:spin .8s linear infinite;margin:40vh auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+.spin-sm{width:18px;height:18px;border-width:2.5px;margin:0;flex-shrink:0}
+.ai-badge{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:6px;padding:2px 6px;margin-left:7px;vertical-align:2px}
+.ai-run{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.ai-note{font-size:11.5px;line-height:1.45;color:var(--muted);margin:10px 0 0}
+.sk{height:11px;border-radius:6px;background:linear-gradient(90deg,#E9E9F2,#F6F6FA,#E9E9F2);background-size:200% 100%;animation:shim 1.15s linear infinite;margin:9px 0 0}
+@keyframes shim{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.spinner,.sk{animation:none}}
 .center{max-width:420px;margin:0 auto;padding:10vh 22px 60px;text-align:center}
 
 /* ===== Кабинет 2.0 ===== */
@@ -249,7 +256,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
       <div style="text-align:center;margin-top:14px" class="sm"><a href="#" id="lnk-login2">Назад ко входу</a></div>
     </form>
 
-    <div class="xs mut" style="text-align:center;margin-top:26px">Входя, ты принимаешь <a href="oferta.html">оферту</a> и <a href="privacy.html">политику данных</a></div>
+    <div class="xs mut" style="text-align:center;margin-top:26px">Входя, ты принимаешь <a href="/oferta/">оферту</a> и <a href="/privacy/">политику данных</a></div>
   </div>
 </div>
 
@@ -289,7 +296,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
       <div class="chk"><span class="box ok">✓</span>Портфель из 9 программ под твой профиль</div>
       <div class="chk"><span class="box ok">✓</span>Персональный план документов</div>
     </div>
-    <a class="btn btn-primary btn-block" href="quiz.html">Пройти квиз · 2 минуты</a>
+    <a class="btn btn-primary btn-block" href="/quiz/">Пройти квиз · 2 минуты</a>
     <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-empty-out">Выйти</button>
   </div>
 </div>
@@ -323,10 +330,10 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 <div id="toast-root"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=30"></script>
-<script src="js/report-engine.js?v=30"></script>
-<script src="js/app.js?v=30"></script>
-<script src="js/doc-rules.js?v=30"></script>
-<script src="js/cabinet2.js?v=30"></script>
+<script src="/js/config.js?v=31"></script>
+<script src="/js/report-engine.js?v=31"></script>
+<script src="/js/app.js?v=31"></script>
+<script src="/js/doc-rules.js?v=31"></script>
+<script src="/js/cabinet2.js?v=31"></script>
 </body>
 </html>

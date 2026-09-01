@@ -1,0 +1,39 @@
+# ============================================================
+# Scholary — правила Apache для scholary.kz
+# Работают только если в Plesk (Apache и nginx → «Обрабатывать
+# статические файлы с помощью nginx») из списка расширений убраны
+# htm и html. Иначе HTML отдаёт nginx и эти правила игнорируются.
+# ============================================================
+
+# 1) HTML не кэшируем: иначе обновления сайта не доезжают до тех,
+#    кто уже заходил (хостинг по умолчанию ставит expires на 10 лет).
+#    Статика (css/js/картинки) кэшируется надолго и обновляется через ?v=NN.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|json|xml|txt)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+    Header unset Expires
+    Header set Pragma "no-cache"
+  </FilesMatch>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# 2) Свои страницы ошибок вместо стандартных серверных
+ErrorDocument 403 /error_docs/403.html
+ErrorDocument 404 /error_docs/404.html
+ErrorDocument 500 /error_docs/500.html
+ErrorDocument 502 /error_docs/502.html
+ErrorDocument 503 /error_docs/503.html
+
+# 3) Не отдаём наружу служебные файлы, начинающиеся с точки
+<IfModule mod_authz_core.c>
+  <FilesMatch "^\.(?!well-known)">
+    Require all denied
+  </FilesMatch>
+</IfModule>
