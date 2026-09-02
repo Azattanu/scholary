@@ -556,6 +556,7 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
 /* Сноска с источниками под блоком цифр: маленькая, но читаемая. */
 .muted-note{
   margin-top:12px;
+  max-width:78ch;
   font-size:12.5px;
   line-height:1.5;
   color:var(--faint);
@@ -600,6 +601,7 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
 .anchor-row.me b{color:var(--accent,#5B4BFF);}
 .anchor-note{
   margin:14px 0 0;
+  max-width:78ch;
   font-size:12.5px;
   line-height:1.55;
   color:var(--faint);
@@ -651,8 +653,8 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
   font-weight:700;
   padding:3px 10px;
   border-radius:999px;
-  background:#F1F1F5;
-  color:var(--faint);
+  background:#ECECF2;
+  color:#55555D;            /* прежний оттенок давал 4,43 при норме 4,5 */
   font-variant-numeric:tabular-nums;
 }
 .dl-card.soon .dl-left{background:#FDECEC; color:#9E2B2B;}
@@ -685,3 +687,7 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
 @media (max-width:560px){
   .par-grid{grid-template-columns:1fr;}
 }
+
+
+/* предел длины строки: длиннее ~90 знаков глаз теряет начало следующей строки */
+.card > p, .par-card p, .section > .container > p, .tariff-note { max-width: 78ch; }
