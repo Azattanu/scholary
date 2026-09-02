@@ -111,6 +111,39 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script>
+/* Если библиотека Supabase не загрузилась (блокировщик, корпоративный фильтр,
+   сбой CDN) — раньше страница оставалась пустой и человек упирался в тупик.
+   Пробуем запасной адрес, а если и он молчит — говорим об этом по-человечески. */
+(function () {
+  var FALLBACK = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+  function fail() {
+    // Раньше здесь всегда ждали DOMContentLoaded. Но срабатывает эта функция
+    // по таймауту через несколько секунд, когда событие давно прошло, —
+    // и сообщение не показывалось никогда: человек видел белый экран.
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
+    else render();
+    function render() {
+      if (window.supabase && window.supabase.createClient) return;
+      document.body.innerHTML =
+        '<div style="max-width:520px;margin:14vh auto;padding:28px;font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1D1D1F;text-align:center">' +
+        '<h1 style="font-size:22px;margin:0 0 10px">Не получилось загрузить панель</h1>' +
+        '<p style="color:#6E6E73;margin:0 0 18px">Похоже, часть кода заблокирована — это бывает из-за блокировщика рекламы, VPN или сети оператора. ' +
+        'Попробуй отключить блокировщик и обновить страницу или зайти из другого браузера.</p>' +
+        '<p style="margin:0 0 18px"><a href="/" style="color:#5B4BFF;font-weight:650">Вернуться на главную</a></p>' +
+        '<p style="margin:0"><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") +
+        '" style="display:inline-flex;align-items:center;min-height:44px;padding:0 22px;background:#0B7A3E;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
+    }
+  }
+  if (window.supabase && window.supabase.createClient) return;
+  var s = document.createElement("script");
+  s.src = FALLBACK; s.async = false;
+  s.onerror = fail;
+  s.onload = function () { if (!(window.supabase && window.supabase.createClient)) fail(); };
+  document.head.appendChild(s);
+  setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
+})();
+</script>
 <script src="/js/config.js?v=50"></script>
 <script src="/js/admin.js?v=50"></script>
 </body>
