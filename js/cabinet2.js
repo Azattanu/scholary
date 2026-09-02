@@ -435,8 +435,8 @@
       }).join("") : "") +
       aiTipHTML(vs) +
       '<div class="card" style="margin-top:14px;background:var(--bg);border-style:dashed">' +
-        '<div class="h-row"><div style="padding-right:10px"><b class="sm">Нужен живой человек?</b><div class="xs mut">Консультант проверит пакет и доведёт до подачи — 25 000 ₸</div></div>' +
-        '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸") + '">Написать</a></div></div>';
+        '<div class="h-row"><div style="padding-right:10px"><b class="sm">Нужен живой человек?</b><div class="xs mut">Консультант проверит пакет и доведёт до подачи — 35 000 ₸</div></div>' +
+        '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸") + '">Написать</a></div></div>';
   }
   function aiTipHTML(vs) {
     var tip = null;
@@ -978,7 +978,7 @@
         (S.tg && S.tg.chat_id ? "подключён · шаг дня и дедлайны" : "не подключён — уведомления о дедлайнах не придут") + "</div></div>" +
         '<button class="btn ' + (S.tg && S.tg.chat_id ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="tg">' + (S.tg && S.tg.chat_id ? "Настроить" : "Подключить") + "</button></div></div>" +
       '<div class="lst tappable" data-act="subscribe"><div style="flex:1"><b class="sm">Scholary Pro</b><div class="xs mut">' +
-        (S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date() ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ без лимитов · 2 990 ₸/мес") + '</div></div><span class="xs mut">→</span></div>' +
+        (S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date() ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ-разборы без очереди · 4 990 ₸/мес") + '</div></div><span class="xs mut">→</span></div>' +
       '<div class="lst tappable" data-act="reports"><div style="flex:1"><b class="sm">Мои отчёты</b><div class="xs mut">' + ((S.reports || []).length) + " " + plural((S.reports || []).length, "отчёт", "отчёта", "отчётов") + "</div></div><span class=\"xs mut\">→</span></div>" +
       '<div class="lst tappable" data-act="privacy"><div style="flex:1"><b class="sm">Данные и приватность</b><div class="xs mut">что хранится и как удалить</div></div><span class="xs mut">→</span></div>' +
       '<div class="lst tappable" data-act="help"><div style="flex:1"><b class="sm">Помощь</b><div class="xs mut">WhatsApp · Telegram · вопросы</div></div><span class="xs mut">→</span></div>' +
@@ -1090,25 +1090,30 @@
               '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 120 разборов ИИ в день и модель посильнее</div></div>" : "") +
         '<div class="card" style="margin-bottom:12px"><div class="h-row"><b>Бесплатно</b><span class="pill pill-mut">сейчас у тебя</span></div>' +
           '<div class="feat">✅ Все подачи, чек-листы и дедлайны</div>' +
-          '<div class="feat">✅ Каталог 129 программ с твоими вероятностями</div>' +
+          '<div class="feat">✅ Каталог 97 программ с твоими вероятностями</div>' +
           '<div class="feat">✅ Проверка документов по правилам — без лимита</div>' +
           '<div class="feat">✅ 8 разборов с ИИ в день: документы и письмо</div></div>' +
         '<div class="card" style="border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft);margin-bottom:12px">' +
           '<div class="h-row"><b>Scholary Pro</b><span class="pill pill-acc">выгодно в сезон</span></div>' +
-          '<div style="font-size:27px;font-weight:800;letter-spacing:-0.03em;margin:6px 0 2px">2 990 ₸<span class="sm mut" style="font-weight:600">/мес</span></div>' +
-          '<p class="xs mut" style="margin:0 0 8px">или 9 900 ₸ за 4 месяца сезона — экономия 2 060 ₸</p>' +
-          '<div class="feat">⚡ 120 разборов ИИ в день вместо 8</div>' +
-          '<div class="feat">⚡ Разбор делает более сильная модель — глубже</div>' +
-          '<div class="feat">⚡ Симулятор «что если» и сравнение программ</div>' +
+          '<div style="font-size:27px;font-weight:800;letter-spacing:-0.03em;margin:6px 0 2px">14 900 ₸<span class="sm mut" style="font-weight:600"> за весь сезон</span></div>' +
+          '<p class="xs mut" style="margin:0 0 8px">сентябрь — февраль, все дедлайны сезона. Помесячно — 4 990 ₸, на сезон выходит выгоднее на 5 060 ₸</p>' +
+          '<div class="feat">⚡ 60 разборов с ИИ в день вместо 8</div>' +
+          '<div class="feat">⚡ Разбор делает более сильная модель — глубже и конкретнее</div>' +
+          '<div class="feat">⚡ Симулятор «что если»: видно, что поднимет шансы сильнее всего</div>' +
           '<div class="feat">⚡ Приоритетные напоминания о дедлайнах</div>' +
-          '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="pay-pro" data-v="month">Оформить за 2 990 ₸/мес</button>' +
-          '<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="pay-pro" data-v="season">Сезон · 9 900 ₸</button>' +
+          '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="pay-pro" data-v="season">Взять на весь сезон · 14 900 ₸</button>' +
+          '<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="pay-pro" data-v="month">Сначала на месяц · 4 990 ₸</button>' +
         "</div>" +
-        '<div class="card"><div class="h-row"><b>Документы и подача</b><span class="pill pill-mut">человек</span></div>' +
-          '<div style="font-size:22px;font-weight:800;margin:6px 0 2px">25 000 ₸</div>' +
-          '<div class="feat">👤 Консультант проверяет пакет до 5 программ</div>' +
-          '<div class="feat">👤 Правки мотивационного вручную</div>' +
-          '<a class="btn btn-ghost btn-block" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸") + '">Написать в WhatsApp</a></div>' +
+        '<div class="card"><div class="h-row"><b>Документы и подача</b><span class="pill pill-mut">с живым человеком</span></div>' +
+          '<div style="font-size:22px;font-weight:800;margin:6px 0 2px">35 000 ₸</div>' +
+          '<p class="xs mut" style="margin:0 0 8px">Когда список программ уже понятен, а страшно ошибиться в бумагах. Ведём до отправки заявок — сами заявки подаёшь ты, доступы к твоим аккаунтам мы не просим.</p>' +
+          '<div class="feat">1️⃣ Созвон 30 минут: разбираем твои 5 программ и что по ним нужно</div>' +
+          '<div class="feat">2️⃣ Персональный чек-лист: какой документ, к какому числу, где заказывать</div>' +
+          '<div class="feat">3️⃣ Проверяем каждый документ глазами: перевод, апостиль, сроки, формат</div>' +
+          '<div class="feat">4️⃣ Мотивационное письмо и резюме — правки вручную, до двух кругов</div>' +
+          '<div class="feat">5️⃣ Финальная сверка пакета перед отправкой по каждой программе</div>' +
+          '<div class="feat">6️⃣ Ведём по дедлайнам до конца сезона и пишем, когда пора</div>' +
+          '<a class="btn btn-ghost btn-block" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸") + '">Написать в WhatsApp</a></div>' +
         '<p class="xs mut" style="margin-top:12px">Оплата картой подключается на этой неделе. Пока оформляем через WhatsApp — доступ включим вручную в тот же день. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p>';
     });
   }
@@ -1210,7 +1215,7 @@
     if (act === "tab-docs") { setTab("docs"); return; }
     if (act === "subscribe") { openSubscribe(); return; }
     if (act === "pay-pro") {
-      var plan = v === "season" ? "сезон · 9 900 ₸" : "месяц · 2 990 ₸";
+      var plan = v === "season" ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸";
       if (window.track) track("pro_click", { plan: v });
       if (C.TIPTOP_PUBLIC_TERMINAL_ID && String(C.TIPTOP_PUBLIC_TERMINAL_ID).indexOf("TODO") !== 0) {
         toast("Открываем оплату…");   // подключится, когда эквайринг будет активен
@@ -1471,7 +1476,7 @@
       Promise.all([
         sb.from("portfolio_items").select("*"),
         sb.from("user_documents").select("*"),
-        sb.from("programs").select("*"),
+        sb.from("programs_public").select("*"),
         sb.rpc("my_reports"),
         sb.from("probability_history").select("*").order("ts", { ascending: true }).limit(30),
         sb.from("tg_links").select("*").maybeSingle()

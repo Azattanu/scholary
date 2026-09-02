@@ -11,7 +11,7 @@ window.SCHOLARY_CONFIG = {
   // --- Цены (тенге) ---
   PRICE_REPORT: 4000,
   PRICE_CONSULT: 15000,
-  PRICE_PACKAGE: 25000,
+  PRICE_PACKAGE: 35000,
 
   // --- Контакты ---
   WHATSAPP_NUMBER: "77024666852", // без «+», для ссылок wa.me
@@ -31,7 +31,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-45",
+  RELEASE:      "web-46",
 
   // --- Ссылки ---
   DEMO_VIDEO_URL: "TODO_https://www.youtube.com/embed/XXXX", // видеодемо (unlisted)

@@ -70,6 +70,45 @@
 
   window.scholaryLeadId = leadId;
 
+
+  // ---- Меню в шапке на телефоне и планшете ----
+  // Второстепенные ссылки прячутся под кнопку, а вход в кабинет и главная
+  // кнопка остаются на виду. Работает одинаково на всех страницах.
+  function initMenu() {
+    var burger = document.getElementById("navBurger");
+    var menu = document.getElementById("siteMenu");
+    if (!burger || !menu) return;
+    function close() {
+      menu.hidden = true;
+      burger.classList.remove("open");
+      burger.setAttribute("aria-expanded", "false");
+      burger.setAttribute("aria-label", "Открыть меню");
+    }
+    function open() {
+      menu.hidden = false;
+      burger.classList.add("open");
+      burger.setAttribute("aria-expanded", "true");
+      burger.setAttribute("aria-label", "Закрыть меню");
+    }
+    burger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (menu.hidden) { open(); if (window.track) window.track("menu_open"); } else close();
+    });
+    // клик мимо меню, Escape и переход по ссылке — закрывают
+    document.addEventListener("click", function (e) {
+      if (menu.hidden) return;
+      if (menu.contains(e.target) || burger.contains(e.target)) return;
+      close();
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    menu.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", close); });
+    // если человек повернул телефон или растянул окно — меню не должно висеть
+    window.addEventListener("resize", function () { if (window.innerWidth > 900) close(); });
+    close();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initMenu);
+  else initMenu();
+
   // UX: все внешние ссылки (мессенджеры, соцсети, чужие сайты) — в новой вкладке
   function externalizeLinks() {
     document.querySelectorAll('a[href^="http"]').forEach(function (a) {
