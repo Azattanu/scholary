@@ -141,7 +141,7 @@
     else if (S.tab === "channels") v.innerHTML = viewChannels();
     else if (S.tab === "people") v.innerHTML = viewPeople();
     else if (S.tab === "product") v.innerHTML = viewProduct();
-    else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(); }
+    else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(false); }
   }
 
   function viewOverview() {
@@ -326,20 +326,30 @@
     return '<div class="box"><h2>Внешние сервисы</h2>' +
       '<p class="sub">Живая проверка: каждый пункт опрашивается прямо сейчас. Значения ключей нигде не показываются.</p>' +
       '<div id="healthBox"><div class="muted">Проверяю…</div></div>' +
-      '<div style="margin-top:12px"><button class="btn-adm btn-ghost" id="btnHealth">Проверить ещё раз</button></div></div>' +
+      '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="btn-adm btn-ghost" id="btnHealth">Проверить ещё раз</button>' +
+        '<button class="btn-adm btn-ghost" id="btnMailTest">Отправить тестовое письмо</button></div>' +
+      '<div class="muted" id="mailMsg" style="margin-top:8px"></div></div>' +
       '<div class="box"><h2>Что это значит</h2><p class="sub">Короткая расшифровка.</p>' +
       '<div class="note">Красный пункт не всегда авария: например, «Telegram — вебхук» покраснеет, пока бот не подключён, ' +
       'а сайт будет работать. Опасны три: Supabase (не сохранятся анкеты), TipTop (не отметятся оплаты) ' +
       'и WhatsApp (не узнаешь о заявке).</div></div>';
   }
-  function loadHealth() {
+  function loadHealth(sendTest) {
     var box = $("healthBox"); if (!box) return;
+    if (sendTest && $("mailMsg")) $("mailMsg").textContent = "Отправляю…";
     sb.auth.getSession().then(function (r) {
       var tok = r.data && r.data.session && r.data.session.access_token;
       if (!tok) { box.innerHTML = '<div class="muted">Нужно войти заново.</div>'; return; }
       return fetch("/api/health.php", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: tok }) }).then(function (x) { return x.json(); }).then(function (j) {
+        body: JSON.stringify({ token: tok, send_test: !!sendTest }) }).then(function (x) { return x.json(); }).then(function (j) {
         if (!box) return;
+        if (sendTest && $("mailMsg")) {
+          var s = (j && j.sent) || {};
+          $("mailMsg").textContent = "Почта: " + (s.email ? "письмо отправлено" : "НЕ отправлено") +
+            " · WhatsApp: " + (s.whatsapp ? "сообщение отправлено" : "НЕ отправлено") +
+            ". Проверь входящие — если письма нет и в спаме, ключ Resend или домен настроены неверно.";
+        }
         if (!j || !j.items) { box.innerHTML = '<div class="muted">Не удалось проверить: ' + esc((j && j.error) || "нет ответа") + "</div>"; return; }
         box.innerHTML = j.items.map(function (it) {
           return '<div class="frow" style="grid-template-columns:1fr auto"><div><b>' + esc(it.title) + "</b>" +
@@ -439,7 +449,8 @@
     if (t.id === "btnReport") { downloadReport(); return; }
     if (t.id === "btnLogout") { sb.auth.signOut().then(function () { location.reload(); }); return; }
     if (t.id === "btnPro") { grantPro(); return; }
-    if (t.id === "btnHealth") { loadHealth(); return; }
+    if (t.id === "btnHealth") { loadHealth(false); return; }
+    if (t.id === "btnMailTest") { loadHealth(true); return; }
     var seg = t.closest("#periodSeg button");
     if (seg) {
       S.days = parseInt(seg.getAttribute("data-d"), 10) || 30;
