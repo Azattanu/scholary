@@ -6,11 +6,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=50">
-  <script src="/js/config.js?v=50"></script>
-<script src="/js/telemetry.js?v=50"></script>
-  <script src="/js/report-engine.js?v=50"></script>
-  <script src="/js/app.js?v=50" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=51">
+  <script src="/js/config.js?v=51"></script>
+<script src="/js/telemetry.js?v=51"></script>
+  <script src="/js/report-engine.js?v=51"></script>
+  <script src="/js/app.js?v=51" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -461,6 +461,7 @@ function startTipTop(email) {
     // Факт оплаты ставит СЕРВЕР по уведомлению шлюза (api/tiptop.php):
     // с фронта поле paid не записывается, ему нельзя верить.
     onSuccess: renderSuccess,
+    onPending: renderPayPending,
     onFail: renderPayFail,
     onError: function () { alertBox("Виджет оплаты не загрузился. Проверь интернет или оплати через Kaspi."); }
   });
@@ -468,6 +469,26 @@ function startTipTop(email) {
 function alertBox(text) {
   const n = h('<div class="notice" style="margin-top:10px">' + text + "</div>");
   $("payButtons").appendChild(n);
+}
+
+/* ---------- Оплата в обработке ----------
+   Статус wait от шлюза: деньги могли уже уйти, но подтверждения ещё нет.
+   Врать «не прошла» здесь нельзя — человек испугается и заплатит второй раз. */
+function renderPayPending() {
+  track("pay_pending_screen");
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
+        '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--yellow-soft); border-radius:999px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D9A413" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>' +
+        '<div style="font-size:21px; font-weight:800">Платёж обрабатывается</div>' +
+        '<div style="font-size:14px; color:var(--muted); line-height:1.55">Банк ещё не подтвердил оплату. Повторно платить не нужно — деньги могут уже быть списаны.<br>Как только платёж пройдёт, я пришлю отчёт на почту и в WhatsApp. Обычно это занимает пару минут.</div>' +
+      "</div>" +
+      '<a class="btn btn-primary" id="waitWa" href="#">Написать мне в WhatsApp</a>' +
+      '<a class="btn btn-ghost" href="/cabinet/" onclick="track(\'free_cabinet_click\')">Пока открыть бесплатный кабинет</a>' +
+    "</div>"));
+  $("waitWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
+    "Здравствуйте! Оплата отчёта Scholary висит в обработке. Заявка: " + window.scholaryLeadId());
 }
 
 /* ---------- Оплата не прошла ---------- */
@@ -602,5 +623,8 @@ track("quiz_start");
 renderStep();
 });
 </script>
+<!-- Счётчик Яндекс.Метрики для посетителей без JavaScript.
+     Сам счётчик подключается в js/telemetry.js. -->
+<noscript><div><img src="https://mc.yandex.ru/watch/111376927" style="position:absolute; left:-9999px;" alt=""></div></noscript>
 </body>
 </html>
