@@ -41,7 +41,7 @@ $out = [
   '1_check_ok'        => send($base . 'check', $f, $secret),
   '2_check_bad_sig'   => send($base . 'check', $f, $secret, true),
   '3_check_bad_amount'=> send($base . 'check', ['Amount' => '10.00'] + $f, $secret),
-  '4_check_no_lead'   => send($base . 'check', ['InvoiceId' => ''] + $f, $secret),
+  '4_check_no_lead'   => send($base . 'check', ['InvoiceId' => ''] + $f, $secret),   // платёжная ссылка: пропускаем
   '5_pay_ok'          => send($base . 'pay',   $f, $secret),
   '6_pay_retry'       => send($base . 'pay',   $f, $secret),
 ];
@@ -60,7 +60,7 @@ $out['lead'] = $lead;
 $out['txn']  = $txn;
 $out['expected'] = [
   '1_check_ok' => '200 {"code":0}', '2_check_bad_sig' => '403 {"code":13}',
-  '3_check_bad_amount' => '200 {"code":12}', '4_check_no_lead' => '200 {"code":10}',
+  '3_check_bad_amount' => '200 {"code":12}', '4_check_no_lead' => '200 {"code":0} — оплата по ссылке без номера заказа',
   '5_pay_ok' => '200 {"code":0}', '6_pay_retry' => '200 {"code":0}',
 ];
 jout($out);
