@@ -175,6 +175,27 @@ function clean_txt($v, $max = 200) {
   $v = preg_replace('#(https?://|www\.)\S+#iu', '[ссылка убрана]', $v);
   return trim(mb_substr($v, 0, $max));
 }
+/* Адрес отправителя писем.
+   Домен scholary.kz подтверждён в Resend (DKIM + SPF-CNAME + DMARC), поэтому
+   письма уходят со своего адреса. Раньше отправка шла с общего адреса Resend:
+   такие письма чаще попадают в спам у mail.ru и Яндекса, а человек, купивший
+   отчёт, письмо в спаме просто не находит.
+   Значение MAIL_FROM из конфига уважаем, только если оно уже на нашем домене:
+   иначе один забытый старый адрес молча вернул бы всё как было. */
+function mail_from() {
+  $f = trim((string)(cfg()['MAIL_FROM'] ?? ''));
+  if ($f !== '' && stripos($f, '@scholary.kz') !== false) return $f;
+  /* Не no-reply: человек, купивший отчёт, часто отвечает на письмо, и это
+     самый дешёвый канал поддержки. Ящика hello@ нет — ответы уводит
+     Reply-To на живую почту владельца. */
+  return 'Scholary <hello@scholary.kz>';
+}
+/* Куда человек попадёт, если нажмёт «Ответить» в почтовом клиенте. */
+function mail_reply_to() {
+  $t = trim((string)(cfg()['MAIL_TO'] ?? ''));
+  return $t !== '' ? $t : null;
+}
+
 /* Уведомление владельцу: почта через Resend + WhatsApp через GREEN-API.
    Получатели жёстко заданы в конфиге, поэтому это не ретранслятор спама. */
 function notify_owner($title, $rows) {
@@ -198,7 +219,7 @@ function notify_owner($title, $rows) {
       'Authorization: Bearer ' . $c['RESEND_KEY'],
       'Content-Type: application/json',
     ], [
-      'from' => $c['MAIL_FROM'], 'to' => [$c['MAIL_TO']],
+      'from' => mail_from(), 'to' => [$c['MAIL_TO']],
       'subject' => $subj, 'html' => $html, 'text' => $plain,
     ], 20);
     $sent['email'] = ($r['code'] >= 200 && $r['code'] < 300);

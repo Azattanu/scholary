@@ -48,7 +48,7 @@ else {
      Поэтому 401 трактуем отдельно, а настоящую проверку отправки
      делает кнопка «Отправить тестовое письмо». */
   $r = http_json('https://api.resend.com/domains', 'GET', ['Authorization: Bearer ' . $c['RESEND_KEY']], null, 12);
-  $from = (string)($c['MAIL_FROM'] ?? '');
+  $from = mail_from();   /* показываем адрес, с которого письма реально уходят */
   $ownDomain = strpos($from, 'scholary.kz') !== false;
   if ($r['code'] === 200) {
     $ver = [];

@@ -128,7 +128,7 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
   if ($kind !== null && $currency === 'KZT') {
     /* Лид может отсутствовать: так приходят оплаты по платёжной ссылке.
        Деньги всё равно записываем и зовём владельца привязать заказ. */
-    $res = $leadOk ? tt_mark($lead, $txn, $sum, $email, $kind, 'success') : null;
+    $res = $leadOk ? tt_mark($lead, $txn, $sum, $email, $kind, 'success', $test) : null;
     tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $leadOk ? $lead : null, 'p_email' => $email,
       'p_amount' => $sum, 'p_kind' => $kind, 'p_status' => 'success', 'p_test' => $test]);
     /* Шлюзу отвечаем СРАЗУ: письмо и WhatsApp занимают до 40 секунд,
@@ -198,7 +198,7 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
 }
 
 if ($type === 'fail') {
-  if ($leadOk) tt_mark($lead, $txn, $sum, $email, $kind, 'fail');
+  if ($leadOk) tt_mark($lead, $txn, $sum, $email, $kind, 'fail', $test);
   tt_log('fail', 'declined', ['txn' => $txn, 'lead' => $lead, 'reason' => $reason]);
   echo '{"code":0}'; exit;
 }
@@ -255,7 +255,7 @@ function tt_send_report($name, $wa, $mail, $token, $test) {
 
   $digits = preg_replace('/\D/', '', (string)$wa);
   if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && strlen($digits) >= 10 && strlen($digits) <= 15) {
-    $msg = $hi . " Твой отчёт Scholary готов ð
+    $msg = $hi . " Твой отчёт Scholary готов 🎓
 
 "
          . "Вероятности по каждой программе, портфель подач и план документов — по ссылке:
@@ -288,8 +288,10 @@ function tt_send_report($name, $wa, $mail, $token, $test) {
     $text = $hi . "\n\nТвой отчёт Scholary готов: " . $link;
     $r = http_json('https://api.resend.com/emails', 'POST', [
       'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
-    ], ['from' => $c['MAIL_FROM'], 'to' => [$mail], 'subject' => $subj,
-        'html' => $html, 'text' => $text], 20);
+    ], array_filter([
+        'from' => mail_from(), 'to' => [$mail], 'subject' => $subj,
+        'reply_to' => mail_reply_to(),   /* «Ответить» ведёт живому человеку */
+        'html' => $html, 'text' => $text], function ($v) { return $v !== null; }), 20);
     $out['email'] = ($r['code'] >= 200 && $r['code'] < 300);
   }
   return $out;
@@ -310,10 +312,14 @@ function tt_rpc($fn, $args) {
   return is_array($r['json']) ? $r['json'] : ['ok' => true];
 }
 
-function tt_mark($lead, $txn, $amount, $email, $kind, $status) {
+function tt_mark($lead, $txn, $amount, $email, $kind, $status, $test = false) {
+  /* p_test отделяет тестовые платежи от боевых: без него проверка эквайринга
+     тестовой картой ставила leads.paid и попадала и в выручку, и в срочный
+     список «оплатил, но отчёта нет». */
   return tt_rpc('tiptop_mark_paid', [
     'p_lead' => $lead, 'p_txn' => (string)$txn, 'p_amount' => $amount,
     'p_email' => $email ?: null, 'p_kind' => $kind, 'p_status' => $status,
+    'p_test' => (bool)$test,
   ]) !== null;
 }
 
