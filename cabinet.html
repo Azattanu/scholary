@@ -156,6 +156,25 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 @keyframes shim{to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.spinner,.sk{animation:none}}
 .center{max-width:420px;margin:0 auto;padding:10vh 22px 60px;text-align:center}
+/* анкета в кабинете */
+.setup-top{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.setup-bar{flex:1;height:5px;border-radius:999px;background:#E9E9EE;overflow:hidden}
+.setup-bar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .25s ease}
+.setup-q{font-size:22px;font-weight:800;letter-spacing:-0.02em;text-align:left;line-height:1.25}
+.setup-why{font-size:13.5px;color:var(--muted);text-align:left;margin:6px 0 18px}
+.setup-opts{display:flex;flex-direction:column;gap:9px;text-align:left}
+.setup-opt{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;
+  padding:15px 16px;border:1.5px solid var(--border);border-radius:14px;background:#fff;
+  font-size:15.5px;font-weight:650;color:var(--ink);cursor:pointer;text-align:left;min-height:54px}
+.setup-opt:hover{border-color:#BDBDC7}
+.setup-opt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark)}
+.setup-opt .tick{flex:0 0 22px;width:22px;height:22px;border-radius:999px;border:1.5px solid #D2D2D7;background:#fff}
+.setup-opt.on .tick{border-color:var(--accent);background:var(--accent);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-size:14px;background-position:center;background-repeat:no-repeat}
+.setup-nav{display:flex;gap:10px;margin-top:22px}
+#v-setup .center{padding-top:5vh}
+#v-setup .center > p{text-align:left}
 
 /* ===== Кабинет 2.0 ===== */
 .sub-h{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
@@ -227,7 +246,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
     <div style="text-align:center;margin-bottom:24px">
       <div style="font-weight:800;font-size:26px;letter-spacing:-0.02em">Scholary<span style="color:var(--accent)">.</span></div>
       <div class="h2" style="font-size:26px;margin-top:20px" id="auth-title">Твой путь к Точке Б</div>
-      <div class="mut" style="font-size:15px;margin-top:4px" id="auth-sub">Отчёт, программы, документы и дедлайны — в одном месте</div>
+      <div class="mut" style="font-size:15px;margin-top:4px" id="auth-sub">Программы, дедлайны, документы и вероятности — в одном месте.<br>Кабинет бесплатный, карта не нужна.</div>
     </div>
 
     <button class="gbtn" id="btn-google">
@@ -296,22 +315,42 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
     <div class="mut" style="font-size:15px">Заберём его в кабинет — вместе с портфелем программ и планом документов</div>
     <div class="minirep" style="text-align:left" id="claim-card"></div>
     <button class="btn btn-primary btn-block" id="btn-claim">Забрать в кабинет</button>
-    <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-claim-skip">Позже</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-claim-skip">Это не мой расчёт — заполню заново</button>
     <div class="err" id="claim-err" hidden></div>
+  </div>
+</div>
+
+<!-- Анкета прямо в кабинете: раньше человек без расчёта упирался в тупик
+     «иди в квиз», а квиз заканчивался пейволлом. Теперь кабинет можно
+     собрать здесь же, бесплатно и за минуту. -->
+<div id="v-setup" hidden>
+  <div class="center" style="max-width:520px">
+    <div class="setup-top">
+      <div class="setup-bar"><i id="setup-bar-i"></i></div>
+      <div class="xs mut" id="setup-count"></div>
+    </div>
+    <div id="setup-body"></div>
+    <div class="setup-nav">
+      <button class="btn btn-ghost" id="setup-back" style="width:auto" hidden>← Назад</button>
+      <button class="btn btn-primary" id="setup-next" style="flex:1">Далее</button>
+    </div>
+    <p class="xs mut" style="margin-top:14px">Всё это бесплатно. Ответы можно изменить в профиле в любой момент — вероятности пересчитаются.</p>
   </div>
 </div>
 
 <div id="v-empty" hidden>
   <div class="center">
     <div style="font-size:44px">🧭</div>
-    <div class="h2" style="font-size:25px">Начнём с расчёта</div>
-    <div class="mut" style="font-size:15px;margin-bottom:18px">Кабинет строится вокруг твоих шансов. Пройди квиз — 2 минуты, и здесь появятся твои программы, дедлайны и план документов.</div>
+    <div class="h2" style="font-size:25px">Кабинет уже твой</div>
+    <div class="mut" style="font-size:15px;margin-bottom:18px">Осталось рассказать о себе — минута, шесть вопросов. После этого здесь появятся программы, дедлайны и план документов. Бесплатно.</div>
     <div class="card" style="margin-bottom:18px;text-align:left">
       <div class="chk"><span class="box ok">✓</span>Вероятность поступления и стипендии</div>
-      <div class="chk"><span class="box ok">✓</span>Портфель из 9 программ под твой профиль</div>
-      <div class="chk"><span class="box ok">✓</span>Персональный план документов</div>
+      <div class="chk"><span class="box ok">✓</span>Каталог программ с порогами и дедлайнами</div>
+      <div class="chk"><span class="box ok">✓</span>Портфель подач и план документов</div>
+      <div class="chk"><span class="box ok">✓</span>8 разборов с ИИ в день</div>
     </div>
-    <a class="btn btn-primary btn-block" href="/quiz/">Пройти квиз · 2 минуты</a>
+    <button class="btn btn-primary btn-block" id="btn-empty-setup">Заполнить анкету · 1 минута</button>
+    <a class="btn btn-ghost btn-block" style="margin-top:10px" href="/quiz/">Пройти полный квиз</a>
     <button class="btn btn-ghost btn-block" style="margin-top:10px" id="btn-empty-out">Выйти</button>
   </div>
 </div>
@@ -378,11 +417,11 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
 })();
 </script>
-<script src="/js/config.js?v=48"></script>
-<script src="/js/telemetry.js?v=48"></script>
-<script src="/js/report-engine.js?v=48"></script>
-<script src="/js/app.js?v=48"></script>
-<script src="/js/doc-rules.js?v=48"></script>
-<script src="/js/cabinet2.js?v=48"></script>
+<script src="/js/config.js?v=49"></script>
+<script src="/js/telemetry.js?v=49"></script>
+<script src="/js/report-engine.js?v=49"></script>
+<script src="/js/app.js?v=49"></script>
+<script src="/js/doc-rules.js?v=49"></script>
+<script src="/js/cabinet2.js?v=49"></script>
 </body>
 </html>
