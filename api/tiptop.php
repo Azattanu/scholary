@@ -46,7 +46,8 @@ foreach ($got as $g) foreach ($want as $w) if (hash_equals($w, $g)) $sigOk = tru
 if (!$sigOk) {
   /* Настоящий TipTop всегда подписывает. Значит это подделка —
      отвечаем 403 и ничего не пишем в базу. */
-  tt_log($type, 'bad_signature', ['ip' => client_ip(), 'headers' => count($got)]);
+  tt_log($type, 'bad_signature', ['ip' => client_ip(), 'headers' => count($got),
+    'self' => (($_SERVER['REMOTE_ADDR'] ?? '') === ($_SERVER['SERVER_ADDR'] ?? ''))]);
   http_response_code(403); echo '{"code":13}'; exit;
 }
 

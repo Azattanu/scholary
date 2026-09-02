@@ -43,18 +43,29 @@ chk($out, 'supabase', 'Supabase — база и каталог', $r['code'] === 
 /* ---- Почта ---- */
 if (empty($c['RESEND_KEY'])) chk($out, 'resend', 'Resend — письма', false, 'ключ не прописан', 'письма о заявках и оплатах не уходят');
 else {
+  /* Ключ Resend бывает «только отправка» — тогда список доменов он
+     не покажет и вернёт 401. Это НЕ поломка: письма всё равно уходят.
+     Поэтому 401 трактуем отдельно, а настоящую проверку отправки
+     делает кнопка «Отправить тестовое письмо». */
   $r = http_json('https://api.resend.com/domains', 'GET', ['Authorization: Bearer ' . $c['RESEND_KEY']], null, 12);
-  $doms = $r['json']['data'] ?? [];
-  $ver = [];
-  foreach ((array)$doms as $d) if (($d['status'] ?? '') === 'verified') $ver[] = $d['name'] ?? '';
   $from = (string)($c['MAIL_FROM'] ?? '');
   $ownDomain = strpos($from, 'scholary.kz') !== false;
-  chk($out, 'resend', 'Resend — письма', $r['code'] === 200,
-    $r['code'] === 200
-      ? ('ключ рабочий; подтверждённых доменов: ' . count($ver) . ($ver ? ' (' . implode(', ', $ver) . ')' : '') .
-         '; отправитель ' . ($ownDomain ? 'свой домен' : 'общий адрес Resend'))
-      : 'код ответа ' . $r['code'],
-    $ownDomain ? '' : 'письма уходят с общего адреса Resend — часть попадёт в спам. Нужны DNS-записи для scholary.kz');
+  if ($r['code'] === 200) {
+    $ver = [];
+    foreach ((array)($r['json']['data'] ?? []) as $d) if (($d['status'] ?? '') === 'verified') $ver[] = $d['name'] ?? '';
+    chk($out, 'resend', 'Resend — письма', true,
+      'ключ рабочий; подтверждённых доменов: ' . count($ver) . ($ver ? ' (' . implode(', ', $ver) . ')' : '') .
+      '; отправитель ' . ($ownDomain ? 'свой домен' : 'общий адрес Resend'),
+      $ownDomain ? '' : 'письма уходят с общего адреса Resend — часть попадёт в спам. Нужны DNS-записи для scholary.kz');
+  } elseif ($r['code'] === 401 || $r['code'] === 403) {
+    chk($out, 'resend', 'Resend — письма', true,
+      'ключ с правом только на отправку (список доменов закрыт) — это нормально; отправитель ' .
+      ($ownDomain ? 'свой домен' : 'общий адрес Resend'),
+      'проверить отправку по-настоящему: кнопка «Отправить тестовое письмо» ниже');
+  } else {
+    chk($out, 'resend', 'Resend — письма', false, 'код ответа ' . $r['code'],
+      'письма о заявках и оплатах могут не уходить');
+  }
 }
 
 /* ---- WhatsApp ---- */
@@ -108,15 +119,39 @@ chk($out, 'ai_limit', 'Расход ИИ за сегодня', $used < (int)($c[
 $logDir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiptop';
 $log = $logDir . '/log-' . gmdate('Y-m') . '.jsonl';
 $lines = is_file($log) ? @file($log, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
-$bad = 0; $last = null;
+/* Считаем отдельно: подделанная подпись — тревога, несовпавшая сумма —
+   чаще всего наша же рассинхронизация прайса, а не атака. */
+$forged = 0; $mismatch = 0; $selfTests = 0; $last = null;
+$selfIp = (string)($_SERVER['SERVER_ADDR'] ?? '');
 foreach ((array)$lines as $l) {
   $j = json_decode($l, true);
   if (!is_array($j)) continue;
-  if (($j['what'] ?? '') === 'bad_signature' || ($j['what'] ?? '') === 'mismatch') $bad++;
+  $w = $j['what'] ?? '';
+  if ($w === 'bad_signature') {
+    /* Скрипт самопроверки нарочно шлёт уведомление с чужой подписью —
+       и делает это с этого же сервера. Такие записи не тревога. */
+    if (!empty($j['self']) || (isset($j['ip']) && $selfIp !== '' && $j['ip'] === $selfIp)) $selfTests++;
+    else $forged++;
+  }
+  if ($w === 'mismatch' || $w === 'declined') $mismatch++;
   $last = $j['t'] ?? $last;
 }
-chk($out, 'tiptop_log', 'Журнал уведомлений шлюза', $bad === 0,
-  count($lines) . ' записей за месяц' . ($last ? ', последняя ' . $last : '') . ($bad ? '; подозрительных: ' . $bad : ''),
-  $bad ? 'есть уведомления с неверной подписью или суммой — посмотреть private/tiptop/' : '');
+chk($out, 'tiptop_log', 'Журнал уведомлений шлюза', $forged === 0,
+  count($lines) . ' записей за месяц' . ($last ? ', последняя ' . $last : '') .
+    ($forged ? '; с чужой подписью: ' . $forged : '') . ($mismatch ? '; отклонено по сумме: ' . $mismatch : '') .
+    ($selfTests ? '; из них наших самопроверок: ' . $selfTests : ''),
+  $forged ? 'кто-то шлёт уведомления с чужой подписью — посмотреть private/tiptop/'
+          : ($mismatch ? 'были отказы по сумме: сверить цены в js/config.js и в списке $PRICES в api/tiptop.php' : ''));
+
+/* Отдельное действие: реально отправить письмо себе.
+   Единственный честный способ проверить, что почта доходит. */
+if (!empty($in['send_test'])) {
+  $sent = notify_owner('Проверка связи из панели Scholary', [
+    'Что это'  => 'тестовое письмо из раздела «Система»',
+    'Когда'    => date('d.m.Y H:i'),
+    'Что дальше' => 'если письмо пришло — почта работает, ничего делать не нужно',
+  ]);
+  jout(['ok' => true, 'sent' => $sent, 'items' => $out]);
+}
 
 jout(['ok' => true, 'checked_at' => gmdate('c'), 'items' => $out]);
