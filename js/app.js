@@ -4,22 +4,49 @@
   const C = window.SCHOLARY_CONFIG || {};
   const configured = C.SUPABASE_URL && !String(C.SUPABASE_URL).startsWith("TODO");
 
+  /* ID лида — это ключ к анкете и к покупке: зная его, посторонний может
+     привязать чужой лид к своему кабинету. Поэтому он всегда криптостойкий.
+     Раньше запасной вариант был "anon-" + Date.now() — угадывается перебором
+     миллисекунд за минуту. Теперь запасной путь тоже случайный. */
+  function randId() {
+    try {
+      if (crypto && crypto.randomUUID) return crypto.randomUUID();
+      if (crypto && crypto.getRandomValues) {
+        var a = new Uint8Array(18), h = "";
+        crypto.getRandomValues(a);
+        for (var i = 0; i < a.length; i++) h += ("0" + a[i].toString(16)).slice(-2);
+        return "id-" + h;
+      }
+    } catch (e) {}
+    /* Совсем древний браузер без Web Crypto: три независимых источника
+       энтропии лучше одного счётчика времени. */
+    return "id-" + Date.now().toString(36) +
+           Math.random().toString(36).slice(2, 12) +
+           Math.random().toString(36).slice(2, 12);
+  }
+
   function leadId() {
     try {
       let id = localStorage.getItem("scholary_lead_id");
       if (!id) {
-        id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+        id = randId();
         localStorage.setItem("scholary_lead_id", id);
       }
       return id;
-    } catch (e) { return "anon-" + Date.now(); }
+    } catch (e) {
+      /* localStorage недоступен (приватный режим, блокировка хранилища) —
+         держим один и тот же id хотя бы в пределах вкладки, иначе события
+         и анкета разъедутся по разным лидам. */
+      if (!window.__scholaryLeadFallback) window.__scholaryLeadFallback = randId();
+      return window.__scholaryLeadFallback;
+    }
   }
 
   function utm() {
     try {
       const p = new URLSearchParams(location.search);
       const u = {};
-      ["utm_source", "utm_medium", "utm_campaign", "utm_content"].forEach(k => { if (p.get(k)) u[k] = p.get(k); });
+      ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid"].forEach(k => { if (p.get(k)) u[k] = p.get(k); });
       if (Object.keys(u).length) sessionStorage.setItem("scholary_utm", JSON.stringify(u));
       return JSON.parse(sessionStorage.getItem("scholary_utm") || "{}");
     } catch (e) { return {}; }
@@ -89,6 +116,9 @@
     } catch (e) {}
     /* И в Яндекс.Метрику: имя цели = имя события, кроме pay_result —
        его разводим по исходу (см. ymGoal), чтобы отмена не считалась продажей. */
+    /* И в пиксель Meta: стандартные события — чтобы реклама умела
+       оптимизироваться на заявку, а не на «клик по ссылке». */
+    try { if (window.scholaryFb) window.scholaryFb(event, data, props); } catch (e) {}
     try {
       if (window.scholaryYm) {
         var goal = ymGoal(event, data), price = goalPrice(goal, data);

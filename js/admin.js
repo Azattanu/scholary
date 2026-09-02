@@ -350,19 +350,25 @@
     ]) +
     (waiting.length ? '<div class="box" style="border-color:#F5C6BE;background:#FFF9F7"><h2>Оплатили, но отчёта не получили</h2>' +
       '<p class="sub">Самый срочный список: этим людям мы уже должны результат.</p>' +
-      table([["Оплата"], ["Ждёт", 1], ["Имя"], ["WhatsApp"], ["Почта"], ["Сумма", 1]], waiting, function (l) {
+      table([["Оплата"], ["Ждёт", 1], ["Имя"], ["WhatsApp"], ["Почта"], ["Сумма", 1], ["Что делать"]], waiting, function (l) {
         return "<td>" + dt(l.paid_at) + '</td><td class="num">' + num(l.chasov_zhdet) + " ч</td>" +
           "<td>" + (esc(l.name) || "—") + "</td><td>" + wa(l.whatsapp) + "</td><td>" + esc(l.email || "—") + "</td>" +
-          '<td class="num">' + (l.paid_amount ? money(l.paid_amount) : "—") + "</td>";
+          '<td class="num">' + (l.paid_amount ? money(l.paid_amount) : "—") + "</td>" +
+          '<td><button class="btn-adm" style="min-height:32px;padding:6px 13px;font-size:13px" data-act="issue" data-lead="' + esc(l.id) + '">' +
+            (l.est_raschet ? "Выдать отчёт" : "Собрать по анкете") + "</button>" +
+            '<div class="muted" style="font-size:11.5px;margin-top:3px" data-msg="' + esc(l.id) + '"></div></td>';
       }) + "</div>" : "") +
     '<div class="box"><h2>Выданные отчёты</h2>' +
       '<p class="sub">Каждый отчёт открывается по своей ссылке — её же получает человек.</p>' +
-      (reps.length ? table([["Когда"], ["Кому"], ["Уровень"], ["Программ", 1], ["Тексты ИИ"], ["Отправлен"], ["Ссылка"]], reps, function (r) {
+      (reps.length ? table([["Когда"], ["Кому"], ["Уровень"], ["Программ", 1], ["Тексты ИИ"], ["Отправлен"], ["Ссылка"], ["Отправить ещё раз"]], reps, function (r) {
         return "<td>" + dt(r.created_at) + "</td><td>" + (esc(r.name) || esc(r.lead_id) || "—") + "</td>" +
           "<td>" + esc(LEVELS[r.level] || r.level || "—") + '</td><td class="num">' + num(r.programm_v_otchete) + "</td>" +
           "<td>" + (r.est_teksty ? '<span class="pill ok">есть</span>' : '<span class="pill no">только расчёт</span>') + "</td>" +
           "<td>" + (r.report_sent_at ? '<span class="pill ok">' + day(r.report_sent_at) + "</span>" : '<span class="pill warn">не отмечен</span>') + "</td>" +
-          '<td><a href="/report/?t=' + encodeURIComponent(r.token) + '" target="_blank" rel="noopener">открыть</a></td>';
+          '<td><a href="/report/?t=' + encodeURIComponent(r.token) + '" target="_blank" rel="noopener">открыть</a> · ' +
+            '<a href="#" data-act="copy" data-link="/report/?t=' + encodeURIComponent(r.token) + '">скопировать</a></td>' +
+          '<td><button class="btn-adm btn-ghost" style="min-height:32px;padding:6px 13px;font-size:13px" data-act="resend" data-lead="' + esc(r.lead_id) + '">WhatsApp + почта</button>' +
+            '<div class="muted" style="font-size:11.5px;margin-top:3px" data-msg="' + esc(r.lead_id) + '"></div></td>';
       })
       : '<div class="muted">Отчётов пока нет.</div>' +
         '<div class="note"><b>Почему их ноль.</b> Отчёт после оплаты сейчас никто не создаёт автоматически: ' +
@@ -527,6 +533,13 @@
     if (t.id === "btnPro") { grantPro(); return; }
     if (t.id === "btnHealth") { loadHealth(false); return; }
     if (t.id === "btnMailTest") { loadHealth(true); return; }
+    var act = t.closest("[data-act]");
+    if (act) {
+      var a = act.getAttribute("data-act");
+      if (a === "issue")  { e.preventDefault(); issueReport(act); return; }
+      if (a === "resend") { e.preventDefault(); resendReport(act); return; }
+      if (a === "copy")   { e.preventDefault(); copyLink(act); return; }
+    }
     var seg = t.closest("#periodSeg button");
     if (seg) {
       S.days = parseInt(seg.getAttribute("data-d"), 10) || 30;
@@ -543,6 +556,87 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && $("gate") && !$("gate").hidden) login();
   });
+
+  /* ---------- восстановление отчёта ----------
+     Три кнопки закрывают все случаи «человек заплатил, а отчёта у него нет»:
+       · «Выдать отчёт» — снимок расчёта уже лежит на лиде (leads.result);
+       · «Собрать по анкете» — снимка нет (старая оплата), считаем тем же
+         движком report-engine.js прямо здесь, из ответов анкеты;
+       · «Отправить ещё раз» — отчёт есть, но не дошёл: сервер шлёт ссылку
+         на сохранённые WhatsApp и почту.
+     Второй реализации формул нет: и квиз, и админка зовут ScholaryEngine. */
+  function say(lead, text, bad) {
+    var el = document.querySelector('[data-msg="' + (window.CSS && CSS.escape ? CSS.escape(lead) : lead) + '"]');
+    if (el) { el.textContent = text; el.style.color = bad ? "#C0392B" : "#1E874B"; }
+  }
+  function splitList(v) {
+    return String(v || "").split(",").map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  /* Квиз хранит списки строкой через запятую — движок ждёт массивы. */
+  function answersFromLead(row) {
+    var a = {};
+    ["level", "year", "gpa_band", "school_type", "gpa_uni", "gpa_phd", "uni_type", "phd_topic",
+     "lang_status", "ielts_band", "sat", "budget", "priority", "target_university", "target_major", "name"
+    ].forEach(function (k) { if (row[k]) a[k] = row[k]; });
+    ["field", "achievements", "target_countries"].forEach(function (k) {
+      var l = splitList(row[k]); if (l.length) a[k] = l;
+    });
+    return a;
+  }
+  function issueReport(btn) {
+    var lead = btn.getAttribute("data-lead");
+    btn.disabled = true; say(lead, "Готовлю…");
+    rpc("admin_lead_answers", { p_lead: lead }).then(function (row) {
+      if (!row) throw new Error("лид не найден");
+      if (row.token) { say(lead, "Отчёт уже есть — жми «Отправить ещё раз»"); return null; }
+      if (row.has_result) return rpc("admin_save_report", { p_lead: lead, p_data: null });
+      if (!window.ScholaryEngine) throw new Error("движок не загрузился — обнови страницу");
+      var a = answersFromLead(row);
+      if (!a.level) throw new Error("анкета не заполнена, отчёт не из чего собрать");
+      var data = ScholaryEngine.evaluate(a);
+      data.answers = a;
+      data.generatedAt = new Date().toISOString();
+      return rpc("admin_save_report", { p_lead: lead, p_data: data });
+    }).then(function (j) {
+      if (!j) { btn.disabled = false; return; }
+      if (!j.ok) throw new Error(j.why === "no_data" ? "нет ни расчёта, ни анкеты" : (j.why || "не вышло"));
+      say(lead, "Отчёт создан. Отправляю ссылку…");
+      return sendTo(lead);
+    }).then(function () { loadAll(); }, function (e) {
+      btn.disabled = false; say(lead, "Ошибка: " + e.message, true);
+    });
+  }
+  function resendReport(btn) {
+    var lead = btn.getAttribute("data-lead");
+    btn.disabled = true; say(lead, "Отправляю…");
+    sendTo(lead).then(function () { btn.disabled = false; }, function (e) {
+      btn.disabled = false; say(lead, "Ошибка: " + e.message, true);
+    });
+  }
+  /* Отправку делает сервер: ключи GREEN-API и Resend в браузер не попадают. */
+  function sendTo(lead) {
+    return sb.auth.getSession().then(function (r) {
+      var tok = r.data && r.data.session && r.data.session.access_token;
+      if (!tok) throw new Error("сессия истекла, войди заново");
+      return fetch("/api/report-recover.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+        body: JSON.stringify({ mode: "admin", lead: lead })
+      });
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (!j.ok) throw new Error(j.why === "no_report" ? "отчёта ещё нет" : (j.error || "сервер не отправил"));
+        var s = j.sent || {};
+        if (!s.whatsapp && !s.email) { say(lead, "Ни один канал не сработал — отправь ссылку руками", true); return; }
+        say(lead, "Ушло: " + [s.whatsapp ? "WhatsApp" : null, s.email ? "почта" : null].filter(Boolean).join(" + "));
+      });
+  }
+  function copyLink(a) {
+    var url = location.origin + a.getAttribute("data-link");
+    var done = function () { a.textContent = "скопировано"; setTimeout(function () { a.textContent = "скопировать"; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () {});
+    else { var i = document.createElement("input"); i.value = url; document.body.appendChild(i); i.select(); try { document.execCommand("copy"); done(); } catch (e) {} i.remove(); }
+  }
 
   function grantPro() {
     var email = ($("proEmail").value || "").trim();
