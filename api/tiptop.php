@@ -167,9 +167,41 @@ if ($type === 'fail') {
   echo '{"code":0}'; exit;
 }
 
-/* refund / cancel — фиксируем в логе, деньги вернул человек руками */
+/* ---------- 5. возврат ----------
+   Возврат делает владелец руками в ЛК TipTop. Наша задача — снять
+   ровно то, что выдал исходный платёж: отчёт или дни подписки.
+   Частичный возврат доступ не снимает. */
+if ($type === 'refund') {
+  $orig = trim((string)($f['PaymentTransactionId'] ?? ''));
+  $r = tt_rpc('tiptop_refund', ['p_orig_txn' => $orig, 'p_refund_txn' => (string)$txn, 'p_amount' => $amount]);
+  tt_finish('{"code":0}');
+  tt_log('refund', 'done', ['orig' => $orig, 'refund' => $txn, 'amount' => $amount, 'res' => is_array($r) ? $r : null]);
+  if (tt_once('refund-' . $txn)) {
+    $what = is_array($r) ? $r : [];
+    notify_owner($test ? 'Возврат денег (ТЕСТ)' : 'Возврат денег', [
+      'Сумма'      => number_format((float)$amount, 0, '.', ' ') . ' ₸',
+      'За что'     => tt_kind_ru((string)($what['kind'] ?? '')) ?: '—',
+      'Транзакция' => clean_txt((string)$orig, 32) ?: '—',
+      'Доступ'     => !empty($what['partial']) ? 'частичный возврат — доступ оставлен'
+                    : (!empty($what['ok']) ? 'снят' : 'НЕ СНЯТ — платежа нет в журнале, разобрать вручную'),
+      'ID лида'    => clean_txt((string)($what['lead'] ?? ''), 64) ?: '—',
+    ]);
+  }
+  exit;
+}
+
+/* cancel — отмена холда двухстадийного платежа. Мы работаем по Single,
+   поэтому сюда попадать не должны; фиксируем и зовём человека. */
 tt_log($type, 'noted', ['txn' => $txn, 'lead' => $lead, 'amount' => $amount]);
-echo '{"code":0}';
+tt_finish('{"code":0}');
+if (tt_once($type . '-' . $txn)) {
+  notify_owner('Отмена платежа — посмотреть', [
+    'Тип'        => clean_txt($type, 20),
+    'Сумма'      => $amount . ' ' . clean_txt($currency, 8),
+    'Транзакция' => clean_txt($txn, 32) ?: '—',
+    'ID лида'    => clean_txt($lead, 64) ?: '—',
+  ]);
+}
 
 /* ============================================================ */
 
