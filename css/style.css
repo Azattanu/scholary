@@ -186,7 +186,7 @@ p { margin: 0; text-wrap: pretty; }
 .locked-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--s2); background: rgba(255,255,255,.55); text-align: center; padding: 0 var(--s7); }
 .lock-badge { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; background: var(--ink); border-radius: 999px; }
 .bar-row { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
-.bar-label { font-size: 11.5px; font-weight: 700; color: var(--muted); width: 92px; flex-shrink: 0; }
+.bar-label { font-size: 12.5px; font-weight: 700; color: var(--muted); width: 92px; flex-shrink: 0; }
 .bar { flex: 1; min-width: 40px; height: 6px; background: #EDEBE6; border-radius: 999px; overflow: hidden; }
 .bar > i { display: block; height: 100%; border-radius: 999px; background: var(--green); }
 .bar.warn > i { background: var(--yellow-bar); }
@@ -473,3 +473,129 @@ a.photo-card:hover .pc-cap{color:#fff}
 .nav a[aria-label]{min-width:44px;justify-content:center}
 /* строчная ссылка-подсказка под кнопкой хиро тоже кликается пальцем */
 a.fineprint{min-height:44px;display:inline-flex;align-items:center}
+
+
+/* Сноска с источниками под блоком цифр: маленькая, но читаемая. */
+.muted-note{
+  margin-top:12px;
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--faint);
+  font-weight:600;
+  max-width:70ch;
+}
+
+
+/* ---- Ценовой якорь: сравнение с рынком ---- */
+.anchor-box{
+  margin-top:14px;
+  background:var(--card,#fff);
+  border:1px solid var(--border,#E8E8ED);
+  border-radius:20px;
+  padding:20px 22px;
+}
+.anchor-title{
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-0.01em;
+  margin-bottom:12px;
+}
+.anchor-rows{display:flex; flex-direction:column;}
+.anchor-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+  padding:10px 0;
+  border-bottom:1px solid var(--border,#EEE);
+  font-size:14.5px;
+  color:#3D414D;
+}
+.anchor-row:last-child{border-bottom:none;}
+.anchor-row b{
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  font-weight:700;
+  color:#1D1D1F;
+}
+.anchor-row.me{color:#1D1D1F; font-weight:650;}
+.anchor-row.me b{color:var(--accent,#5B4BFF);}
+.anchor-note{
+  margin:14px 0 0;
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--faint);
+  font-weight:600;
+}
+@media (max-width:560px){
+  .anchor-box{padding:16px 16px;}
+  .anchor-row{flex-direction:column; gap:2px; align-items:flex-start;}
+  .anchor-row b{font-size:15px;}
+}
+
+
+/* ---- Ближайшие дедлайны ---- */
+.dl-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:12px;
+  margin-top:18px;
+  align-items:stretch;      /* карточки в ряду одной высоты */
+}
+.dl-card{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:16px 18px;
+  background:var(--card,#fff);
+  border:1px solid var(--border,#E8E8ED);
+  border-radius:18px;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color .15s ease, transform .15s ease;
+  min-height:44px;
+}
+.dl-card:hover,
+.dl-card:focus-visible{border-color:var(--accent,#5B4BFF); transform:translateY(-1px);}
+.dl-when{
+  font-size:19px;
+  font-weight:750;
+  letter-spacing:-0.02em;
+  font-variant-numeric:tabular-nums;
+}
+.dl-name{font-size:14.5px; font-weight:650; line-height:1.35;}
+.dl-note{font-size:13px; color:var(--muted,#6E6E73); line-height:1.4;}
+.dl-left{
+  margin-top:auto;          /* подписи «через N дней» выравниваются по низу карточки */
+  padding-top:8px;
+  align-self:flex-start;
+  font-size:12px;
+  font-weight:700;
+  padding:3px 10px;
+  border-radius:999px;
+  background:#F1F1F5;
+  color:var(--faint);
+  font-variant-numeric:tabular-nums;
+}
+.dl-card.soon .dl-left{background:#FDECEC; color:#9E2B2B;}
+.dl-card.soon .dl-when{color:#9E2B2B;}
+@media (max-width:560px){
+  .dl-grid{grid-template-columns:1fr;}
+  .dl-card{padding:14px 16px;}
+}
+
+
+/* ---- Шапка на узких телефонах ----
+   На 390px строка шапки не помещалась: логотип + две иконки мессенджеров
+   выталкивали кнопку «Узнать вероятность» за правый край, и вся страница
+   начинала прокручиваться вбок. Иконки убираем: WhatsApp и так висит
+   плавающей кнопкой в правом нижнем углу, а Telegram есть в хиро и подвале. */
+@media (max-width: 460px) {
+  .site-header { padding-inline: var(--s4); gap: var(--s3); }
+  .nav a[aria-label] { display: none; }
+  .nav a.nav-cta { padding: 9px 13px; font-size: 12.5px; }
+}
+@media (max-width: 340px) {
+  .logo { font-size: 18px; }
+  .nav a.nav-cta { padding: 9px 11px; font-size: 12px; }
+}
