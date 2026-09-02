@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Твой отчёт | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=51">
-  <script src="/js/config.js?v=51"></script>
-<script src="/js/telemetry.js?v=51"></script>
-  <script src="/js/report-engine.js?v=51"></script>
-  <script src="/js/app.js?v=51" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=53">
+  <script src="/js/config.js?v=53"></script>
+<script src="/js/telemetry.js?v=53"></script>
+  <script src="/js/report-engine.js?v=53"></script>
+  <script src="/js/app.js?v=53" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Персональный отчёт Scholary</h1>
@@ -45,6 +45,52 @@
 
 <script>
 "use strict";
+function renderRecovery(box, C) {
+  box.innerHTML =
+    '<div class="card" style="display:flex; flex-direction:column; gap:12px">' +
+      '<div><strong style="font-size:17px">Не можем открыть этот отчёт</strong>' +
+      '<p style="color:var(--muted); font-size:14px; margin:6px 0 0">Ссылка неполная или устарела — такое бывает, если письмо переслали или адрес скопировался не целиком. Отчёт при этом никуда не делся: он хранится за тобой и не сгорает.</p></div>' +
+      '<div style="background:var(--bg); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px">' +
+        '<div style="font-size:14px; font-weight:700">Уже оплачивал? Пришлём ссылку заново</div>' +
+        '<div class="field"><label for="recContact">Номер WhatsApp или почта, которые ты указывал при покупке</label>' +
+        '<input id="recContact" class="input" autocomplete="tel" placeholder="+7 701 234 56 78"></div>' +
+        '<button type="button" class="btn btn-primary" id="recGo">Прислать ссылку заново</button>' +
+        '<div id="recMsg" style="font-size:13px; font-weight:600; color:var(--muted)"></div>' +
+      '</div>' +
+      '<div style="font-size:13px; color:var(--muted); font-weight:600">Ещё не покупал отчёт? <a href="/quiz/">Пройди квиз</a> — расчёт бесплатный.<br>Нужен человек: <a href="https://wa.me/' + C.WHATSAPP_NUMBER + '" target="_blank" rel="noopener">написать в WhatsApp</a>.</div>' +
+    '</div>';
+  var input = document.getElementById("recContact");
+  var btn = document.getElementById("recGo");
+  var msg = document.getElementById("recMsg");
+  btn.addEventListener("click", async function () {
+    var v = (input.value || "").trim();
+    if (v.length < 5) { msg.style.color = "var(--red, #D92D20)"; msg.textContent = "Впиши номер WhatsApp или почту."; return; }
+    btn.disabled = true; btn.textContent = "Ищем…"; msg.style.color = "var(--muted)"; msg.textContent = "";
+    try {
+      var r = await fetch("/api/report-recover.php", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contact: v })
+      });
+      var j = await r.json().catch(function () { return {}; });
+      if (r.status === 429 || j.why === "rate_limited") {
+        msg.style.color = "var(--red, #D92D20)";
+        msg.textContent = "Слишком много попыток. Напиши нам в WhatsApp — найдём отчёт вручную.";
+      } else {
+        /* Ответ намеренно одинаковый: сервер не подтверждает, есть ли такой
+           клиент, иначе форму можно было бы использовать как проверялку базы. */
+        msg.style.color = "var(--green)";
+        msg.textContent = "Готово. Если на эти контакты был оплачен отчёт, ссылка уже отправлена в WhatsApp и на почту (проверь папку «Спам»).";
+      }
+    } catch (err) {
+      msg.style.color = "var(--red, #D92D20)";
+      msg.textContent = "Не получилось отправить. Напиши нам в WhatsApp — поможем сразу.";
+    }
+    btn.disabled = false; btn.textContent = "Прислать ссылку заново";
+  });
+  input.addEventListener("keydown", function (e) { if (e.key === "Enter") btn.click(); });
+  if (window.track) track("report_not_found");
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
   const C = window.SCHOLARY_CONFIG;
   const box = document.getElementById("report");
@@ -75,7 +121,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       payload = j;
     }
   } catch (e) {
-    box.innerHTML = '<div class="card" style="text-align:center"><strong>Отчёт не найден</strong><p style="color:var(--muted); font-size:14px; margin-top:6px">Проверь ссылку из WhatsApp или письма. Не открывается — напиши нам: <a href="https://wa.me/' + C.WHATSAPP_NUMBER + '">WhatsApp</a></p></div>';
+    /* Сюда попадает человек, который уже заплатил: ссылка старая, письмо
+       потерялось, открыл не на том телефоне. Ему нужен не упрёк «проверь
+       ссылку», а способ получить отчёт прямо сейчас. Форма ниже находит
+       покупку по телефону или почте и отправляет ссылку на СОХРАНЁННЫЕ
+       контакты — сам токен браузеру не выдаётся никогда. */
+    renderRecovery(box, C);
     return;
   }
 
@@ -103,7 +154,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       '<div class="bar-row"><span class="bar-label">Поступление</span><div class="bar' + (p.p.adm < .5 ? " warn" : "") + '"><i style="width:' + pct(p.p.adm) + '%"></i></div><span class="bar-val ' + (p.p.adm >= .5 ? "ok" : "warn") + '">' + pct(p.p.adm) + "%</span></div>" +
       (p.p.sch != null ? '<div class="bar-row"><span class="bar-label">Стипендия</span><div class="bar' + (p.p.sch < .45 ? " warn" : "") + '"><i style="width:' + pct(p.p.sch) + '%"></i></div><span class="bar-val ' + (p.p.sch >= .45 ? "ok" : "warn") + '">' + pct(p.p.sch) + "%</span></div>"
         : '<div style="font-size:12px; font-weight:700; color:var(--muted)">Стипендии нет — но обучение бесплатное</div>') +
-      '<div class="notice">дедлайн: ' + esc(p.deadline) + (p.note ? " · " + esc(p.note) : "") + "</div>" +
+      /* «дедлайн: 22 июля» без года читается как «уже прошёл»: отчёт человек
+         открывает в сентябре, а поступает через год. Пишем «обычно», чтобы
+         дата воспринималась как ориентир цикла, а не как сегодняшний срок. */
+      '<div class="notice">дедлайн — обычно ' + esc(p.deadline) + (p.note ? " · " + esc(p.note) : "") + "</div>" +
       (comments[p.id] ? '<div style="font-size:12.5px; color:var(--ink-soft); font-weight:600; line-height:1.5">' + esc(comments[p.id]) + "</div>" : "") +
     "</div>").join("");
 
@@ -111,6 +165,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     '<div style="display:flex; justify-content:space-between; gap:10px; align-items:center; background:var(--bg); border-radius:12px; padding:12px 14px"><span style="font-size:13.5px; font-weight:700">' + esc(b.what) + '</span><span style="font-size:14px; font-weight:800; color:var(--green); white-space:nowrap">+' + b.pp + " п.п.</span></div>").join("");
 
   const wa = txt => "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(txt);
+  const rub = n => Number(n).toLocaleString("ru-RU").replace(/\u00A0/g, "\u00A0") + "\u00A0\u20B8";
+  const PRICE_CONSULT = C.PRICE_CONSULT || 15000;
+  const PRICE_PACKAGE = C.PRICE_PACKAGE || 35000;
 
   // Исходные данные расчёта: отчёт персональный, и это видно (старые отчёты без answers не ломаем)
   let srcBlock = "";
@@ -158,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       '<div class="card" style="padding:0; overflow-x:auto; margin-top:10px"><table style="width:100%; border-collapse:collapse; font-size:12px; min-width:340px">' +
       '<tr style="color:var(--muted); font-weight:700; text-align:left"><th style="padding:10px 12px; border-bottom:1px solid var(--border)">Программа</th><th style="padding:10px 6px; border-bottom:1px solid var(--border); text-align:right">Поступл.</th><th style="padding:10px 6px; border-bottom:1px solid var(--border); text-align:right">Стипенд.</th><th style="padding:10px 12px; border-bottom:1px solid var(--border); text-align:right">Дедлайн</th></tr>' +
       tableRows + "</table></div>" +
-      '<div style="font-size:11px; color:var(--faint); font-weight:600; margin-top:6px">* 0 ₸ — стипендии нет, но обучение бесплатное. Дедлайны ориентировочные — проверяй на официальных сайтах.</div></div>' +
+      '<div style="font-size:11px; color:var(--faint); font-weight:600; margin-top:6px">* 0 ₸ — стипендии нет, но обучение бесплатное. Даты дедлайнов — типовые для цикла: год к году они сдвигаются на несколько дней, точную дату для твоего года смотри на официальном сайте программы.</div></div>' +
     // 5. Карточки топ-5
     '<div style="display:flex; flex-direction:column; gap:10px">' + cards + "</div>" +
     // 6. Оси
@@ -169,8 +226,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     '<div class="card" style="display:flex; flex-direction:column; gap:12px; background:var(--accent-soft); border-color:var(--accent-border)">' +
       '<strong style="font-size:17px">Что дальше</strong>' +
       '<p style="font-size:13.5px; color:#4B5060">' + esc(t.next_step || "Дальше самое сложное — документы. Большинство отказов случается по формальностям, а не по способностям: просроченный сертификат, не тот перевод, пропущенный второй трек.") + "</p>" +
-      '<a class="btn btn-primary" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за 15 000 ₸") + '">Разбор со специалистом — 15 000 ₸</a>' +
-      '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за 35 000 ₸") + '">Документы и подача — 25 000 ₸</a>' +
+      /* Цены берём из config.js, а не пишем руками: на этой кнопке уже была
+         рассинхронизация — подпись «25 000 ₸» при сообщении на 35 000 ₸.
+         Человек видел одну цену, а в WhatsApp уходила другая. */
+      '<a class="btn btn-primary" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за " + rub(PRICE_CONSULT)) + '">Разбор со специалистом — ' + rub(PRICE_CONSULT) + '</a>' +
+      '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за " + rub(PRICE_PACKAGE)) + '">Документы и подача — ' + rub(PRICE_PACKAGE) + '</a>' +
     "</div>" +
     '<div class="fineprint">Scholary · scholary.kz · Оценка модели не является гарантией поступления</div>';
 
