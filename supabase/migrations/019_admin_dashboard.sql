@@ -116,7 +116,8 @@ begin
       (select count(distinct lead_id) from e where event = 'paywall_view')                 as uvideli_paywall,
       (select count(distinct lead_id) from e where event = 'free_cabinet_click')           as poshli_v_kabinet,
       (select count(distinct lead_id) from e where event in ('pay_click', 'pay_kaspi_click')) as nazhali_oplatit,
-      (select count(distinct lead_id) from leads
+      -- В leads первичный ключ называется id, а не lead_id (правка 022)
+      (select count(*) from leads
         where paid and updated_at > now() - (d || ' days')::interval)                      as oplatili
   ) t;
   return j;
