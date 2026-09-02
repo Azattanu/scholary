@@ -135,6 +135,41 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
        за это время TipTop успел бы посчитать обработчик недоступным
        и начать слать повторы. */
     tt_finish('{"code":0}');
+
+    /* Куплен отчёт — выдаём его СРАЗУ, не дожидаясь человека:
+       строка в reports создаётся из снимка расчёта (leads.result),
+       ссылка уходит на WhatsApp и почту. Повтор уведомления шлюза
+       второй отчёт не создаст — RPC идемпотентна. */
+    $repNote = null; // строка «Отчёт» в уведомлении — только для покупки отчёта
+    if ($kind === 'report' && $leadOk) {
+      $rep = tt_rpc('tiptop_issue_report', ['p_lead' => $lead]);
+      if (is_array($rep) && !empty($rep['ok']) && !empty($rep['token'])) {
+        $sentR = ['whatsapp' => false, 'email' => false];
+        if (tt_once('report-' . $txn)) {
+          $sentR = tt_send_report(
+            (string)($rep['name'] ?? ''),
+            (string)($rep['whatsapp'] ?? ''),
+            (string)($rep['email'] ?? ($email ?: '')),
+            (string)$rep['token'], $test);
+          tt_rpc('tiptop_mark_report_sent', ['p_lead' => $lead,
+            'p_wa' => $sentR['whatsapp'] ? 'sent' : 'failed',
+            'p_email' => $sentR['email'] ? 'sent' : 'failed']);
+          tt_log('pay', 'report_issued', ['lead' => $lead, 'txn' => $txn,
+            'existing' => !empty($rep['existing']), 'wa' => $sentR['whatsapp'], 'mail' => $sentR['email']]);
+        }
+        $repNote = 'выдан автоматически · WhatsApp: ' . ($sentR['whatsapp'] ? 'ушёл' : 'НЕ УШЁЛ')
+                 . ' · почта: ' . ($sentR['email'] ? 'ушла' : 'НЕ УШЛА');
+      } else {
+        $why = is_array($rep) ? (string)($rep['why'] ?? 'rpc_failed') : 'rpc_failed';
+        $repNote = $why === 'no_result'
+          ? 'НЕ ВЫДАН — нет снимка расчёта (старый лид), собрать вручную'
+          : 'НЕ ВЫДАН (' . clean_txt($why, 40) . ') — собрать вручную';
+        tt_log('pay', 'report_not_issued', ['lead' => $lead, 'txn' => $txn, 'why' => $why]);
+      }
+    } elseif ($kind === 'report') {
+      $repNote = 'НЕ ВЫДАН — оплата без ID заявки (платёжная ссылка), привязать вручную';
+    }
+
     if (tt_once('paid-' . $txn)) {
       notify_owner($test ? 'Оплата прошла (ТЕСТ)' : 'Оплата прошла', [
         'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
@@ -144,7 +179,7 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
         'Транзакция' => clean_txt($txn, 32) ?: '—',
         'Режим'      => $test ? 'тестовый' : 'боевой',
         'В базе'     => $res === null ? 'записано в журнал платежей' : ($res ? 'отмечено' : 'НЕ ОТМЕЧЕНО — проверить вручную'),
-      ]);
+      ] + ($repNote !== null ? ['Отчёт' => $repNote] : []));
     }
   } else {
     /* Деньги пришли, но заказ не сходится с прайсом — не теряем: пишем в лог
@@ -209,6 +244,57 @@ if (tt_once($type . '-' . $txn)) {
 /* Отметить лид оплаченным через узкий security-definer RPC.
    Сервисного ключа Supabase на хостинге нет специально: утечка конфига
    не должна давать доступ ко всей базе. */
+/* Отправка готового отчёта клиенту: WhatsApp + почта.
+   Никаких персональных данных в логи — только флаги «ушло/не ушло». */
+function tt_send_report($name, $wa, $mail, $token, $test) {
+  $c = cfg();
+  $link = 'https://scholary.kz/report/?t=' . rawurlencode($token);
+  $first = trim(mb_substr(preg_replace('/[^\p{L}\p{M}\s\-]/u', '', (string)$name), 0, 30));
+  $hi = $first !== '' ? $first . ', привет!' : 'Привет!';
+  $out = ['whatsapp' => false, 'email' => false];
+
+  $digits = preg_replace('/\D/', '', (string)$wa);
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && strlen($digits) >= 10 && strlen($digits) <= 15) {
+    $msg = $hi . " Твой отчёт Scholary готов ð
+
+"
+         . "Вероятности по каждой программе, портфель подач и план документов — по ссылке:
+"
+         . $link . "
+
+"
+         . "Ссылка личная, работает всегда — можно показать родителям.
+"
+         . "Вопросы по отчёту? Просто ответь на это сообщение.";
+    if ($test) $msg = "[ТЕСТОВЫЙ ПЛАТЁЖ]
+" . $msg;
+    $r = http_json('https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
+      'POST', ['Content-Type: application/json'],
+      ['chatId' => $digits . '@c.us', 'message' => $msg], 20);
+    $out['whatsapp'] = ($r['code'] >= 200 && $r['code'] < 300);
+  }
+
+  if (!empty($c['RESEND_KEY']) && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+    $subj = ($test ? '[ТЕСТ] ' : '') . 'Твой отчёт Scholary готов';
+    $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F;max-width:520px">'
+          . '<h2 style="margin:0 0 12px;font-size:20px">' . htmlspecialchars($hi) . '</h2>'
+          . '<p>Отчёт о вероятности поступления готов: вероятности по каждой программе, '
+          . 'портфель подач, дедлайны и план документов.</p>'
+          . '<p style="margin:20px 0"><a href="' . htmlspecialchars($link) . '" '
+          . 'style="background:#4F46E5;color:#fff;text-decoration:none;font-weight:700;'
+          . 'padding:13px 22px;border-radius:10px;display:inline-block">Открыть отчёт</a></p>'
+          . '<p style="color:#6B7280;font-size:13px">Ссылка личная и не сгорает. '
+          . 'Не открывается — напиши нам в WhatsApp, поможем.</p></div>';
+    $text = $hi . "\n\nТвой отчёт Scholary готов: " . $link;
+    $r = http_json('https://api.resend.com/emails', 'POST', [
+      'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
+    ], ['from' => $c['MAIL_FROM'], 'to' => [$mail], 'subject' => $subj,
+        'html' => $html, 'text' => $text], 20);
+    $out['email'] = ($r['code'] >= 200 && $r['code'] < 300);
+  }
+  return $out;
+}
+
 function tt_rpc($fn, $args) {
   $c = cfg();
   if (empty($c['TIPTOP_RPC_SECRET'])) { tt_log('rpc', 'no_secret', ['fn' => $fn]); return null; }
