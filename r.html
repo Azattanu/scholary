@@ -5,18 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Твой отчёт | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=45">
-  <script src="/js/config.js?v=45"></script>
-<script src="/js/telemetry.js?v=45"></script>
-  <script src="/js/report-engine.js?v=45"></script>
-  <script src="/js/app.js?v=45" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=46">
+  <script src="/js/config.js?v=46"></script>
+<script src="/js/telemetry.js?v=46"></script>
+  <script src="/js/report-engine.js?v=46"></script>
+  <script src="/js/app.js?v=46" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Персональный отчёт Scholary</h1>
 <header class="site-header">
   <a class="logo" href="/">Scholary</a>
-  <nav class="nav"><a class="nav-cta" href="/quiz/">Пройти квиз</a></nav>
+  <nav class="nav" aria-label="Основная навигация">
+    <a class="nav-link" href="/tariffs/">Тарифы</a>
+    <a class="nav-link" href="/#parents">Родителям</a>
+    <a class="nav-link" href="/#faq">Вопросы</a>
+    <a class="nav-icon" href="https://wa.me/77024666852" target="_blank" rel="noopener" aria-label="Написать в WhatsApp" title="Написать в WhatsApp"><svg width="19" height="19" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-2.6-.8-4.9-2.9-6.2-5.3-.5-.9-.9-2-.6-2.9.2-.6.9-1.5 1.5-1.5h.5c.3 0 .5.1.7.6l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.2.2-.3.4-.1.7.7 1.2 1.8 2.2 3.1 2.8.3.1.5.1.7-.1l.8-.9c.2-.2.4-.3.6-.2l2 1c.4.2.6.3.6.6 0 .1 0 .4-.2.7z"/></svg></a>
+    <a class="nav-icon" id="soInstagramTop" href="#" target="_blank" rel="noopener" aria-label="Наш Instagram" title="Наш Instagram" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E1306C" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="#E1306C" stroke="none"/></svg></a>
+    <a class="nav-icon" href="https://t.me/azattanux" target="_blank" rel="noopener" aria-label="Написать в Telegram" title="Написать в Telegram"><svg width="19" height="19" viewBox="0 0 24 24" fill="#2AABEE" aria-hidden="true"><path d="M21.9 4.4 18.9 19c-.2 1-.8 1.2-1.6.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-.9.5l.3-4.7 8.5-7.7c.4-.3-.1-.5-.6-.2L7.3 13.1 2.7 11.7c-1-.3-1-1 .2-1.5l17.7-6.8c.8-.3 1.5.2 1.3 1z"/></svg></a>
+    <a class="nav-login" href="/cabinet/">Войти</a>
+    <a class="nav-cta" href="/quiz/" onclick="track('cta_header_quiz')"><span class="cta-long">Узнать вероятность</span><span class="cta-short">Узнать шансы</span></a>
+    <button class="nav-burger" type="button" id="navBurger" aria-label="Открыть меню" aria-expanded="false" aria-controls="siteMenu"><span></span><span></span><span></span></button>
+  </nav>
 </header>
+<div class="site-menu" id="siteMenu" hidden>
+  <a href="/quiz/">Узнать свою вероятность</a>
+  <a href="/cabinet/">Личный кабинет</a>
+  <a href="/tariffs/">Тарифы и цены</a>
+  <a href="/#parents">Родителям</a>
+  <a href="/demo/">Пример отчёта</a>
+  <a href="/#faq">Частые вопросы</a>
+  <div class="site-menu-sep"></div>
 
 <main class="narrow" style="padding-top:18px; padding-bottom:48px; display:flex; flex-direction:column; gap:14px" id="report">
   <div class="card" id="loading" style="text-align:center; color:var(--muted); font-weight:600">Загружаем твой отчёт…</div>
@@ -149,7 +167,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       '<strong style="font-size:17px">Что дальше</strong>' +
       '<p style="font-size:13.5px; color:#4B5060">' + esc(t.next_step || "Дальше самое сложное — документы. Большинство отказов случается по формальностям, а не по способностям: просроченный сертификат, не тот перевод, пропущенный второй трек.") + "</p>" +
       '<a class="btn btn-primary" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за 15 000 ₸") + '">Разбор со специалистом — 15 000 ₸</a>' +
-      '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за 25 000 ₸") + '">Документы и подача — 25 000 ₸</a>' +
+      '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за 35 000 ₸") + '">Документы и подача — 25 000 ₸</a>' +
     "</div>" +
     '<div class="fineprint">Scholary · scholary.kz · Оценка модели не является гарантией поступления</div>';
 
