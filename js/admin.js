@@ -112,11 +112,13 @@
       rpc("admin_funnel", d), rpc("admin_sources", d), rpc("admin_daily", d),
       rpc("admin_payments", { p_limit: 200 }), rpc("admin_subscriptions"),
       rpc("admin_top_programs_json", { p_limit: 15 }), rpc("admin_countries", { p_limit: 12 }),
-      rpc("admin_leads", { p_limit: 300 })
+      rpc("admin_leads", { p_limit: 300 }), rpc("admin_reports", { p_limit: 100 }),
+      rpc("admin_paid_without_report"), rpc("admin_timings", d), rpc("admin_quiz_steps", d)
     ]).then(function (r) {
       S.data = { sum: r[0] || {}, revDaily: r[1] || [], revKind: r[2] || [], funnel: r[3] || {},
                  sources: r[4] || [], daily: r[5] || [], payments: r[6] || [], subs: r[7] || [],
-                 programs: r[8] || [], countries: r[9] || [], leads: r[10] || [] };
+                 programs: r[8] || [], countries: r[9] || [], leads: r[10] || [],
+                 reports: r[11] || [], paidNoReport: r[12] || [], timings: r[13] || {}, steps: r[14] || [] };
       S.loading = false;
       $("updatedAt").textContent = "Обновлено " + new Date().toLocaleTimeString("ru-RU") + " · период: " + S.days + " " + plural(S.days, "день", "дня", "дней");
       draw();
@@ -140,6 +142,7 @@
     else if (S.tab === "funnel") v.innerHTML = viewFunnel();
     else if (S.tab === "channels") v.innerHTML = viewChannels();
     else if (S.tab === "people") v.innerHTML = viewPeople();
+    else if (S.tab === "reports") v.innerHTML = viewReports();
     else if (S.tab === "product") v.innerHTML = viewProduct();
     else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(false); }
   }
@@ -321,6 +324,68 @@
     "</div>";
   }
 
+  /* ---------- отчёты и время прохождения ---------- */
+  function dur(sec) {
+    sec = Number(sec);
+    if (!sec || sec < 0) return "—";
+    if (sec < 60) return Math.round(sec) + " сек";
+    if (sec < 3600) return Math.round(sec / 60) + " мин";
+    if (sec < 86400) return (Math.round(sec / 360) / 10) + " ч";
+    return (Math.round(sec / 8640) / 10) + " дн";
+  }
+  function viewReports() {
+    var t = S.data.timings || {}, reps = S.data.reports, waiting = S.data.paidNoReport;
+    var steps = S.data.steps;
+    var maxStep = steps.reduce(function (a, x) { return Math.max(a, Number(x.doshli) || 0); }, 1);
+    var STEP_RU = { level: "Куда поступаешь", gpa: "Успеваемость", lang: "Английский",
+                    field: "Направления", achievements: "Достижения", budget: "Бюджет",
+                    priority: "Приоритет", contact: "Контакты" };
+    return kpi([
+      ["Отчётов выдано", num(S.data.sum.reports_total), true, "всего за всё время"],
+      ["Ждут отчёт", num(waiting.length), waiting.length > 0, waiting.length ? "оплатили, но не получили" : "никто не ждёт"],
+      ["Квиз проходят за", dur(t.kviz_mediana_sek), false, "медиана · у 10% дольше " + dur(t.kviz_p90_sek)],
+      ["Думают перед оплатой", dur(t.razdumya_mediana_sek), false, "от пейволла до нажатия «Оплатить»"],
+      ["Весь путь до оплаты", dur(t.ves_put_mediana_sek), false, "от начала квиза до успеха"],
+      ["Читают главную", dur(t.chtenie_lendinga_mediana_sek), false, "прежде чем начать квиз"]
+    ]) +
+    (waiting.length ? '<div class="box" style="border-color:#F5C6BE;background:#FFF9F7"><h2>Оплатили, но отчёта не получили</h2>' +
+      '<p class="sub">Самый срочный список: этим людям мы уже должны результат.</p>' +
+      table([["Оплата"], ["Ждёт", 1], ["Имя"], ["WhatsApp"], ["Почта"], ["Сумма", 1]], waiting, function (l) {
+        return "<td>" + dt(l.paid_at) + '</td><td class="num">' + num(l.chasov_zhdet) + " ч</td>" +
+          "<td>" + (esc(l.name) || "—") + "</td><td>" + wa(l.whatsapp) + "</td><td>" + esc(l.email || "—") + "</td>" +
+          '<td class="num">' + (l.paid_amount ? money(l.paid_amount) : "—") + "</td>";
+      }) + "</div>" : "") +
+    '<div class="box"><h2>Выданные отчёты</h2>' +
+      '<p class="sub">Каждый отчёт открывается по своей ссылке — её же получает человек.</p>' +
+      (reps.length ? table([["Когда"], ["Кому"], ["Уровень"], ["Программ", 1], ["Тексты ИИ"], ["Отправлен"], ["Ссылка"]], reps, function (r) {
+        return "<td>" + dt(r.created_at) + "</td><td>" + (esc(r.name) || esc(r.lead_id) || "—") + "</td>" +
+          "<td>" + esc(LEVELS[r.level] || r.level || "—") + '</td><td class="num">' + num(r.programm_v_otchete) + "</td>" +
+          "<td>" + (r.est_teksty ? '<span class="pill ok">есть</span>' : '<span class="pill no">только расчёт</span>') + "</td>" +
+          "<td>" + (r.report_sent_at ? '<span class="pill ok">' + day(r.report_sent_at) + "</span>" : '<span class="pill warn">не отмечен</span>') + "</td>" +
+          '<td><a href="/report/?t=' + encodeURIComponent(r.token) + '" target="_blank" rel="noopener">открыть</a></td>';
+      })
+      : '<div class="muted">Отчётов пока нет.</div>' +
+        '<div class="note"><b>Почему их ноль.</b> Отчёт после оплаты сейчас никто не создаёт автоматически: ' +
+        'таблица заполняется вручную. Экран успеха при этом обещает человеку доставку за 2–3 минуты. ' +
+        'Пока терминал в тестовом режиме, это не стреляет — но с боевым первая же ночная оплата ' +
+        'оставит человека ждать. Это следующая задача.</div>') + "</div>" +
+    '<div class="box"><h2>Где отваливаются в квизе</h2>' +
+      '<p class="sub">Сколько разных устройств дошло до каждого шага за период.</p>' +
+      (steps.length ? steps.map(function (st, i) {
+        var n = Number(st.doshli) || 0;
+        var prev = i ? Number(steps[i - 1].doshli) || 0 : n;
+        return '<div class="frow"><div><b>Шаг ' + st.shag + "</b> · " + esc(STEP_RU[st.vopros] || st.vopros) + "</div>" +
+          '<div class="fbar"><i style="width:' + Math.max(1, n / maxStep * 100) + '%"></i></div>' +
+          '<div class="fnum">' + num(n) + (i ? " <small>" + pct(n, prev) + "%</small>" : "") + "</div></div>";
+      }).join("") : '<div class="muted">За период квиз не начинали.</div>') + "</div>" +
+    '<div class="box"><h2>Как читать время</h2>' +
+      '<div class="note">Показана <b>медиана</b>, а не среднее: один человек, ушедший на обед посреди квиза, ' +
+      'не должен портить картину. «У 10% дольше» — это девяностый процентиль: столько занимает квиз у самых ' +
+      'медленных. Выборка: ' + num(t.vyborka_kviz) + " " + plural(t.vyborka_kviz, "прохождение", "прохождения", "прохождений") +
+      " квиза и " + num(t.vyborka_put) + " " + plural(t.vyborka_put, "путь", "пути", "путей") + " до оплаты. " +
+      'Значения дольше часа для квиза и дольше недели для пути отбрасываются как случайные.</div></div>';
+  }
+
   /* ---------- система: живая проверка всех подключений ---------- */
   function viewSystem() {
     return '<div class="box"><h2>Внешние сервисы</h2>' +
@@ -411,6 +476,17 @@
       });
       L.push("");
     }
+    var tm = d.timings || {};
+    L.push("## Время прохождения (медиана)");
+    L.push("- Квиз: " + dur(tm.kviz_mediana_sek) + " (у 10% дольше " + dur(tm.kviz_p90_sek) + ")");
+    L.push("- Раздумья перед оплатой: " + dur(tm.razdumya_mediana_sek));
+    L.push("- Весь путь до оплаты: " + dur(tm.ves_put_mediana_sek));
+    L.push("- Чтение главной до начала квиза: " + dur(tm.chtenie_lendinga_mediana_sek));
+    L.push("");
+    L.push("## Отчёты");
+    L.push("- Выдано отчётов: " + num(s.reports_total));
+    L.push("- Оплатили и ждут отчёт: " + num((d.paidNoReport || []).length));
+    L.push("");
     if (d.programs.length) {
       L.push("## Топ программ");
       d.programs.slice(0, 10).forEach(function (p, i) { L.push((i + 1) + ". " + p.name + " (" + p.country + ") — ведут " + p.picks); });

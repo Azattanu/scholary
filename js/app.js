@@ -51,13 +51,48 @@
     } catch (e) { /* не мешаем пользователю */ }
   }
 
+  /* Сколько денег стоит событие — чтобы Метрика показывала доход по целям
+     и рекламные кабинеты умели считать стоимость привлечения. */
+  /* Метрика различает цели по имени, поэтому одно событие pay_result
+     разводим на pay_success / pay_fail / pay_cancel / pay_pending: иначе
+     в отчётах отменённая оплата считалась бы конверсией. */
+  function ymGoal(event, data) {
+    if (event !== "pay_result") return event;
+    var st = (data && data.status) || "", tp = (data && data.type) || "";
+    if (tp === "cancel" || st === "cancel") return "pay_cancel";
+    if (tp === "error") return "pay_fail";
+    if (st === "success" || st === "appointment") return "pay_success";
+    if (st === "wait") return "pay_pending";
+    return "pay_fail";
+  }
+  function goalPrice(goal, data) {
+    var C2 = window.SCHOLARY_CONFIG || {};
+    if (goal === "pay_success") {
+      if (data && data.kind === "pro_season") return 14900;
+      if (data && data.kind === "pro_month") return 4990;
+      if (data && data.kind === "consult") return C2.PRICE_CONSULT || 15000;
+      if (data && data.kind === "package") return C2.PRICE_PACKAGE || 35000;
+      return C2.PRICE_REPORT || 4000;
+    }
+    if (goal === "cta_tariff_consult") return C2.PRICE_CONSULT || 15000;
+    if (goal === "cta_tariff_package") return C2.PRICE_PACKAGE || 35000;
+    return null;
+  }
+
   // Событие аналитики: track('quiz_step', {step: 3})
   window.track = function (event, data) {
+    var clean = window.scholaryClean || function (x) { return x; };
+    var props = Object.assign({ page: location.pathname }, clean(data || {}));
     // то же событие уходит в продуктовую аналитику — без персональных полей
     try {
-      if (window.posthog && window.posthog.capture) {
-        var clean = window.scholaryClean || function (x) { return x; };
-        window.posthog.capture(event, Object.assign({ page: location.pathname }, clean(data || {})));
+      if (window.posthog && window.posthog.capture) window.posthog.capture(event, props);
+    } catch (e) {}
+    /* И в Яндекс.Метрику: имя цели = имя события, кроме pay_result —
+       его разводим по исходу (см. ymGoal), чтобы отмена не считалась продажей. */
+    try {
+      if (window.scholaryYm) {
+        var goal = ymGoal(event, data), price = goalPrice(goal, data);
+        window.scholaryYm(goal, price ? Object.assign({ order_price: price, currency: "KZT" }, props) : props);
       }
     } catch (e) {}
     return post("events", { lead_id: leadId(), event: event, data: data || {}, utm: utm(), ts: new Date().toISOString(), page: location.pathname });
@@ -150,11 +185,21 @@
     if (!o.amount || !o.externalId) { fail(new Error("bad_params")); return; }
     loadWidget().then(function () {
       var widget = new window.tiptop.Widget();
+      /* Разбор ответа виджета. Типы шлюза: payment, installment, installmentKz, sbp,
+         foreignCard, sberPay, tinkoff, spei, cancel, error. Статусы: success,
+         appointment (рассрочку одобрили), fail, reject, cancel, wait.
+         Проверять только type==="payment" && status==="success" нельзя: тогда
+         рассрочка и СБП уходили бы в «оплата не прошла» при списанных деньгах.
+         Истина в любом случае за сервером — вебхук в api/tiptop.php. */
       widget.oncomplete = function (r) {
-        var type = r && r.type, status = r && r.status;
+        var type = (r && r.type) || "", status = (r && r.status) || "";
+        var cancelled = type === "cancel" || status === "cancel";
+        var ok = !cancelled && type !== "error" && (status === "success" || status === "appointment");
+        var pending = !cancelled && !ok && status === "wait";
         if (window.track) window.track("pay_result", { type: type, status: status, kind: o.kind || "" });
-        if (type === "payment" && status === "success") { if (o.onSuccess) o.onSuccess(r); }
-        else if (type === "cancel") { if (o.onCancel) o.onCancel(r); }
+        if (ok) { if (o.onSuccess) o.onSuccess(r); }
+        else if (cancelled) { if (o.onCancel) o.onCancel(r); }
+        else if (pending) { (o.onPending || o.onSuccess || function () {})(r); }
         else if (o.onFail) o.onFail(r);
       };
       widget.start({

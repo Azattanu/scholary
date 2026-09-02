@@ -62,6 +62,69 @@
     document.head.appendChild(s);
   }
 
+  /* ---------- Яндекс.Метрика ----------
+     Ставим рядом с PostHog, а не вместо: PostHog удобен для воронок внутри
+     продукта, Метрика — для рекламы, поисковых запросов и карты кликов.
+     Все события сайта автоматически становятся целями с теми же именами:
+     дублировать их руками в коде не нужно. */
+  var YM_ID = String(C.YANDEX_METRIKA_ID || "").replace(/\D/g, "");
+  if (YM_ID) {
+    window.dataLayer = window.dataLayer || [];
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+      m[i].l = 1 * new Date();
+      for (var j = 0; j < e.scripts.length; j++) { if (e.scripts[j].src === r) return; }
+      k = e.createElement(t), a = e.getElementsByTagName(t)[0];
+      k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+    })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js?id=" + YM_ID, "ym");
+    try {
+      window.ym(YM_ID, "init", {
+        ssr: true,
+        clickmap: true,            // карта кликов
+        trackLinks: true,          // переходы по внешним ссылкам
+        accurateTrackBounce: true, // отказ считается только при уходе за 15 секунд
+        webvisor: !!C.YANDEX_WEBVISOR,
+        ecommerce: "dataLayer",    // доход по целям едет через dataLayer
+        referrer: document.referrer,
+        url: location.href,
+        defer: false
+      });
+    } catch (e) {}
+    /* Вебвизор пишет экран. Поля с именем, телефоном и почтой помечаем так,
+       чтобы их содержимое в записи не сохранялось. Делаем это и для полей,
+       которые появляются позже — квиз и кабинет рисуют их на ходу. */
+    if (C.YANDEX_WEBVISOR) {
+      var PRIV = 'input[type=email],input[type=tel],input[type=password],' +
+                 'input[autocomplete=name],input[autocomplete=email],input[autocomplete=tel],' +
+                 '#fName,#fWa,#fEmail,#li-email,#li-pass,#su-name,#su-email,#su-pass,' +
+                 '#rc-pass,#admEmail,#admPass,#proEmail';
+      var mark = function () {
+        try {
+          document.querySelectorAll(PRIV).forEach(function (el) {
+            el.classList.add("ym-disable-keys");     // не сохранять ввод
+            el.classList.add("ym-hide-content");     // и не показывать значение
+          });
+        } catch (e) {}
+      };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mark);
+      else mark();
+      /* формы появляются динамически — подхватываем новые поля */
+      try {
+        new MutationObserver(mark).observe(document.documentElement, { childList: true, subtree: true });
+      } catch (e) {}
+    }
+    /* Единая точка отправки цели. Персональные поля вырезаются тем же
+       фильтром, что и для PostHog. */
+    window.scholaryYm = function (goal, params) {
+      try {
+        if (!window.ym) return;
+        window.ym(YM_ID, "reachGoal", goal, params ? clean(params) : undefined);
+      } catch (e) {}
+    };
+  } else {
+    window.scholaryYm = function () {};
+  }
+
   /* ---------- PostHog: продуктовая аналитика ---------- */
   if (C.POSTHOG_KEY) {
     var host = C.POSTHOG_HOST || "https://us.i.posthog.com";
