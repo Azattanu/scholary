@@ -23,7 +23,7 @@
   /* ================= утилиты ================= */
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[<>&"]/g, function (c) { return { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]; }); }
-  function show(id) { ["loading", "v-auth", "v-recovery", "v-claim", "v-empty", "v-app"].forEach(function (v) { var e = $(v); if (e) e.hidden = v !== id; }); }
+  function show(id) { ["loading", "v-auth", "v-recovery", "v-claim", "v-setup", "v-empty", "v-app"].forEach(function (v) { var e = $(v); if (e) e.hidden = v !== id; }); }
   function toast(msg, kind) {
     var t = document.createElement("div"); t.className = "toast" + (kind ? " " + kind : ""); t.textContent = msg;
     $("toast-root").appendChild(t); setTimeout(function () { t.remove(); }, 3400);
@@ -971,6 +971,7 @@
         row("Уровень", (L.level[a.level] || "") + (a.year ? " · " + a.year : ""), "level") +
         row("Успеваемость", lvl, "gpa") +
         row("Язык", (L.lang_status[a.lang_status] || "") + (a.ielts_band ? " · " + (L.ielts[a.ielts_band] || "") : ""), "lang") +
+        row("Направления", (a.field || []).map(function (k) { return L.field ? (L.field[k] || k) : k; }).join(", "), "field") +
         row("Бюджет семьи", L.budget[a.budget], "budget") +
         row("Достижения", (a.achievements || []).map(function (k) { return L.ach[k] || k; }).join(", "), "ach") +
       "</div>" +
@@ -986,23 +987,35 @@
       '<p class="xs mut" style="text-align:center;margin-top:10px">Scholary · вероятности — оценка модели, не гарантия</p>';
   }
 
+  /* Один список вариантов на всё: и анкета при первом входе, и правка
+     в профиле. Раньше эти списки жили в двух местах и могли разъехаться. */
+  var OPT = {
+    level:    [["bachelor", "Бакалавриат"], ["master", "Магистратура"], ["phd", "PhD / докторантура"]],
+    year:     [["2027", "2027"], ["2028", "2028"], ["later", "Позже / ещё не решил"]],
+    gpa_band: [["5.0-4.5", "5.0–4.5"], ["4.4-4.0", "4.4–4.0"], ["3.9-3.5", "3.9–3.5"], ["<3.5", "ниже 3.5"]],
+    gpa4:     [["3.67+", "3.67 и выше"], ["3.33-3.66", "3.33–3.66"], ["3.0-3.32", "3.0–3.32"], ["<3.0", "ниже 3.0"], ["unknown", "не знаю"]],
+    ielts:    [["7+", "IELTS 7.0 и выше"], ["6.5", "IELTS 6.5"], ["6.0", "IELTS 6.0"], ["5.5", "IELTS 5.5"], ["<5.5", "ниже 5.5"], ["unknown", "сертификата пока нет"]],
+    lang:     [["have", "Сертификат есть"], ["soon", "Сдаю скоро"], ["none", "Нет"]],
+    field:    [["it", "IT и Computer Science"], ["eng", "Инженерия и технологии"], ["med", "Медицина и здоровье"], ["bus", "Бизнес и экономика"], ["sci", "Естественные науки"], ["hum", "Гуманитарные и социальные"], ["art", "Искусство и дизайн"], ["law", "Право"]],
+    budget:   [["0", "0 ₸ — только стипендия"], ["<1m", "до 1 млн ₸"], ["1-3m", "1–3 млн ₸"], ["3m+", "больше 3 млн ₸"]],
+    ach:      [["intl_olymp", "Международные олимпиады"], ["rep_olymp", "Республиканские олимпиады"], ["city_olymp", "Областные / городские олимпиады"], ["publications", "Публикации и конференции"], ["work_exp", "Опыт работы по специальности"], ["project", "Проекты, стартапы, исследования"], ["volunteer", "Волонтёрство"], ["sport_art", "Спорт / творчество на уровне наград"]]
+  };
+
   var EDIT = {
-    level: { title: "Куда поступаешь", key: "level", opts: [["bachelor", "Бакалавриат"], ["master", "Магистратура"], ["phd", "PhD"]] },
-    gpa: { title: "Успеваемость", key: null },
-    lang: { title: "Английский", key: "lang_status", opts: [["have", "Сертификат есть"], ["soon", "Сдаю скоро"], ["none", "Нет"]] },
-    budget: { title: "Бюджет семьи в год", key: "budget", opts: [["0", "0 ₸ — только стипендия"], ["<1m", "до 1 млн ₸"], ["1-3m", "1–3 млн ₸"], ["3m+", "больше 3 млн ₸"]] },
-    ach: { title: "Достижения", key: "achievements", multi: true, opts: [["intl_olymp", "Межд. олимпиады"], ["rep_olymp", "Респ. олимпиады"], ["city_olymp", "Обл. олимпиады"], ["publications", "Публикации"], ["work_exp", "Опыт работы"], ["project", "Проекты"], ["volunteer", "Волонтёрство"], ["sport_art", "Спорт/творчество"]] }
+    level:  { title: "Куда поступаешь", key: "level", opts: OPT.level },
+    gpa:    { title: "Успеваемость", key: null },
+    lang:   { title: "Английский", key: "lang_status", opts: OPT.lang },
+    field:  { title: "Направления", key: "field", multi: true, max: 3, opts: OPT.field },
+    budget: { title: "Бюджет семьи в год", key: "budget", opts: OPT.budget },
+    ach:    { title: "Достижения", key: "achievements", multi: true, opts: OPT.ach }
   };
   function openEdit(k) {
     var lvl = (S.ans && S.ans.level) || "bachelor";
     var cfg = EDIT[k];
     if (k === "gpa") cfg = lvl === "bachelor"
-      ? { title: "Средний балл аттестата", key: "gpa_band", opts: [["5.0-4.5", "5.0–4.5"], ["4.4-4.0", "4.4–4.0"], ["3.9-3.5", "3.9–3.5"], ["<3.5", "ниже 3.5"]] }
-      : { title: "GPA (шкала 4.0)", key: lvl === "phd" ? "gpa_phd" : "gpa_uni", opts: [["3.67+", "3.67 и выше"], ["3.33-3.66", "3.33–3.66"], ["3.0-3.32", "3.0–3.32"], ["<3.0", "ниже 3.0"], ["unknown", "не знаю"]] };
-    if (k === "lang") {
-      var cur = S.ans.lang_status;
-      cfg = { title: "Английский", key: "ielts_band", opts: [["7+", "IELTS 7.0+"], ["6.5", "6.5"], ["6.0", "6.0"], ["5.5", "5.5"], ["<5.5", "ниже 5.5"], ["unknown", "не знаю / нет"]] };
-    }
+      ? { title: "Средний балл аттестата", key: "gpa_band", opts: OPT.gpa_band }
+      : { title: "GPA (шкала 4.0)", key: lvl === "phd" ? "gpa_phd" : "gpa_uni", opts: OPT.gpa4 };
+    if (k === "lang") cfg = { title: "Английский", key: "ielts_band", opts: OPT.ielts };
     if (!cfg) return;
     var sel = S.ans[cfg.key];
     var bg = document.createElement("div"); bg.className = "modal-bg";
@@ -1019,7 +1032,11 @@
       if (c) {
         if (cfg.multi) {
           var v = c.getAttribute("data-v"), i = picked.indexOf(v);
-          if (i >= 0) picked.splice(i, 1); else picked.push(v);
+          if (i >= 0) picked.splice(i, 1);
+          else {
+            if (cfg.max && picked.length >= cfg.max) { toast("Можно выбрать не больше " + cfg.max); return; }
+            picked.push(v);
+          }
           c.classList.toggle("on");
         } else {
           picked = c.getAttribute("data-v");
@@ -1460,6 +1477,12 @@
       .then(function (r) { if (r.error) toast("Google-вход недоступен — войди по почте", "bad"); });
   };
   $("btn-empty-out").onclick = function () { sb.auth.signOut(); };
+  $("btn-empty-setup").onclick = function () { startSetup(); };
+  $("setup-next").onclick = function () { setupNext(); };
+  $("setup-back").onclick = function () { if (SU.i > 0) { SU.i--; drawSetup(); } };
+  $("setup-body").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-v]"); if (b) setupPick(b.getAttribute("data-v"));
+  });
   $("topbar-ava").onclick = function () { setTab("profile"); };
   Array.prototype.forEach.call(document.querySelectorAll("#tabbar button"), function (b) {
     b.onclick = function () { setTab(b.getAttribute("data-tab")); };
@@ -1494,7 +1517,98 @@
         if (window.track) track("cab_claim", {}); enter();
       });
     };
-    $("btn-claim-skip").onclick = function () { show("v-empty"); };
+    $("btn-claim-skip").onclick = function () { startSetup(); };
+  }
+
+  /* ================= анкета при первом входе =================
+     Раньше человек без расчёта видел только «иди в квиз», а квиз
+     заканчивался пейволлом — круг замыкался и в кабинет было не попасть.
+     Шесть вопросов здесь же открывают кабинет бесплатно. */
+  var SU = { i: 0, ans: {} };
+  function setupSteps() {
+    var lvl = SU.ans.level || "bachelor";
+    return [
+      { key: "level", q: "Куда поступаешь?", why: "От уровня зависят и программы, и веса модели", opts: OPT.level },
+      { key: "year", q: "В каком году?", why: "Считаем дедлайны от твоего сезона подачи", opts: OPT.year },
+      lvl === "bachelor"
+        ? { key: "gpa_band", q: "Средний балл аттестата?", why: "Главный вход почти во все программы", opts: OPT.gpa_band }
+        : { key: lvl === "phd" ? "gpa_phd" : "gpa_uni", q: "GPA диплома по шкале 4.0?", why: "Главный вход почти во все программы", opts: OPT.gpa4 },
+      { key: "ielts_band", q: "Как с английским?", why: "Языковой порог отсекает больше заявок, чем оценки", opts: OPT.ielts },
+      { key: "field", q: "Какие направления тянут?", why: "Можно выбрать до трёх — портфель соберём по всем", opts: OPT.field, multi: true, max: 3 },
+      { key: "budget", q: "Сколько семья готова вкладывать в год?", why: "Считаем только реальные варианты: есть программы за 0 ₸", opts: OPT.budget },
+      { key: "achievements", q: "Что уже есть в копилке?", why: "Достижения добавляют баллов стипендиям. Можно ничего не выбирать", opts: OPT.ach, multi: true, optional: true }
+    ];
+  }
+  function startSetup() {
+    SU = { i: 0, ans: normAnswers(JSON.parse(JSON.stringify((S.profile && S.profile.answers) || {}))) };
+    if (window.track) track("cab_setup_start", {});
+    show("v-setup"); drawSetup();
+  }
+  function drawSetup() {
+    var steps = setupSteps(), st = steps[SU.i];
+    if (!st) return finishSetup();
+    var val = SU.ans[st.key];
+    $("setup-bar-i").style.width = Math.round((SU.i / steps.length) * 100) + "%";
+    $("setup-count").textContent = (SU.i + 1) + " из " + steps.length;
+    $("setup-body").innerHTML =
+      '<div class="setup-q">' + esc(st.q) + "</div>" +
+      '<div class="setup-why">' + esc(st.why) + "</div>" +
+      '<div class="setup-opts">' + st.opts.map(function (o) {
+        var on = st.multi ? (val || []).indexOf(o[0]) >= 0 : val === o[0];
+        return '<button type="button" class="setup-opt' + (on ? " on" : "") + '" data-v="' + esc(o[0]) + '"><span>' + esc(o[1]) + '</span><span class="tick"></span></button>';
+      }).join("") + "</div>";
+    $("setup-back").hidden = SU.i === 0;
+    /* Одиночный выбор уходит дальше сам — кнопка «Далее» там только
+       путала бы. Она нужна на шагах, где можно выбрать несколько. */
+    $("setup-next").hidden = !st.multi;
+    $("setup-next").style.flex = st.multi ? "1" : "";
+    $("setup-next").textContent = SU.i === steps.length - 1 ? "Открыть кабинет" : "Далее";
+    syncSetupNext();
+  }
+  function syncSetupNext() {
+    var st = setupSteps()[SU.i]; if (!st) return;
+    var val = SU.ans[st.key];
+    var ok = st.optional || (st.multi ? (val || []).length > 0 : !!val);
+    $("setup-next").disabled = !ok;
+    $("setup-next").style.opacity = ok ? "1" : ".5";
+  }
+  function setupPick(v) {
+    var st = setupSteps()[SU.i]; if (!st) return;
+    if (st.multi) {
+      var cur = (SU.ans[st.key] || []).slice(), i = cur.indexOf(v);
+      if (i >= 0) cur.splice(i, 1);
+      else { if (st.max && cur.length >= st.max) { toast("Можно выбрать не больше " + st.max); return; } cur.push(v); }
+      SU.ans[st.key] = cur;
+    } else {
+      SU.ans[st.key] = v;
+      if (st.key === "ielts_band") SU.ans.lang_status = (v === "unknown" || v === "<5.5") ? "none" : "have";
+    }
+    drawSetup();
+    if (!st.multi) setTimeout(setupNext, 180);   // одиночный выбор — сразу дальше
+  }
+  function setupNext() {
+    var steps = setupSteps(), st = steps[SU.i];
+    var val = SU.ans[st.key];
+    if (!st.optional && (st.multi ? !(val || []).length : !val)) return;
+    if (SU.i >= steps.length - 1) return finishSetup();
+    SU.i++; drawSetup();
+  }
+  function finishSetup() {
+    $("setup-next").disabled = true;
+    $("setup-next").textContent = "Собираем кабинет…";
+    var name = (S.profile && S.profile.name) ||
+      (S.session && S.session.user.user_metadata && S.session.user.user_metadata.name) || "";
+    var patch = { answers: SU.ans, updated_at: new Date().toISOString() };
+    if (name) patch.name = name;
+    sb.from("profiles").update(patch).eq("user_id", S.session.user.id).then(function (r) {
+      if (r.error) {
+        $("setup-next").disabled = false; $("setup-next").textContent = "Открыть кабинет";
+        toast("Не удалось сохранить. Попробуй ещё раз", "bad"); return;
+      }
+      if (window.track) track("cab_setup_done", { level: SU.ans.level });
+      S.profile = Object.assign({}, S.profile || {}, patch);
+      entering = false; enter();
+    });
   }
 
   var entering = false;
@@ -1511,6 +1625,7 @@
       if (!haveAnswers) {
         var ll = localLead(); entering = false;
         if (ll.lead) offerClaim(ll); else show("v-empty");
+        if (window.track) track("cab_no_profile", { had_lead: !!ll.lead });
         return;
       }
       S.ans = normAnswers(JSON.parse(JSON.stringify(S.profile.answers)));
