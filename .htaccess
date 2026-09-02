@@ -59,3 +59,13 @@ ErrorDocument 503 /error_docs/503.html
   Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
   Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
 </IfModule>
+
+# 7) HSTS: браузер запоминает, что на этот сайт можно ходить только по HTTPS,
+#    и больше не делает первый незащищённый запрос (его можно перехватить).
+#    Заголовок отдаём только по HTTPS — по HTTP он всё равно игнорируется.
+#    includeSubDomains и preload сознательно НЕ ставим: сначала нужно
+#    убедиться, что все поддомены (webmail, mail и т.п.) живут по HTTPS,
+#    иначе они станут недоступны на год без возможности быстро откатить.
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+</IfModule>
