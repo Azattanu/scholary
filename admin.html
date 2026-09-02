@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Scholary — панель управления</title>
-  <link rel="stylesheet" href="/css/style.css?v=43">
+  <link rel="stylesheet" href="/css/style.css?v=45">
   <style>
     .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 80px; }
     .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -36,7 +36,7 @@
     .keybox h1 { font-size: 24px; margin: 0 0 8px; }
     .keybox p { color: #6E6E73; font-size: 14px; line-height: 1.5; }
     .keybox input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid #D2D2D7; border-radius: 12px; font-size: 15px; margin: 10px 0 14px; }
-    .btn-adm { display: inline-block; background: #5B4BFF; color: #fff; border: none; border-radius: 999px; padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .btn-adm { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; background: #5B4BFF; color: #fff; border: none; border-radius: 999px; padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer; }
     .btn-ghost { background: #F5F5F7; color: #1D1D1F; }
     .muted { color: #6E6E73; font-size: 13px; }
     .err { color: #C0392B; font-size: 14px; margin-top: 8px; }
@@ -47,12 +47,13 @@
 
 <div id="gate" class="keybox" hidden>
   <h1>Панель Scholary</h1>
-  <p>Вставь <b>секретный ключ</b> Supabase (начинается с <code>sb_secret_</code>).
-  Найти: Supabase → Project Settings → API Keys → Secret keys.
-  Ключ хранится только в этом браузере и никуда не отправляется, кроме твоей базы.</p>
-  <input id="keyInput" type="password" placeholder="sb_secret_...">
-  <button class="btn-adm" onclick="saveKey()">Войти</button>
+  <p>Вход по обычной почте и паролю — тем же аккаунтом, что и в кабинете.
+  Доступ открыт только тем, кто добавлен в список администраторов.</p>
+  <input id="admEmail" type="email" autocomplete="username" placeholder="почта">
+  <input id="admPass" type="password" autocomplete="current-password" placeholder="пароль">
+  <button class="btn-adm" id="loginBtn">Войти</button>
   <div id="gateErr" class="err" hidden></div>
+  <p class="muted" style="margin-top:14px">Забыл пароль — <a href="/cabinet/">восстанови его в кабинете</a>, панель использует тот же аккаунт.</p>
 </div>
 
 <div id="panel" class="admin-wrap" hidden>
@@ -111,32 +112,67 @@
   </div>
 </div>
 
-<script src="/js/config.js?v=43"></script>
-<script src="/js/telemetry.js?v=43"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script>
-const SB = window.SCHOLARY_CONFIG.SUPABASE_URL;
-const LS_KEY = "scholary_admin_key";
-
-function getKey() { try { return localStorage.getItem(LS_KEY) || ""; } catch(e){ return ""; } }
-function saveKey() {
-  const v = document.getElementById("keyInput").value.trim();
-  if (!v.startsWith("sb_secret_") && !v.startsWith("eyJ")) {
-    const e = document.getElementById("gateErr");
-    e.textContent = "Это не похоже на секретный ключ (sb_secret_...)."; e.hidden = false; return;
+/* Если библиотека Supabase не загрузилась (блокировщик, корпоративный фильтр,
+   сбой CDN) — раньше страница оставалась пустой и человек упирался в тупик.
+   Пробуем запасной адрес, а если и он молчит — говорим об этом по-человечески. */
+(function () {
+  var FALLBACK = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+  function fail() {
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.supabase && window.supabase.createClient) return;
+      document.body.innerHTML =
+        '<div style="max-width:520px;margin:14vh auto;padding:28px;font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1D1D1F;text-align:center">' +
+        '<h1 style="font-size:22px;margin:0 0 10px">Не получилось загрузить кабинет</h1>' +
+        '<p style="color:#6E6E73;margin:0 0 18px">Похоже, часть кода заблокирована — это бывает из-за блокировщика рекламы, VPN или сети оператора. ' +
+        'Попробуй отключить блокировщик и обновить страницу или зайти из другого браузера.</p>' +
+        '<p style="margin:0 0 18px"><a href="/" style="color:#5B4BFF;font-weight:650">Вернуться на главную</a></p>' +
+        '<p style="margin:0"><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") +
+        '" style="display:inline-flex;align-items:center;min-height:44px;padding:0 22px;background:#25D366;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
+    });
   }
-  try { localStorage.setItem(LS_KEY, v); } catch(e){}
+  if (window.supabase && window.supabase.createClient) return;
+  var s = document.createElement("script");
+  s.src = FALLBACK; s.async = false;
+  s.onerror = fail;
+  s.onload = function () { if (!(window.supabase && window.supabase.createClient)) fail(); };
+  document.head.appendChild(s);
+  setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
+})();
+</script>
+<script src="/js/config.js?v=45"></script>
+<script src="/js/telemetry.js?v=45"></script>
+<script>
+const CFG = window.SCHOLARY_CONFIG;
+/* Раньше здесь просили сервисный ключ Supabase и клали его в localStorage.
+   Такой ключ обходит все правила доступа к базе — держать его в браузере нельзя.
+   Теперь вход обычный, а данные отдают функции базы, которые сами проверяют,
+   что вызывающий есть в списке админов (миграция 013). */
+const sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY, {
+  auth: { storageKey: "scholary-admin-auth", persistSession: true, autoRefreshToken: true }
+});
+
+async function login() {
+  const e = document.getElementById("gateErr");
+  const email = document.getElementById("admEmail").value.trim();
+  const pass  = document.getElementById("admPass").value;
+  e.hidden = true;
+  if (!email || !pass) { e.textContent = "Впиши почту и пароль."; e.hidden = false; return; }
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true; btn.textContent = "Захожу…";
+  const { error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+  btn.disabled = false; btn.textContent = "Войти";
+  if (error) { e.textContent = "Не получилось войти: " + error.message; e.hidden = false; return; }
   boot();
 }
-document.addEventListener("click", function (e) { if (e.target && e.target.id === "proBtn") grantPro(); });
-function logout() { try { localStorage.removeItem(LS_KEY); } catch(e){} location.reload(); }
+async function logout() { await sb.auth.signOut(); location.reload(); }
 
-async function api(path) {
-  const k = getKey();
-  const r = await fetch(SB + "/rest/v1/" + path, {
-    headers: { "apikey": k, "Authorization": "Bearer " + k }
-  });
-  if (!r.ok) throw new Error("HTTP " + r.status + " на " + path.split("?")[0]);
-  return r.json();
+/* Вызов функции базы от имени вошедшего админа. */
+async function rpc(fn, args) {
+  const { data, error } = await sb.rpc(fn, args || {});
+  if (error) throw new Error(error.message || "ошибка запроса");
+  return data;
 }
 
 function esc(s){ return String(s==null?"":s).replace(/[<>&"]/g, c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c])); }
@@ -149,35 +185,38 @@ async function loadAll() {
   try {
     loadCabinet();
     const [events, leads] = await Promise.all([
-      api("events?select=lead_id,event,ts&order=ts.desc&limit=20000"),
-      api("leads?select=*&order=updated_at.desc&limit=300")
+      rpc("admin_events", { p_limit: 20000 }),
+      rpc("admin_leads",  { p_limit: 300 })
     ]);
-    render(events, leads);
+    render(events || [], leads || []);
     document.getElementById("updatedAt").textContent = "Обновлено: " + new Date().toLocaleTimeString("ru-RU");
   } catch (e) {
-    document.getElementById("updatedAt").textContent = "Ошибка: " + e.message + " — проверь ключ (кнопка «Выйти» → вставь заново).";
+    document.getElementById("updatedAt").textContent = "Ошибка: " + e.message;
   }
 }
 
 async function loadCabinet() {
   try {
-    const [ov, top] = await Promise.all([api("admin_overview?select=*"), api("admin_top_programs?select=*&limit=12")]);
-    const o = (ov && ov[0]) || {};
+    const [o, top] = await Promise.all([
+      rpc("admin_stats"),
+      rpc("admin_top_programs_json", { p_limit: 12 })
+    ]);
+    const ov = o || {};
     document.getElementById("cabKpis").innerHTML = [
-      ["Регистраций", o.users_total], ["За 7 дней", o.users_7d], ["С анкетой", o.profiles_with_quiz],
-      ["Подач ведут", o.applications_total], ["Отправлено", o.applications_submitted, true],
-      ["Средняя готовность", (o.avg_readiness == null ? "—" : o.avg_readiness + "%")],
-      ["Документов", o.documents_total], ["Из них готовы", o.documents_ready],
-      ["Pro активных", o.pro_active, true], ["Разборов ИИ", o.documents_ai_checked],
-      ["Telegram привязан", o.telegram_linked], ["Событий за сутки", o.events_24h],
-      ["Тестовых аккаунтов", o.test_accounts]
+      ["Регистраций", ov.users_total], ["За 7 дней", ov.users_7d], ["С анкетой", ov.profiles_with_quiz],
+      ["Подач ведут", ov.applications_total], ["Отправлено", ov.applications_submitted, true],
+      ["Средняя готовность", (ov.avg_readiness == null ? "—" : ov.avg_readiness + "%")],
+      ["Документов", ov.documents_total], ["Из них готовы", ov.documents_ready],
+      ["Pro активных", ov.pro_active, true], ["Разборов ИИ", ov.documents_ai_checked],
+      ["Telegram привязан", ov.telegram_linked], ["Событий за сутки", ov.events_24h],
+      ["Тестовых аккаунтов", ov.test_accounts]
     ].map(([l, n, hl]) => `<div class="kpi${hl ? " hl" : ""}"><div class="n">${n == null ? "—" : n}</div><div class="l">${l}</div></div>`).join("");
     document.getElementById("topProgTbl").innerHTML = (top && top.length)
       ? `<table class="adm"><tr><th>Программа</th><th>Страна</th><th>Ведут</th><th>Отправлено</th><th>Ср. готовность</th></tr>` +
         top.map(r => `<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.country)}</td><td>${r.picks}</td><td>${r.submitted}</td><td>${r.avg_readiness == null ? "—" : r.avg_readiness + "%"}</td></tr>`).join("") + `</table>`
       : `<div class="muted">Пока никто не добавил программы в подачи.</div>`;
   } catch (e) {
-    document.getElementById("cabKpis").innerHTML = `<div class="muted">Не удалось загрузить: ${esc(e.message)}. Если ошибка про admin_overview — накати миграции 008 и 011 в SQL-редакторе Supabase.</div>`;
+    document.getElementById("cabKpis").innerHTML = `<div class="muted">Не удалось загрузить: ${esc(e.message)}. Если ошибка про forbidden — твой аккаунт ещё не в списке админов: выполни в SQL-редакторе Supabase <code>select seed_admin('почта');</code></div>`;
   }
 }
 
@@ -188,13 +227,7 @@ async function grantPro() {
   if (!email) { msg.textContent = "Впиши почту"; return; }
   msg.textContent = "Выдаю…";
   try {
-    const k = getKey();
-    const r = await fetch(SB + "/rest/v1/rpc/grant_pro", {
-      method: "POST", headers: { "apikey": k, "Authorization": "Bearer " + k, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_email: email, p_days: days, p_plan: "manual" })
-    });
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.message || ("HTTP " + r.status));
+    const j = await rpc("grant_pro", { p_email: email, p_days: days, p_plan: "manual" });
     msg.textContent = (j && j.length) ? `Готово: Pro до ${j[0].pro_until}` : "Пользователь с такой почтой не найден (он должен сначала зарегистрироваться в кабинете).";
     loadCabinet();
   } catch (e) { msg.textContent = "Ошибка: " + e.message; }
@@ -272,16 +305,17 @@ function tbl(rows, paidMode) {
     }).join("") + `</table>`;
 }
 
-function boot() {
-  if (getKey()) {
-    document.getElementById("gate").hidden = true;
-    document.getElementById("panel").hidden = false;
-    loadAll();
-  } else {
-    document.getElementById("gate").hidden = false;
-    document.getElementById("panel").hidden = true;
-  }
+async function boot() {
+  const { data } = await sb.auth.getSession();
+  const on = !!(data && data.session);
+  document.getElementById("gate").hidden = on;
+  document.getElementById("panel").hidden = !on;
+  if (on) loadAll();
 }
+document.addEventListener("click", function (e) { if (e.target && e.target.id === "loginBtn") login(); });
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !document.getElementById("gate").hidden) login();
+});
 boot();
 </script>
 </body>

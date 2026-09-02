@@ -57,9 +57,12 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#5B4BFF,#9B8CFF);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:none;cursor:pointer}
 .screen{padding:0 16px 96px;max-width:560px;margin:0 auto}
+/* Ссылки под формой входа: раньше зона нажатия была 20px — палец промахивался. */
+.authlinks{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:12px}
+.authlinks a{display:inline-flex;align-items:center;min-height:44px;padding:0 2px}
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--border);display:flex;padding:8px 6px calc(10px + env(safe-area-inset-bottom));z-index:40}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:650;
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:650;
   color:var(--muted);background:none;border:none;cursor:pointer;padding:0}
 .tabbar button.on{color:var(--accent)}
 .tabbar svg{width:23px;height:23px}
@@ -240,7 +243,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
       <input class="f" id="li-pass" type="password" autocomplete="current-password" placeholder="Минимум 6 символов" required minlength="6">
       <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Войти</button>
       <div class="err" id="li-err" hidden></div>
-      <div style="display:flex;justify-content:space-between;margin-top:14px" class="sm">
+      <div class="sm authlinks">
         <a href="#" id="lnk-forgot">Забыл пароль</a>
         <a href="#" id="lnk-signup" style="font-weight:700">Создать аккаунт</a>
       </div>
@@ -341,12 +344,40 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 <div id="modal-root"></div>
 <div id="toast-root"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="/js/config.js?v=43"></script>
-<script src="/js/telemetry.js?v=43"></script>
-<script src="/js/report-engine.js?v=43"></script>
-<script src="/js/app.js?v=43"></script>
-<script src="/js/doc-rules.js?v=43"></script>
-<script src="/js/cabinet2.js?v=43"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script>
+/* Если библиотека Supabase не загрузилась (блокировщик, корпоративный фильтр,
+   сбой CDN) — раньше страница оставалась пустой и человек упирался в тупик.
+   Пробуем запасной адрес, а если и он молчит — говорим об этом по-человечески. */
+(function () {
+  var FALLBACK = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+  function fail() {
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.supabase && window.supabase.createClient) return;
+      document.body.innerHTML =
+        '<div style="max-width:520px;margin:14vh auto;padding:28px;font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1D1D1F;text-align:center">' +
+        '<h1 style="font-size:22px;margin:0 0 10px">Не получилось загрузить кабинет</h1>' +
+        '<p style="color:#6E6E73;margin:0 0 18px">Похоже, часть кода заблокирована — это бывает из-за блокировщика рекламы, VPN или сети оператора. ' +
+        'Попробуй отключить блокировщик и обновить страницу или зайти из другого браузера.</p>' +
+        '<p style="margin:0 0 18px"><a href="/" style="color:#5B4BFF;font-weight:650">Вернуться на главную</a></p>' +
+        '<p style="margin:0"><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") +
+        '" style="display:inline-flex;align-items:center;min-height:44px;padding:0 22px;background:#25D366;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
+    });
+  }
+  if (window.supabase && window.supabase.createClient) return;
+  var s = document.createElement("script");
+  s.src = FALLBACK; s.async = false;
+  s.onerror = fail;
+  s.onload = function () { if (!(window.supabase && window.supabase.createClient)) fail(); };
+  document.head.appendChild(s);
+  setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
+})();
+</script>
+<script src="/js/config.js?v=45"></script>
+<script src="/js/telemetry.js?v=45"></script>
+<script src="/js/report-engine.js?v=45"></script>
+<script src="/js/app.js?v=45"></script>
+<script src="/js/doc-rules.js?v=45"></script>
+<script src="/js/cabinet2.js?v=45"></script>
 </body>
 </html>

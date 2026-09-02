@@ -44,3 +44,18 @@ ErrorDocument 503 /error_docs/503.html
   RewriteEngine On
   RewriteRule ^ph/(.*)$ /api/ph.php?p=$1 [QSA,L]
 </IfModule>
+
+# 5) Служебные подключаемые файлы бэкенда наружу не отдаём.
+#    Сами по себе они ничего не печатают, но и открывать их незачем.
+<IfModule mod_authz_core.c>
+  <FilesMatch "^_.*\.php$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+# 6) Ограничиваем, кто может встраивать сайт и куда он ходит.
+#    frame-ancestors 'self' — защита от кликджекинга поверх X-Frame-Options.
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+</IfModule>
