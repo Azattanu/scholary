@@ -109,6 +109,70 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initMenu);
   else initMenu();
 
+  /* ================= Оплата через TipTop Pay =================
+     Одна реализация на весь сайт: квиз и кабинет зовут scholaryPay().
+     Виджет подгружается по требованию, чтобы не тянуть чужой скрипт
+     на страницы, где никто ничего не покупает. */
+  window.scholaryTerminalReady = function () {
+    var c = window.SCHOLARY_CONFIG || {};
+    var id = c.TIPTOP_PUBLIC_TERMINAL_ID || "";
+    if (!id || String(id).indexOf("TODO") === 0) return false;
+    if (c.TIPTOP_MODE === "live") return true;
+    // Тестовый терминал не списывает деньги. Показать такую кнопку всем —
+    // значит отдавать отчёты бесплатно, поэтому она только для проверки.
+    try {
+      if (location.search.indexOf("tt=1") >= 0) { sessionStorage.setItem("scholary_tt", "1"); return true; }
+      return sessionStorage.getItem("scholary_tt") === "1" || location.hostname === "localhost";
+    } catch (e) { return location.search.indexOf("tt=1") >= 0; }
+  };
+  var widgetPromise = null;
+  function loadWidget() {
+    if (window.tiptop && window.tiptop.Widget) return Promise.resolve();
+    if (widgetPromise) return widgetPromise;
+    widgetPromise = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src*="widget.tiptoppay.kz"]');
+      var timer = setTimeout(function () { widgetPromise = null; reject(new Error("timeout")); }, 12000);
+      function ok() { clearTimeout(timer); (window.tiptop && window.tiptop.Widget) ? resolve() : bad(); }
+      function bad() { clearTimeout(timer); widgetPromise = null; reject(new Error("load_failed")); }
+      if (existing) { existing.addEventListener("load", ok); existing.addEventListener("error", bad); return; }
+      var s = document.createElement("script");
+      s.src = "https://widget.tiptoppay.kz/bundles/widget.js";
+      s.addEventListener("load", ok);
+      s.addEventListener("error", bad);
+      document.head.appendChild(s);
+    });
+    return widgetPromise;
+  }
+  window.scholaryPay = function (o) {
+    o = o || {};
+    var fail = o.onError || function () {};
+    if (!window.scholaryTerminalReady()) { fail(new Error("no_terminal")); return; }
+    if (!o.amount || !o.externalId) { fail(new Error("bad_params")); return; }
+    loadWidget().then(function () {
+      var widget = new window.tiptop.Widget();
+      widget.oncomplete = function (r) {
+        var type = r && r.type, status = r && r.status;
+        if (window.track) window.track("pay_result", { type: type, status: status, kind: o.kind || "" });
+        if (type === "payment" && status === "success") { if (o.onSuccess) o.onSuccess(r); }
+        else if (type === "cancel") { if (o.onCancel) o.onCancel(r); }
+        else if (o.onFail) o.onFail(r);
+      };
+      widget.start({
+        publicTerminalId: (window.SCHOLARY_CONFIG || {}).TIPTOP_PUBLIC_TERMINAL_ID,
+        description: o.description || "Scholary",
+        paymentSchema: "Single",
+        currency: "KZT",
+        amount: o.amount,
+        externalId: String(o.externalId),
+        accountId: o.accountId || undefined,
+        receiptEmail: o.email || undefined
+      });
+    }, function (e) {
+      if (window.track) window.track("pay_widget_error", { why: e && e.message });
+      fail(e);
+    });
+  };
+
   // UX: все внешние ссылки (мессенджеры, соцсети, чужие сайты) — в новой вкладке
   function externalizeLinks() {
     document.querySelectorAll('a[href^="http"]').forEach(function (a) {

@@ -4,9 +4,14 @@
 // ============================================================
 window.SCHOLARY_CONFIG = {
   // --- TipTop Pay ---
-  // Public Terminal ID из личного кабинета TipTop Pay (раздел «Терминалы»).
-  // Тестовый терминал выглядит как "test_api_...". Боевой выдадут после верификации.
-  TIPTOP_PUBLIC_TERMINAL_ID: "TODO_public_terminal_id",
+  // Public ID сайта из личного кабинета TipTop Pay (Сайты → scholary.kz).
+  TIPTOP_PUBLIC_TERMINAL_ID: "pk_8b18e6f5ae97bc629948af455d0b9",
+  // "test" — терминал в тестовом режиме: деньги не списываются, поэтому
+  // кнопку оплаты картой видим только мы (адрес с ?tt=1), а посетителям
+  // остаётся Kaspi. Как только TipTop переведёт сайт в боевой режим —
+  // поставить "live", и кнопка появится у всех. Это единственное место,
+  // которое нужно поменять.
+  TIPTOP_MODE: "test",
 
   // --- Цены (тенге) ---
   PRICE_REPORT: 4000,
@@ -31,7 +36,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-47",
+  RELEASE:      "web-48",
 
   // --- Ссылки ---
   DEMO_VIDEO_URL: "TODO_https://www.youtube.com/embed/XXXX", // видеодемо (unlisted)

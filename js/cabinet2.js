@@ -1199,6 +1199,56 @@
     });
   }
 
+  /* Оплата подписки. Доступ продлевает СЕРВЕР по уведомлению шлюза
+     (api/tiptop.php → tiptop_grant_pro), поэтому в AccountId кладём почту
+     аккаунта — иначе непонятно, кому продлевать. */
+  function payPro(plan) {
+    var season = plan === "season";
+    var amount = season ? 14900 : 4990;
+    var email = (S.session && S.session.user && S.session.user.email) || "";
+    if (window.track) track("pro_click", { plan: plan });
+
+    if (!window.scholaryTerminalReady || !window.scholaryTerminalReady() || !email) { proByHand(plan, email); return; }
+
+    var extId = "pro_" + (email ? email.replace(/[^a-z0-9]/gi, "").slice(0, 10) : "x") + "_" + Date.now().toString(36);
+    toast("Открываем оплату…");
+    window.scholaryPay({
+      kind: season ? "pro_season" : "pro_month",
+      amount: amount,
+      description: "Scholary Pro — " + (season ? "весь сезон" : "месяц"),
+      externalId: extId,
+      accountId: email,
+      email: email,
+      onSuccess: function () {
+        toast("Оплата прошла. Обновляем доступ…", "ok");
+        // Продление приходит вебхуком, а не с этой страницы: перечитываем профиль.
+        // Продление ставит вебхук, а не эта страница: перечитываем профиль.
+        // Уведомление идёт своим маршрутом, поэтому даём ему фору и пробуем дважды.
+        refreshPro(1);
+      },
+      onFail: function () { toast("Оплата не прошла. Попробуй другую карту", "bad"); },
+      onError: function () { proByHand(plan, email); }
+    });
+  }
+  /* Перечитать pro_until после оплаты: вебхук доходит за секунду-две,
+     но если сеть тормозит — пробуем ещё раз, а потом честно просим обновить. */
+  function refreshPro(attempt) {
+    setTimeout(function () {
+      sb.from("profiles").select("*").maybeSingle().then(function (r) {
+        var pro = r.data && r.data.pro_until && new Date(r.data.pro_until) > new Date();
+        if (pro) { S.profile = r.data; toast("Scholary Pro активен", "ok"); drawSub(); return; }
+        if (attempt < 3) { refreshPro(attempt + 1); return; }
+        toast("Оплата прошла. Доступ появится в течение минуты — обнови страницу", "ok");
+      });
+    }, attempt * 2500);
+  }
+  function proByHand(plan, email) {
+    var label = plan === "season" ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸";
+    toast("Онлайн-оплата недоступна — пишем в WhatsApp");
+    window.open("https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" +
+      encodeURIComponent("Здравствуйте! Хочу Scholary Pro (" + label + "). Аккаунт: " + (email || "")), "_blank", "noopener");
+  }
+
   /* ================= делегирование событий ================= */
   document.addEventListener("click", function (e) {
     var el = e.target.closest("[data-act]"); if (!el) return;
@@ -1214,16 +1264,7 @@
     if (act === "tab-unis") { setTab("unis"); return; }
     if (act === "tab-docs") { setTab("docs"); return; }
     if (act === "subscribe") { openSubscribe(); return; }
-    if (act === "pay-pro") {
-      var plan = v === "season" ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸";
-      if (window.track) track("pro_click", { plan: v });
-      if (C.TIPTOP_PUBLIC_TERMINAL_ID && String(C.TIPTOP_PUBLIC_TERMINAL_ID).indexOf("TODO") !== 0) {
-        toast("Открываем оплату…");   // подключится, когда эквайринг будет активен
-      }
-      window.open("https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" +
-        encodeURIComponent("Здравствуйте! Хочу Scholary Pro (" + plan + "). Аккаунт: " + ((S.session && S.session.user.email) || "")), "_blank", "noopener");
-      return;
-    }
+    if (act === "pay-pro") { payPro(v); return; }
     if (act === "apptab") { appTab = v; drawSub(); return; }
     if (act === "status" && app) { saveApp(app, { status: v }, function () { drawSub(); }); return; }
     if (act === "outcome" && app) {
