@@ -43,9 +43,20 @@
     }
 
     // Язык (+ небольшой бонус за SAT — он же сигнал академической готовности)
+    // Значения приходят из квиза строками. Если однажды появится новый вариант
+    // ответа, а таблицу забудут дополнить, балл молча станет средним и отчёт
+    // будет врать — поэтому такие случаи отмечаем в аналитике, а не проглатываем.
+    var LANG_HAVE = { "7+": 9, "6.5": 7.5, "6.0": 6, "5.5": 4.5, "<5.5": 3, unknown: 5.5 };
+    var LANG_SOON = { "7+": 7, "6.5": 6, "6.0": 5, "5.5": 4, "<5.5": 3, unknown: 4.5 };
     var language = 2;
-    if (a.lang_status === "have") language = { "7+": 9, "6.5": 7.5, "6.0": 6, "5.5": 4.5, "<5.5": 3, unknown: 5.5 }[a.ielts_band] || 5.5;
-    else if (a.lang_status === "soon") language = ({ "7+": 7, "6.5": 6, "6.0": 5, "5.5": 4, "<5.5": 3 }[a.ielts_band] || 4.5);
+    if (a.lang_status === "have" || a.lang_status === "soon") {
+      var tbl = a.lang_status === "have" ? LANG_HAVE : LANG_SOON;
+      if (Object.prototype.hasOwnProperty.call(tbl, a.ielts_band)) language = tbl[a.ielts_band];
+      else {
+        language = a.lang_status === "have" ? 5.5 : 4.5;
+        try { if (typeof window !== "undefined" && window.track) window.track("engine_unknown_value", { field: "ielts_band" }); } catch (e) {}
+      }
+    }
     var sat = { "1400+": 9, "1200-1399": 6.5, "<1200": 4, plan: 0, no: 0 }[a.sat] || 0;
 
     // Достижения
@@ -88,14 +99,14 @@
     { id: "edisu", name: "EDISU Piemonte", country: "Италия", cc: "it", levels: ["bachelor", "master"], baseAdm: .55, baseSch: .5, req: { academics: 5, language: 5.5, budget: 2 }, deadline: "4 сентября", note: "грант по доходу семьи (ISEE); окно подачи открывается в конце июля", funding: "освобождение от платы за учёбу + стипендия 3 800–8 097 € в год + общежитие", source_url: "https://www.edisu.piemonte.it/borse-e-contributi/benefici-economici/borsa-di-studio" },
     { id: "disco", name: "DiSCo Lazio", country: "Италия", cc: "it", levels: ["bachelor", "master"], baseAdm: .52, baseSch: .47, req: { academics: 5, language: 5.5, budget: 2 }, deadline: "22 июля", note: "крупнейший региональный фонд Италии; окно подачи открывается в июне", funding: "стипендия 2 290–7 557 € в год по доходу семьи + питание + общежитие", source_url: "https://laziodisco.it/bando-diritto-allo-studio-2026-2027/" },
     { id: "maeci", name: "MAECI (правительство Италии)", country: "Италия", cc: "it", levels: ["master", "phd"], baseAdm: .3, baseSch: .3, req: { academics: 7, language: 6.5, budget: 0 }, deadline: "26 марта", note: "конкурс объявляют в марте — сверяйся с бандо текущего года", funding: "стипендия 10 800 € за 9 месяцев + медстраховка; плату за учёбу снимает вуз", source_url: "https://www.esteri.it/it/opportunita/borse-di-studio/" },
-    { id: "tb", name: "Türkiye Burslari", country: "Турция", cc: "tr", levels: ["bachelor", "master", "phd"], baseAdm: .3, baseSch: .3, req: { academics: 6.5, language: 3, budget: 0 }, deadline: "20 февраля", note: "подача открывается 10 января; после отбора — интервью", funding: "обучение 0 ₸ + 4 500–9 000 TL/мес + общежитие + перелёт + год языка", source_url: "https://www.turkiyeburslari.gov.tr/fulltimeprograms" },
+    { id: "tb", name: "Türkiye Burslari", country: "Турция", cc: "tr", levels: ["bachelor", "master", "phd"], langYear: true, baseAdm: .3, baseSch: .3, req: { academics: 6.5, language: 3, budget: 0 }, deadline: "20 февраля", note: "подача открывается 10 января; после отбора — интервью", funding: "обучение 0 ₸ + 4 500–9 000 TL/мес + общежитие + перелёт + год языка", source_url: "https://www.turkiyeburslari.gov.tr/fulltimeprograms" },
     { id: "de_pub", name: "Гос. вузы Германии (0 ₸)", country: "Германия", cc: "de", levels: ["bachelor", "master"], baseAdm: .6, baseSch: null, req: { academics: 6, language: 6, budget: 7 }, deadline: "15 июля / 15 янв", note: "стипендии нет: нужен блокированный счёт на год жизни", funding: "обучение 0 ₸ (в Баден-Вюртемберге 1 500 €/сем.) + семестровый взнос 100–350 €", source_url: "https://www.study-in-germany.de/en/" },
     { id: "daad", name: "DAAD EPOS", country: "Германия", cc: "de", levels: ["master"], baseAdm: .25, baseSch: .25, req: { academics: 7, language: 6.5, budget: 0 }, deadline: "авг–окт", note: "единого дедлайна нет — своя дата у каждой программы в базе DAAD", funding: "стипендия 992 €/мес (магистратура) или 1 300 €/мес (PhD) + страховка + перелёт", source_url: "https://www.daad.de/en/studying-in-germany/scholarships/daad-scholarships/" },
-    { id: "cz_free", name: "Чехия: гос. вузы на чешском (0 ₸)", country: "Чехия", cc: "cz", levels: ["bachelor", "master"], baseAdm: .55, baseSch: null, req: { academics: 5, language: 3, budget: 4 }, deadline: "28 февраля", note: "дату ставит сам вуз: обычно февраль–апрель на сентябрьский набор", funding: "обучение бесплатно, если учишься на чешском; жильё и сборы — свои", source_url: "https://studyin.gov.cz/plan-your-studies/learn-czech-study-tuition-free/" },
-    { id: "csc", name: "CSC (гранты Китая)", country: "Китай", cc: "cn", levels: ["bachelor", "master", "phd"], baseAdm: .45, baseSch: .4, req: { academics: 5.5, language: 4, budget: 0 }, deadline: "15 февраля", note: "точную дату ставит посольство КНР или вуз — обычно январь–февраль, уточни", funding: "обучение 0 ₸ + общежитие + 2 500–3 500 CNY/мес + медстраховка", source_url: "https://www.campuschina.org/" },
+    { id: "cz_free", name: "Чехия: гос. вузы на чешском (0 ₸)", country: "Чехия", cc: "cz", levels: ["bachelor", "master"], langYear: true, baseAdm: .55, baseSch: null, req: { academics: 5, language: 3, budget: 4 }, deadline: "28 февраля", note: "дату ставит сам вуз: обычно февраль–апрель на сентябрьский набор", funding: "обучение бесплатно, если учишься на чешском; жильё и сборы — свои", source_url: "https://studyin.gov.cz/plan-your-studies/learn-czech-study-tuition-free/" },
+    { id: "csc", name: "CSC (гранты Китая)", country: "Китай", cc: "cn", levels: ["bachelor", "master", "phd"], langYear: true, baseAdm: .45, baseSch: .4, req: { academics: 5.5, language: 4, budget: 0 }, deadline: "15 февраля", note: "точную дату ставит посольство КНР или вуз — обычно январь–февраль, уточни", funding: "обучение 0 ₸ + общежитие + 2 500–3 500 CNY/мес + медстраховка", source_url: "https://www.campuschina.org/" },
     { id: "anso", name: "ANSO (Академия наук КНР)", country: "Китай", cc: "cn", levels: ["master", "phd"], baseAdm: .35, baseSch: .35, req: { academics: 7, language: 6, budget: 0 }, deadline: "31 января", note: "приём открывается в середине октября", funding: "обучение 0 ₸ + 3 000 CNY/мес (магистратура), 6 000–7 000 (PhD) + перелёт", source_url: "https://www.anso.org.cn/programmes/talent/scholarship/" },
-    { id: "gks", name: "GKS (Корея)", country: "Корея", cc: "kr", levels: ["bachelor", "master", "phd"], baseAdm: .25, baseSch: .25, req: { academics: 7.5, language: 5, budget: 0 }, deadline: "17 октября", note: "бакалавриат (GKS-U) подаётся до середины октября, магистратура (GKS-G) — в феврале", funding: "обучение + перелёт + год корейского + 1,14–1,38 млн KRW/мес", source_url: "https://www.studyinkorea.go.kr/in/plan/scholarship.do" },
-    { id: "mext", name: "MEXT (Япония)", country: "Япония", cc: "jp", levels: ["bachelor", "master", "phd"], baseAdm: .22, baseSch: .22, req: { academics: 7.5, language: 5.5, budget: 0 }, deadline: "29 мая", note: "для Казахстана дату ставит посольство Японии в Астане — сверяйся с их объявлением", funding: "обучение 0 ₸ + 117 000 ¥/мес + авиабилеты в обе стороны", source_url: "https://www.studyinjapan.go.jp/en/planning/scholarship/" },
+    { id: "gks", name: "GKS (Корея)", country: "Корея", cc: "kr", levels: ["bachelor", "master", "phd"], langYear: true, baseAdm: .25, baseSch: .25, req: { academics: 7.5, language: 5, budget: 0 }, deadline: "17 октября", note: "бакалавриат (GKS-U) подаётся до середины октября, магистратура (GKS-G) — в феврале", funding: "обучение + перелёт + год корейского + 1,14–1,38 млн KRW/мес", source_url: "https://www.studyinkorea.go.kr/in/plan/scholarship.do" },
+    { id: "mext", name: "MEXT (Япония)", country: "Япония", cc: "jp", levels: ["bachelor", "master", "phd"], langYear: true, baseAdm: .22, baseSch: .22, req: { academics: 7.5, language: 5.5, budget: 0 }, deadline: "29 мая", note: "для Казахстана дату ставит посольство Японии в Астане — сверяйся с их объявлением", funding: "обучение 0 ₸ + 117 000 ¥/мес + авиабилеты в обе стороны", source_url: "https://www.studyinjapan.go.jp/en/planning/scholarship/" },
     { id: "erasmus", name: "Erasmus Mundus", country: "ЕС", cc: "eu", levels: ["master"], baseAdm: .28, baseSch: .28, req: { academics: 7, language: 6.5, budget: 0 }, deadline: "окт–янв", note: "единого дедлайна нет: дату ставит консорциум программы, обычно октябрь–январь", funding: "обучение бесплатно + 1 400 €/мес на жизнь, переезд и визу (до 33 600 € за 2 года)", source_url: "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en" },
     { id: "si", name: "SI Global Professionals (Швеция)", country: "Швеция", cc: "se", levels: ["master"], baseAdm: .18, baseSch: .18, req: { academics: 7.5, language: 7, budget: 0 }, deadline: "февраль", note: "Казахстана нет в списке стран программы — подать нельзя", funding: "обучение 0 kr + 12 000 SEK в месяц + 15 000 SEK на перелёт", source_url: "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/", availableKz: false },
     { id: "us_need", name: "Need-based aid (США, топ-вузы)", country: "США", cc: "us", levels: ["bachelor"], baseAdm: .1, baseSch: .55, req: { academics: 9, language: 8.5, budget: 0, sat: 7 }, deadline: "1 января", note: "это не стипендия, а помощь по доходу семьи; Harvard, Yale и MIT смотрят заявку без оглядки на деньги", funding: "доход семьи до 100 000 $ — учёба и жизнь бесплатно; до 200 000 $ — бесплатное обучение", source_url: "https://college.harvard.edu/financial-aid" },
@@ -124,6 +135,20 @@
     var d = fitDelta(profile, prog);
     var adm = clamp(prog.baseAdm * (1 + 0.16 * d), 0.03, 0.92);
     var sch = prog.baseSch == null ? null : clamp(prog.baseSch * (1 + 0.16 * d), 0.02, 0.9);
+
+    /* Жёсткая отсечка по языку.
+       Раньше модель была чисто множительной: не хватает трёх баллов языка —
+       вероятность падала всего на четверть, и абитуриент без единого сертификата
+       видел «40 % на итальянский грант». Это не «шанс поменьше», это закрытая
+       дверь: без сертификата заявку просто не примут. Программам, которые сами
+       дают год языка (Турция, Корея, Япония, Китай, чешские госвузы), поблажка
+       в 2,5 балла — там язык действительно учат уже внутри программы. */
+    var gap = (prog.req.language || 0) - profile.axes.language - (prog.langYear ? 2.5 : 0);
+    if (gap >= 2) {
+      var k = Math.pow(0.5, gap - 1);           // не хватает 2 → ×0,5; 3 → ×0,25; 4 → ×0,125
+      adm = clamp(adm * k, 0.02, 0.92);
+      if (sch != null) sch = clamp(sch * k, 0.01, 0.9);
+    }
     return { adm: adm, sch: sch };
   }
 
