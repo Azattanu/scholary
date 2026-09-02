@@ -352,7 +352,12 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 (function () {
   var FALLBACK = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
   function fail() {
-    document.addEventListener("DOMContentLoaded", function () {
+    // Раньше здесь всегда ждали DOMContentLoaded. Но срабатывает эта функция
+    // по таймауту через несколько секунд, когда событие давно прошло, —
+    // и сообщение не показывалось никогда: человек видел белый экран.
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
+    else render();
+    function render() {
       if (window.supabase && window.supabase.createClient) return;
       document.body.innerHTML =
         '<div style="max-width:520px;margin:14vh auto;padding:28px;font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1D1D1F;text-align:center">' +
@@ -361,8 +366,8 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
         'Попробуй отключить блокировщик и обновить страницу или зайти из другого браузера.</p>' +
         '<p style="margin:0 0 18px"><a href="/" style="color:#5B4BFF;font-weight:650">Вернуться на главную</a></p>' +
         '<p style="margin:0"><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") +
-        '" style="display:inline-flex;align-items:center;min-height:44px;padding:0 22px;background:#25D366;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
-    });
+        '" style="display:inline-flex;align-items:center;min-height:44px;padding:0 22px;background:#0B7A3E;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
+    }
   }
   if (window.supabase && window.supabase.createClient) return;
   var s = document.createElement("script");
@@ -373,11 +378,11 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
 })();
 </script>
-<script src="/js/config.js?v=46"></script>
-<script src="/js/telemetry.js?v=46"></script>
-<script src="/js/report-engine.js?v=46"></script>
-<script src="/js/app.js?v=46"></script>
-<script src="/js/doc-rules.js?v=46"></script>
-<script src="/js/cabinet2.js?v=46"></script>
+<script src="/js/config.js?v=47"></script>
+<script src="/js/telemetry.js?v=47"></script>
+<script src="/js/report-engine.js?v=47"></script>
+<script src="/js/app.js?v=47"></script>
+<script src="/js/doc-rules.js?v=47"></script>
+<script src="/js/cabinet2.js?v=47"></script>
 </body>
 </html>
