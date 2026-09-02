@@ -10,20 +10,27 @@ cors();
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') jout(['error' => 'method'], 405);
 
 $c  = cfg();
+
+/* Форму отправляет наш же сайт. Запрос «в лоб» с чужой страницы отсекаем:
+   иначе эндпоинт превращается в кнопку «завалить владельца сообщениями». */
+if (!same_origin()) jout(['error' => 'forbidden'], 403);
+
 $in = body(20000);
 
 /* ---------- защита от флуда ---------- */
-$ip  = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$ip  = trim(explode(',', $ip)[0]);
-$rl  = rate_check('ip:' . $ip . ':notify', 12);
+$ip    = client_ip();
+$rl    = rate_check('ip:' . $ip . ':notify', 12);
 if (!$rl['ok']) jout(['error' => 'too_many'], 429);
-$rlAll = rate_check('all:notify', 300);
+$rlAll = rate_check('all:notify', 150);
 if (!$rlAll['ok']) jout(['error' => 'paused'], 429);
 
 /* ---------- разбор заявки ---------- */
 function clean($v, $max = 200) {
   $v = is_string($v) ? $v : '';
   $v = preg_replace('/[\x00-\x1F\x7F]/u', ' ', $v);
+  /* Ссылки вырезаем: заявку пишет посторонний человек, а письмо и WhatsApp
+     читает владелец — фишинговой ссылке там делать нечего. */
+  $v = preg_replace('#(https?://|www\.)\S+#iu', '[ссылка убрана]', $v);
   return trim(mb_substr($v, 0, $max));
 }
 $kind  = ($in['kind'] ?? 'lead') === 'paid' ? 'paid' : 'lead';

@@ -4,6 +4,11 @@
    теряется 10–25 % событий. Запросы идут на наш домен /ph/… и оттуда сюда,
    поэтому блокировщику не за что зацепиться.
    Проксируем ТОЛЬКО известные пути PostHog и только на их хосты. */
+require_once __DIR__ . '/_lib.php';
+
+/* домен берём из конфига: если однажды добавится www или другой адрес,
+   не придётся править код в двух местах */
+$ALLOW = (string)(cfg()['ALLOW_ORIGIN'] ?? 'https://scholary.kz');
 
 $path = isset($_GET['p']) ? (string)$_GET['p'] : '';
 $path = ltrim(preg_replace('#[^A-Za-z0-9_\-/\.]#', '', $path), '/');
@@ -24,7 +29,7 @@ $url = $base . $path . (count($qs) ? ('?' . http_build_query($qs)) : '');
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if (!in_array($method, ['GET', 'POST', 'OPTIONS'], true)) { http_response_code(405); exit('method'); }
 if ($method === 'OPTIONS') {
-  header('Access-Control-Allow-Origin: https://scholary.kz');
+  header('Access-Control-Allow-Origin: ' . $ALLOW);
   header('Access-Control-Allow-Headers: Content-Type');
   header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
   http_response_code(204); exit;
@@ -34,8 +39,8 @@ $body = ($method === 'POST') ? file_get_contents('php://input', false, null, 0, 
 
 $headers = ['Accept-Encoding: identity'];
 if (!empty($_SERVER['CONTENT_TYPE'])) $headers[] = 'Content-Type: ' . $_SERVER['CONTENT_TYPE'];
-$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
-if ($ip) $headers[] = 'X-Forwarded-For: ' . trim(explode(',', $ip)[0]);
+$ip = client_ip();
+if ($ip && $ip !== 'unknown') $headers[] = 'X-Forwarded-For: ' . $ip;
 if (!empty($_SERVER['HTTP_USER_AGENT'])) $headers[] = 'User-Agent: ' . $_SERVER['HTTP_USER_AGENT'];
 
 $ch = curl_init($url);
@@ -61,6 +66,6 @@ http_response_code($code ?: 502);
 foreach (explode("\r\n", $rawHeaders) as $h) {
   if (stripos($h, 'content-type:') === 0 || stripos($h, 'cache-control:') === 0 || stripos($h, 'etag:') === 0) header($h, true);
 }
-header('Access-Control-Allow-Origin: https://scholary.kz');
+header('Access-Control-Allow-Origin: ' . $ALLOW);
 if ($isStatic) header('Cache-Control: public, max-age=3600');
 echo $payload;

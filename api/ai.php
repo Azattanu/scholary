@@ -10,15 +10,37 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') jout(['error' => 'method'], 4
 $in    = body();
 $token = $in['token'] ?? '';
 $kind  = $in['kind'] ?? '';
-$user  = auth_user($token);
+/* Тип разбора проверяем ДО списания лимита: иначе кривой запрос
+   молча съедал бы попытки живого человека. */
+if (!in_array($kind, ['doc', 'letter'], true)) jout(['error' => 'unknown_kind'], 400);
+
+$user = auth_user($token);
 if (!$user) jout(['error' => 'unauthorized'], 401);
 
 $c   = cfg();
 $pro = is_pro($token, $user['id']);
-$rl  = rate_check($user['id'], $pro ? (int)$c['PRO_AI_PER_DAY'] : (int)$c['FREE_AI_PER_DAY']);
 $MODEL = $pro ? ($c['ANTHROPIC_MODEL_PRO'] ?? $c['ANTHROPIC_MODEL'])
               : ($c['ANTHROPIC_MODEL_FREE'] ?? $c['ANTHROPIC_MODEL']);
+
+/* Общий предохранитель на весь сайт: регистрация свободная, поэтому
+   без него можно завести много аккаунтов и сжечь бюджет на модель. */
+$all = rate_check('all:ai', (int)($c['ALL_AI_PER_DAY'] ?? 600));
+if (!$all['ok']) jout(['error' => 'busy'], 429);
+
+$rl = rate_check($user['id'], $pro ? (int)$c['PRO_AI_PER_DAY'] : (int)$c['FREE_AI_PER_DAY']);
 if (!$rl['ok']) jout(['error' => 'limit', 'used' => $rl['used'], 'limit' => $rl['limit'], 'pro' => $pro], 429);
+
+/* Обрезаем всё, что уходит в модель: длина запроса = деньги. */
+function trim_deep($v, $maxStr = 400, $depth = 0) {
+  if (is_string($v)) return mb_substr($v, 0, $maxStr);
+  if (is_array($v)) {
+    if ($depth > 3) return null;
+    $out = []; $i = 0;
+    foreach ($v as $k => $x) { if (++$i > 40) break; $out[$k] = trim_deep($x, $maxStr, $depth + 1); }
+    return $out;
+  }
+  return $v;
+}
 
 $SYS = "Ты — методист приёмной комиссии и консультант по поступлению за рубеж для казахстанских абитуриентов.\n" .
   "Правила:\n" .
@@ -31,8 +53,8 @@ $SYS = "Ты — методист приёмной комиссии и конс�
   "7. Ссылайся на конкретные программы абитуриента по названию, а не «первая подача».";
 
 if ($kind === 'doc') {
-  $doc  = $in['doc'] ?? [];
-  $apps = array_slice($in['apps'] ?? [], 0, 12);
+  $doc  = trim_deep($in['doc'] ?? []);
+  $apps = trim_deep(array_slice($in['apps'] ?? [], 0, 12));
   $u = "Документ абитуриента и его подачи. Дай список замечаний.\n\n" .
        "ДОКУМЕНТ: " . json_encode($doc, JSON_UNESCAPED_UNICODE) . "\n\n" .
        "ПОДАЧИ (программа, страна, дедлайн, требования): " . json_encode($apps, JSON_UNESCAPED_UNICODE) . "\n\n" .
@@ -54,7 +76,7 @@ if ($kind === 'doc') {
 
 if ($kind === 'letter') {
   $text = mb_substr((string)($in['text'] ?? ''), 0, 9000);
-  $prog = $in['program'] ?? [];
+  $prog = trim_deep($in['program'] ?? []);
   if (mb_strlen(trim($text)) < 40) jout(['error' => 'too_short'], 400);
   $u = "Разбери мотивационное письмо под конкретную программу.\n\n" .
        "ПРОГРАММА: " . json_encode($prog, JSON_UNESCAPED_UNICODE) . "\n\n" .
@@ -80,4 +102,5 @@ if ($kind === 'letter') {
         'used' => $rl['used'], 'limit' => $rl['limit'], 'pro' => $pro]);
 }
 
+/* сюда не доходим: kind проверен выше */
 jout(['error' => 'unknown_kind'], 400);
