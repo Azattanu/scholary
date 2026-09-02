@@ -35,7 +35,7 @@
   }
 
   async function post(table, body) {
-    if (!configured) { console.log("[scholary]", table, body); return; }
+    if (!configured) { console.log("[scholary] событие в таблицу", table); return; }  // без содержимого: там бывают имя и телефон
     try {
       if (table === "leads") {
         // Запись лида идёт через RPC upsert_lead (insert-or-update на стороне базы)
