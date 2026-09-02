@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const d = payload.data, t = payload.texts || {};
   const axes = d.profile.axes;
-  const name = esc(t.name || payload.demoName || "");
+  const name = esc(t.name || (d.answers && d.answers.name) || payload.demoName || "");
   const pAny = pct(d.pAtLeastOne);
   const comments = {};
   (t.programs || []).forEach(p => { comments[p.id] = p.comment; });
