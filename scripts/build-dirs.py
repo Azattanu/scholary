@@ -4,6 +4,7 @@
 а каталоги (/cabinet/) — с no-cache. Поэтому канонические адреса —
 каталоги, а старые .html становятся вечными заглушками-редиректами
 (они сами больше никогда не меняются, поэтому их кэш безвреден)."""
+import subprocess, sys as _sys
 import io, os, shutil
 
 PAGES = {          # исходник -> каталог
@@ -67,3 +68,9 @@ for f in ("robots.txt", "sitemap.xml"):
 
 print("build/ готов:", sorted(os.listdir(out)))
 
+# ---- страховка: не собираем сборку со сломанной структурой HTML ----
+_r = subprocess.run([_sys.executable, __file__.replace('build-dirs.py', 'html-check.py')],
+                    capture_output=True, text=True)
+if _r.returncode != 0:
+    print(_r.stdout)
+    raise SystemExit('Сборка остановлена: в HTML есть незакрытые теги (см. выше)')
