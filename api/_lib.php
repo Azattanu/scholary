@@ -3,8 +3,14 @@
 function cfg() {
   static $c = null;
   if ($c === null) {
-    $p = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/scholary-config.php';
-    $c = is_file($p) ? require $p : [];
+    $base = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/';
+    $c = is_file($base . 'scholary-config.php') ? require $base . 'scholary-config.php' : [];
+    /* Ключи эквайринга лежат отдельным файлом: их можно перевыпустить
+       и залить заново, не трогая остальные секреты сервиса. */
+    if (is_file($base . 'tiptop-secrets.php')) {
+      $t = require $base . 'tiptop-secrets.php';
+      if (is_array($t)) $c = $t + $c;
+    }
   }
   return $c;
 }
@@ -160,4 +166,51 @@ function parse_json_block($txt) {
   $e = max(strrpos($txt, '}'), strrpos($txt, ']'));
   if ($e === false || $e <= $s) return null;
   return json_decode(substr($txt, $s, $e - $s + 1), true);
+}
+/* Убрать управляющие символы и ссылки: текст пишет посторонний человек,
+   а письмо и WhatsApp читает владелец — фишинговой ссылке там не место. */
+function clean_txt($v, $max = 200) {
+  $v = is_string($v) ? $v : '';
+  $v = preg_replace('/[\x00-\x1F\x7F]/u', ' ', $v);
+  $v = preg_replace('#(https?://|www\.)\S+#iu', '[ссылка убрана]', $v);
+  return trim(mb_substr($v, 0, $max));
+}
+/* Уведомление владельцу: почта через Resend + WhatsApp через GREEN-API.
+   Получатели жёстко заданы в конфиге, поэтому это не ретранслятор спама. */
+function notify_owner($title, $rows) {
+  $c = cfg();
+  $plain = $title . "\n\n";
+  foreach ($rows as $k => $v) $plain .= $k . ': ' . $v . "\n";
+  $plain .= "\nВремя: " . date('d.m.Y H:i') . " (сервер)";
+  $sent = ['email' => false, 'whatsapp' => false];
+
+  if (!empty($c['RESEND_KEY']) && !empty($c['MAIL_TO'])) {
+    $html = '<div style="font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F">'
+          . '<h2 style="margin:0 0 14px;font-size:19px">' . htmlspecialchars($title) . '</h2><table cellpadding="6" style="border-collapse:collapse">';
+    foreach ($rows as $k => $v) {
+      $html .= '<tr><td style="color:#6B7280;border-bottom:1px solid #EEE">' . htmlspecialchars($k)
+            .  '</td><td style="border-bottom:1px solid #EEE"><b>' . htmlspecialchars($v) . '</b></td></tr>';
+    }
+    $html .= '</table><p style="color:#6B7280;font-size:13px;margin-top:16px">Scholary · ' . date('d.m.Y H:i') . '</p></div>';
+    $subj = $title;
+    if (!empty($rows['Имя']) && $rows['Имя'] !== '—') $subj .= ' — ' . $rows['Имя'];
+    $r = http_json('https://api.resend.com/emails', 'POST', [
+      'Authorization: Bearer ' . $c['RESEND_KEY'],
+      'Content-Type: application/json',
+    ], [
+      'from' => $c['MAIL_FROM'], 'to' => [$c['MAIL_TO']],
+      'subject' => $subj, 'html' => $html, 'text' => $plain,
+    ], 20);
+    $sent['email'] = ($r['code'] >= 200 && $r['code'] < 300);
+  }
+
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && !empty($c['OWNER_WA'])) {
+    $url = 'https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'];
+    $r = http_json($url, 'POST', ['Content-Type: application/json'], [
+      'chatId'  => preg_replace('/\D/', '', $c['OWNER_WA']) . '@c.us',
+      'message' => $plain,
+    ], 20);
+    $sent['whatsapp'] = ($r['code'] >= 200 && $r['code'] < 300);
+  }
+  return $sent;
 }
