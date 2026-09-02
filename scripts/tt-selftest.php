@@ -67,11 +67,28 @@ if (isset($_GET['refund'])) {
   $out['12_refund_unknown'] = send($base . 'refund', ['PaymentTransactionId' => 'net-takoy-' . gmdate('His'),
                                'TransactionId' => $rt . 'x'] + $rf, $secret);
 }
+/* Проверяем, что после оплаты отчёт реально создан и привязан к лиду.
+   Секрет вебхука лежит в конфиге — им же зовём issue_report на сверку. */
+$rpc = $c['SUPABASE_URL'] . '/rest/v1/rpc/tiptop_issue_report';
+$rr = http_json($rpc, 'POST', [
+  'apikey: ' . $c['SUPABASE_ANON'], 'Authorization: Bearer ' . $c['SUPABASE_ANON'],
+  'Content-Type: application/json',
+], ['p_secret' => (string)($c['TIPTOP_RPC_SECRET'] ?? ''), 'p_lead' => $lead], 20);
+$rj = is_array($rr['json']) ? $rr['json'] : [];
+$out['7_report_issued'] = [
+  'http' => $rr['code'],
+  'ok' => !empty($rj['ok']),
+  'existing' => $rj['existing'] ?? null,
+  'has_token' => !empty($rj['token']),
+  'why' => $rj['why'] ?? null,
+];
+
 $out['lead'] = $lead;
 $out['txn']  = $txn;
 $out['expected'] = [
   '1_check_ok' => '200 {"code":0}', '2_check_bad_sig' => '403 {"code":13}',
   '3_check_bad_amount' => '200 {"code":12}', '4_check_no_lead' => '200 {"code":0} — оплата по ссылке без номера заказа',
   '5_pay_ok' => '200 {"code":0}', '6_pay_retry' => '200 {"code":0}',
+  '7_report_issued' => 'ok=true, has_token=true, existing=true (повтор issue не задваивает)',
 ];
 jout($out);
