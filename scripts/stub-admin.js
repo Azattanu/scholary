@@ -1,0 +1,56 @@
+// Заглушка для проверки дашборда: возвращает правдоподобные данные.
+(function () {
+  function res(data) { return Promise.resolve({ data: data, error: null }); }
+  function days(n, f) { var a = [], d = new Date(); for (var i = n - 1; i >= 0; i--) { var x = new Date(d); x.setDate(d.getDate() - i); a.push(f(x.toISOString().slice(0,10), n - i)); } return a; }
+  var FIX = {
+    admin_dash_summary: { revenue_all: 187000, revenue_period: 121000, payments_all: 24, payments_period: 15,
+      refunds_all: 2, refunded_sum: 8000, users_total: 27, users_period: 11, users_with_answers: 17, pro_active: 3,
+      leads_total: 49, leads_period: 22, leads_paid: 12, leads_with_contact: 31, applications_total: 153,
+      applications_submitted: 9, documents_ready: 22, reports_total: 0, telegram_linked: 4, programs_total: 108,
+      events_24h: 340, period_days: 30 },
+    admin_revenue_daily: days(30, function (d, i) { return { den: d, summa: (i % 5 === 0 ? 0 : (i * 700) % 19000), oplat: i % 4 === 0 ? 0 : (i % 3) }; }),
+    admin_revenue_by_kind: [ { vid: "report", oplat: 9, summa: 36000 }, { vid: "package", oplat: 2, summa: 70000 },
+      { vid: "pro_season", oplat: 1, summa: 14900 }, { vid: "consult", oplat: 0, summa: 0 } ],
+    admin_funnel: { vsego: 812, nachali_kviz: 402, doshli_do_rezultata: 233, uvideli_paywall: 219, poshli_v_kabinet: 61, nazhali_oplatit: 38, oplatili: 12 },
+    admin_sources: [ { istochnik: "instagram", kanal: "stories", kampaniya: "sentyabr", zayavok: 21, s_kontaktom: 14, oplat: 5, summa: 20000 },
+      { istochnik: "прямой заход", kanal: "—", kampaniya: "—", zayavok: 18, s_kontaktom: 11, oplat: 4, summa: 55000 },
+      { istochnik: "tiktok", kanal: "video", kampaniya: "—", zayavok: 10, s_kontaktom: 6, oplat: 3, summa: 46000 } ],
+    admin_daily: days(30, function (d, i) { return { den: d, zayavki: (i * 3) % 7, registracii: (i * 2) % 4, nachali_kviz: (i * 5) % 11 }; }),
+    admin_payments: [ { txn: "1001", lead_id: "lead_ab12cd34", user_email: "a@b.kz", amount: 4000, kind: "report", status: "success", test_mode: false, created_at: new Date().toISOString() },
+      { txn: "1002", lead_id: null, user_email: "c@d.kz", amount: 14900, kind: "pro_season", status: "success", test_mode: false, created_at: new Date(Date.now()-86400000).toISOString() },
+      { txn: "1003", lead_id: "lead_zz99", user_email: "e@f.kz", amount: 35000, kind: "package", status: "refunded", test_mode: false, created_at: new Date(Date.now()-3*86400000).toISOString() },
+      { txn: "1004", lead_id: "lead_test", user_email: "t@t.kz", amount: 4000, kind: "report", status: "success", test_mode: true, created_at: new Date(Date.now()-4*86400000).toISOString() } ],
+    admin_subscriptions: [ { email: "c@d.kz", pro_until: "2027-03-01", pro_plan: "season", aktivna: true },
+      { email: "old@x.kz", pro_until: "2026-01-01", pro_plan: "month", aktivna: false } ],
+    admin_top_programs_json: [ { name: "Stipendium Hungaricum", country: "Венгрия", picks: 31, submitted: 4, avg_readiness: 42 },
+      { name: "EDISU Piemonte", country: "Италия", picks: 24, submitted: 2, avg_readiness: 30 },
+      { name: "Türkiye Bursları", country: "Турция", picks: 19, submitted: 1, avg_readiness: 18 } ],
+    admin_countries: [ { strana: "Венгрия", podach: 31, otpravleno: 4 }, { strana: "Италия", podach: 24, otpravleno: 2 }, { strana: "Турция", podach: 19, otpravleno: 1 } ],
+    admin_leads: [
+      { id: "l1", name: "Аида", whatsapp: "+7 701 111 22 33", level: "bachelor", field: "it", gpa_band: "4.4-4.0", ielts_band: "6.5", paid: true, paid_at: new Date().toISOString(), paid_amount: 4000, report_sent_at: null, updated_at: new Date().toISOString() },
+      { id: "l2", name: "Данияр", whatsapp: "+7 702 333 44 55", level: "master", field: "eng", gpa_uni: "3.67+", ielts_band: "7+", paid: false, updated_at: new Date().toISOString() },
+      { id: "l3", name: "", whatsapp: "", level: "phd", field: "sci", paid: false, updated_at: new Date().toISOString() } ]
+  };
+  window.supabase = { createClient: function () { return {
+    rpc: function (fn) { return res(FIX[fn] !== undefined ? FIX[fn] : []); },
+    auth: { getSession: function () { return res({ session: { access_token: "stub-token-1234567890abcdef", user: { email: "azattanu@gmail.com" } } }); },
+            signOut: function () { return res(null); },
+            signInWithPassword: function () { return res(null); } }
+  }; } };
+  var of = window.fetch;
+  window.fetch = function (u, o) {
+    if (String(u).indexOf('/api/health.php') >= 0) {
+      return Promise.resolve({ json: function () { return Promise.resolve({ ok: true, items: [
+        { title: 'Supabase — база и каталог', ok: true, note: 'отвечает, каталог читается', hint: '' },
+        { title: 'Resend — письма', ok: true, note: 'ключ рабочий; подтверждённых доменов: 0; отправитель общий адрес Resend', hint: 'письма уходят с общего адреса Resend — часть попадёт в спам. Нужны DNS-записи для scholary.kz' },
+        { title: 'WhatsApp (GREEN-API)', ok: false, note: 'состояние: notAuthorized', hint: 'телефон отвязался — заново отсканировать QR' },
+        { title: 'Telegram-бот', ok: true, note: '@askScholary_bot', hint: '' },
+        { title: 'Anthropic — разборы с ИИ', ok: true, note: 'ключ на месте', hint: '' },
+        { title: 'TipTop Pay — приём оплат', ok: true, note: 'ключ подписи на месте; связь с базой настроена', hint: '' },
+        { title: 'Расход ИИ за сегодня', ok: true, note: '12 из 600 общесайтового лимита', hint: '' },
+        { title: 'Журнал уведомлений шлюза', ok: true, note: '18 записей за месяц', hint: '' }
+      ] }); } });
+    }
+    return of.apply(this, arguments);
+  };
+})();

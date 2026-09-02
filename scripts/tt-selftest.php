@@ -56,6 +56,17 @@ if (isset($_GET['pro'])) {
           'TransactionId' => 'selftestpro3-' . gmdate('YmdHis')] + $pf;
   $out['9_pay_pro_no_account'] = send($base . 'pay', $pf3, $secret);
 }
+/* Возврат: должен снять доступ ровно по исходной транзакции */
+if (isset($_GET['refund'])) {
+  $rt = 'selftestref-' . gmdate('YmdHis');
+  $rf = ['TransactionId' => $rt, 'PaymentTransactionId' => $txn, 'Amount' => '4000.00',
+         'OperationType' => 'Refund', 'DateTime' => gmdate('Y-m-d H:i:s'), 'TestMode' => '1',
+         'InvoiceId' => $lead, 'Email' => (string)($c['MAIL_TO'] ?? '')];
+  $out['10_refund_full']    = send($base . 'refund', $rf, $secret);
+  $out['11_refund_repeat']  = send($base . 'refund', $rf, $secret);
+  $out['12_refund_unknown'] = send($base . 'refund', ['PaymentTransactionId' => 'net-takoy-' . gmdate('His'),
+                               'TransactionId' => $rt . 'x'] + $rf, $secret);
+}
 $out['lead'] = $lead;
 $out['txn']  = $txn;
 $out['expected'] = [
