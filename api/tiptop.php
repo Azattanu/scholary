@@ -75,16 +75,19 @@ tt_log($type, 'in', ['txn' => $txn, 'lead' => $lead, 'amount' => $amount, 'cur' 
    Коды: 0 — можно проводить, 10 — неверный номер заказа,
    11 — неверный AccountId, 12 — неверная сумма, 13 — не принимаем. */
 if ($type === 'check') {
-  if ($leadOk && $currency === 'KZT' && $kind !== null) { echo '{"code":0}'; exit; }
-  $code = !$leadOk ? 10 : 12;
-  tt_finish('{"code":' . $code . '}');
+  /* Отклоняем ТОЛЬКО по сумме и валюте. Отсутствие номера заказа — не повод
+     завернуть деньги: так оплачиваются платёжные ссылки из ЛК TipTop, где
+     InvoiceId не задан. Такой платёж просто ляжет в журнал payments,
+     а владельцу придёт письмо «привязать вручную». */
+  if ($currency === 'KZT' && $kind !== null) { echo '{"code":0}'; exit; }
+  tt_finish('{"code":12}');
   /* Отказ на check — это несостоявшаяся продажа. Чаще всего причина не
      во взломе, а в том, что цену поменяли в js/config.js и забыли в $PRICES.
      Поэтому владельцу пишем сразу, а не ждём, пока он заметит тишину. */
-  tt_log('check', 'declined', ['code' => $code, 'txn' => $txn, 'lead' => $lead, 'amount' => $amount, 'cur' => $currency]);
+  tt_log('check', 'declined', ['code' => 12, 'txn' => $txn, 'lead' => $lead, 'amount' => $amount, 'cur' => $currency]);
   if (tt_once('checkfail-' . $sum . '-' . $currency . '-' . gmdate('Y-m-d'))) {
     notify_owner('Платёж отклонён на проверке — оплата не прошла', [
-      'Причина'    => $code === 10 ? 'нет номера заказа' : 'сумма или валюта не из прайса',
+      'Причина'    => 'сумма или валюта не из прайса',
       'Сумма'      => $amount . ' ' . clean_txt($currency, 8),
       'ID лида'    => clean_txt($lead, 64) ?: '—',
       'Транзакция' => clean_txt($txn, 32) ?: '—',
@@ -121,9 +124,11 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
   }
 
   /* ---- разовые покупки: отчёт, консультация, пакет ---- */
-  if ($leadOk && $kind !== null && $currency === 'KZT') {
-    $res = tt_mark($lead, $txn, $sum, $email, $kind, 'success');
-    tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $lead, 'p_email' => $email,
+  if ($kind !== null && $currency === 'KZT') {
+    /* Лид может отсутствовать: так приходят оплаты по платёжной ссылке.
+       Деньги всё равно записываем и зовём владельца привязать заказ. */
+    $res = $leadOk ? tt_mark($lead, $txn, $sum, $email, $kind, 'success') : null;
+    tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $leadOk ? $lead : null, 'p_email' => $email,
       'p_amount' => $sum, 'p_kind' => $kind, 'p_status' => 'success', 'p_test' => $test]);
     /* Шлюзу отвечаем СРАЗУ: письмо и WhatsApp занимают до 40 секунд,
        за это время TipTop успел бы посчитать обработчик недоступным
@@ -134,10 +139,10 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
         'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
         'За что'     => tt_kind_ru($kind),
         'Почта'      => clean_txt($email, 120) ?: '—',
-        'ID лида'    => clean_txt($lead, 64) ?: '—',
+        'ID лида'    => $leadOk ? clean_txt($lead, 64) : 'нет — оплата по ссылке, привязать вручную',
         'Транзакция' => clean_txt($txn, 32) ?: '—',
         'Режим'      => $test ? 'тестовый' : 'боевой',
-        'В базе'     => $res ? 'отмечено' : 'НЕ ОТМЕЧЕНО — проверить вручную',
+        'В базе'     => $res === null ? 'записано в журнал платежей' : ($res ? 'отмечено' : 'НЕ ОТМЕЧЕНО — проверить вручную'),
       ]);
     }
   } else {
