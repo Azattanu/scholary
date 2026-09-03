@@ -28,7 +28,7 @@ alter table programs
 -- Только строки, по которым модель может считать честно: есть базовые ставки
 -- и требования. Никаких служебных полей наружу.
 drop view if exists programs_engine;
-create view programs_engine as
+create or replace view programs_engine as
   select id, name, country, cc, levels, funding,
          base_adm, base_sch, req, deadline, deadline_md, apply_open_md,
          note, fields, lang_year, exam, source_url
@@ -60,10 +60,13 @@ create table if not exists outcomes (
 );
 alter table outcomes enable row level security;
 -- каждый видит и пишет только свои исходы; чужие — только через admin-RPC
+drop policy if exists outcomes_own_select on outcomes;
 create policy outcomes_own_select on outcomes for select to authenticated
   using (user_id = auth.uid());
+drop policy if exists outcomes_own_insert on outcomes;
 create policy outcomes_own_insert on outcomes for insert to authenticated
   with check (user_id = auth.uid());
+drop policy if exists outcomes_own_update on outcomes;
 create policy outcomes_own_update on outcomes for update to authenticated
   using (user_id = auth.uid());
 create index if not exists outcomes_program on outcomes (program_id, cycle, stage);
@@ -84,8 +87,10 @@ create table if not exists profile_snapshots (
   created_at timestamptz not null default now()
 );
 alter table profile_snapshots enable row level security;
+drop policy if exists snapshots_own_select on profile_snapshots;
 create policy snapshots_own_select on profile_snapshots for select to authenticated
   using (user_id = auth.uid());
+drop policy if exists snapshots_own_insert on profile_snapshots;
 create policy snapshots_own_insert on profile_snapshots for insert to authenticated
   with check (user_id = auth.uid());
 create unique index if not exists snapshots_week on profile_snapshots (user_id, cycle, week_of);
