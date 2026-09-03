@@ -1,0 +1,968 @@
+{
+ "_readme": "Разметка каталога v3: канонические окна цикла, карта дублей, обогащение, новые программы. Семантика ставок — README в 46-м документе.",
+ "windows": {
+  "sh": [
+   "01-15",
+   "11-15"
+  ],
+  "edisu": [
+   "09-04",
+   "07-20"
+  ],
+  "disco": [
+   "07-22",
+   "06-10"
+  ],
+  "maeci": [
+   "03-26",
+   "03-01"
+  ],
+  "tb": [
+   "02-20",
+   "01-10"
+  ],
+  "de_pub": [
+   "07-15",
+   "05-01"
+  ],
+  "daad": [
+   "10-15",
+   "08-01"
+  ],
+  "cz_free": [
+   "02-28",
+   "11-01"
+  ],
+  "csc": [
+   "02-15",
+   "01-01"
+  ],
+  "anso": [
+   "01-31",
+   "10-15"
+  ],
+  "gks": [
+   "10-17",
+   "09-01"
+  ],
+  "mext": [
+   "05-29",
+   "04-20"
+  ],
+  "erasmus": [
+   "01-15",
+   "10-15"
+  ],
+  "si": [
+   "02-15",
+   "02-01"
+  ],
+  "us_need": [
+   "01-01",
+   "08-01"
+  ],
+  "kaust": [
+   "01-03",
+   "09-01"
+  ],
+  "mbzuai": [
+   "12-15",
+   "09-01"
+  ],
+  "nawa": [
+   "05-08",
+   "03-15"
+  ],
+  "hkphd": [
+   "12-01",
+   "09-01"
+  ],
+  "singa": [
+   "12-01",
+   "10-01"
+  ],
+  "chevening": [
+   "10-06",
+   "08-05"
+  ],
+  "clarendon": [
+   "01-06",
+   "09-01"
+  ],
+  "gates_cam": [
+   "01-06",
+   "09-01"
+  ],
+  "goi_ies": [
+   "03-12",
+   "01-15"
+  ],
+  "eth_esop": [
+   "11-30",
+   "11-01"
+  ],
+  "swiss_gov": [
+   "11-27",
+   "08-01"
+  ],
+  "eiffel": [
+   "01-08",
+   "10-01"
+  ],
+  "abai_verne": [
+   "05-17",
+   "03-15"
+  ],
+  "kuleuven_sci": [
+   "02-15",
+   "10-01"
+  ],
+  "tudelft_vef": [
+   "12-01",
+   "10-15"
+  ],
+  "nl_scholarship": [
+   "01-31",
+   "10-01"
+  ],
+  "dk_gov": [
+   "01-15",
+   "11-01"
+  ],
+  "fi_uni": [
+   "01-05",
+   "12-01"
+  ],
+  "ee_national": [
+   "10-15",
+   "09-01"
+  ],
+  "lv_state": [
+   "04-01",
+   "02-01"
+  ],
+  "lt_state": [
+   "04-20",
+   "03-01"
+  ],
+  "ro_gov": [
+   "03-31",
+   "01-15"
+  ],
+  "ceu": [
+   "02-02",
+   "10-15"
+  ],
+  "ada_az": [
+   "04-08",
+   "02-01"
+  ],
+  "ge_uni": [
+   null,
+   null
+  ],
+  "hk_ug": [
+   "11-26",
+   "09-15"
+  ],
+  "macau_ug": [
+   "04-09",
+   "02-03"
+  ],
+  "kaist_ug": [
+   "01-14",
+   "09-01"
+  ],
+  "kr_unis": [
+   null,
+   null
+  ],
+  "cn_provincial": [
+   "04-30",
+   "02-01"
+  ],
+  "cis_cn": [
+   "05-15",
+   "03-01"
+  ],
+  "schwarzman": [
+   "09-09",
+   "04-01"
+  ],
+  "yenching": [
+   "11-30",
+   "08-15"
+  ],
+  "malaysia_mis": [
+   null,
+   null
+  ],
+  "ait_th": [
+   "07-15",
+   "03-01"
+  ],
+  "iccr_in": [
+   "04-22",
+   "02-27"
+  ],
+  "brunei_gov": [
+   "02-15",
+   "12-15"
+  ],
+  "berea": [
+   "11-30",
+   "09-01"
+  ],
+  "pearson_utoronto": [
+   "11-06",
+   "09-01"
+  ],
+  "ubc_isp": [
+   "11-15",
+   "09-01"
+  ],
+  "fulbright_kz": [
+   "07-15",
+   "03-01"
+  ],
+  "nyuad": [
+   "01-05",
+   "09-01"
+  ],
+  "khalifa": [
+   "03-02",
+   "12-01"
+  ],
+  "qatar_uni": [
+   "03-25",
+   "03-01"
+  ],
+  "au_merit": [
+   null,
+   null
+  ],
+  "auckland_nz": [
+   null,
+   null
+  ],
+  "adb_jsp": [
+   null,
+   null
+  ],
+  "isdb_msp": [
+   null,
+   null
+  ]
+ },
+ "duplicates": {
+  "x-anso-scholarship-chinese-academy-of-scienc": "anso",
+  "x-adb-japan-scholarship-adb-jsp": "adb_jsp",
+  "x-adb-jsp-asian-development-bank": "adb_jsp",
+  "x-berea-college-100": "berea",
+  "x-brunei-darussalam-government-scholarship": "brunei_gov",
+  "x-ceu-central-european-university": "ceu",
+  "x-chevening": "chevening",
+  "x-clarendon-oxford": "clarendon",
+  "x-eiffel-excellence": "eiffel",
+  "x-estonian-national-scholarship": "ee_national",
+  "x-eth-excellence-scholarship": "eth_esop",
+  "x-fulbright-foreign-student": "fulbright_kz",
+  "x-gates-cambridge": "gates_cam",
+  "x-government-of-ireland-ies": "goi_ies",
+  "x-holland-scholarship-radboud-uva": "nl_scholarship",
+  "x-iccr-scholarship": "iccr_in",
+  "x-islamic-development-bank-scholarship": "isdb_msp",
+  "x-kaist-international-scholarship": "kaist_ug",
+  "x-khalifa-university": "khalifa",
+  "x-ku-leuven-science-leuven": "kuleuven_sci",
+  "x-latvian-state-scholarship": "lv_state",
+  "x-lester-b-pearson-u-of-toronto": "pearson_utoronto",
+  "x-lithuanian-state-scholarships": "lt_state",
+  "x-mis-malaysia-international-scholarship": "malaysia_mis",
+  "x-nawa-ulam": "nawa",
+  "x-prog-11": "ro_gov",
+  "x-qatar-university-international-scholarship": "qatar_uni",
+  "x-schwarzman-scholars-tsinghua": "schwarzman",
+  "x-snu-postech-yonsei": "kr_unis",
+  "x-swiss-government-excellence": "swiss_gov",
+  "x-tu-delft-excellence-justus-louise-van-effe": "tudelft_vef",
+  "x-ubc-international-scholars": "ubc_isp",
+  "x-undergrad-hku-hkust-cuhk": "hk_ug",
+  "x-university-of-macau-full-scholarship": "macau_ug",
+  "x-yenching-academy-peking": "yenching",
+  "x-nyu-abu-dhabi-need-based": "nyuad",
+  "x-aalto-helsinki-50-100": "fi_uni",
+  "x-danish-government-scholarship": "dk_gov",
+  "x-ada-university-scholarship": "ada_az",
+  "x-tbilisi-state-ilia-state": "ge_uni",
+  "x-jiangsu-shanghai-beijing": "cn_provincial",
+  "x-merit-melbourne-monash-unsw-sydney-25-50": "au_merit",
+  "x-university-of-auckland-international-stude": "auckland_nz",
+  "x-ait-siit-scholarships": "ait_th"
+ },
+ "enriched": {
+  "x--2": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 5.5,
+   "language": 4,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "04-30",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x--3": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 5.5,
+   "language": 4,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "05-15",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x-aga-khan-foundation-isp": {
+   "base_adm": 0.15,
+   "base_sch": 0.15,
+   "academics": 7,
+   "language": 6,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "03-31",
+   "apply_open_md": "01-15",
+   "note": null
+  },
+  "x-al-azhar": {
+   "base_adm": 0.4,
+   "base_sch": 0.4,
+   "academics": 4,
+   "language": 0,
+   "budget": 0,
+   "fields": [
+    "hum"
+   ],
+   "lang_year": true,
+   "deadline_md": "07-31",
+   "apply_open_md": "06-01",
+   "note": "язык учат на месте"
+  },
+  "x-belt-road-tsinghua-pku": {
+   "base_adm": 0.12,
+   "base_sch": 0.12,
+   "academics": 8,
+   "language": 6.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "03-15",
+   "apply_open_md": "12-01",
+   "note": null
+  },
+  "x-bocconi-merit-politecnico-di-milano-merit": {
+   "base_adm": 0.35,
+   "base_sch": 0.2,
+   "academics": 7.5,
+   "language": 6.5,
+   "budget": 2,
+   "fields": [
+    "bus",
+    "eng",
+    "it",
+    "art"
+   ],
+   "lang_year": false,
+   "deadline_md": "04-30",
+   "apply_open_md": "01-15",
+   "note": null
+  },
+  "x-community-colleges-transfer": {
+   "base_adm": 0.8,
+   "base_sch": 0.25,
+   "academics": 4,
+   "language": 5,
+   "budget": 7,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": null,
+   "apply_open_md": null,
+   "note": "приём круглый год"
+  },
+  "x-confucius-institute-scholarship": {
+   "base_adm": 0.45,
+   "base_sch": 0.45,
+   "academics": 4.5,
+   "language": 0,
+   "budget": 0,
+   "fields": [
+    "hum"
+   ],
+   "lang_year": true,
+   "deadline_md": "05-15",
+   "apply_open_md": "03-01",
+   "note": "китайский трек, язык учат на месте"
+  },
+  "x-constructor-university-bremen-need-based": {
+   "base_adm": 0.45,
+   "base_sch": 0.4,
+   "academics": 6.5,
+   "language": 6,
+   "budget": 4,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "05-31",
+   "apply_open_md": "01-01",
+   "note": null
+  },
+  "x-czech-government-scholarship": {
+   "base_adm": 0.2,
+   "base_sch": 0.2,
+   "academics": 6,
+   "language": 5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "09-30",
+   "apply_open_md": "07-01",
+   "note": null
+  },
+  "x-daad-helmut-schmidt-public-policy": {
+   "base_adm": 0.12,
+   "base_sch": 0.12,
+   "academics": 7.5,
+   "language": 6.5,
+   "budget": 0,
+   "fields": [
+    "hum",
+    "law",
+    "bus"
+   ],
+   "lang_year": false,
+   "deadline_md": "07-31",
+   "apply_open_md": "06-01",
+   "note": null
+  },
+  "x-deutschlandstipendium": {
+   "base_adm": 0.55,
+   "base_sch": 0.25,
+   "academics": 6.5,
+   "language": 6,
+   "budget": 4,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "09-30",
+   "apply_open_md": "07-01",
+   "note": "стипендия подаётся после зачисления"
+  },
+  "x-diaspora-bilateral-state-scholarships-sh": {
+   "base_adm": 0.35,
+   "base_sch": 0.35,
+   "academics": 5.5,
+   "language": 5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "01-15",
+   "apply_open_md": "11-15",
+   "note": null
+  },
+  "x-diyanet-vakf": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 4.5,
+   "language": 0,
+   "budget": 0,
+   "fields": [
+    "hum"
+   ],
+   "lang_year": true,
+   "deadline_md": "04-30",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x-dsu-toscana": {
+   "base_adm": 0.55,
+   "base_sch": 0.5,
+   "academics": 5,
+   "language": 5.5,
+   "budget": 2,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "09-10",
+   "apply_open_md": "07-01",
+   "note": "грант по доходу семьи, как EDISU/DiSCo"
+  },
+  "x-education-city-qatar-foundation": {
+   "base_adm": 0.12,
+   "base_sch": 0.3,
+   "academics": 8,
+   "language": 7,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "02-01",
+   "apply_open_md": "10-01",
+   "note": null
+  },
+  "x-er-go": {
+   "base_adm": 0.55,
+   "base_sch": 0.5,
+   "academics": 5,
+   "language": 5.5,
+   "budget": 2,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "09-05",
+   "apply_open_md": "07-01",
+   "note": "грант по доходу семьи, как EDISU/DiSCo"
+  },
+  "x-ernst-mach-grant": {
+   "base_adm": 0.18,
+   "base_sch": 0.18,
+   "academics": 7.5,
+   "language": 6.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "03-01",
+   "apply_open_md": "12-01",
+   "note": null
+  },
+  "x-france-excellence-bgf": {
+   "base_adm": 0.2,
+   "base_sch": 0.2,
+   "academics": 7,
+   "language": 6,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "03-15",
+   "apply_open_md": "12-15",
+   "note": null
+  },
+  "x-great-scholarships": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 7,
+   "language": 6.5,
+   "budget": 4,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "05-31",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x-hamad-bin-khalifa-university": {
+   "base_adm": 0.2,
+   "base_sch": 0.25,
+   "academics": 7.5,
+   "language": 6.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "02-01",
+   "apply_open_md": "11-01",
+   "note": null
+  },
+  "x-knb-scholarship": {
+   "base_adm": 0.35,
+   "base_sch": 0.35,
+   "academics": 5,
+   "language": 4.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": true,
+   "deadline_md": "02-28",
+   "apply_open_md": "01-15",
+   "note": "год индонезийского входит в программу"
+  },
+  "x-ljubljana": {
+   "base_adm": 0.35,
+   "base_sch": 0.25,
+   "academics": 6,
+   "language": 6,
+   "budget": 2,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "04-30",
+   "apply_open_md": "02-01",
+   "note": null
+  },
+  "x-merit-ie-esade-navarra": {
+   "base_adm": 0.45,
+   "base_sch": 0.25,
+   "academics": 6.5,
+   "language": 6.5,
+   "budget": 7,
+   "fields": [
+    "bus",
+    "law",
+    "hum"
+   ],
+   "lang_year": false,
+   "deadline_md": null,
+   "apply_open_md": null,
+   "note": "раунды круглый год"
+  },
+  "x-merit-porto-nova-coimbra": {
+   "base_adm": 0.5,
+   "base_sch": 0.3,
+   "academics": 5.5,
+   "language": 6,
+   "budget": 4,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "06-30",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x-national-scholarship-programme-sk": {
+   "base_adm": 0.35,
+   "base_sch": 0.35,
+   "academics": 6.5,
+   "language": 5.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "04-30",
+   "apply_open_md": "03-01",
+   "note": "второе окно — до 31 октября"
+  },
+  "x-nazarbayev-university": {
+   "base_adm": 0.3,
+   "base_sch": 0.6,
+   "academics": 6.5,
+   "language": 6.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "06-15",
+   "apply_open_md": "03-01",
+   "note": null
+  },
+  "x-open-doors-phd": {
+   "base_adm": 0.12,
+   "base_sch": 0.9,
+   "academics": 7.5,
+   "language": 5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "12-10",
+   "apply_open_md": "09-15",
+   "note": "победа в олимпиаде = грант"
+  },
+  "x-orange-tulip-scholarship-kazakhstan": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 6.5,
+   "language": 6.5,
+   "budget": 4,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "04-01",
+   "apply_open_md": "10-01",
+   "note": null
+  },
+  "x-prog-0": {
+   "base_adm": 0.25,
+   "base_sch": 0.95,
+   "academics": 7,
+   "language": 6.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "07-15",
+   "apply_open_md": "05-01",
+   "note": "конкурс Болашак: прошёл отбор — полное покрытие"
+  },
+  "x-sgis-singapore-international-graduate-awar": {
+   "base_adm": 0.1,
+   "base_sch": 0.3,
+   "academics": 8,
+   "language": 7,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "01-15",
+   "apply_open_md": "10-01",
+   "note": null
+  },
+  "x-tau-huji-technion": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 7,
+   "language": 6.5,
+   "budget": 2,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "04-15",
+   "apply_open_md": "01-15",
+   "note": null
+  },
+  "x-taiwan-moe-scholarship-huayu": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 6,
+   "language": 5.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": true,
+   "deadline_md": "03-31",
+   "apply_open_md": "02-01",
+   "note": null
+  },
+  "x-university-of-tokyo-peak": {
+   "base_adm": 0.1,
+   "base_sch": 0.3,
+   "academics": 8.5,
+   "language": 7,
+   "budget": 2,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "01-12",
+   "apply_open_md": "10-01",
+   "note": null
+  },
+  "x-vanier-cgs": {
+   "base_adm": 0.08,
+   "base_sch": 0.08,
+   "academics": 9,
+   "language": 7,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "11-01",
+   "apply_open_md": "07-01",
+   "note": null
+  },
+  "x-visegrad-scholarship": {
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "academics": 6.5,
+   "language": 6,
+   "budget": 0,
+   "fields": null,
+   "lang_year": false,
+   "deadline_md": "03-15",
+   "apply_open_md": "01-15",
+   "note": null
+  },
+  "x-world-in-serbia": {
+   "base_adm": 0.35,
+   "base_sch": 0.35,
+   "academics": 5,
+   "language": 4.5,
+   "budget": 0,
+   "fields": null,
+   "lang_year": true,
+   "deadline_md": "04-30",
+   "apply_open_md": "03-01",
+   "note": null
+  }
+ },
+ "unavailable": {
+  "x--4": "с 2023 года магистратура в гос. вузах Норвегии платная для граждан вне ЕС/ЕЭЗ",
+  "x-fundacio-n-carolina": "программа для граждан стран Латинской Америки — Казахстан не входит",
+  "x-ofid-opec-fund-joint-japan-world-bank": "JJ/WBGSP: Казахстан отсутствует в актуальном списке стран — проверить перед подачей"
+ },
+ "new_programs": [
+  {
+   "id": "tr_uni_merit",
+   "name": "Полные merit-стипендии частных вузов Турции (Koç, Sabancı, Bilkent)",
+   "country": "Турция",
+   "cc": "tr",
+   "levels": [
+    "bachelor",
+    "master"
+   ],
+   "funding": "до 100% платы + у части вузов стипендия и общежитие",
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "req": {
+    "academics": 7.5,
+    "language": 6,
+    "budget": 0
+   },
+   "fields": null,
+   "lang_year": false,
+   "deadline": "апрель–май",
+   "deadline_md": "04-30",
+   "apply_open_md": "01-01",
+   "note": "merit решается вместе с зачислением; сильный аттестат и олимпиады решают",
+   "source_url": "https://apply.ku.edu.tr/"
+  },
+  {
+   "id": "mext_univrec",
+   "name": "MEXT University Recommendation (Япония)",
+   "country": "Япония",
+   "cc": "jp",
+   "levels": [
+    "master",
+    "phd"
+   ],
+   "funding": "обучение 0 ₸ + 144 000–145 000 ¥/мес + перелёт",
+   "base_adm": 0.15,
+   "base_sch": 0.15,
+   "req": {
+    "academics": 7.5,
+    "language": 6,
+    "budget": 0
+   },
+   "fields": null,
+   "lang_year": false,
+   "deadline": "ноябрь–январь (у каждого вуза своё окно)",
+   "deadline_md": "12-15",
+   "apply_open_md": "10-01",
+   "note": "второй трек MEXT: номинация университетом, минуя посольство; писать профессору заранее",
+   "source_url": "https://www.studyinjapan.go.jp/en/planning/scholarship/"
+  },
+  {
+   "id": "weidenfeld",
+   "name": "Weidenfeld-Hoffmann (Oxford)",
+   "country": "Британия",
+   "cc": "uk",
+   "levels": [
+    "master"
+   ],
+   "funding": "полное покрытие: плата + грант на жизнь",
+   "base_adm": 0.06,
+   "base_sch": 0.06,
+   "req": {
+    "academics": 8.5,
+    "language": 7,
+    "budget": 0
+   },
+   "fields": [
+    "law",
+    "hum",
+    "bus",
+    "sci"
+   ],
+   "lang_year": false,
+   "deadline": "вместе с январским дедлайном курса Oxford",
+   "deadline_md": "01-06",
+   "apply_open_md": "09-01",
+   "note": "для будущих лидеров развивающихся стран; эссе и интервью",
+   "source_url": "https://www.whtrust.org/"
+  },
+  {
+   "id": "kfupm",
+   "name": "KFUPM (Саудовская Аравия) — магистратура/PhD",
+   "country": "Саудовская Аравия",
+   "cc": "sa",
+   "levels": [
+    "master",
+    "phd"
+   ],
+   "funding": "обучение 0 ₸ + стипендия + жильё + перелёт домой раз в год",
+   "base_adm": 0.25,
+   "base_sch": 0.25,
+   "req": {
+    "academics": 7,
+    "language": 5.5,
+    "budget": 0
+   },
+   "fields": [
+    "it",
+    "eng",
+    "sci"
+   ],
+   "lang_year": false,
+   "deadline": "раунды: до середины марта и до октября",
+   "deadline_md": "03-15",
+   "apply_open_md": "01-01",
+   "note": "инженерно-технический профиль; GRE у части программ",
+   "source_url": "https://www.kfupm.edu.sa/"
+  },
+  {
+   "id": "oist_phd",
+   "name": "OIST PhD (Япония, Окинава)",
+   "country": "Япония",
+   "cc": "jp",
+   "levels": [
+    "phd"
+   ],
+   "funding": "полное финансирование всех аспирантов + relocation",
+   "base_adm": 0.12,
+   "base_sch": 0.95,
+   "req": {
+    "academics": 8,
+    "language": 6.5,
+    "budget": 0
+   },
+   "fields": [
+    "sci",
+    "it",
+    "eng"
+   ],
+   "lang_year": false,
+   "deadline": "два окна: ~15 апреля и ~15 октября",
+   "deadline_md": "04-15",
+   "apply_open_md": "02-01",
+   "note": "зачислен — значит профинансирован; исследовательский трек",
+   "source_url": "https://www.oist.jp/admissions"
+  },
+  {
+   "id": "epfl_excellence",
+   "name": "EPFL Excellence Fellowship (Швейцария)",
+   "country": "Швейцария",
+   "cc": "ch",
+   "levels": [
+    "master"
+   ],
+   "funding": "16 000 CHF/год + освобождение от платы",
+   "base_adm": 0.1,
+   "base_sch": 0.15,
+   "req": {
+    "academics": 8.5,
+    "language": 7,
+    "budget": 2
+   },
+   "fields": [
+    "it",
+    "eng",
+    "sci"
+   ],
+   "lang_year": false,
+   "deadline": "вместе с заявкой в магистратуру, ~15 декабря / 15 апреля",
+   "deadline_md": "12-15",
+   "apply_open_md": "10-01",
+   "note": "отдельной заявки нет — рассматривают всех поступающих",
+   "source_url": "https://www.epfl.ch/education/master/"
+  },
+  {
+   "id": "nawa_banach",
+   "name": "NAWA Banach (Польша) — магистратура",
+   "country": "Польша",
+   "cc": "pl",
+   "levels": [
+    "master"
+   ],
+   "funding": "обучение 0 ₸ в гос. вузах + стипендия NAWA ежемесячно",
+   "base_adm": 0.3,
+   "base_sch": 0.3,
+   "req": {
+    "academics": 6.5,
+    "language": 6,
+    "budget": 0
+   },
+   "fields": [
+    "it",
+    "eng",
+    "sci",
+    "bus"
+   ],
+   "lang_year": false,
+   "deadline": "~30 апреля",
+   "deadline_md": "04-30",
+   "apply_open_md": "03-01",
+   "note": "для Центральной Азии и Восточного партнёрства; поляк. или англ. программы",
+   "source_url": "https://nawa.gov.pl/en/students/foreign-students/the-banach-scholarship-programme"
+  }
+ ]
+}
