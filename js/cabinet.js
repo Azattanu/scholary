@@ -632,6 +632,7 @@
       .then(function (r) {
         if (r.error) { authErr("su-err", r.error); return; }
         if (window.track) track("cab_signup", {});
+        if (window.scholaryTtIdentify) window.scholaryTtIdentify({ email: $("su-email").value.trim() });
       });
   };
   $("f-forgot").onsubmit = function (e) {

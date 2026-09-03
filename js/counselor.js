@@ -1,4 +1,4 @@
-/* Scholary · workspace профориентолога, /counselors/cabinet/.
+/* Scholary · workspace профориентолога, /prof/cabinet/.
    Вход тем же Supabase Auth, что и у учеников. Привязка workspace к аккаунту —
    по токену из письма (?claim=…). Данные: school_mine / ws_roster / ws_today /
    ws_student_cabinet — RPC; карточки, подачи, документы, заметки — таблицы
@@ -231,7 +231,7 @@ function __counselorMain() {
   $("lnk-forgot").onclick = function (e) { e.preventDefault(); authView("forgot"); };
   $("btn-google").onclick = function () {
     var claim = qs("claim");
-    try { localStorage.setItem("scholary_next", "/counselors/cabinet/" + (claim ? "?claim=" + encodeURIComponent(claim) : "")); } catch (e) {}
+    try { localStorage.setItem("scholary_next", "/prof/cabinet/" + (claim ? "?claim=" + encodeURIComponent(claim) : "")); } catch (e) {}
     sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet/" } })
       .then(function (r) { if (r.error) authErr("li-err", { message: "Google-вход недоступен — войдите по почте" }); });
   };
@@ -250,7 +250,7 @@ function __counselorMain() {
     e.preventDefault(); $("fg-err").hidden = true;
     sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet/" }).then(function (r) { if (r.error) { authErr("fg-err", r.error); return; } $("fg-ok").hidden = false; });
   };
-  function out() { if (S.demo) { location.href = "/counselors/"; return; } sb.auth.signOut().then(function () { location.href = "/counselors/cabinet/"; }); }
+  function out() { if (S.demo) { location.href = "/prof/"; return; } sb.auth.signOut().then(function () { location.href = "/prof/cabinet/"; }); }
   $("btn-out").onclick = out; $("btn-out2").onclick = out;
 
   /* ---------- вход в workspace ---------- */
@@ -259,7 +259,7 @@ function __counselorMain() {
     var claim = qs("claim");
     var p = claim ? DB.claim(claim).then(function (r) {
       var j = r.data;
-      if (j && j.ok) { track("ws_claim_ok"); history.replaceState(null, "", "/counselors/cabinet/" + location.hash); toast("Workspace «" + j.name + "» привязан к вашему аккаунту", "ok"); }
+      if (j && j.ok) { track("ws_claim_ok"); history.replaceState(null, "", "/prof/cabinet/" + location.hash); toast("Workspace «" + j.name + "» привязан к вашему аккаунту", "ok"); }
       else if (j && j.why === "taken") toast("Этот workspace уже привязан к другому аккаунту — войдите им или напишите нам", "bad");
       else if (j && j.why === "not_found") toast("Ссылка привязки не найдена — откройте актуальное письмо", "bad");
     }) : Promise.resolve();
@@ -672,7 +672,7 @@ function __counselorMain() {
       '<div><div class="card"><div class="h2">Тариф</div><div class="kv" style="margin-top:8px"><b>План</b><span>' + esc(w.plan_label || w.plan) + '</span><b>Статус</b><span>' + (w.open ? '<span class="pill pill-ok">доступ открыт</span>' : w.status === "active" ? '<span class="pill pill-warn">срок истёк</span>' : '<span class="pill pill-mut">' + esc(w.status) + "</span>") + '</span><b>Период</b><span>' + (w.starts_on ? fmtD(w.starts_on) + " — " : "") + fmtDL(w.ends_on) + '</span><b>Контакт</b><span>' + esc(w.contact_name || "—") + (w.contact_email ? "<br>" + esc(w.contact_email) : "") + "</span></div>" +
       '<div style="margin-top:12px"><b>' + w.used + " из " + w.seats + '</b> <span class="sm mut">мест занято · ' + (free ? "свободно " + free : "мест нет") + '</span><div class="bar"><i style="width:' + Math.min(100, Math.round(100 * w.used / Math.max(1, w.seats))) + '%"></i></div></div>' +
       '<p class="sm mut" style="margin:12px 0 8px">Место = карточка ученика. Удалили карточку — место освободилось. Нужно больше — переходите на следующий тариф, доплата считается пропорционально остатку срока.</p>' +
-      '<div class="tools"><a class="btn btn-primary btn-sm" href="/counselors/#tariffs">Тарифы</a><a class="btn btn-ghost btn-sm" href="https://wa.me/77024666852?text=' + encodeURIComponent("Здравствуйте! Хочу расширить тариф workspace профориентолога (" + w.name + ", код " + w.invite_code + ").") + '" target="_blank" rel="noopener">Написать нам</a></div></div>' +
+      '<div class="tools"><a class="btn btn-primary btn-sm" href="/prof/#tariffs">Тарифы</a><a class="btn btn-ghost btn-sm" href="https://wa.me/77024666852?text=' + encodeURIComponent("Здравствуйте! Хочу расширить тариф workspace профориентолога (" + w.name + ", код " + w.invite_code + ").") + '" target="_blank" rel="noopener">Написать нам</a></div></div>' +
       '<div class="card" style="margin-top:14px"><div class="h2">Аккаунт</div><div class="sm mut">' + esc(S.session && S.session.user.email || "") + '</div><div class="tools"><button class="btn btn-ghost btn-sm" id="refresh">Обновить данные</button><button class="btn btn-ghost btn-sm" id="out3">Выйти</button></div></div></div></div>';
     $("inv-copy").onclick = function () { copyText(inviteLink(), "Ссылка скопирована"); track("ws_link_copy"); };
     $("inv-txt").onclick = function () { copyText(text, "Текст скопирован"); };

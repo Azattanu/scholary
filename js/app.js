@@ -122,6 +122,7 @@
     /* И в пиксель Meta: стандартные события — чтобы реклама умела
        оптимизироваться на заявку, а не на «клик по ссылке». */
     try { if (window.scholaryFb) window.scholaryFb(event, data, props); } catch (e) {}
+    try { if (window.scholaryTt) window.scholaryTt(event, data, props); } catch (e) {}
     try {
       if (window.scholaryYm) {
         var goal = ymGoal(event, data), price = goalPrice(goal, data);
@@ -299,7 +300,7 @@
         var cancelled = type === "cancel" || status === "cancel";
         var ok = !cancelled && type !== "error" && (status === "success" || status === "appointment");
         var pending = !cancelled && !ok && status === "wait";
-        if (window.track) window.track("pay_result", { type: type, status: status, kind: o.kind || "" });
+        if (window.track) window.track("pay_result", { type: type, status: status, kind: o.kind || "", txn: String((r && (r.transactionId || r.transaction_id || r.TransactionId)) || "") });
         if (ok) { if (o.onSuccess) o.onSuccess(r); }
         else if (cancelled) { if (o.onCancel) o.onCancel(r); }
         else if (pending) { (o.onPending || o.onSuccess || function () {})(r); }

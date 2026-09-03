@@ -350,7 +350,7 @@ function __scholaryMain() {
     var st = SCH_STATUS[r.status] || ["no", r.status];
     var isC = r.kind === "counselor";
     var link = "https://scholary.kz/schools/join/?code=" + (r.invite_code || "");
-    var cab  = (isC ? "https://scholary.kz/counselors/cabinet/?claim=" : "https://scholary.kz/schools/cabinet/?claim=") + (r.claim_token || "");
+    var cab  = (isC ? "https://scholary.kz/prof/cabinet/?claim=" : "https://scholary.kz/schools/cabinet/?claim=") + (r.claim_token || "");
     var id = esc(r.id);
     var actions = "";
     if (r.status === "pending" || r.status === "paused" || r.status === "expired" || r.status === "rejected") {

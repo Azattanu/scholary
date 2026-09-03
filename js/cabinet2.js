@@ -1760,6 +1760,7 @@ function __scholaryMain() {
       .then(function (r) {
         if (r.error) { authErr("su-err", r.error); return; }
         if (window.track) track("cab_signup", {});
+        if (window.scholaryTtIdentify) window.scholaryTtIdentify({ email: $("su-email").value.trim() });
         if (!r.data || !r.data.session) {
           /* подтверждение почты включено (или адрес уже занят — Supabase отвечает одинаково) */
           var el = $("su-err"); el.textContent = "Письмо с подтверждением отправлено на " + $("su-email").value.trim() + " — открой ссылку из него, и кабинет откроется. Если письма нет 2 минуты — проверь «Спам» или попробуй «Забыл пароль».";

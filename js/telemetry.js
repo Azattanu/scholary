@@ -186,6 +186,144 @@
     window.scholaryFb = function () {};
   }
 
+
+  /* ---------- Пиксель TikTok (TikTok Ads) ----------
+     Базовый код — официальный сниппет TikTok, ttq.page() на каждой странице.
+     Наши события → стандартные события TikTok (только они годятся как цель
+     оптимизации в Ads Manager); остальное уходит как кастомные с тем же
+     именем. Клики по всем кнопкам и ссылкам-действиям ловим глобально —
+     ClickButton с названием кнопки, мессенджеры — Contact. Персональные
+     поля в свойства не попадают; для Advanced Matching почта и телефон
+     уходят только хэшем SHA-256 через ttq.identify. */
+  var TT_ID = String(C.TIKTOK_PIXEL_ID || "").trim();
+  if (TT_ID) {
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject = t; var ttq = w[t] = w[t] || []; ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"], ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); }; }; for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]); ttq.instance = function (t) { for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]); return e; }, ttq.load = function (e, n) { var r = "https://analytics.tiktok.com/i18n/pixel/events.js", o = n && n.partner; ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = r, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {}; n = document.createElement("script"); n.type = "text/javascript", n.async = !0, n.src = r + "?sdkid=" + e + "&lib=" + t; e = document.getElementsByTagName("script")[0]; e.parentNode.insertBefore(n, e); };
+      ttq.load(TT_ID);
+      ttq.page();
+    }(window, document, "ttq");
+
+    var TT_STD = {
+      quiz_start:          "ViewContent",
+      tariffs_view:        "ViewContent",
+      demo_view:           "ViewContent",
+      schools_view:        "ViewContent",
+      prof_view:           "ViewContent",
+      report_view:         "ViewContent",
+      lead_form_submit:    "SubmitForm",
+      quiz_done:           "SubmitForm",
+      school_apply_ok:     "SubmitForm",
+      counselor_apply_ok:  "SubmitForm",
+      cab_signup:          "CompleteRegistration",
+      cab_setup_done:      "CompleteRegistration",
+      school_join_ok:      "CompleteRegistration",
+      school_claim_ok:     "CompleteRegistration",
+      ws_claim_ok:         "CompleteRegistration",
+      paywall_view:        "InitiateCheckout",
+      pro_click:           "InitiateCheckout",
+      pay_click:           "AddPaymentInfo",
+      pay_kaspi_click:     "Contact"
+      /* cta_* и клики по кнопкам не дублируем: их ловит глобальный обработчик кликов ниже */
+    };
+    var TT_PRICE = { pro_season: 14900, pro_month: 4990, consult: 15000, package: 35000 };
+    var ttSeq = 0;
+    function ttEventId(name) { ttSeq++; return name + "_" + Date.now().toString(36) + "_" + ttSeq; }
+
+    window.scholaryTt = function (event, data, props) {
+      try {
+        if (!window.ttq) return;
+        var d = data || {}, safe = clean(props || {});
+        var pageName = location.pathname.replace(/\/$/, "") || "/";
+        if (event === "pay_result") {
+          var st = d.status || "", tp = d.type || "";
+          if ((st === "success" || st === "appointment") && tp !== "cancel" && tp !== "error") {
+            var val = TT_PRICE[d.kind] || C.PRICE_REPORT || 4000;
+            window.ttq.track("CompletePayment", {
+              contents: [{ content_id: d.kind || "report", content_type: "product", content_name: d.kind || "report", price: val, quantity: 1 }],
+              value: val, currency: "KZT"
+            }, { event_id: d.txn ? "pay_" + d.txn : ttEventId("pay") });   /* тот же id, что у серверного события — TikTok не посчитает дважды */
+          } else {
+            window.ttq.track("pay_not_completed", { description: st + "/" + tp });
+          }
+          return;
+        }
+        if (event === "pro_click") {
+          var pv = TT_PRICE[d.plan === "season" ? "pro_season" : "pro_month"];
+          window.ttq.track("InitiateCheckout", { contents: [{ content_id: "pro_" + (d.plan || "month"), content_type: "product", price: pv, quantity: 1 }], value: pv, currency: "KZT" }, { event_id: ttEventId(event) });
+          return;
+        }
+        var std = TT_STD[event];
+        var payload = { contents: [{ content_id: event, content_type: "product", content_name: event }], description: pageName };
+        if (std === "SubmitForm" || std === "CompleteRegistration") payload.content_name = event;
+        if (std) window.ttq.track(std, payload, { event_id: ttEventId(event) });
+        else window.ttq.track(event, Object.assign({ description: pageName }, safe), { event_id: ttEventId(event) });
+      } catch (e) {}
+    };
+
+    /* Advanced Matching: почта/телефон — только SHA-256, ничего в открытом виде. */
+    window.scholaryTtIdentify = function (fields) {
+      try {
+        if (!window.ttq || !window.crypto || !window.crypto.subtle) return;
+        var out = {}, jobs = [];
+        var norm = { email: function (v) { return String(v || "").trim().toLowerCase(); },
+                     phone_number: function (v) { var d = String(v || "").replace(/\D/g, ""); if (d.length === 11 && d[0] === "8") d = "7" + d.slice(1); if (d.length === 10) d = "7" + d; return d ? "+" + d : ""; },
+                     external_id: function (v) { return String(v || "").trim(); } };
+        var map = { email: fields.email, phone_number: fields.phone || fields.phone_number, external_id: fields.external_id };
+        Object.keys(map).forEach(function (k) {
+          var v = norm[k](map[k]); if (!v) return;
+          jobs.push(window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(v)).then(function (buf) {
+            out[k] = Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+          }));
+        });
+        Promise.all(jobs).then(function () { if (Object.keys(out).length) window.ttq.identify(out); });
+      } catch (e) {}
+    };
+
+    /* Все кнопки и ссылки-действия сайта: ClickButton с текстом кнопки.
+       Мессенджеры и телефон — Contact. Работает и на кнопках, которые
+       страница рисует позже (делегирование на document). */
+    document.addEventListener("click", function (e) {
+      try {
+        var el = e.target && e.target.closest && e.target.closest("a,button,[role=button],label.btn");
+        if (!el) return;
+        var href = (el.getAttribute && el.getAttribute("href")) || "";
+        var isBtn = el.tagName === "BUTTON" || /(^|\s)(btn|btn-msg|nav-cta|nav-login|chip|tab|tabs|gbtn|btn-adm)(\s|$|-)/.test(el.className || "") || el.getAttribute("role") === "button" || el.closest(".tabs,#tabbar,.stabs,.switch,.plans");
+        if (!isBtn && !/^(https?:\/\/(wa\.me|api\.whatsapp\.com|t\.me)|tel:|mailto:)/.test(href)) return;
+        var text = (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
+        var pageName = location.pathname.replace(/\/$/, "") || "/";
+        if (/^(https?:\/\/(wa\.me|api\.whatsapp\.com|t\.me)|tel:|mailto:)/.test(href)) {
+          window.ttq.track("Contact", { contents: [{ content_id: /wa\.me|whatsapp/.test(href) ? "whatsapp" : /t\.me/.test(href) ? "telegram" : /^tel:/.test(href) ? "phone" : "email", content_type: "product", content_name: text }], description: pageName }, { event_id: ttEventId("contact") });
+          return;
+        }
+        window.ttq.track("ClickButton", { contents: [{ content_id: (el.id || href || text || "button").slice(0, 80), content_type: "product", content_name: text }], description: pageName }, { event_id: ttEventId("click") });
+      } catch (err) {}
+    }, true);
+
+    /* Отправка любой формы сайта — SubmitForm (страничные события добавляют
+       к этому конкретику: лид, заявка школы, регистрация). */
+    document.addEventListener("submit", function (e) {
+      try {
+        var f = e.target; if (!f || f.tagName !== "FORM") return;
+        window.ttq.track("SubmitForm", { contents: [{ content_id: f.id || "form", content_type: "product", content_name: f.id || "form" }], description: location.pathname.replace(/\/$/, "") || "/" }, { event_id: ttEventId("form") });
+      } catch (err) {}
+    }, true);
+  } else {
+    window.scholaryTt = function () {};
+    window.scholaryTtIdentify = function () {};
+  }
+
+  /* Страницы без app.js (кабинеты школы и профориентолога, регистрация по
+     ссылке) тоже должны слать события в пиксели и Метрику. app.js, если
+     загружен позже, переопределит track() полной версией. */
+  if (!window.track) {
+    window.track = function (event, data) {
+      try { window.scholaryTt(event, data, Object.assign({ page: location.pathname }, clean(data || {}))); } catch (e) {}
+      try { window.scholaryFb(event, data, clean(data || {})); } catch (e) {}
+      try { window.scholaryYm(event, clean(data || {})); } catch (e) {}
+      try { if (window.posthog && window.posthog.capture) window.posthog.capture(event, Object.assign({ page: location.pathname }, clean(data || {}))); } catch (e) {}
+    };
+  }
+
   /* ---------- PostHog: продуктовая аналитика ---------- */
   if (C.POSTHOG_KEY) {
     var host = C.POSTHOG_HOST || "https://us.i.posthog.com";
