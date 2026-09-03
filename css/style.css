@@ -297,7 +297,15 @@ p { margin: 0; text-wrap: pretty; }
 .fineprint { font-size: 12px; font-weight: 600; color: var(--faint); text-align: center; line-height: 1.55; }
 
 /* ---------- Хиро ---------- */
+/* Десктоп: меньше воздуха сверху, чтобы вторая кнопка хиро и стек отчётов
+   не уезжали под сгиб на 1440×900; на телефоне отступ прежний. */
 .hero { background: var(--surface); padding-block: clamp(44px, 5rem + 2vw, 96px) clamp(44px, 4rem + 2vw, 80px); border-bottom: 1px solid var(--border); }
+@media (min-width: 961px) {
+  .hero { padding-block: clamp(36px, 2.6rem + 1vw, 56px) clamp(40px, 3rem + 1vw, 60px); }
+  .hero-grid { align-items: start; }
+  .hero-visual { padding: 118px 0 150px; }
+  .hero-cta { margin-top: var(--s5); }
+}
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
 .hero h1 { font-size: var(--fz-h1); margin: var(--s4) 0 var(--s4); max-width: 16ch; }
 .hero .sub { font-size: var(--fz-lead); color: var(--muted); max-width: 46ch; }
@@ -326,6 +334,16 @@ p { margin: 0; text-wrap: pretty; }
   .mr-back { max-width: 330px; padding: 14px 16px; }
   .mr-back-1 { top: 42px; transform: rotate(-4deg) translateX(-14px); }
   .mr-back-2 { bottom: 48px; transform: rotate(3deg) translateX(16px); }
+}
+
+/* Живой стек: на десктопе карточки чуть поворачиваются за курсором.
+   Базовые повороты задаёт JS через переменные, чтобы не спорить с transform выше. */
+@media (min-width: 961px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-visual.tilt .mini-report, .hero-visual.tilt .mr-back, .hero-visual.tilt .float-badge { transition: transform .18s ease-out; will-change: transform; }
+  .hero-visual.tilt .mini-report { transform: rotate(1.2deg) translate3d(calc(var(--mx, 0) * 10px), calc(var(--my, 0) * 8px), 0); }
+  .hero-visual.tilt .mr-back-1 { transform: rotate(-3deg) translateX(-30px) translate3d(calc(var(--mx, 0) * -14px), calc(var(--my, 0) * -10px), 0); }
+  .hero-visual.tilt .mr-back-2 { transform: rotate(3deg) translateX(34px) translate3d(calc(var(--mx, 0) * 16px), calc(var(--my, 0) * 12px), 0); }
+  .hero-visual.tilt .float-badge { transform: translate3d(calc(var(--mx, 0) * -8px), calc(var(--my, 0) * -6px), 0); }
 }
 
 /* Мини-превью отчёта (секция «Так выглядит отчёт») */
