@@ -33,8 +33,8 @@ function rr_send($name, $wa, $mail, $token) {
   $hi = $first !== '' ? $first . ', привет!' : 'Привет!';
   $out = ['whatsapp' => false, 'email' => false];
 
-  $digits = preg_replace('/\D/', '', (string)$wa);
-  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && strlen($digits) >= 10 && strlen($digits) <= 15) {
+  $digits = wa_digits($wa);
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && $digits !== null) {
     $msg = $hi . " Вот твой отчёт Scholary 🎓\n\n" . $link . "\n\n"
          . "Ссылка личная и не сгорает — сохрани её или добавь в закладки.\n"
          . "Если отчёт не открывается, просто ответь на это сообщение.";
