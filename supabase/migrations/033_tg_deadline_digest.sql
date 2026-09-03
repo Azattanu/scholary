@@ -94,7 +94,9 @@ begin
   return jsonb_build_object('ok', true, 'items', v_rows);
 end $$;
 
-revoke all on function tg_due(text) from public, anon, authenticated;
+-- Вызывает PHP с anon-ключом: роли anon нужен EXECUTE, защита — секрет внутри.
+revoke all on function tg_due(text) from public, authenticated;
+grant execute on function tg_due(text) to anon;
 
 -- ---------- отметить отправленное ----------
 create or replace function tg_mark_sent(p_secret text, p_user uuid, p_program text, p_milestone int)
@@ -113,7 +115,8 @@ begin
   return true;
 end $$;
 
-revoke all on function tg_mark_sent(text, uuid, text, int) from public, anon, authenticated;
+revoke all on function tg_mark_sent(text, uuid, text, int) from public, authenticated;
+grant execute on function tg_mark_sent(text, uuid, text, int) to anon;
 
 -- Самопроверка: разворот 'MM-DD' в ближайшую дату работает
 select next_deadline('01-15') as jan15, next_deadline('12-31') as dec31, next_deadline('02-30') as bad;
