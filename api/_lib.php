@@ -1,5 +1,10 @@
 <?php
 /* Scholary · общие функции backend-эндпоинтов. */
+/* Ошибки PHP никогда не печатаем в ответ: для tiptop.php это сломало бы
+   JSON {"code":0} и шлюз ушёл бы в бесконечные ретраи, для остальных —
+   невалидный JSON у клиента и утечка путей сервера. */
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 function cfg() {
   static $c = null;
   if ($c === null) {
@@ -30,8 +35,13 @@ function client_ip() {
      в CF-Connecting-IP, а в X-Forwarded-For последним оказывается уже адрес
      самого Cloudflare — и тогда все посетители выглядели бы одним человеком,
      а лимит «12 заявок с одного IP» отрезал бы всех подряд. */
-  $cf = trim((string)($_SERVER['HTTP_CF_CONNECTING_IP'] ?? ''));
-  if ($cf !== '' && filter_var($cf, FILTER_VALIDATE_IP)) return $cf;
+  /* CF-Connecting-IP верим ТОЛЬКО если сайт реально за Cloudflare
+     (флаг в конфиге). Иначе любой клиент подставляет заголовок и
+     обходит все IP-лимиты «с нового адреса» на каждый запрос. */
+  if (!empty(cfg()['BEHIND_CLOUDFLARE'])) {
+    $cf = trim((string)($_SERVER['HTTP_CF_CONNECTING_IP'] ?? ''));
+    if ($cf !== '' && filter_var($cf, FILTER_VALIDATE_IP)) return $cf;
+  }
   $real = trim((string)($_SERVER['HTTP_X_REAL_IP'] ?? ''));
   if ($real !== '' && filter_var($real, FILTER_VALIDATE_IP)) return $real;
   $xff = (string)($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
@@ -50,7 +60,12 @@ function same_origin() {
   $o = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
   if ($o !== '') return (rtrim($o, '/') === $allow || $o === 'http://localhost:8123');
   $r = (string)($_SERVER['HTTP_REFERER'] ?? '');
-  if ($r !== '') return (strpos($r, $allow . '/') === 0 || strpos($r, $allow) === 0 || strpos($r, 'http://localhost:8123') === 0);
+  if ($r !== '') {
+    /* сравниваем именно хост: «https://scholary.kz.evil.com/» раньше проходил по префиксу */
+    $h = strtolower((string)parse_url($r, PHP_URL_HOST));
+    $ah = strtolower((string)parse_url($allow, PHP_URL_HOST));
+    return $h !== '' && ($h === $ah || $h === 'localhost');
+  }
   return false;
 }
 function cors() {
@@ -225,7 +240,7 @@ function notify_owner($title, $rows) {
     $sent['email'] = ($r['code'] >= 200 && $r['code'] < 300);
   }
 
-  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && !empty($c['OWNER_WA'])) {
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && !empty($c['OWNER_WA']) && empty($GLOBALS['NOTIFY_MAIL_ONLY'])) {
     $url = 'https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'];
     $r = http_json($url, 'POST', ['Content-Type: application/json'], [
       'chatId'  => preg_replace('/\D/', '', $c['OWNER_WA']) . '@c.us',

@@ -24,11 +24,13 @@ $MODEL = $pro ? ($c['ANTHROPIC_MODEL_PRO'] ?? $c['ANTHROPIC_MODEL'])
 
 /* Общий предохранитель на весь сайт: регистрация свободная, поэтому
    без него можно завести много аккаунтов и сжечь бюджет на модель. */
-$all = rate_check('all:ai', (int)($c['ALL_AI_PER_DAY'] ?? 600));
-if (!$all['ok']) jout(['error' => 'busy'], 429);
-
+/* Сначала личный лимит, потом общий: иначе один аккаунт, упёршийся в свой
+   лимит, продолжал бы крутить общий счётчик и выключил бы ИИ всем. */
 $rl = rate_check($user['id'], $pro ? (int)$c['PRO_AI_PER_DAY'] : (int)$c['FREE_AI_PER_DAY']);
 if (!$rl['ok']) jout(['error' => 'limit', 'used' => $rl['used'], 'limit' => $rl['limit'], 'pro' => $pro], 429);
+
+$all = rate_check('all:ai', (int)($c['ALL_AI_PER_DAY'] ?? 600));
+if (!$all['ok']) jout(['error' => 'busy'], 429);
 
 /* Обрезаем всё, что уходит в модель: длина запроса = деньги. */
 function trim_deep($v, $maxStr = 400, $depth = 0) {
