@@ -6,11 +6,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=58">
-  <script src="/js/config.js?v=58"></script>
-<script src="/js/telemetry.js?v=58"></script>
-  <script src="/js/report-engine.js?v=58"></script>
-  <script src="/js/app.js?v=58" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=59">
+  <script src="/js/config.js?v=59"></script>
+<script src="/js/telemetry.js?v=59"></script>
+  <script src="/js/report-engine.js?v=59"></script>
+  <script src="/js/app.js?v=59" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -170,8 +170,20 @@ function stepComplete(st) {
   });
 }
 
-function persist() {
-  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex })); } catch (e) {}
+/* Единственное место, которое пишет прогресс в localStorage.
+   Почту храним здесь же: человек мог ввести её на экране оплаты, уйти в Kaspi
+   и вернуться — заставлять набирать заново нельзя, это прямая потеря оплаты.
+   progressExtra «липкий»: флаг пейволла и превью-расчёт нельзя терять при
+   любом следующем persist(), иначе после возврата человек падает на первый
+   вопрос анкеты вместо экрана оплаты. */
+var progressExtra = {};
+function persist(extra) {
+  try {
+    if (extra) for (var k in extra) progressExtra[k] = extra[k];
+    var o = { answers: answers, step: stepIndex, email: phase2.email || "" };
+    for (var j in progressExtra) o[j] = progressExtra[j];
+    localStorage.setItem("scholary_quiz_v1", JSON.stringify(o));
+  } catch (e) {}
 }
 
 function renderStep() {
@@ -267,7 +279,7 @@ function engineSnapshot() {
   } catch (e) { return {}; }
 }
 function next() { if (stepIndex < STEPS.length - 1) { stepIndex++; renderStep(); } }
-function prev() { if (stepIndex > 0) { stepIndex--; renderStep(); } }
+function prev() { if (stepIndex > 0) { stepIndex--; progressExtra.paywall = false; renderStep(); } }
 
 /* ---------- Экран 8: контакты ---------- */
 function renderContact() {
@@ -372,8 +384,8 @@ function previewCalcFallback() {
 function renderPaywall() {
   const p = previewCalc();
   setProgress(0, STEPS.length, true);
-  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex, paywall: true,
-    result: (typeof p.pAdm === "number") ? { pAtLeastOne: p.pAdm / 100, pSch: (typeof p.pSch === "number") ? p.pSch / 100 : null } : null })); } catch (e) {}
+  persist({ paywall: true,
+    result: (typeof p.pAdm === "number") ? { pAtLeastOne: p.pAdm / 100, pSch: (typeof p.pSch === "number") ? p.pSch / 100 : null } : null });
   track("paywall_view");
   screen.innerHTML = "";
   screen.appendChild(h(
@@ -429,7 +441,7 @@ function renderPaywall() {
     location.href = "/cabinet/";
   });
   $("pwBack").addEventListener("click", () => {
-    try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex })); } catch (e) {}
+    persist();
     renderContact();
   });
 }
@@ -459,8 +471,14 @@ function lockedRow(name, pct, ok) {
     '<div style="display:flex; justify-content:space-between"><span style="font-size:14px; font-weight:700">' + name + '</span><span class="bar-val ' + (ok ? "ok" : "warn") + '">' + pct + "%</span></div>" +
     '<div class="bar' + (ok ? "" : " warn") + '"><i style="width:' + pct + '%"></i></div></div>';
 }
-
-/* ---------- Оплата ---------- */
+/* ---------- Оплата ----------
+   ЗАЧЕМ ЗДЕСЬ ПОДТВЕРЖДЕНИЕ КОНТАКТОВ.
+   Маска приводит номер к одному формату, но она не умеет отличить
+   «+7 775 383 18 36» от «+7 775 383 18 37» — один неверный палец, и отчёт
+   уходит постороннему человеку. Поэтому перед оплатой мы показываем оба
+   канала крупно, даём поправить номер прямо здесь и требуем почту:
+   почта — второй, независимый канал доставки и единственная страховка,
+   если в номере всё-таки опечатка. */
 function renderPayment() {
   screen.innerHTML = "";
   const terminalReady = window.scholaryTerminalReady && window.scholaryTerminalReady();
@@ -468,10 +486,36 @@ function renderPayment() {
     '<div style="display:flex; flex-direction:column; gap:14px">' +
       '<div class="quiz-q" style="font-size:21px">Оплата</div>' +
       '<div class="card" style="display:flex; justify-content:space-between; align-items:center">' +
-        '<div><div style="font-size:15px; font-weight:800">Отчёт о вероятности</div><div style="font-size:12.5px; color:var(--muted); font-weight:600">персональный онлайн-отчёт · для ' + esc(answers.name) + '</div></div>' +
-        '<div style="font-size:20px; font-weight:800; color:var(--accent)">' + fmt(C.PRICE_REPORT) + ' ₸</div>' +
+        '<div style="min-width:0"><div style="font-size:15px; font-weight:800">Отчёт о вероятности</div><div style="font-size:12.5px; color:var(--muted); font-weight:600">персональный онлайн-отчёт · для ' + esc(answers.name) + '</div></div>' +
+        /* nowrap + flex-shrink:0 — иначе на 390px цена ломалась на две строки */
+        '<div style="font-size:20px; font-weight:800; color:var(--accent); white-space:nowrap; flex-shrink:0; margin-left:12px">' + fmt(C.PRICE_REPORT) + '&nbsp;₸</div>' +
       "</div>" +
-      '<div class="field"><label for="fEmail">Email для отчёта (и чека)</label><input id="fEmail" class="input" inputmode="email" autocomplete="email" placeholder="aida@example.com"></div>' +
+
+      '<div class="card" style="display:flex; flex-direction:column; gap:12px">' +
+        '<b style="font-size:15px">Куда пришлём отчёт</b>' +
+
+        '<div id="waView" style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--bg); border-radius:12px; padding:12px 14px">' +
+          '<div style="min-width:0">' +
+            '<div style="font-size:11.5px; font-weight:800; color:var(--muted); letter-spacing:.06em; text-transform:uppercase">WhatsApp</div>' +
+            '<div id="waShown" style="font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:.02em">' + esc(PH.format(answers.whatsapp || "")) + '</div>' +
+          "</div>" +
+          '<button type="button" id="waEditBtn" class="btn btn-ghost" style="width:auto; min-height:40px; padding:0 14px; flex-shrink:0">Изменить</button>' +
+        "</div>" +
+
+        '<div id="waEditBox" hidden>' +
+          '<div class="field"><label for="fWa2">Номер WhatsApp</label>' +
+            '<input id="fWa2" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __" maxlength="20" value="' + esc(PH.format(answers.whatsapp || "")) + '">' +
+            '<div id="fWa2Hint" class="field-hint">Можно начать с 8 или +7 — приведём к одному формату.</div>' +
+          "</div>" +
+          '<button type="button" id="waSaveBtn" class="btn btn-outline" style="margin-top:8px">Сохранить номер</button>' +
+        "</div>" +
+
+        '<div class="field"><label for="fEmail">Почта <span style="color:var(--accent)">— обязательно</span></label>' +
+          '<input id="fEmail" class="input" type="email" inputmode="email" autocomplete="email" placeholder="aida@example.com" value="' + esc(phase2.email || "") + '">' +
+          '<div id="fEmailHint" class="field-hint">Второй канал доставки и чек об оплате. Если в номере окажется опечатка, отчёт всё равно дойдёт.</div>' +
+        "</div>" +
+      "</div>" +
+
       '<div style="display:flex; flex-direction:column; gap:10px" id="payButtons">' +
         (terminalReady
           ? '<button type="button" class="btn btn-dark" id="payCard" style="min-height:52px">Оплатить картой / Apple Pay / Google Pay</button>'
@@ -483,19 +527,88 @@ function renderPayment() {
     "</div>"));
 
   $("payBack").addEventListener("click", renderPaywall);
+
+  /* --- правка номера прямо на экране оплаты --- */
+  PH.attach($("fWa2"));
+  const setErr = (id, hintId, msg) => {
+    const el = $(id); if (!el) return;
+    el.classList.toggle("input-error", !!msg);
+    const hint = $(hintId);
+    if (hint) { hint.classList.toggle("is-error", !!msg); if (msg) hint.textContent = msg; }
+    if (msg) { el.focus(); try { el.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {} }
+  };
+  $("waEditBtn").addEventListener("click", () => {
+    $("waView").hidden = true; $("waEditBox").hidden = false; $("fWa2").focus();
+  });
+  $("waSaveBtn").addEventListener("click", () => {
+    const v = $("fWa2").value;
+    if (!PH.valid(v)) {
+      setErr("fWa2", "fWa2Hint", "Проверь номер: нужно 10 цифр после +7, например +7 775 383 18 36.");
+      track("pay_phone_invalid", { len: PH.digits(v).length });
+      return;
+    }
+    answers.whatsapp = PH.normalize(v);
+    saveLead({ whatsapp: answers.whatsapp });
+    persist();                       // иначе при возврате вернётся старый номер
+    $("waShown").textContent = PH.format(answers.whatsapp);
+    $("waEditBox").hidden = true; $("waView").hidden = false;
+    track("pay_phone_fixed");
+  });
+  $("fEmail").addEventListener("input", () => {
+    if ($("fEmail").classList.contains("input-error") && emailOk($("fEmail").value)) setErr("fEmail", "fEmailHint", "");
+  });
+  /* Сохраняем почту, как только человек её дописал: если он уйдёт в Kaspi
+     и вернётся на страницу, поле уже будет заполнено. */
+  $("fEmail").addEventListener("change", () => {
+    const v = ($("fEmail").value || "").trim();
+    if (emailOk(v)) { phase2.email = v; persist(); saveLead({ email: v }); }
+  });
+
+  /* Единая проверка контактов перед любой оплатой: и картой, и через Kaspi.
+     Раньше почта была необязательной — при опечатке в номере отчёт было
+     физически некуда доставить, и его приходилось искать руками. */
+  function contactsOk() {
+    if (!PH.valid($("fWa2") && !$("waEditBox").hidden ? $("fWa2").value : answers.whatsapp)) {
+      $("waView").hidden = true; $("waEditBox").hidden = false;
+      setErr("fWa2", "fWa2Hint", "Проверь номер: нужно 10 цифр после +7, например +7 775 383 18 36.");
+      return false;
+    }
+    if (!$("waEditBox").hidden) {           // открыт редактор — сначала сохраним
+      answers.whatsapp = PH.normalize($("fWa2").value);
+      saveLead({ whatsapp: answers.whatsapp });
+      persist();
+      $("waShown").textContent = PH.format(answers.whatsapp);
+      $("waEditBox").hidden = true; $("waView").hidden = false;
+    }
+    const em = ($("fEmail").value || "").trim();
+    if (!em) {
+      setErr("fEmail", "fEmailHint", "Впиши почту — это запасной канал: если в номере опечатка, отчёт всё равно дойдёт.");
+      track("pay_email_missing");
+      return false;
+    }
+    if (!emailOk(em)) {
+      setErr("fEmail", "fEmailHint", "Проверь адрес: похоже, в нём опечатка. Пример: aida@example.com");
+      track("pay_email_invalid");
+      return false;
+    }
+    phase2.email = em;
+    persist();
+    saveLead({ email: em });
+    return true;
+  }
+
   $("payKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
     "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
-  $("payKaspi").addEventListener("click", () => {
+  $("payKaspi").addEventListener("click", (ev) => {
+    if (!contactsOk()) { ev.preventDefault(); return; }
     track("pay_kaspi_click");
     // сразу дублируем владельцу: покупателя нельзя потерять, пока оплата ручная
     try {
-      const em = ($("fEmail").value || "").trim();
-      if (em) saveLead({ email: em });   // иначе у переотправки отчёта из админки нет почты
       fetch((C.NOTIFY_URL || "/api/notify.php"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          kind: "lead", name: answers.name || "", phone: answers.whatsapp || answers.phone || "",
-          email: em, level: answers.level || "",
+          kind: "lead", name: answers.name || "", phone: answers.whatsapp || "",
+          email: phase2.email || "", level: answers.level || "",
           note: "ХОЧЕТ ОТЧЁТ за " + fmt(C.PRICE_REPORT) + " ₸, оплата через Kaspi — выставить счёт и прислать PDF",
           lead_id: (window.scholaryLeadId ? window.scholaryLeadId() : ""), page: "/quiz/"
         })
@@ -506,13 +619,12 @@ function renderPayment() {
   if (terminalReady) $("payCard").addEventListener("click", () => {
     const btn = $("payCard");
     if (btn.dataset.busy) return;            // двойной тап — один виджет
+    if (!contactsOk()) return;
     btn.dataset.busy = "1"; setTimeout(() => { delete btn.dataset.busy; }, 4000);
-    const email = $("fEmail").value.trim();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("fEmail").focus(); alertBox("Проверь адрес почты — на него придёт ссылка на отчёт."); delete btn.dataset.busy; return; }
-    if (email) { phase2.email = email; saveLead({ email: email }); }
-    startTipTop(email);
+    startTipTop(phase2.email);
   });
 }
+function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim()); }
 
 // Общая обвязка живёт в js/app.js (window.scholaryPay), чтобы виджет
 // был подключён одинаково и в квизе, и в кабинете.
@@ -685,6 +797,7 @@ try {
   const saved = JSON.parse(localStorage.getItem("scholary_quiz_v1") || "null");
   if (saved && saved.answers && Object.keys(saved.answers).length) {
     Object.assign(answers, saved.answers);
+    if (saved.email) phase2.email = saved.email;      // не заставляем набирать почту заново
     stepIndex = Math.min(saved.step || 0, STEPS.length - 1);
     track("quiz_resume", { step: stepIndex + 1 });
     if (saved.paywall && saved.answers.name) { track("quiz_start"); renderPaywall(); return; }
