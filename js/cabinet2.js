@@ -434,9 +434,39 @@ function __scholaryMain() {
           '<span class="pill ' + dlClass(v.days) + '">' + (v.days != null ? v.days + " дн" : "—") + "</span></div>";
       }).join("") : "") +
       aiTipHTML(vs) +
+      proCardHTML() +
       '<div class="card" style="margin-top:14px;background:var(--bg);border-style:dashed">' +
         '<div class="h-row"><div style="padding-right:10px"><b class="sm">Нужен живой человек?</b><div class="xs mut">Консультант проверит пакет и доведёт до подачи — 35 000 ₸</div></div>' +
         '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸") + '">Написать</a></div></div>';
+  }
+
+  /* ---------- Scholary Pro на виду ----------
+     Раньше подписка жила одной строкой в «Профиле», визуально неотличимой
+     от «Помощи»: человек проходил весь кабинет и ни разу не узнавал, что
+     платный тариф вообще существует. Продаём не «подписку», а конкретный
+     результат — и показываем его там, где ценность ощущается. */
+  function isPro() { return !!(S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date()); }
+  function proCardHTML() {
+    if (isPro()) {
+      return '<div class="card" style="margin-top:14px;border-color:var(--ok);background:var(--ok-soft)">' +
+        '<div class="h-row"><div style="padding-right:10px"><b class="sm">Scholary Pro активна</b>' +
+        '<div class="xs mut">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 60 разборов ИИ в день</div></div>" +
+        '<span class="pill pill-ok">Pro</span></div></div>';
+    }
+    var plan = docPlanNow();
+    var toCheck = plan.filter(function (p) { return p.required && p.status !== "ready"; }).length;
+    var letters = plan.filter(function (p) { return p.t === "motivation" && p.status !== "ready"; }).length;
+    /* Аргумент подбираем под ситуацию человека, а не один текст на всех. */
+    var line = letters
+      ? "Мотивационное письмо переписывают по 3–4 круга. На Pro каждый круг разбирает модель посильнее — и не 8 раз в день, а 60."
+      : toCheck >= 4
+        ? "У тебя " + toCheck + " " + plural(toCheck, "документ", "документа", "документов") + " ещё в работе. На Pro их можно прогонять через ИИ, не оглядываясь на лимит."
+        : "Симулятор «что если» показывает, какое действие поднимет твой шанс сильнее всего — и стоит ли оно того.";
+    return '<div class="card tappable" data-act="subscribe" style="margin-top:14px;border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft)">' +
+      '<div class="h-row"><b class="sm">Scholary Pro</b><span class="pill pill-acc">14 900 ₸ за сезон</span></div>' +
+      '<p class="sm" style="margin:6px 0 10px">' + esc(line) + "</p>" +
+      '<div class="xs mut" style="margin-bottom:10px">⚡ 60 разборов ИИ в день вместо 8 · модель посильнее · симулятор «что если» · приоритетные напоминания о дедлайнах</div>' +
+      '<button class="btn btn-primary btn-sm btn-block" data-act="subscribe">Что входит в Pro</button></div>';
   }
   function aiTipHTML(vs) {
     var tip = null;
@@ -618,37 +648,162 @@ function __scholaryMain() {
     });
   }
 
-  /* ================= 4 · ДОКУМЕНТЫ ================= */
+  /* ================= 4 · ДОКУМЕНТЫ =================
+     Не список файлов, а план сбора. Человек должен за две секунды
+     понять три вещи: сколько собрано, что горит и что делать сегодня.
+     Порядок задаёт критический путь из doc-rules (docPlan): срок
+     изготовления + зависимости против ближайшего дедлайна. */
+  function docPlanNow() { return D.docPlan(appsForDoc(), S.docs, S.ans); }
+  /* Типы документов, актуальные для этого человека — из того же плана,
+     чтобы счётчик на вкладке «Сегодня» и модалка загрузки не расходились
+     со списком на вкладке «Документы». */
   function docTypesForUser() {
-    var set = {}, out = [];
-    appViews().forEach(function (v) { v.rd.required.forEach(function (r) { if (!set[r.t]) { set[r.t] = 1; out.push(r.t); } }); });
-    if (!out.length) out = ["diploma", "passport", "ielts", "motivation"];
-    return out;
+    var out = docPlanNow().filter(function (p) { return p.required; }).map(function (p) { return p.t; });
+    return out.length ? out : ["diploma", "passport", "ielts", "motivation"];
   }
+
+  function docWarned(d) {
+    if (!d || !d.verdicts) return false;
+    var v = Array.isArray(d.verdicts) ? d.verdicts : (d.verdicts.verdicts || []);
+    return v.some(function (x) { return x.level === "blocker"; });
+  }
+  function docStatusPill(p) {
+    var warn = docWarned(p.doc);
+    if (p.status === "ready") return warn ? '<span class="pill pill-warn">есть замечания</span>' : '<span class="pill pill-ok">готов</span>';
+    if (p.status === "progress") return '<span class="pill pill-acc">в работе</span>';
+    return '<span class="pill pill-mut">нет</span>';
+  }
+  /* Строка сроков — главная новая информация экрана. */
+  function docTimingHTML(p) {
+    if (!p.required) return '<div class="xs mut">' + esc(p.why) + "</div>";
+    if (p.status === "ready") {
+      return '<div class="xs mut">Нужен для ' + p.usesCount + " " + plural(p.usesCount, "подачи", "подач", "подач") + " · закрыт</div>";
+    }
+    var made = "≈" + p.chainLead + " " + plural(p.chainLead, "день", "дня", "дней") + " на изготовление";
+    var line;
+    if (p.daysToStart == null) line = made;
+    else if (p.daysToStart < 0) {
+      var late = -p.daysToStart;
+      line = '<b style="color:var(--bad)">Начать нужно было ' + late + " " + plural(late, "день", "дня", "дней") + " назад</b> · " + made;
+    } else if (p.daysToStart === 0) line = '<b style="color:var(--bad)">Начать сегодня</b> · ' + made;
+    else line = "Начать до " + fmtDL(p.startBy) + " · " + made;
+    return '<div class="xs mut">Нужен для ' + p.usesCount + " " + plural(p.usesCount, "подачи", "подач", "подач") +
+      (p.nearestTitle ? " · ближайшая «" + esc(p.nearestTitle) + "»" : "") + "</div>" +
+      '<div class="xs" style="margin-top:3px">' + line + "</div>" +
+      (p.blockedBy ? '<div class="xs" style="margin-top:3px;color:var(--accent-dark)">⛓ Только после: ' + esc((D.TYPES[p.blockedBy] || {}).title || p.blockedBy) + "</div>" : "");
+  }
+  /* Та же информация о сроках, но простым текстом — для карточки документа. */
+  function docTimingText(p) {
+    var parts = [];
+    parts.push("Нужен для " + p.usesCount + " " + plural(p.usesCount, "подачи", "подач", "подач"));
+    if (p.nearestTitle) parts.push("ближайшая «" + p.nearestTitle + "»" + (p.nearest ? " до " + fmtDL(p.nearest) : ""));
+    if (p.status !== "ready") {
+      parts.push("делается ≈" + p.chainLead + " " + plural(p.chainLead, "день", "дня", "дней"));
+      if (p.daysToStart != null && p.daysToStart < 0) parts.push("начать нужно было " + (-p.daysToStart) + " " + plural(-p.daysToStart, "день", "дня", "дней") + " назад");
+      else if (p.startBy) parts.push("начать до " + fmtDL(p.startBy));
+    }
+    if (p.blockedBy) parts.push("только после: " + ((D.TYPES[p.blockedBy] || {}).title || p.blockedBy));
+    return parts.join(" · ");
+  }
+  function docCardHTML(p) {
+    var d = p.doc;
+    var bg = p.status === "ready" ? "var(--ok-soft)" : p.status === "progress" ? "var(--accent-soft)" : "var(--bg)";
+    return '<div class="doc tappable" data-act="' + (d ? "doc" : "doc-new") + '" data-id="' + (d ? d.id : "") + '" data-doc="' + p.t + '">' +
+      '<div class="ic" style="background:' + bg + '">' + p.T.ic + "</div>" +
+      '<div style="flex:1;min-width:0"><b class="sm">' + esc(p.T.title) + "</b>" + docTimingHTML(p) + "</div>" +
+      docStatusPill(p) + "</div>";
+  }
+  function docGroupHTML(title, note, list) {
+    if (!list.length) return "";
+    return '<div class="sub-h">' + title + "</div>" +
+      (note ? '<p class="xs mut" style="margin:-2px 0 8px">' + note + "</p>" : "") +
+      list.map(docCardHTML).join("");
+  }
+
   function renderDocs() {
-    var types = docTypesForUser();
-    var ready = 0;
-    var rows = types.map(function (t) {
-      var T = D.TYPES[t] || { title: t, ic: "📄" };
-      var list = docsOfType(t);
-      var d = list[0];
-      var st = d ? d.status : "none";
-      if (st === "ready") ready++;
-      var warn = d && d.verdicts && d.verdicts.some ? d.verdicts.some(function (v) { return v.level !== "ok"; }) : false;
-      var uses = appViews().filter(function (v) { return v.rd.required.some(function (r) { return r.t === t; }); }).length;
-      return '<div class="doc tappable" data-act="' + (d ? "doc" : "doc-new") + '" data-id="' + (d ? d.id : "") + '" data-doc="' + t + '">' +
-        '<div class="ic" style="background:' + (st === "ready" ? "var(--ok-soft)" : st === "progress" ? "var(--accent-soft)" : "var(--bg)") + '">' + T.ic + "</div>" +
-        '<div style="flex:1;min-width:0"><b class="sm">' + esc(T.title) + "</b>" +
-        '<div class="xs mut">' + uses + " " + plural(uses, "подача", "подачи", "подач") + (d && d.expires_on ? " · до " + fmtDL(new Date(d.expires_on)) : d ? "" : " · " + (T.hint || "")) + "</div></div>" +
-        '<span class="pill ' + (st === "ready" && !warn ? "pill-ok" : warn ? "pill-warn" : st === "progress" ? "pill-acc" : "pill-mut") + '">' +
-        (st === "ready" && !warn ? "готов" : warn ? "смотри" : st === "progress" ? "в работе" : "нет") + "</span></div>";
-    }).join("");
+    var vs = appViews();
+    /* Без подач список документов собрать не из чего — честно говорим об этом,
+       а не показываем выдуманный набор из четырёх штук, как было раньше. */
+    if (!vs.length) {
+      $("tab-docs").innerHTML =
+        '<div class="h2" style="margin:10px 0 4px">Документы</div>' +
+        '<div class="empty"><div class="art">📂</div><h3>Пока нечего собирать</h3>' +
+        '<p>Список документов мы собираем не «вообще», а под конкретные программы: у Венгрии и Кореи он разный. Добавь хотя бы одну программу — и здесь появится план со сроками.</p>' +
+        '<button class="btn btn-primary" data-act="tab-unis">Выбрать программы</button></div>';
+      return;
+    }
+
+    var plan = docPlanNow(), s = D.planSummary(plan);
+    var g = function (u) { return plan.filter(function (p) { return p.urgency === u; }); };
+    var nowList = g("overdue").concat(g("now"));
+
     $("tab-docs").innerHTML =
-      '<div class="h-row" style="margin:10px 0 4px"><div class="h2" style="margin:0">Документы</div>' + ringHTML(Math.round(ready / Math.max(1, types.length) * 100), 44) + "</div>" +
-      '<p class="sm mut" style="margin:0 0 12px">' + ready + " из " + types.length + " готово · список собран из требований твоих подач</p>" +
-      rows +
-      '<div class="upload tappable" data-act="doc-pick">＋ Загрузить документ<div class="xs">PDF или фото · до 10 МБ · проверим по требованиям программ</div></div>' +
+      '<div class="h2" style="margin:10px 0 10px">Документы</div>' +
+
+      /* --- дашборд --- */
+      '<div class="card" style="margin-bottom:14px">' +
+        '<div class="h-row"><div style="padding-right:12px">' +
+          '<b class="sm">Собрано ' + s.ready + " из " + s.required + "</b>" +
+          '<div class="xs mut" style="margin-top:2px">обязательных по твоим ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + "</div>" +
+        "</div>" + ringHTML(s.pct, 52) + "</div>" +
+        '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
+          '<span class="pill pill-ok">Готово ' + s.ready + "</span>" +
+          '<span class="pill pill-acc">В работе ' + s.progress + "</span>" +
+          '<span class="pill pill-mut">Не начато ' + s.none + "</span>" +
+          (s.optional ? '<span class="pill pill-mut">Дополнительных ' + s.optional + "</span>" : "") +
+        "</div>" +
+        (s.overdue
+          ? '<div class="verd bad" style="margin:12px 0 0"><span>🔴</span><div><b>Старт просрочен: ' + s.overdue + " " + plural(s.overdue, "документ", "документа", "документов") + "</b>" +
+            "Это ещё не провал: сроки изготовления обычно можно ужать срочным тарифом. Но начинать надо сегодня — ниже они первыми.</div></div>"
+          : s.now
+            ? '<div class="verd warn" style="margin:12px 0 0"><span>⏳</span><div><b>Пора начинать: ' + s.now + " " + plural(s.now, "документ", "документа", "документов") + "</b>" +
+              "У них длинный срок изготовления, а дедлайн уже близко.</div></div>"
+            : s.ready === s.required && s.required
+              ? '<div class="verd ok" style="margin:12px 0 0"><span>✅</span><div><b>Обязательные документы собраны</b>Проверь пакет перед отправкой — это последняя точка, где ошибку ещё можно поймать.</div></div>'
+              : '<div class="verd ok" style="margin:12px 0 0"><span>👌</span><div><b>Сроки пока не горят</b>Запас есть. Начни с того, что делается дольше всего — это всегда апостиль и перевод.</div></div>') +
+      "</div>" +
+
+      /* --- группы по критическому пути --- */
+      docGroupHTML("Начать сейчас", "Дольше всего делаются — и дедлайн ближе всего", nowList) +
+      docGroupHTML("Скоро", "Начинать в ближайший месяц", g("soon")) +
+      docGroupHTML("Можно позже", "Срок позволяет — но не забудь", g("later")) +
+      docGroupHTML("Готово", "", g("done")) +
+      docGroupHTML("Дополнительные", "Не требует ни одна из твоих программ, но заявку усиливают", g("optional")) +
+
+      '<div class="upload tappable" data-act="doc-pick" style="margin-top:14px">＋ Загрузить документ<div class="xs">PDF, JPG или PNG · до 10 МБ · сразу проверим по требованиям твоих программ</div></div>' +
+      proCardHTML() +
+
+      /* --- решение проблем --- */
+      '<div class="lst tappable" data-act="doc-help" style="margin-top:12px"><div style="flex:1"><b class="sm">Что делать, если…</b>' +
+        '<div class="xs mut">не тот формат · нет документа на руках · файл не открывается</div></div><span class="xs mut">→</span></div>' +
       '<p class="xs mut" style="margin-top:12px">Файлы видишь только ты: доступ закрыт по твоему аккаунту. <a href="/privacy/" target="_blank" rel="noopener">Как мы храним данные</a></p>';
+  }
+
+  /* ---------- «что делать, если…» ---------- */
+  var DOC_FAQ = [
+    { q: "Загрузил не тот файл или не тот формат",
+      a: "Открой документ в списке и нажми «Заменить файл» — старый файл заменится новым, статус и проверки пересчитаются. Отдельно удалять ничего не нужно. Принимаем PDF, JPG и PNG до 10 МБ." },
+    { q: "Документа ещё нет на руках",
+      a: "Это нормально — большинство документов и не должно быть готово заранее. Смотри строку «Начать до …»: до этой даты его можно спокойно не иметь. Если дата уже прошла, документ поднимется в блок «Начать сейчас»." },
+    { q: "Файл не открывается или не загружается",
+      a: "Чаще всего дело в размере: фото с современного телефона бывает больше 10 МБ. Пересними с меньшим разрешением или сохрани в PDF. Если не помогло — напиши нам в WhatsApp, отправим инструкцию и заберём файл вручную." },
+    { q: "Не знаю, где получить документ",
+      a: "Открой карточку документа: внизу есть пошаговая инструкция по Казахстану — куда идти, сколько дней и сколько примерно стоит. Она есть для апостиля, перевода, медсправки, IELTS и рекомендаций." },
+    { q: "Документ на казахском или русском, а нужен английский",
+      a: "Нужен нотариальный перевод — и делать его надо строго ПОСЛЕ апостиля, иначе апостиль в перевод не попадёт и перевод придётся заказывать заново. В плане мы это уже учли: перевод помечен «Только после: Апостиль»." },
+    { q: "Сертификат истекает до дедлайна",
+      a: "Впиши дату сдачи в карточке сертификата — мы сверим её с дедлайнами всех твоих подач и предупредим, если срок не покрывает подачу. IELTS действует 2 года." },
+    { q: "Хочу удалить документ и свои файлы",
+      a: "Профиль → «Данные и приватность». Там можно удалить и файлы, и аккаунт целиком." }
+  ];
+  function docHelpHTML() {
+    return subHead("Что делать, если…", "частые ситуации со сбором документов") +
+      DOC_FAQ.map(function (f) {
+        return '<div class="card" style="margin-bottom:10px"><b class="sm">' + esc(f.q) + "</b>" +
+          '<p class="sm mut" style="margin:6px 0 0">' + esc(f.a) + "</p></div>";
+      }).join("") +
+      '<a class="btn btn-ghost btn-block" style="margin-top:6px" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") +
+      '?text=' + encodeURIComponent("Здравствуйте! Вопрос по документам в кабинете Scholary") + '">Не нашёл ответ — написать в WhatsApp</a>';
   }
 
   /* ---------- карточка документа ---------- */
@@ -670,16 +825,44 @@ function __scholaryMain() {
     var apps = appsForDoc();
     var vers = D.checkDocument(d, apps, S.ans, S.evalR && S.evalR.profile);
     var how = D.HOWTO[d.doc_type];
+    /* Зачем этот документ и когда его начинать — берём из того же плана,
+       что и на вкладке, чтобы карточка и список не расходились. */
+    var pl = docPlanNow().filter(function (x) { return x.t === d.doc_type; })[0];
+    var blockers = vers.filter(function (x) { return x.level === "blocker"; }).length;
+
     return subHead(T.title, T.hint || "") +
+
+      (pl && pl.required ? '<div class="card" style="margin-bottom:12px;background:var(--accent-soft);border-color:var(--accent-border)">' +
+        '<b class="sm">Зачем он нужен</b><p class="sm" style="margin:6px 0 0">' + esc(pl.why) + "</p>" +
+        '<div class="xs mut" style="margin-top:8px">' + esc(docTimingText(pl)) + "</div></div>" : "") +
+
       '<div class="card" style="margin-bottom:12px">' +
         '<div class="h-row"><span class="sm mut">Статус</span><div class="seg" style="width:190px;margin:0">' +
         ["none|Нет", "progress|В работе", "ready|Готов"].map(function (s) {
           var p = s.split("|");
           return '<button data-act="docst" data-v="' + p[0] + '" data-id="' + d.id + '" class="' + (d.status === p[0] ? "on" : "") + '">' + p[1] + "</button>";
         }).join("") + "</div></div>" +
-        (d.file_path ? '<div class="h-row" style="margin-top:10px"><span class="sm mut">Файл</span><button class="btn btn-ghost btn-sm" data-act="dl" data-id="' + d.id + '">Открыть</button></div>' : "") +
-        '<div class="h-row" style="margin-top:10px"><span class="sm mut">' + (d.file_path ? "Заменить файл" : "Загрузить файл") + '</span><button class="btn btn-soft btn-sm" data-act="upload" data-id="' + d.id + '">Выбрать</button></div>' +
+
+        /* Что именно загружено — имя файла и когда. Раньше здесь было
+           безымянное «Файл · Открыть», и человек не помнил, что внутри. */
+        (d.file_path
+          ? '<div style="margin-top:12px;padding:11px 12px;background:var(--bg);border-radius:14px">' +
+              '<div class="h-row"><div style="min-width:0;padding-right:10px">' +
+                '<b class="sm" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📎 ' + esc(d.file_name || "Загруженный файл") + "</b>" +
+                '<div class="xs mut">' + (d.checked_at ? "загружен " + fmtDL(new Date(d.checked_at)) : "загружен") + "</div>" +
+              "</div>" +
+              '<button class="btn btn-ghost btn-sm" data-act="dl" data-id="' + d.id + '">Открыть</button></div>' +
+              '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+                '<button class="btn btn-soft btn-sm" data-act="upload" data-id="' + d.id + '">Заменить файл</button>' +
+                '<button class="btn btn-ghost btn-sm" data-act="recheck" data-id="' + d.id + '">Проверить заново</button>' +
+              "</div></div>"
+          : '<div style="margin-top:12px;padding:14px 12px;background:var(--bg);border-radius:14px;text-align:center">' +
+              '<div class="sm mut" style="margin-bottom:10px">Файл ещё не загружен. Можно вести документ и без файла — но с файлом мы проверим его содержимое.</div>' +
+              '<button class="btn btn-primary btn-sm" data-act="upload" data-id="' + d.id + '">Загрузить файл</button>' +
+              '<div class="xs mut" style="margin-top:8px">PDF, JPG или PNG · до 10 МБ</div></div>') +
       "</div>" +
+
+      (blockers ? '<div class="verd bad"><span>🔴</span><div><b>' + blockers + " " + plural(blockers, "замечание", "замечания", "замечаний") + ", которые стоит закрыть</b>Ниже — что именно и что с этим делать.</div></div>" : "") +
       docFieldsHTML(d) +
       '<div class="aicard" style="margin-bottom:10px"><div class="who"><i></i>Проверка по требованиям твоих подач</div>' +
       '<span class="xs mut">Сверено с ' + apps.length + " " + plural(apps.length, "подачей", "подачами", "подачами") + (d.checked_at ? " · " + fmtDL(new Date(d.checked_at)) : "") + "</span></div>" +
@@ -975,11 +1158,19 @@ function __scholaryMain() {
         row("Бюджет семьи", L.budget[a.budget], "budget") +
         row("Достижения", (a.achievements || []).map(function (k) { return L.ach[k] || k; }).join(", "), "ach") +
       "</div>" +
+      '<div class="card" style="margin-bottom:12px;background:var(--accent-soft);border-color:var(--accent-border)">' +
+        '<b class="sm">Планы изменились?</b>' +
+        '<p class="sm" style="margin:6px 0 0">Проходить квиз заново не нужно и лимита на изменения нет. Поменяй направление, уровень или балл прямо здесь — вероятности по всем подачам пересчитаются сразу, а мы подскажем, какие программы теперь подходят лучше.</p>' +
+        '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+          '<button class="btn btn-soft btn-sm" data-act="edit" data-key="field">Сменить направление</button>' +
+          '<button class="btn btn-ghost btn-sm" data-act="edit" data-key="level">Сменить уровень</button>' +
+        "</div></div>" +
       '<div class="card" style="margin-bottom:12px"><div class="h-row"><div style="padding-right:10px"><b class="sm">Telegram</b><div class="xs mut">' +
         (S.tg && S.tg.chat_id ? "подключён · шаг дня и дедлайны" : "не подключён — уведомления о дедлайнах не придут") + "</div></div>" +
         '<button class="btn ' + (S.tg && S.tg.chat_id ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="tg">' + (S.tg && S.tg.chat_id ? "Настроить" : "Подключить") + "</button></div></div>" +
-      '<div class="lst tappable" data-act="subscribe"><div style="flex:1"><b class="sm">Scholary Pro</b><div class="xs mut">' +
-        (S.profile && S.profile.pro_until && new Date(S.profile.pro_until) > new Date() ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ-разборы без очереди · 4 990 ₸/мес") + '</div></div><span class="xs mut">→</span></div>' +
+      (isPro()
+        ? '<div class="lst tappable" data-act="subscribe" style="border-radius:14px;background:var(--ok-soft);padding-inline:12px"><div style="flex:1"><b class="sm">Scholary Pro</b><div class="xs mut">активна до ' + fmtDL(new Date(S.profile.pro_until)) + '</div></div><span class="pill pill-ok">Pro</span></div>'
+        : '<div class="lst tappable" data-act="subscribe" style="border-radius:14px;background:var(--accent-soft);padding-inline:12px"><div style="flex:1"><b class="sm">Scholary Pro</b><div class="xs mut">60 разборов ИИ в день, симулятор «что если» · от 4 990 ₸</div></div><span class="pill pill-acc">Смотреть</span></div>') +
       '<div class="lst tappable" data-act="reports"><div style="flex:1"><b class="sm">Мои отчёты</b><div class="xs mut">' + ((S.reports || []).length) + " " + plural((S.reports || []).length, "отчёт", "отчёта", "отчётов") + "</div></div><span class=\"xs mut\">→</span></div>" +
       '<div class="lst tappable" data-act="privacy"><div style="flex:1"><b class="sm">Данные и приватность</b><div class="xs mut">что хранится и как удалить</div></div><span class="xs mut">→</span></div>' +
       '<div class="lst tappable" data-act="help"><div style="flex:1"><b class="sm">Помощь</b><div class="xs mut">WhatsApp · Telegram · вопросы</div></div><span class="xs mut">→</span></div>' +
@@ -1047,10 +1238,18 @@ function __scholaryMain() {
       }
       if (e.target.closest("[data-x]") || e.target === bg) { bg.remove(); return; }
       if (e.target.closest("[data-s]")) {
+        var changedDirection = (cfg.key === "field" || cfg.key === "level") &&
+          JSON.stringify(picked) !== JSON.stringify(sel);
         S.ans[cfg.key] = picked;
         if (cfg.key === "ielts_band") S.ans.lang_status = picked === "unknown" ? "none" : "have";
         sb.from("profiles").update({ answers: S.ans, updated_at: new Date().toISOString() }).eq("user_id", S.session.user.id).then(function () {});
-        recompute(); pushHistory("правка анкеты"); bg.remove(); renderProfile(); toast("Пересчитали вероятности");
+        recompute(); pushHistory("правка анкеты"); bg.remove(); renderProfile();
+        /* Сменил направление — вероятности пересчитались, но подачи и список
+           документов остались от прежнего трека. Молча оставлять это нельзя:
+           человек будет собирать бумаги под программы, которые ему больше
+           не подходят. */
+        if (changedDirection) { toast("Пересчитали. Портфель собран под прежнее направление — посмотри новые программы"); setTimeout(function () { setTab("unis"); }, 900); }
+        else toast("Пересчитали вероятности");
       }
     });
   }
@@ -1200,21 +1399,55 @@ function __scholaryMain() {
       if (window.track) track("cab_add_prog", { id: id });
     });
   }
+  /* Форматы, которые реально принимают приёмные комиссии и умеет читать
+     наша проверка. Всё остальное отсекаем ДО загрузки: раньше человек
+     ждал заливки, а отказ получал уже после неё. */
+  var OK_EXT = { pdf: "PDF", jpg: "JPG", jpeg: "JPG", png: "PNG", heic: "HEIC", webp: "WEBP" };
+  var MAX_MB = 10;
+  function fileProblem(file) {
+    var ext = (file.name.split(".").pop() || "").toLowerCase();
+    if (!OK_EXT[ext]) {
+      return "Формат «." + ext + "» не подходит. Нужен PDF, JPG или PNG — сохрани документ в PDF или сфотографируй." +
+        (ext === "doc" || ext === "docx" ? " Word открой и сохрани как PDF: «Файл → Сохранить как → PDF»." : "");
+    }
+    if (file.size > MAX_MB * 1024 * 1024) {
+      return "Файл " + (file.size / 1048576).toFixed(1) + " МБ, а можно до " + MAX_MB + " МБ. Сфотографируй с меньшим разрешением или сохрани в PDF.";
+    }
+    if (!file.size) return "Файл пустой — похоже, он не докачался. Попробуй выбрать заново.";
+    return null;
+  }
   function pickFile(cb) {
     var i = document.createElement("input"); i.type = "file";
-    i.accept = "image/*,application/pdf";
+    i.accept = ".pdf,.jpg,.jpeg,.png,.heic,.webp,image/*,application/pdf";
     i.onchange = function () { if (i.files && i.files[0]) cb(i.files[0]); };
     i.click();
   }
-  function uploadFor(d) {
+  function uploadFor(d, cb) {
     pickFile(function (file) {
-      if (file.size > 10 * 1024 * 1024) { toast("Файл больше 10 МБ — сожми или сфотографируй заново", "bad"); return; }
-      toast("Загружаем…");
+      var bad = fileProblem(file);
+      if (bad) { toast(bad, "bad"); return; }
+      toast("Загружаем " + file.name.slice(0, 24) + "…");
       var path = S.session.user.id + "/" + d.id + "-" + Date.now() + "-" + file.name.replace(/[^\w.\-]+/g, "_");
       sb.storage.from("docs").upload(path, file, { upsert: true }).then(function (r) {
-        if (r.error) { toast("Не удалось загрузить: " + r.error.message, "bad"); return; }
-        saveDoc(d, { file_path: path, status: d.status === "none" ? "progress" : d.status, checked_at: new Date().toISOString() }, function () {
-          recompute(); drawSub(); toast("Файл загружен · проверяем по требованиям");
+        if (r.error) {
+          toast("Не удалось загрузить: " + (r.error.message || "нет связи") + ". Попробуй ещё раз — файл не потерялся.", "bad");
+          return;
+        }
+        /* После загрузки СРАЗУ прогоняем проверку по правилам и показываем
+           результат — раньше человек видел только «файл загружен» и не
+           понимал, всё ли с документом в порядке. */
+        saveDoc(d, {
+          file_path: path,
+          file_name: file.name.slice(0, 120),
+          status: d.status === "none" ? "progress" : d.status,
+          checked_at: new Date().toISOString()
+        }, function () {
+          recompute(); drawSub();
+          var vs = D.checkDocument(d, appsForDoc(), S.ans, S.evalR && S.evalR.profile);
+          var blockers = vs.filter(function (x) { return x.level === "blocker"; }).length;
+          toast(blockers ? "Загружено · нашли " + blockers + " " + plural(blockers, "замечание", "замечания", "замечаний") + " ниже" : "Загружено · замечаний нет", blockers ? "bad" : "");
+          if (window.track) track("cab_doc_upload", { type: d.doc_type, blockers: blockers });
+          if (cb) cb();
         });
       });
     });
@@ -1337,7 +1570,8 @@ function __scholaryMain() {
     if (act === "doc" && doc) { openDoc(doc.id); return; }
     if (act === "doc-new") { openNewDoc(dt, appId); return; }
     if (act === "doc-pick") {
-      var types = docTypesForUser();
+      var plan0 = docPlanNow();
+      var types = plan0.length ? plan0.map(function (x) { return x.t; }) : docTypesForUser();
       var bg = document.createElement("div"); bg.className = "modal-bg";
       bg.innerHTML = '<div class="modal"><b>Что загружаешь?</b><div style="margin-top:10px">' +
         types.map(function (t) { var T = D.TYPES[t] || { title: t, ic: "📄" };
@@ -1357,6 +1591,18 @@ function __scholaryMain() {
       return;
     }
     if (act === "upload" && doc) { uploadFor(doc); return; }
+    if (act === "doc-help") { openSub(docHelpHTML); return; }
+    if (act === "recheck" && doc) {
+      /* Явная перепроверка по правилам: человек поправил данные или заменил
+         файл и хочет увидеть свежий вердикт, не гадая, обновилось ли оно. */
+      saveDoc(doc, { checked_at: new Date().toISOString() }, function () {
+        recompute(); drawSub();
+        var vs = D.checkDocument(doc, appsForDoc(), S.ans, S.evalR && S.evalR.profile);
+        var b = vs.filter(function (x) { return x.level === "blocker"; }).length;
+        toast(b ? "Проверили · " + b + " " + plural(b, "замечание", "замечания", "замечаний") : "Проверили · замечаний нет", b ? "bad" : "");
+      });
+      return;
+    }
     if (act === "dl" && doc) { openFile(doc); return; }
     if (act === "letter" && doc) { openDoc(doc.id); return; }
     if (act === "letter-save" && doc) {

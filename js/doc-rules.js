@@ -35,6 +35,25 @@
     finance:       { title: "Подтверждение финансов / блок-счёт", ic: "🏦", lead: 21, hint: "Германия: Sperrkonto для визы" }
   };
 
+  /* Зависимости: что нельзя начинать раньше, чем готово другое.
+     Перевод строго ПОСЛЕ апостиля — иначе апостиль не попадёт в перевод
+     и перевод придётся заказывать и оплачивать заново. Это самая частая
+     и самая дорогая ошибка в сборе документов. */
+  var AFTER = { translation: "apostille" };
+
+  /* Документы, которые не требует ни одна подача, но которые заметно
+     усиливают заявку. Показываем отдельным блоком, чтобы не путать
+     с обязательными. */
+  var NICE_TO_HAVE = {
+    cv:             "Академическое CV усиливает почти любую заявку — и его просят на интервью",
+    recommendation: "Даже там, где рекомендации не обязательны, они выделяют заявку",
+    research:       "Набросок исследовательских интересов помогает на магистратуре с наукой"
+  };
+
+  /* Буфер между готовностью документа и дедлайном: неделя на форс-мажор
+     (переделка, курьер, ошибка в имени). Без буфера план врёт. */
+  var BUFFER = 7;
+
   /* страны, где для документов об образовании обычно нужен апостиль */
   var APOSTILLE = ["hu","it","de","cz","pl","nl","fr","es","pt","gr","ee","lv","lt","ro","sk","si","hr","tr","kr","jp","us","uk","ie","fi","se","no","dk","at","be","ch","lu"];
   /* страны, где чаще требуют консульскую легализацию, а не апостиль */
@@ -97,6 +116,114 @@
       if (ck[r.t] === true || byDoc) done++; else missing.push(r);
     });
     return { pct: req.length ? Math.round(done / req.length * 100) : 0, done: done, total: req.length, missing: missing, required: req };
+  }
+
+  /* ---------- критический путь: что начинать сегодня ----------
+     Документ нельзя «сделать к дедлайну»: у каждого свой срок изготовления.
+     Дата старта = ближайший дедлайн − срок изготовления − буфер.
+     Для документа с зависимостью (перевод после апостиля) складываем сроки
+     всей цепочки, иначе план обещает невозможное.
+
+     apps: [{program_id, prog, deadline:Date, title}] — из кабинета
+     docs: строки user_documents
+     Возвращает по каждому типу документа полную картину для UI. */
+  function docPlan(apps, docs, ans) {
+    apps = (apps || []).filter(function (a) { return a && a.prog; });
+    docs = docs || [];
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+
+    /* какие типы вообще нужны — объединение требований всех подач */
+    var need = {};          // t -> [{app, why}]
+    apps.forEach(function (a) {
+      requiredFor(a.prog, ans).forEach(function (r) {
+        if (!TYPES[r.t]) return;
+        (need[r.t] = need[r.t] || []).push({ app: a, why: r.why });
+      });
+    });
+
+    function docOf(t, programId) {
+      var list = docs.filter(function (d) { return d.doc_type === t; });
+      var exact = list.filter(function (d) { return has(d.program_ids || [], programId); });
+      return exact[0] || list.filter(function (d) { return !(d.program_ids || []).length; })[0] || list[0] || null;
+    }
+    function isReady(t, programId) {
+      var d = docOf(t, programId);
+      return !!(d && d.status === "ready");
+    }
+
+    var out = [];
+    Object.keys(need).forEach(function (t) {
+      var T = TYPES[t], uses = need[t];
+      var d = docOf(t, uses[0].app.program_id);
+      var status = d ? d.status : "none";
+
+      /* ближайший дедлайн среди подач, которым этот документ нужен */
+      var dls = uses.map(function (u) { return u.app.deadline; }).filter(Boolean).sort(function (a, b) { return a - b; });
+      var nearest = dls[0] || null;
+
+      /* цепочка: если есть незакрытая зависимость — её срок прибавляется */
+      var dep = AFTER[t] || null;
+      var depOpen = dep && !isReady(dep, uses[0].app.program_id);
+      var chainLead = (T.lead || 7) + (depOpen ? (TYPES[dep] ? TYPES[dep].lead : 0) : 0);
+
+      var startBy = nearest ? new Date(nearest.getTime() - (chainLead + BUFFER) * 864e5) : null;
+      var daysToStart = startBy ? Math.round((startBy - today) / 864e5) : null;
+
+      var urgency;
+      if (status === "ready") urgency = "done";
+      else if (daysToStart == null) urgency = "later";
+      else if (daysToStart < 0) urgency = "overdue";
+      else if (daysToStart <= 14) urgency = "now";
+      else if (daysToStart <= 45) urgency = "soon";
+      else urgency = "later";
+
+      out.push({
+        t: t, T: T, required: true, doc: d, status: status,
+        uses: uses, usesCount: uses.length,
+        why: uses[0].why,
+        nearest: nearest, nearestTitle: (uses.filter(function (u) { return u.app.deadline === nearest; })[0] || uses[0]).app.title,
+        lead: T.lead || 7, chainLead: chainLead,
+        blockedBy: depOpen ? dep : null,
+        startBy: startBy, daysToStart: daysToStart, urgency: urgency
+      });
+    });
+
+    /* дополнительные — не требует никто, но помогают */
+    Object.keys(NICE_TO_HAVE).forEach(function (t) {
+      if (need[t] || !TYPES[t]) return;
+      var d = docOf(t, null);
+      out.push({
+        t: t, T: TYPES[t], required: false, doc: d, status: d ? d.status : "none",
+        uses: [], usesCount: 0, why: NICE_TO_HAVE[t],
+        nearest: null, nearestTitle: "", lead: TYPES[t].lead || 7, chainLead: TYPES[t].lead || 7,
+        blockedBy: null, startBy: null, daysToStart: null,
+        urgency: (d && d.status === "ready") ? "done" : "optional"
+      });
+    });
+
+    var ORDER = { overdue: 0, now: 1, soon: 2, later: 3, optional: 4, done: 5 };
+    out.sort(function (a, b) {
+      if (ORDER[a.urgency] !== ORDER[b.urgency]) return ORDER[a.urgency] - ORDER[b.urgency];
+      if (a.daysToStart != null && b.daysToStart != null) return a.daysToStart - b.daysToStart;
+      return (b.usesCount || 0) - (a.usesCount || 0);
+    });
+    return out;
+  }
+
+  /* Сводка по плану — то, что человек должен понять за две секунды. */
+  function planSummary(plan) {
+    var req = plan.filter(function (p) { return p.required; });
+    var s = {
+      required: req.length,
+      ready: req.filter(function (p) { return p.status === "ready"; }).length,
+      progress: req.filter(function (p) { return p.status === "progress"; }).length,
+      none: req.filter(function (p) { return p.status === "none"; }).length,
+      overdue: req.filter(function (p) { return p.urgency === "overdue"; }).length,
+      now: req.filter(function (p) { return p.urgency === "now"; }).length,
+      optional: plan.filter(function (p) { return !p.required; }).length
+    };
+    s.pct = s.required ? Math.round(s.ready / s.required * 100) : 0;
+    return s;
   }
 
   /* ---------- вспомогательное ---------- */
@@ -269,8 +396,9 @@
   };
 
   return {
-    TYPES: TYPES, HOWTO: HOWTO, APOSTILLE: APOSTILLE,
+    TYPES: TYPES, HOWTO: HOWTO, APOSTILLE: APOSTILLE, AFTER: AFTER, NICE_TO_HAVE: NICE_TO_HAVE,
     requiredFor: requiredFor, readiness: readiness, checkDocument: checkDocument,
+    docPlan: docPlan, planSummary: planSummary,
     letterReview: letterReview, ieltsFromAxis: ieltsFromAxis, plural: plural
   };
 });
