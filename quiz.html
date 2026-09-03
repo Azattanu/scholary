@@ -6,11 +6,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=53">
-  <script src="/js/config.js?v=53"></script>
-<script src="/js/telemetry.js?v=53"></script>
-  <script src="/js/report-engine.js?v=53"></script>
-  <script src="/js/app.js?v=53" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=54">
+  <script src="/js/config.js?v=54"></script>
+<script src="/js/telemetry.js?v=54"></script>
+  <script src="/js/report-engine.js?v=54"></script>
+  <script src="/js/app.js?v=54" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -314,9 +314,16 @@ function pBlend(vals) {
 function previewCalc() {
   if (window.ScholaryEngine) {
     const r = ScholaryEngine.evaluate(answers);
-    const pAdm = Math.round(pBlend(r.portfolio.map(p => p.p.adm)) * 100);
-    const pSch = Math.min(Math.round(pBlend(r.portfolio.filter(p => p.p.sch != null).map(p => p.p.sch)) * 100), pAdm);
-    return { programs: r.programsCount, country: r.topCountry, verdict: r.verdict, pAdm: pAdm, pSch: pSch };
+    /* Число на пейволле обязано совпасть с числом в купленном отчёте —
+       поэтому берём готовый r.pAtLeastOne, а не считаем заново. */
+    const pAdm = Math.round(r.pAtLeastOne * 100);
+    /* стипендия: лучшая программа на страну, страны квази-независимы */
+    const byCc = {};
+    r.portfolio.forEach(p => { if (p.p.sch != null) { const k = p.cc || p.country; if (!byCc[k] || p.p.sch > byCc[k]) byCc[k] = p.p.sch; } });
+    const pSch = Math.min(Math.round(pBlend(Object.values(byCc)) * 100), pAdm);
+    const pDl = r.pAtLeastOneAtDeadline != null ? Math.round(r.pAtLeastOneAtDeadline * 100) : null;
+    return { programs: r.programsCount, country: r.topCountry, verdict: r.verdict, pAdm: pAdm, pSch: pSch,
+             pDl: pDl, conf: r.confidence || null };
   }
   return previewCalcFallback();
 }
@@ -366,6 +373,10 @@ function renderPaywall() {
           '<div class="stat"><div class="num" style="color:var(--accent)">' + p.pAdm + '%</div><div class="lbl">поступление — шанс хотя бы одного оффера</div></div>' +
           '<div class="stat"><div class="num" style="color:#187E54">' + p.pSch + '%</div><div class="lbl">стипендия — шанс хотя бы одной</div></div>' +
         "</div>" : "") +
+        (p.pDl && p.pAdm && p.pDl > p.pAdm
+          ? '<div style="font-size:13px; font-weight:700; color:#187E54; background:var(--green-soft); border-radius:10px; padding:8px 11px">К окнам подачи — до ' + p.pDl + '%, если выполнить план из отчёта</div>'
+          : "") +
+        (p.conf ? '<div style="font-size:11.5px; color:var(--faint); font-weight:600">Точность расчёта: ' + p.conf.label + " · интервал " + Math.round(p.conf.low * 100) + "–" + Math.round(p.conf.high * 100) + '% — сузится, когда заполнишь профиль в кабинете</div>' : "") +
         '<div class="stat-pair">' +
           '<div class="stat"><div class="num">' + p.programs + '</div><div class="lbl">подходящих программ</div></div>' +
           '<div class="stat"><div class="num">' + p.country + '</div><div class="lbl">лучшее направление</div></div>' +

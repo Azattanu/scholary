@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Твой отчёт | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=53">
-  <script src="/js/config.js?v=53"></script>
-<script src="/js/telemetry.js?v=53"></script>
-  <script src="/js/report-engine.js?v=53"></script>
-  <script src="/js/app.js?v=53" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=54">
+  <script src="/js/config.js?v=54"></script>
+<script src="/js/telemetry.js?v=54"></script>
+  <script src="/js/report-engine.js?v=54"></script>
+  <script src="/js/app.js?v=54" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Персональный отчёт Scholary</h1>
@@ -134,6 +134,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const axes = d.profile.axes;
   const name = esc(t.name || (d.answers && d.answers.name) || payload.demoName || "");
   const pAny = pct(d.pAtLeastOne);
+  /* v3-поля (точка Б, окна, уверенность) есть только в новых отчётах.
+     Старые сохранённые отчёты (engineVersion ≤ 2) обязаны рендериться
+     как раньше — поэтому каждое v3-поле проверяем на существование. */
+  const pDl = d.pAtLeastOneAtDeadline != null ? pct(d.pAtLeastOneAtDeadline) : null;
+  const conf = d.confidence && d.confidence.low != null ? d.confidence : null;
+  const plan = Array.isArray(d.plan) ? d.plan : [];
   const comments = {};
   (t.programs || []).forEach(p => { comments[p.id] = p.comment; });
 
@@ -154,15 +160,44 @@ document.addEventListener("DOMContentLoaded", async function () {
       '<div class="bar-row"><span class="bar-label">Поступление</span><div class="bar' + (p.p.adm < .5 ? " warn" : "") + '"><i style="width:' + pct(p.p.adm) + '%"></i></div><span class="bar-val ' + (p.p.adm >= .5 ? "ok" : "warn") + '">' + pct(p.p.adm) + "%</span></div>" +
       (p.p.sch != null ? '<div class="bar-row"><span class="bar-label">Стипендия</span><div class="bar' + (p.p.sch < .45 ? " warn" : "") + '"><i style="width:' + pct(p.p.sch) + '%"></i></div><span class="bar-val ' + (p.p.sch >= .45 ? "ok" : "warn") + '">' + pct(p.p.sch) + "%</span></div>"
         : '<div style="font-size:12px; font-weight:700; color:var(--muted)">Стипендии нет — но обучение бесплатное</div>') +
-      /* «дедлайн: 22 июля» без года читается как «уже прошёл»: отчёт человек
-         открывает в сентябре, а поступает через год. Пишем «обычно», чтобы
-         дата воспринималась как ориентир цикла, а не как сегодняшний срок. */
-      '<div class="notice">дедлайн — обычно ' + esc(p.deadline) + (p.note ? " · " + esc(p.note) : "") + "</div>" +
+      (p.p.admAtDeadline != null && pct(p.p.admAtDeadline) > pct(p.p.adm) && p.window && p.window.feasible !== false
+        ? '<div style="font-size:12px; font-weight:700; color:var(--green)">к окну подачи — до ' + pct(p.p.admAtDeadline) + "%, если готовиться по плану</div>" : "") +
+      /* v3: у программы есть просчитанное окно цикла — показываем дату с годом
+         и остаток недель. Иначе (старый отчёт) — прежняя строка «обычно…»:
+         «дедлайн: 22 июля» без года читается как «уже прошёл». */
+      (p.window && p.window.known
+        ? '<div class="notice"' + (p.window.feasible === false ? ' style="background:#FDECEC; color:#B42318"' : '') + '>окно подачи — до ' + esc(p.window.human) +
+          (p.window.weeksLeft != null ? " · осталось " + p.window.weeksLeft + " нед" : "") +
+          (p.window.note ? "<br>" + esc(p.window.note) : (p.note ? " · " + esc(p.note) : "")) + "</div>"
+        : '<div class="notice">дедлайн — обычно ' + esc(p.deadline) + (p.note ? " · " + esc(p.note) : "") + "</div>") +
       (comments[p.id] ? '<div style="font-size:12.5px; color:var(--ink-soft); font-weight:600; line-height:1.5">' + esc(comments[p.id]) + "</div>" : "") +
     "</div>").join("");
 
   const boosters = d.boosters.map(b =>
     '<div style="display:flex; justify-content:space-between; gap:10px; align-items:center; background:var(--bg); border-radius:12px; padding:12px 14px"><span style="font-size:13.5px; font-weight:700">' + esc(b.what) + '</span><span style="font-size:14px; font-weight:800; color:var(--green); white-space:nowrap">+' + b.pp + " п.п.</span></div>").join("");
+
+  /* v3: «План до окон подачи» — что конкретно сделать, чтобы дойти до точки Б.
+     У старых отчётов plan пуст — блока просто нет. */
+  const planBlock = plan.length
+    ? '<div class="card" style="display:flex; flex-direction:column; gap:10px"><div><strong style="font-size:17px">План до окон подачи</strong>' +
+      (pDl != null && pDl > pAny ? '<div style="font-size:12.5px; color:var(--muted); font-weight:600">выполнишь — шанс вырастает с ' + pAny + "% до " + pDl + "%</div>" : "") + "</div>" +
+      plan.map(g => '<div style="background:var(--bg); border-radius:12px; padding:12px 14px"><div style="font-size:13.5px; font-weight:700">' + esc(g.what) + '</div>' +
+        (g.detail ? '<div style="font-size:12px; color:var(--muted); font-weight:600; margin-top:2px">' + esc(g.detail) + "</div>" : "") + "</div>").join("") +
+      "</div>"
+    : "";
+
+  /* v3: «Ближайшие окна подачи» — топ-3 реальных дедлайна портфеля. */
+  const windows = d.portfolio
+    .filter(p => p.window && p.window.known && p.window.weeksLeft != null)
+    .sort((x, y) => (x.window.date < y.window.date ? -1 : 1)).slice(0, 3);
+  const windowsBlock = windows.length
+    ? '<div class="card" style="display:flex; flex-direction:column; gap:8px"><div><strong style="font-size:17px">Ближайшие окна подачи</strong>' +
+      '<div style="font-size:12.5px; color:var(--muted); font-weight:600">типовые даты цикла — точную для своего года проверь на сайте программы</div></div>' +
+      windows.map(p => '<div style="display:flex; justify-content:space-between; gap:10px; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border)">' +
+        '<span style="font-size:13px; font-weight:700">' + esc(p.name) + '</span>' +
+        '<span style="font-size:12.5px; font-weight:800; white-space:nowrap; color:' + (p.window.weeksLeft <= 8 ? "var(--yellow-ink, #8a6d1a)" : "var(--ink)") + '">до ' + esc(p.window.human) + " · " + p.window.weeksLeft + " нед</span></div>").join("") +
+      "</div>"
+    : "";
 
   const wa = txt => "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(txt);
   const rub = n => Number(n).toLocaleString("ru-RU").replace(/\u00A0/g, "\u00A0") + "\u00A0\u20B8";
@@ -205,11 +240,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     // 2. Главное число
     '<div class="card" style="display:flex; align-items:center; gap:18px">' +
       '<svg width="92" height="92" viewBox="0 0 42 42" style="flex-shrink:0"><circle cx="21" cy="21" r="16" fill="none" stroke="#EDEBE6" stroke-width="5"/><circle cx="21" cy="21" r="16" fill="none" stroke="' + (pAny >= 55 ? "#187E54" : "#D9A413") + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (pAny * 1.005).toFixed(1) + ' 100.5" transform="rotate(-90 21 21)"/><text x="21" y="23" text-anchor="middle" font-size="10.5" font-weight="800" fill="#1A1D27" font-family="Manrope, sans-serif">' + pAny + "%</text></svg>" +
-      '<div><strong style="font-size:15px">шанс хотя бы одного оффера</strong><div style="font-size:12.5px; color:var(--muted); line-height:1.5">при подаче во все ' + d.portfolio.length + " программ портфеля. Сильная сторона — " + esc(d.strongest).toLowerCase() + ", подтянуть — " + esc(d.weakest).toLowerCase() + "</div></div>" +
+      '<div><strong style="font-size:15px">шанс хотя бы одного оффера</strong><div style="font-size:12.5px; color:var(--muted); line-height:1.5">при подаче во все ' + d.portfolio.length + " программ портфеля. Сильная сторона — " + esc(d.strongest).toLowerCase() + ", подтянуть — " + esc(d.weakest).toLowerCase() + "</div>" +
+      (pDl != null && pDl > pAny ? '<div style="margin-top:8px; display:inline-block; background:var(--green-soft); color:var(--green); font-size:12px; font-weight:800; border-radius:999px; padding:4px 10px">к окнам подачи — до ' + pDl + "%, если выполнить план ниже</div>" : "") +
+      (conf ? '<div style="font-size:11.5px; color:var(--faint); font-weight:600; margin-top:6px">точность расчёта: ' + esc(conf.label) + " · интервал " + pct(conf.low) + "–" + pct(conf.high) + "%. Заполнишь профиль в кабинете — интервал сузится.</div>" : "") +
+      "</div>" +
     "</div>" +
     // 3. Бустеры
     '<div class="card" style="display:flex; flex-direction:column; gap:10px"><strong style="font-size:17px">Что поднимет шансы сильнее всего</strong>' + boosters +
       (t.boosters_text ? '<p style="font-size:13px; color:var(--ink-soft)">' + esc(t.boosters_text) + "</p>" : "") + "</div>" +
+    // 3б. v3: план до окон подачи (у старых отчётов пусто)
+    planBlock +
+    // 3в. v3: ближайшие окна подачи (у старых отчётов пусто)
+    windowsBlock +
     // 4. Таблица портфеля
     '<div><strong style="font-size:17px">Твой портфель: ' + d.portfolio.length + ' программ</strong>' +
       '<div class="card" style="padding:0; overflow-x:auto; margin-top:10px"><table style="width:100%; border-collapse:collapse; font-size:12px; min-width:340px">' +
