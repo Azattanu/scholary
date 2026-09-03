@@ -266,6 +266,7 @@ begin
       (select ph.p_sch from probability_history ph where ph.user_id = m.user_id order by ph.ts desc limit 1) as p_sch,
       (select count(*) from portfolio_items pi where pi.user_id = m.user_id)                                as apps,
       (select count(*) from portfolio_items pi where pi.user_id = m.user_id and pi.submitted_at is not null) as apps_sent,
+      (select count(*) from portfolio_items pi where pi.user_id = m.user_id and pi.outcome = 'admit')          as offers,
       (select count(*) from user_documents d where d.user_id = m.user_id)                                    as docs,
       (select count(*) from user_documents d where d.user_id = m.user_id and d.status = 'ready')             as docs_ready,
       (select min(next_deadline(p.deadline_md))
@@ -388,6 +389,21 @@ begin
                             'claim_token', s.claim_token, 'seats', s.seats, 'ends_on', s.ends_on);
 end $$;
 grant execute on function admin_school_set(uuid, text, text, int, int, text, boolean) to authenticated;
+
+-- Профориентолог сменился: отвязываем кабинет и выпускаем новый токен,
+-- старая ссылка из письма перестаёт работать. Ученики и места не трогаются.
+create or replace function admin_school_reset_owner(p_id uuid)
+returns jsonb
+language plpgsql security definer set search_path = public, auth as $$
+declare v_tok text;
+begin
+  if not is_admin() then raise exception 'forbidden' using errcode = '42501'; end if;
+  v_tok := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
+  update schools set owner_user_id = null, claim_token = v_tok, updated_at = now() where id = p_id;
+  if not found then return jsonb_build_object('ok', false, 'why', 'not_found'); end if;
+  return jsonb_build_object('ok', true, 'claim_token', v_tok);
+end $$;
+grant execute on function admin_school_reset_owner(uuid) to authenticated;
 
 -- Самопроверка
 select school_gen_code() as sample_code, school_plan_label('s500') as label;
