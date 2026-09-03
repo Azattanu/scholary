@@ -34,8 +34,9 @@ if (!$s) jout(['ok' => false, 'why' => 'not_found'], 404);
 if (($s['status'] ?? '') !== 'active' || empty($s['invite_code']) || empty($s['claim_token'])) jout(['ok' => false, 'why' => 'not_active'], 400);
 if (empty($c['RESEND_KEY'])) jout(['ok' => false, 'why' => 'mail_off'], 503);
 
+$isC   = (($s['kind'] ?? '') === 'counselor');
 $join  = 'https://scholary.kz/schools/join/?code=' . rawurlencode($s['invite_code']);
-$cab   = 'https://scholary.kz/schools/cabinet/?claim=' . rawurlencode($s['claim_token']);
+$cab   = ($isC ? 'https://scholary.kz/counselors/cabinet/?claim=' : 'https://scholary.kz/schools/cabinet/?claim=') . rawurlencode($s['claim_token']);
 $first = trim(explode(' ', trim((string)($s['contact_name'] ?? '')))[0]);
 $hi    = $first !== '' ? $first . ', ' : '';
 $until = !empty($s['ends_on']) ? date('d.m.Y', strtotime($s['ends_on'])) : '—';
@@ -48,6 +49,35 @@ $btn = function ($href, $text, $bg) use ($esc) {
   return '<a href="' . $esc($href) . '" style="display:inline-block;background:' . $bg . ';color:#fff;text-decoration:none;font-weight:700;padding:13px 22px;border-radius:12px">' . $esc($text) . '</a>';
 };
 
+$wa = preg_replace('/\D/', '', (string)($c['OWNER_WA'] ?? '77024666852'));
+if ($isC) {
+  /* Профориентолог: сначала workspace, потом ссылка для учеников. */
+  $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F;max-width:600px">'
+    . '<h2 style="margin:0 0 10px;font-size:21px">' . $esc($hi) . 'ваш workspace открыт</h2>'
+    . '<p style="margin:0 0 18px;color:#424245">Тариф <b>' . $esc($plan) . '</b> · до <b>' . $seats . '</b> учеников · действует до <b>' . $esc($until) . '</b>.</p>'
+    . '<p style="margin:0 0 8px">' . $btn($cab, 'Открыть workspace', '#5B4BFF') . '</p>'
+    . '<p style="margin:0 0 18px;color:#6B7280;font-size:13px">Кнопка личная: при первом входе workspace привяжется к вашему аккаунту — войдите через Google или почтой <b>' . $esc((string)$s['contact_email']) . '</b> с паролем. Не пересылайте эту ссылку ученикам.</p>'
+    . '<div style="background:#F0EEFF;border-radius:14px;padding:16px 18px;margin:0 0 18px">'
+    . '<div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#4739E0;text-transform:uppercase">Ссылка для учеников</div>'
+    . '<div style="font-size:16px;font-weight:700;margin:6px 0 4px;word-break:break-all"><a href="' . $esc($join) . '" style="color:#1D1D1F">' . $esc($join) . '</a></div>'
+    . '<div style="color:#424245;font-size:13.5px">Код: <b style="font-size:16px;letter-spacing:.08em">' . $esc($s['invite_code']) . '</b> · эта же ссылка есть в workspace, раздел «Ссылка и тариф», вместе с готовым текстом для WhatsApp</div>'
+    . '</div>'
+    . '<p style="margin:0 0 6px"><b>С чего начать — три шага</b></p>'
+    . '<ol style="margin:0 0 18px;padding-left:20px;color:#424245">'
+    . '<li>Заведите карточки учеников (имя, класс, почта) — или отправьте им ссылку: зарегистрировавшиеся привяжутся к карточкам по почте сами и получат Scholary Pro до ' . $esc($until) . '.</li>'
+    . '<li>Добавьте каждому программы — из каталога с точными ссылками на подачу и дедлайнами или свои — и стандартный набор документов одной кнопкой.</li>'
+    . '<li>Утром открывайте «Сегодня»: дедлайны ближе 45 дней, открытые задачи, у кого не собраны документы.</li>'
+    . '</ol>'
+    . '<p style="margin:0 0 18px"><b>Место занимает карточка ученика.</b> Удалили карточку — место освободилось. Нужно больше — напишите нам, расширим тариф с доплатой за остаток срока.</p>'
+    . '<p style="color:#6B7280;font-size:13px;margin:0">Вопросы и пожелания — просто ответьте на это письмо или напишите в WhatsApp: <a href="https://wa.me/' . $wa . '" style="color:#5B4BFF">+7 702 466 68 52</a>. Мы допиливаем workspace под первых профориентологов — ваши замечания попадут в продукт.</p>'
+    . '</div>';
+  $text = $hi . "ваш workspace открыт.\n\nТариф: " . $plan . " · до " . $seats . " учеников · до " . $until
+    . "\n\nОткрыть workspace (личная ссылка): " . $cab
+    . "\n\nСсылка для учеников: " . $join . "\nКод: " . $s['invite_code']
+    . "\n\nВопросы — ответьте на это письмо.";
+  $subject = 'Scholary — ваш workspace открыт';
+} else {
+$subject = 'Scholary для ' . $name . ' — доступ открыт';
 $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F;max-width:600px">'
   . '<h2 style="margin:0 0 10px;font-size:21px">' . $esc($hi) . 'доступ для ' . $esc($name) . ' открыт</h2>'
   . '<p style="margin:0 0 18px;color:#424245">Тариф <b>' . $esc($plan) . '</b> · до <b>' . $seats . '</b> учеников · действует до <b>' . $esc($until) . '</b>.</p>'
@@ -77,6 +107,7 @@ $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;colo
 $text = $hi . "доступ для " . $name . " открыт.\n\nТариф: " . $plan . " · до " . $seats . " учеников · до " . $until
   . "\n\nСсылка для учеников: " . $join . "\nКод школы: " . $s['invite_code']
   . "\n\nКабинет школы: " . $cab . "\n\nВопросы — ответьте на это письмо.";
+}
 
 $to = [(string)$s['contact_email']];
 $r2 = http_json('https://api.resend.com/emails', 'POST', [
@@ -84,7 +115,7 @@ $r2 = http_json('https://api.resend.com/emails', 'POST', [
 ], array_filter([
   'from' => mail_from(), 'to' => $to, 'reply_to' => mail_reply_to(),
   'bcc' => !empty($c['MAIL_TO']) ? [$c['MAIL_TO']] : null,
-  'subject' => 'Scholary для ' . $name . ' — доступ открыт',
+  'subject' => $subject,
   'html' => $html, 'text' => $text,
 ], function ($v) { return $v !== null; }), 20);
 
