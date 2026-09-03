@@ -19,6 +19,8 @@ PAGES = {          # исходник -> каталог
     "schools.html": "schools",
     "school-join.html": "schools/join",
     "school-cabinet.html": "schools/cabinet",
+    "counselors.html": "counselors",
+    "counselor-cabinet.html": "counselors/cabinet",
 }
 STUB = """<!doctype html>
 <html lang="ru"><head><meta charset="utf-8">
