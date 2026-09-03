@@ -1165,6 +1165,7 @@ function __scholaryMain() {
           '<button class="btn btn-soft btn-sm" data-act="edit" data-key="field">Сменить направление</button>' +
           '<button class="btn btn-ghost btn-sm" data-act="edit" data-key="level">Сменить уровень</button>' +
         "</div></div>" +
+      schoolCardHTML() +
       '<div class="card" style="margin-bottom:12px"><div class="h-row"><div style="padding-right:10px"><b class="sm">Telegram</b><div class="xs mut">' +
         (S.tg && S.tg.chat_id ? "подключён · шаг дня и дедлайны" : "не подключён — уведомления о дедлайнах не придут") + "</div></div>" +
         '<button class="btn ' + (S.tg && S.tg.chat_id ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="tg">' + (S.tg && S.tg.chat_id ? "Настроить" : "Подключить") + "</button></div></div>" +
@@ -1176,6 +1177,37 @@ function __scholaryMain() {
       '<div class="lst tappable" data-act="help"><div style="flex:1"><b class="sm">Помощь</b><div class="xs mut">WhatsApp · Telegram · вопросы</div></div><span class="xs mut">→</span></div>' +
       '<button class="btn btn-ghost btn-block" style="margin-top:14px" data-act="logout">Выйти</button>' +
       '<p class="xs mut" style="text-align:center;margin-top:10px">Scholary · вероятности — оценка модели, не гарантия</p>';
+  }
+
+  /* Школа ученика: контакт профориентолога и срок школьного доступа.
+     Грузится один раз при входе; если школы нет — карточки нет. */
+  function schoolCardHTML() {
+    var sc = S.school;
+    if (!sc) return "";
+    var who = (sc.contact_name || "").trim();
+    var cls = sc.class_label ? " · " + sc.class_label : (sc.grade && sc.grade !== "other" ? " · " + sc.grade + " класс" : "");
+    var contact = "";
+    if (sc.contact_phone) {
+      var d = String(sc.contact_phone).replace(/\D/g, "");
+      contact += '<a class="btn btn-soft btn-sm" href="https://wa.me/' + d + '?text=' + encodeURIComponent("Здравствуйте! Это " + ((S.profile && S.profile.name) || "ученик") + " из Scholary, есть вопрос по поступлению") + '" target="_blank" rel="noopener">Написать в WhatsApp</a>';
+    }
+    if (sc.contact_email) contact += '<a class="btn btn-ghost btn-sm" href="mailto:' + esc(sc.contact_email) + '">Почта</a>';
+    return '<div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#FFFFFF 0%,#F4F2FF 58%,#EDF9F3 100%);border-color:#E3DFFF">' +
+      '<div class="xs" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)">Твоя школа</div>' +
+      '<b style="display:block;margin-top:4px">' + esc(sc.name) + esc(cls) + '</b>' +
+      (who ? '<div class="sm" style="margin-top:6px">Профориентолог: <b>' + esc(who) + '</b>' + (sc.contact_role ? ' <span class="mut">· ' + esc(sc.contact_role) + '</span>' : '') + '</div>' : '') +
+      '<div class="xs mut" style="margin-top:4px">' + (sc.active ? "Scholary Pro от школы" + (sc.ends_on ? " · доступ школы до " + fmtDL(new Date(sc.ends_on)) : "") : "Школьный доступ закончился — Pro можно продлить самому") + '</div>' +
+      (contact ? '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' + contact + '</div>' : '') +
+      "</div>";
+  }
+  function loadSchool() {
+    sb.rpc("school_for_student").then(function (r) {
+      S.school = r.data || null;
+      var joined = null;
+      try { joined = localStorage.getItem("scholary_school_joined"); if (joined) localStorage.removeItem("scholary_school_joined"); } catch (e) {}
+      if (joined && S.school) toast("Ты в списке школы " + S.school.name + " · Scholary Pro активна", "ok");
+      if (S.tab === "profile") setTab("profile");
+    });
   }
 
   /* Один список вариантов на всё: и анкета при первом входе, и правка
@@ -1914,6 +1946,13 @@ function __scholaryMain() {
 
   var entering = false;
   function enter() {
+    /* Google-вход разрешён только с возвратом на /cabinet/. Страницы школ
+       (/schools/join/, /schools/cabinet/) кладут сюда адрес, куда вернуть
+       человека с уже открытой сессией — иначе ученик терял ссылку школы. */
+    try {
+      var nxt = localStorage.getItem("scholary_next");
+      if (nxt && /^\/schools\//.test(nxt)) { localStorage.removeItem("scholary_next"); location.replace(nxt); return; }
+    } catch (e) {}
     if (entering) return; entering = true; show("loading");
     sb.from("profiles").select("*").maybeSingle().then(function (r) {
       S.profile = r.data || null;
@@ -1957,6 +1996,7 @@ function __scholaryMain() {
           entering = false;
           $("topbar-ava").textContent = ((S.profile && S.profile.name) || "S")[0].toUpperCase();
           show("v-app"); setTab(S.tab); pushHistory("вход");
+          loadSchool();
           if (window.track) track("cab_open", { v: 2 });
         };
         if (!S.apps.length && S.evalR && S.evalR.portfolio.length) {

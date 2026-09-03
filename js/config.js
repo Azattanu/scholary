@@ -36,7 +36,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-59",
+  RELEASE:      "web-61",
 
   // --- Яндекс.Метрика ---
   // Номер счётчика из metrika.yandex.ru (только цифры). Пустая строка = выключено.

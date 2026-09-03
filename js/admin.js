@@ -130,6 +130,7 @@ function __scholaryMain() {
       S.loading = false;
       $("updatedAt").textContent = "Обновлено " + new Date().toLocaleTimeString("ru-RU") + " · период: " + S.days + " " + plural(S.days, "день", "дня", "дней");
       draw();
+      loadSchools();
     }, function (e) {
       S.loading = false;
       $("updatedAt").textContent = "Ошибка: " + e.message;
@@ -150,6 +151,7 @@ function __scholaryMain() {
     else if (S.tab === "funnel") v.innerHTML = viewFunnel();
     else if (S.tab === "channels") v.innerHTML = viewChannels();
     else if (S.tab === "people") v.innerHTML = viewPeople();
+    else if (S.tab === "schools") v.innerHTML = viewSchools();
     else if (S.tab === "reports") v.innerHTML = viewReports();
     else if (S.tab === "product") v.innerHTML = viewProduct();
     else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(false); }
@@ -316,6 +318,102 @@ function __scholaryMain() {
           "<td>" + esc(gpa) + (l.ielts_band ? " / " + esc(l.ielts_band) : "") + "</td>" +
           "<td>" + (l.paid ? '<span class="pill ok">оплатил</span>' : '<span class="pill warn">лид</span>') + "</td>";
       }) + "</div>";
+  }
+
+  /* ---------- школы (B2B) ----------
+     Заявка → «Активировать» (база выпускает код и токен кабинета) → письмо
+     школе уходит через api/school-notify.php. Всё остальное — правки ёмкости,
+     срока, паузы — тем же admin_school_set. */
+  var PLAN_LABEL = { pilot: "Пилот", s100: "Класс · 100", s500: "Школа · 500", s1000: "Сеть · 1000" };
+  var SCH_STATUS = { pending: ["warn", "заявка"], active: ["ok", "активна"], paused: ["no", "пауза"], expired: ["no", "истекла"], rejected: ["bad", "отказ"] };
+  function loadSchools() {
+    rpc("admin_schools").then(function (rows) { S.schools = rows || []; if (S.tab === "schools") draw(); },
+      function (e) { S.schoolsErr = e.message; if (S.tab === "schools") draw(); });
+  }
+  function viewSchools() {
+    if (S.schoolsErr) return '<div class="box"><h2>Школы</h2><p class="sub">Не удалось загрузить: ' + esc(S.schoolsErr) + '</p><div class="note">Проверь, что применена миграция 035_schools.sql.</div></div>';
+    var rows = S.schools || [];
+    var pending = rows.filter(function (r) { return r.status === "pending"; });
+    var active = rows.filter(function (r) { return r.status === "active"; });
+    var seatsUsed = active.reduce(function (a, r) { return a + (r.used || 0); }, 0);
+    var seatsAll  = active.reduce(function (a, r) { return a + (r.seats || 0); }, 0);
+    var h = kpi([["Заявок ждут", pending.length], ["Активных школ", active.length], ["Учеников по школам", seatsUsed], ["Мест продано", seatsAll]]);
+    h += '<div class="box"><h2>Школы · ' + rows.length + '</h2><p class="sub">Активация выпускает ссылку для учеников и вход в кабинет школы; письмо уходит на почту контакта автоматически.</p>' +
+      (rows.length ? '<div class="scroll"><table class="adm"><tr><th>Школа</th><th>Контакт</th><th>Тариф</th><th class="num">Места</th><th>Срок</th><th>Статус</th><th>Действия</th></tr>' +
+        rows.map(schoolRow).join("") + "</table></div>" : '<div class="muted">Заявок пока нет. Страница для школ: <a href="/schools/" target="_blank">scholary.kz/schools</a></div>') +
+      "</div>";
+    return h;
+  }
+  function schoolRow(r) {
+    var st = SCH_STATUS[r.status] || ["no", r.status];
+    var link = "https://scholary.kz/schools/join/?code=" + (r.invite_code || "");
+    var cab  = "https://scholary.kz/schools/cabinet/?claim=" + (r.claim_token || "");
+    var id = esc(r.id);
+    var actions = "";
+    if (r.status === "pending" || r.status === "paused" || r.status === "expired" || r.status === "rejected") {
+      actions += '<div class="tools" style="grid-template-columns:90px 90px auto;gap:6px;margin-bottom:6px">' +
+        '<input type="number" min="1" placeholder="мест" value="' + (r.seats || 50) + '" data-seats="' + id + '" title="Мест">' +
+        '<input type="number" min="1" max="60" placeholder="мес." value="' + (r.plan === "pilot" ? 1 : 12) + '" data-months="' + id + '" title="Месяцев">' +
+        '<button class="btn-adm" data-act="sch-activate" data-id="' + id + '">Активировать</button></div>';
+      if (r.status === "pending") actions += '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="rejected">Отклонить</button> ';
+    }
+    if (r.status === "active") {
+      actions += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">' +
+        '<button class="btn-adm btn-ghost" data-act="sch-mail" data-id="' + id + '">Письмо школе</button>' +
+        '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(link) + '">Ссылка учеников</button>' +
+        '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(cab) + '">Вход в кабинет</button>' +
+        '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="paused">Пауза</button></div>' +
+        '<div class="tools" style="grid-template-columns:90px 90px auto;gap:6px">' +
+        '<input type="number" min="1" placeholder="мест" value="' + (r.seats || 50) + '" data-seats="' + id + '" title="Мест">' +
+        '<input type="number" min="1" max="60" placeholder="+мес." data-months="' + id + '" title="Продлить на N месяцев">' +
+        '<button class="btn-adm btn-ghost" data-act="sch-update" data-id="' + id + '">Сохранить</button></div>';
+    }
+    actions += '<div class="muted" data-msg="' + id + '" style="margin-top:6px;font-size:12px"></div>';
+    var contact = esc(r.contact_name || "—") + (r.contact_role ? ' <span class="muted">· ' + esc(r.contact_role) + "</span>" : "") +
+      "<br><a href=\"mailto:" + esc(r.contact_email) + "\">" + esc(r.contact_email) + "</a>" + (r.contact_phone ? "<br>" + wa(r.contact_phone) : "") +
+      (r.claimed ? '<br><span class="pill ok">кабинет привязан</span>' : (r.status === "active" ? '<br><span class="pill warn">в кабинет ещё не входили</span>' : ""));
+    var note = (r.note ? '<div class="muted" style="font-size:12px;margin-top:4px;max-width:260px">' + esc(r.note) + "</div>" : "") +
+      (r.students_expected ? '<div class="muted" style="font-size:12px">ожидают ' + r.students_expected + " уч.</div>" : "");
+    return "<td><b>" + esc(r.name) + "</b>" + (r.is_test ? ' <span class="pill no">тест</span>' : "") + "<br><span class=\"muted\">" + esc([r.city, { state: "гос.", private: "частная", other: "" }[r.kind] || ""].filter(Boolean).join(" · ")) + "</span>" + note +
+      '<div class="muted" style="font-size:12px;margin-top:4px">заявка ' + dt(r.created_at) + "</div></td>" +
+      "<td>" + contact + "</td>" +
+      "<td>" + esc(PLAN_LABEL[r.plan] || r.plan) + (r.period === "month" ? '<br><span class="muted">помесячно</span>' : "") + "</td>" +
+      '<td class="num">' + (r.used || 0) + " / " + (r.seats || 0) + "</td>" +
+      "<td>" + (r.ends_on ? day(r.starts_on) + " — " + day(r.ends_on) : "—") + "</td>" +
+      '<td><span class="pill ' + st[0] + '">' + st[1] + "</span>" + (r.invite_code ? '<br><code style="font-size:12px">' + esc(r.invite_code) + "</code>" : "") + "</td>" +
+      "<td>" + actions + "</td>";
+  }
+  function schoolSay(id, text, bad) {
+    var el = document.querySelector('[data-msg="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+    if (el) { el.textContent = text; el.style.color = bad ? "#C0392B" : "#1E874B"; }
+  }
+  function schoolSet(id, args, okText, thenMail) {
+    schoolSay(id, "Сохраняю…");
+    return rpc("admin_school_set", Object.assign({ p_id: id }, args)).then(function (j) {
+      if (!j || !j.ok) { schoolSay(id, "Не получилось: " + ((j && j.why) || "ошибка"), true); return; }
+      schoolSay(id, okText || "Сохранено");
+      return (thenMail ? schoolMail(id) : Promise.resolve()).then(loadSchools);
+    }, function (e) { schoolSay(id, "Ошибка: " + e.message, true); });
+  }
+  function schoolMail(id) {
+    schoolSay(id, "Отправляю письмо школе…");
+    return sb.auth.getSession().then(function (r) {
+      var tok = r.data && r.data.session && r.data.session.access_token;
+      return fetch("/api/school-notify.php", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tok }, body: JSON.stringify({ id: id }) })
+        .then(function (x) { return x.json(); }).then(function (j) {
+          if (j && j.ok) schoolSay(id, "Письмо ушло на " + j.to);
+          else schoolSay(id, "Письмо не ушло: " + ((j && (j.why || j.error)) || "ошибка") + " — скопируй ссылки и отправь вручную", true);
+        }, function () { schoolSay(id, "Письмо не ушло (сеть) — скопируй ссылки и отправь вручную", true); });
+    });
+  }
+  function schoolAction(act, id, btn) {
+    var seatsEl = document.querySelector('[data-seats="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+    var monthsEl = document.querySelector('[data-months="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+    var seats = seatsEl ? parseInt(seatsEl.value, 10) : null, months = monthsEl ? parseInt(monthsEl.value, 10) : null;
+    if (act === "sch-activate") return schoolSet(id, { p_status: "active", p_seats: seats || null, p_months: months || null }, "Активирована", true);
+    if (act === "sch-update")   return schoolSet(id, { p_seats: seats || null, p_months: months || null }, "Сохранено" + (months ? " · срок продлён, Pro ученикам продлена" : ""));
+    if (act === "sch-status")   return schoolSet(id, { p_status: btn.getAttribute("data-status") }, "Статус изменён");
+    if (act === "sch-mail")     return schoolMail(id);
   }
 
   function viewProduct() {
@@ -563,6 +661,7 @@ function __scholaryMain() {
       if (a === "issue")  { ev.preventDefault(); issueReport(act); return; }
       if (a === "resend") { ev.preventDefault(); resendReport(act); return; }
       if (a === "copy")   { ev.preventDefault(); copyLink(act); return; }
+      if (/^sch-/.test(a)) { ev.preventDefault(); schoolAction(a, act.getAttribute("data-id"), act); return; }
     }
     var seg = t.closest("#periodSeg button");
     if (seg) {
@@ -656,8 +755,10 @@ function __scholaryMain() {
       });
   }
   function copyLink(a) {
-    var url = location.origin + a.getAttribute("data-link");
-    var done = function () { a.textContent = "скопировано"; setTimeout(function () { a.textContent = "скопировать"; }, 1600); };
+    var raw = a.getAttribute("data-link");
+    var url = /^https?:/.test(raw) ? raw : location.origin + raw;   // ссылки школ уже абсолютные
+    var was = a.textContent;
+    var done = function () { a.textContent = "скопировано"; setTimeout(function () { a.textContent = was === "скопировано" ? "скопировать" : was; }, 1600); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () {});
     else { var i = document.createElement("input"); i.value = url; document.body.appendChild(i); i.select(); try { document.execCommand("copy"); done(); } catch (e) {} i.remove(); }
   }
