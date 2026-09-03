@@ -160,7 +160,11 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
             <input class="f" id="cl-letter" placeholder="А, Б, В…" maxlength="4" autocapitalize="characters">
           </div>
         </div>
-        <button class="btn btn-primary btn-block" style="margin-top:18px" type="submit" id="joinBtn">Получить доступ</button>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:var(--ink-soft);cursor:pointer">
+          <input type="checkbox" id="cl-consent" style="width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex-shrink:0">
+          <span>Регистрируюсь с ведома родителей (если мне нет 18). Школа увидит моё имя, класс, направление и прогресс — не пароль и не переписку.</span>
+        </label>
+        <button class="btn btn-primary btn-block" style="margin-top:14px" type="submit" id="joinBtn">Получить доступ</button>
         <div class="err" id="cl-err" hidden></div>
       </form>
     </div>
@@ -187,8 +191,8 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   document.head.appendChild(s);
 })();
 </script>
-<script src="/js/config.js?v=61"></script>
-<script src="/js/telemetry.js?v=61"></script>
-<script src="/js/school-join.js?v=61"></script>
+<script src="/js/config.js?v=62"></script>
+<script src="/js/telemetry.js?v=62"></script>
+<script src="/js/school-join.js?v=62"></script>
 </body>
 </html>

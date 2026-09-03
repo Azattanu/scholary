@@ -88,7 +88,31 @@ table.r .sub{font-size:12px;color:var(--muted)}
 .memo ol{margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--ink-soft)}
 .memo li+li{margin-top:6px}
 textarea.msg{width:100%;min-height:120px;padding:12px 14px;border:1px solid #D2D2D7;border-radius:13px;font:inherit;font-size:14px;resize:vertical;background:#fff;margin-top:8px}
+.demo-bar{background:linear-gradient(90deg,#5B4BFF,#7C6CFF);color:#fff;padding:10px 20px;font-size:14px;font-weight:650;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+.demo-bar a{color:#fff;text-decoration:underline}
 @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+@media (max-width: 640px){
+  /* на телефоне оставляем самое важное: ученик, направление, вероятность, дедлайн */
+  /* Таблица не влезает в телефон — превращаем строки в карточки:
+     имя и класс · вероятность · ×  /  направление · дедлайн */
+  table.r, table.r tbody{display:block;width:100%}
+  table.r tr:first-child{display:none}
+  table.r tr{display:grid;grid-template-columns:1fr auto auto;grid-template-areas:"name prob rm" "dir dl dl";gap:4px 10px;padding:10px 0;border-bottom:1px solid #F0F0F4;align-items:center}
+  table.r tr:last-child{border-bottom:0}
+  table.r td{display:block;padding:0;border:0;text-align:left}
+  table.r td:nth-child(1){grid-area:name} table.r td:nth-child(2){grid-area:dir} table.r td:nth-child(3){grid-area:prob;justify-self:end}
+  table.r td:nth-child(6){grid-area:dl;justify-self:end} table.r td:nth-child(8){grid-area:rm;justify-self:end}
+  table.r td:nth-child(4), table.r td:nth-child(5), table.r td:nth-child(7){display:none}
+  .pbar{min-width:0;gap:6px} .pbar i{width:44px}
+  table.r .sub{font-size:11.5px}
+}
+@media print{
+  .top, .grid > .card:first-child, .tools, .memo, .rm, #btn-csv, #btn-print, .demo-bar, #toast-root{display:none!important}
+  body{background:#fff;font-size:12px} .card{border:0;padding:0;margin:0 0 14px} .grid{grid-template-columns:1fr 1fr;gap:20px}
+  .wrap{padding:0;max-width:none} table.r{font-size:11px} .pbar i{display:none}
+  .print-only{display:block!important}
+}
+.print-only{display:none;font-size:12px;color:var(--muted);margin-top:6px}
 @media (max-width: 640px){
   .top{padding-inline:16px} .wrap{padding-inline:16px}
   .h1{font-size:22px}
@@ -161,6 +185,7 @@ textarea.msg{width:100%;min-height:120px;padding:12px 14px;border:1px solid #D2D
 
 <!-- кабинет -->
 <div id="v-app" hidden>
+  <div class="demo-bar" id="demoBar" hidden>Демо-режим: школа и ученики вымышленные · <a href="/schools/#apply">подключить свою школу</a> · <a href="/schools/">о продукте</a></div>
   <div class="top">
     <a class="logo" href="/schools/">Scholary<span>.</span> <span class="mut" style="font-weight:600;font-size:14px">для школ</span></a>
     <div style="display:flex;gap:8px;align-items:center">
@@ -207,14 +232,15 @@ textarea.msg{width:100%;min-height:120px;padding:12px 14px;border:1px solid #D2D
         <div class="l">В зоне риска</div>
         <div class="n" id="riskN">0</div>
         <div class="xs mut" id="riskText">дедлайн ближе 30 дней, а документы не собраны</div>
-        <div class="xs mut" style="margin-top:auto;padding-top:10px"><span id="idleN">0</span> не заходили 7+ дней · <span id="noCalcN">0</span> без расчёта</div>
+        <div class="xs mut" style="margin-top:auto;padding-top:10px"><span id="idleN">0</span> не заходили 7+ дней · <span id="noCalcN">0</span> без расчёта · <span id="offersN">0</span> <span id="offersW">офферов</span></div>
+        <div class="print-only" id="printMeta"></div>
       </div>
     </div>
 
     <div class="card" style="margin-top:14px">
       <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
         <div><div class="h2">Ученики</div><div class="xs mut" id="rosterSub">—</div></div>
-        <button class="btn btn-ghost btn-sm" id="btn-csv">Скачать CSV</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" id="btn-print">Печать сводки</button><button class="btn btn-ghost btn-sm" id="btn-csv">Скачать CSV</button></div>
       </div>
       <div class="tools">
         <input class="f" id="q" placeholder="Поиск по имени" autocomplete="off">
@@ -245,8 +271,8 @@ textarea.msg{width:100%;min-height:120px;padding:12px 14px;border:1px solid #D2D
   document.head.appendChild(s);
 })();
 </script>
-<script src="/js/config.js?v=61"></script>
-<script src="/js/telemetry.js?v=61"></script>
-<script src="/js/school-cabinet.js?v=61"></script>
+<script src="/js/config.js?v=62"></script>
+<script src="/js/telemetry.js?v=62"></script>
+<script src="/js/school-cabinet.js?v=62"></script>
 </body>
 </html>
