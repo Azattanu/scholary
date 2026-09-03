@@ -1192,11 +1192,12 @@ function __scholaryMain() {
       contact += '<a class="btn btn-soft btn-sm" href="https://wa.me/' + d + '?text=' + encodeURIComponent("Здравствуйте! Это " + ((S.profile && S.profile.name) || "ученик") + " из Scholary, есть вопрос по поступлению") + '" target="_blank" rel="noopener">Написать в WhatsApp</a>';
     }
     if (sc.contact_email) contact += '<a class="btn btn-ghost btn-sm" href="mailto:' + esc(sc.contact_email) + '">Почта</a>';
+    var isC = sc.kind === "counselor";
     return '<div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#FFFFFF 0%,#F4F2FF 58%,#EDF9F3 100%);border-color:#E3DFFF">' +
-      '<div class="xs" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)">Твоя школа</div>' +
-      '<b style="display:block;margin-top:4px">' + esc(sc.name) + esc(cls) + '</b>' +
-      (who ? '<div class="sm" style="margin-top:6px">Профориентолог: <b>' + esc(who) + '</b>' + (sc.contact_role ? ' <span class="mut">· ' + esc(sc.contact_role) + '</span>' : '') + '</div>' : '') +
-      '<div class="xs mut" style="margin-top:4px">' + (sc.active ? "Scholary Pro от школы" + (sc.ends_on ? " · доступ школы до " + fmtDL(new Date(sc.ends_on)) : "") : "Школьный доступ закончился — Pro можно продлить самому") + '</div>' +
+      '<div class="xs" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)">' + (isC ? "Твой профориентолог" : "Твоя школа") + '</div>' +
+      '<b style="display:block;margin-top:4px">' + esc(isC && who ? who : sc.name) + esc(isC ? "" : cls) + '</b>' +
+      (isC ? (sc.name && sc.name !== who ? '<div class="sm" style="margin-top:6px">' + esc(sc.name) + '</div>' : '') : (who ? '<div class="sm" style="margin-top:6px">Профориентолог: <b>' + esc(who) + '</b>' + (sc.contact_role ? ' <span class="mut">· ' + esc(sc.contact_role) + '</span>' : '') + '</div>' : '')) +
+      '<div class="xs mut" style="margin-top:4px">' + (sc.active ? (isC ? "Scholary Pro от профориентолога" : "Scholary Pro от школы") + (sc.ends_on ? " · доступ до " + fmtDL(new Date(sc.ends_on)) : "") : (isC ? "Доступ от профориентолога закончился — Pro можно продлить самому" : "Школьный доступ закончился — Pro можно продлить самому")) + '</div>' +
       (contact ? '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' + contact + '</div>' : '') +
       "</div>";
   }

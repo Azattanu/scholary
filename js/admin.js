@@ -324,7 +324,8 @@ function __scholaryMain() {
      Заявка → «Активировать» (база выпускает код и токен кабинета) → письмо
      школе уходит через api/school-notify.php. Всё остальное — правки ёмкости,
      срока, паузы — тем же admin_school_set. */
-  var PLAN_LABEL = { pilot: "Пилот", s100: "Класс · 100", s500: "Школа · 500", s1000: "Сеть · 1000" };
+  var PLAN_LABEL = { pilot: "Пилот", s100: "Класс · 100", s500: "Школа · 500", s1000: "Сеть · 1000", c15: "Старт · 15", c50: "Практика · 50", c150: "Агентство · 150" };
+  var SCH_KIND = { state: "гос.", private: "частная", other: "", counselor: "профориентолог" };
   var SCH_STATUS = { pending: ["warn", "заявка"], active: ["ok", "активна"], paused: ["no", "пауза"], expired: ["no", "истекла"], rejected: ["bad", "отказ"] };
   function loadSchools() {
     rpc("admin_schools").then(function (rows) { S.schools = rows || []; if (S.tab === "schools") draw(); },
@@ -337,8 +338,9 @@ function __scholaryMain() {
     var active = rows.filter(function (r) { return r.status === "active"; });
     var seatsUsed = active.reduce(function (a, r) { return a + (r.used || 0); }, 0);
     var seatsAll  = active.reduce(function (a, r) { return a + (r.seats || 0); }, 0);
-    var h = kpi([["Заявок ждут", pending.length], ["Активных школ", active.length], ["Учеников по школам", seatsUsed], ["Мест продано", seatsAll]]);
-    h += '<div class="box"><h2>Школы · ' + rows.length + '</h2><p class="sub">Активация выпускает ссылку для учеников и вход в кабинет школы; письмо уходит на почту контакта автоматически.</p>' +
+    var activeC = active.filter(function (r) { return r.kind === "counselor"; }).length;
+    var h = kpi([["Заявок ждут", pending.length], ["Активных школ", active.length - activeC], ["Workspace профориентологов", activeC], ["Учеников / мест", seatsUsed + " / " + seatsAll]]);
+    h += '<div class="box"><h2>Школы и профориентологи · ' + rows.length + '</h2><p class="sub">Активация выпускает ссылку для учеников и вход в кабинет (школы) или workspace (профориентолога); письмо уходит на почту контакта автоматически. Пробный период профориентолога — 14 дней, если поле «мес.» пустое.</p>' +
       (rows.length ? '<div class="scroll"><table class="adm"><tr><th>Школа</th><th>Контакт</th><th>Тариф</th><th class="num">Места</th><th>Срок</th><th>Статус</th><th>Действия</th></tr>' +
         rows.map(schoolRow).join("") + "</table></div>" : '<div class="muted">Заявок пока нет. Страница для школ: <a href="/schools/" target="_blank">scholary.kz/schools</a></div>') +
       "</div>";
@@ -346,22 +348,23 @@ function __scholaryMain() {
   }
   function schoolRow(r) {
     var st = SCH_STATUS[r.status] || ["no", r.status];
+    var isC = r.kind === "counselor";
     var link = "https://scholary.kz/schools/join/?code=" + (r.invite_code || "");
-    var cab  = "https://scholary.kz/schools/cabinet/?claim=" + (r.claim_token || "");
+    var cab  = (isC ? "https://scholary.kz/counselors/cabinet/?claim=" : "https://scholary.kz/schools/cabinet/?claim=") + (r.claim_token || "");
     var id = esc(r.id);
     var actions = "";
     if (r.status === "pending" || r.status === "paused" || r.status === "expired" || r.status === "rejected") {
       actions += '<div class="tools" style="grid-template-columns:90px 90px auto;gap:6px;margin-bottom:6px">' +
         '<input type="number" min="1" placeholder="мест" value="' + (r.seats || 50) + '" data-seats="' + id + '" title="Мест">' +
-        '<input type="number" min="1" max="60" placeholder="мес." value="' + (r.plan === "pilot" ? 1 : 12) + '" data-months="' + id + '" title="Месяцев">' +
+        '<input type="number" min="1" max="60" placeholder="' + (isC && r.plan === "pilot" ? "14 дн." : "мес.") + '" value="' + (r.plan === "pilot" ? (isC ? "" : 1) : 12) + '" data-months="' + id + '" title="' + (isC && r.plan === "pilot" ? "Пусто = пробные 14 дней" : "Месяцев") + '">' +
         '<button class="btn-adm" data-act="sch-activate" data-id="' + id + '">Активировать</button></div>';
       if (r.status === "pending") actions += '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="rejected">Отклонить</button> ';
     }
     if (r.status === "active") {
       actions += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">' +
-        '<button class="btn-adm btn-ghost" data-act="sch-mail" data-id="' + id + '">Письмо школе</button>' +
+        '<button class="btn-adm btn-ghost" data-act="sch-mail" data-id="' + id + '">' + (isC ? "Письмо профориентологу" : "Письмо школе") + '</button>' +
         '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(link) + '">Ссылка учеников</button>' +
-        '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(cab) + '">Вход в кабинет</button>' +
+        '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(cab) + '">' + (isC ? "Вход в workspace" : "Вход в кабинет") + '</button>' +
         '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="paused">Пауза</button>' +
         (r.claimed ? '<button class="btn-adm btn-ghost" data-act="sch-reset" data-id="' + id + '" title="Профориентолог сменился: старая ссылка кабинета перестанет работать, новая уйдёт письмом">Сменить профориентолога</button>' : "") + '</div>' +
         '<div class="tools" style="grid-template-columns:90px 90px auto;gap:6px">' +
@@ -375,7 +378,7 @@ function __scholaryMain() {
       (r.claimed ? '<br><span class="pill ok">кабинет привязан</span>' : (r.status === "active" ? '<br><span class="pill warn">в кабинет ещё не входили</span>' : ""));
     var note = (r.note ? '<div class="muted" style="font-size:12px;margin-top:4px;max-width:260px">' + esc(r.note) + "</div>" : "") +
       (r.students_expected ? '<div class="muted" style="font-size:12px">ожидают ' + r.students_expected + " уч.</div>" : "");
-    return "<td><b>" + esc(r.name) + "</b>" + (r.is_test ? ' <span class="pill no">тест</span>' : "") + "<br><span class=\"muted\">" + esc([r.city, { state: "гос.", private: "частная", other: "" }[r.kind] || ""].filter(Boolean).join(" · ")) + "</span>" + note +
+    return "<td><b>" + esc(r.name) + "</b>" + (r.is_test ? ' <span class="pill no">тест</span>' : "") + "<br><span class=\"muted\">" + esc([r.city, SCH_KIND[r.kind] || ""].filter(Boolean).join(" · ")) + "</span>" + note +
       '<div class="muted" style="font-size:12px;margin-top:4px">заявка ' + dt(r.created_at) + "</div></td>" +
       "<td>" + contact + "</td>" +
       "<td>" + esc(PLAN_LABEL[r.plan] || r.plan) + (r.period === "month" ? '<br><span class="muted">помесячно</span>' : "") + "</td>" +

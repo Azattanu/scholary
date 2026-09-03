@@ -38,15 +38,22 @@ function __schoolJoinMain() {
     var j = r.data;
     if (r.error || !j || !j.ok) { bad("Ссылка не работает", "Такой школы не нашли. Проверь, что открыл(а) ссылку целиком, или попроси у профориентолога новую."); track("school_join_bad", { why: "not_found" }); return; }
     S.school = j;
+    S.isC = j.kind === "counselor";
     $("schName").textContent = j.name;
-    $("schCity").textContent = j.city ? j.city + " · " + j.plan : j.plan;
+    $("schCity").textContent = S.isC ? (j.contact_name ? "Профориентолог: " + j.contact_name : "Профориентолог") + (j.city ? " · " + j.city : "") : (j.city ? j.city + " · " + j.plan : j.plan);
+    if (S.isC) {
+      /* Ученик пришёл по ссылке профориентолога — слова про «школу» здесь сбивают. */
+      document.title = "Регистрация по ссылке профориентолога — Scholary";
+      $("schKind").textContent = "Регистрация по ссылке профориентолога";
+      document.querySelectorAll(".who-sees").forEach(function (el) { el.textContent = "Профориентолог"; });
+    }
     $("schUntil").textContent = j.ends_on ? "до " + fmtD(j.ends_on) : "";
     $("schUntil").hidden = !j.ends_on;
     var free = Math.max(0, (j.seats || 0) - (j.used || 0));
     $("schSeats").textContent = free > 0 ? "свободно мест: " + free : "мест не осталось";
     if (!j.open) {
-      if (j.why === "full") bad("Места закончились", "Школа " + j.name + " выбрала все места по своему тарифу. Напиши профориентологу — школа может расширить доступ, и ссылка заработает снова.");
-      else bad("Доступ школы закрыт", "Срок подключения " + j.name + " закончился или ещё не начался. Напиши профориентологу — он знает, когда доступ откроют.");
+      if (j.why === "full") bad("Места закончились", S.isC ? "У профориентолога заняты все места по тарифу. Напиши ему — он может расширить тариф, и ссылка заработает снова." : "Школа " + j.name + " выбрала все места по своему тарифу. Напиши профориентологу — школа может расширить доступ, и ссылка заработает снова.");
+      else bad(S.isC ? "Доступ закрыт" : "Доступ школы закрыт", "Срок подключения " + j.name + " закончился или ещё не начался. Напиши профориентологу — он знает, когда доступ откроют.");
       track("school_join_bad", { why: j.why });
       return;
     }
@@ -121,7 +128,7 @@ function __schoolJoinMain() {
     e.preventDefault(); $("cl-err").hidden = true;
     var name = $("cl-name").value.trim();
     if (name.length < 2) { authErr("cl-err", { message: "Напиши имя и фамилию" }); return; }
-    if (!$("cl-consent").checked) { authErr("cl-err", { message: "Поставь галочку про согласие — без неё школа не может тебя добавить" }); return; }
+    if (!$("cl-consent").checked) { authErr("cl-err", { message: "Поставь галочку про согласие — без неё " + (S.isC ? "профориентолог" : "школа") + " не может тебя добавить" }); return; }
     /* Буква класса: на телефоне с английской раскладкой набирают латинскую B/E/A —
        приводим к кириллице, иначе «11B» и «11В» станут разными классами в списке. */
     var LAT = { A: "А", B: "В", C: "С", E: "Е", H: "Н", K: "К", M: "М", O: "О", P: "Р", T: "Т", X: "Х", Y: "У" };
@@ -133,8 +140,8 @@ function __schoolJoinMain() {
       var j = r.data;
       if (r.error || !j || !j.ok) {
         var why = (j && j.why) || (r.error && r.error.message) || "";
-        var m = why === "full" ? "Места в школе закончились — напиши профориентологу."
-              : why === "closed" ? "Доступ школы закрыт — напиши профориентологу."
+        var m = why === "full" ? (S.isC ? "Места по тарифу закончились — напиши профориентологу." : "Места в школе закончились — напиши профориентологу.")
+              : why === "closed" ? (S.isC ? "Доступ закрыт — напиши профориентологу." : "Доступ школы закрыт — напиши профориентологу.")
               : "Не получилось — попробуй ещё раз или напиши нам в WhatsApp.";
         authErr("cl-err", { message: m }); track("school_join_fail", { why: why }); return;
       }
