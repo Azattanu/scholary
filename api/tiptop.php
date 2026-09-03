@@ -146,10 +146,13 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
       if (is_array($rep) && !empty($rep['ok']) && !empty($rep['token'])) {
         $sentR = ['whatsapp' => false, 'email' => false];
         if (tt_once('report-' . $txn)) {
+          /* Тестовый платёж (терминал в test-режиме, карта 4242…) не должен
+             выдавать бесплатный отчёт клиенту: ссылка уходит только владельцу. */
+          $toWa   = $test ? (string)($c['OWNER_WA'] ?? '') : (string)($rep['whatsapp'] ?? '');
+          $toMail = $test ? (string)($c['MAIL_TO'] ?? '')  : (string)($rep['email'] ?? ($email ?: ''));
           $sentR = tt_send_report(
             (string)($rep['name'] ?? ''),
-            (string)($rep['whatsapp'] ?? ''),
-            (string)($rep['email'] ?? ($email ?: '')),
+            $toWa, $toMail,
             (string)$rep['token'], $test);
           tt_rpc('tiptop_mark_report_sent', ['p_lead' => $lead,
             'p_wa' => $sentR['whatsapp'] ? 'sent' : 'failed',
@@ -345,8 +348,10 @@ function tt_once($key) {
   $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiptop';
   if (!is_dir($dir)) @mkdir($dir, 0700, true);
   $f = $dir . '/seen-' . substr(hash('sha256', $key), 0, 32) . '.flag';
-  if (file_exists($f)) return false;
-  @file_put_contents($f, (string)time());
+  /* fopen('x') атомарен: два одновременных ретрая шлюза не пройдут оба */
+  $h = @fopen($f, 'x');
+  if ($h === false) return false;
+  fwrite($h, (string)time()); fclose($h);
   foreach ((array)@glob($dir . '/seen-*.flag') as $old) {
     if (@filemtime($old) < time() - 30 * 86400) @unlink($old);
   }

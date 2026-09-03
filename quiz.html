@@ -6,11 +6,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=55">
-  <script src="/js/config.js?v=55"></script>
-<script src="/js/telemetry.js?v=55"></script>
-  <script src="/js/report-engine.js?v=55"></script>
-  <script src="/js/app.js?v=55" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=56">
+  <script src="/js/config.js?v=56"></script>
+<script src="/js/telemetry.js?v=56"></script>
+  <script src="/js/report-engine.js?v=56"></script>
+  <script src="/js/app.js?v=56" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -312,7 +312,7 @@ function pBlend(vals) {
   return Math.min(0.95, Math.max(0.05, ps[0] + (indep - ps[0]) * 0.35));
 }
 function previewCalc() {
-  if (window.ScholaryEngine) {
+  if (window.ScholaryEngine) try {
     const r = ScholaryEngine.evaluate(answers);
     /* Число на пейволле обязано совпасть с числом в купленном отчёте —
        поэтому берём готовый r.pAtLeastOne, а не считаем заново. */
@@ -324,7 +324,7 @@ function previewCalc() {
     const pDl = r.pAtLeastOneAtDeadline != null ? Math.round(r.pAtLeastOneAtDeadline * 100) : null;
     return { programs: r.programsCount, country: r.topCountry, verdict: r.verdict, pAdm: pAdm, pSch: pSch,
              pDl: pDl, conf: r.confidence || null };
-  }
+  } catch (e) { try { track("engine_error", { where: "preview" }); } catch (_) {} }
   return previewCalcFallback();
 }
 function previewCalcFallback() {
@@ -394,7 +394,7 @@ function renderPaywall() {
       "</div>" +
       '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px">' +
         '<button type="button" class="btn btn-primary" id="toPay" style="min-height:54px; font-size:16.5px">Получить полный отчёт — ' + fmt(C.PRICE_REPORT) + '&nbsp;₸</button>' +
-        '<div class="fineprint">PDF сразу на WhatsApp и почту — регистрация не нужна<br>Карта / Apple Pay / Google Pay / Kaspi · не придёт за 10 минут — вернём деньги</div>' +
+        '<div class="fineprint">Отчёт сразу на WhatsApp и почту — регистрация не нужна<br>' + (C.TIPTOP_MODE === "live" ? 'Карта / Apple Pay / Google Pay / Kaspi' : 'Kaspi (карта онлайн — скоро)') + ' · не придёт за 10 минут — вернём деньги</div>' +
       "</div>" +
       /* Второй честный выход. Без него квиз упирался в оплату и человек,
          не готовый платить сразу, уходил ни с чем — а кабинет и каталог
@@ -452,7 +452,7 @@ function renderPayment() {
     '<div style="display:flex; flex-direction:column; gap:14px">' +
       '<div class="quiz-q" style="font-size:21px">Оплата</div>' +
       '<div class="card" style="display:flex; justify-content:space-between; align-items:center">' +
-        '<div><div style="font-size:15px; font-weight:800">Отчёт о вероятности</div><div style="font-size:12.5px; color:var(--muted); font-weight:600">персональный PDF · для ' + esc(answers.name) + '</div></div>' +
+        '<div><div style="font-size:15px; font-weight:800">Отчёт о вероятности</div><div style="font-size:12.5px; color:var(--muted); font-weight:600">персональный онлайн-отчёт · для ' + esc(answers.name) + '</div></div>' +
         '<div style="font-size:20px; font-weight:800; color:var(--accent)">' + fmt(C.PRICE_REPORT) + ' ₸</div>' +
       "</div>" +
       '<div class="field"><label for="fEmail">Email для отчёта (и чека)</label><input id="fEmail" class="input" inputmode="email" autocomplete="email" placeholder="aida@example.com"></div>' +
@@ -474,6 +474,7 @@ function renderPayment() {
     // сразу дублируем владельцу: покупателя нельзя потерять, пока оплата ручная
     try {
       const em = ($("fEmail").value || "").trim();
+      if (em) saveLead({ email: em });   // иначе у переотправки отчёта из админки нет почты
       fetch((C.NOTIFY_URL || "/api/notify.php"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -487,7 +488,11 @@ function renderPayment() {
   });
 
   if (terminalReady) $("payCard").addEventListener("click", () => {
+    const btn = $("payCard");
+    if (btn.dataset.busy) return;            // двойной тап — один виджет
+    btn.dataset.busy = "1"; setTimeout(() => { delete btn.dataset.busy; }, 4000);
     const email = $("fEmail").value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("fEmail").focus(); alertBox("Проверь адрес почты — на него придёт ссылка на отчёт."); delete btn.dataset.busy; return; }
     if (email) { phase2.email = email; saveLead({ email: email }); }
     startTipTop(email);
   });
@@ -575,7 +580,10 @@ const PHASE2 = [
 
 function renderSuccess() {
   track("pay_success_screen");
-  try { localStorage.removeItem("scholary_quiz_v1"); } catch (e) {}
+  /* Отчёт по этому лиду выдан и заморожен. Следующий квиз на этом устройстве
+     (второй ребёнок, пересдал IELTS) обязан идти НОВЫМ лидом — иначе
+     повторная покупка вернула бы старый отчёт. */
+  try { localStorage.removeItem("scholary_quiz_v1"); localStorage.removeItem("scholary_lead_id"); } catch (e) {}
   screen.innerHTML = "";
   screen.appendChild(h(
     '<div style="display:flex; flex-direction:column; gap:14px">' +

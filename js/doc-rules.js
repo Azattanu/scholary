@@ -226,7 +226,7 @@
 
     var v = [];
     if (!words) {
-      v.push({ level: "warn", title: "Письма ещё нет", text: "Начни с четырёх вопросов — соберём каркас, дальше поправишь своими словами.", action: { label: "Собрать черновик", kind: "letter_wizard" } });
+      v.push({ level: "warn", title: "Письма ещё нет", text: "Начни с четырёх вопросов — соберём каркас, дальше поправишь своими словами.", action: { label: "Собрать черновик", kind: "letter-wizard" } });
       return { score: 0, criteria: c, verdicts: v, words: 0 };
     }
     if (words < 220) v.push({ level: "warn", title: "Письмо короткое: " + words + " слов", text: "Типичный объём — 300–600 слов. Слишком короткое читается как «не старался»." });

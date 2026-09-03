@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Твой отчёт | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=55">
-  <script src="/js/config.js?v=55"></script>
-<script src="/js/telemetry.js?v=55"></script>
-  <script src="/js/report-engine.js?v=55"></script>
-  <script src="/js/app.js?v=55" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=56">
+  <script src="/js/config.js?v=56"></script>
+<script src="/js/telemetry.js?v=56"></script>
+  <script src="/js/report-engine.js?v=56"></script>
+  <script src="/js/app.js?v=56" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Персональный отчёт Scholary</h1>
@@ -130,6 +130,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
+  /* Рендер под защитой: битый или очень старый снимок не должен оставлять
+     оплатившего человека на вечном «Загружаем…» — показываем отчёт частично
+     или честное сообщение с WhatsApp. */
+  try {
   const d = payload.data, t = payload.texts || {};
   const axes = d.profile.axes;
   const name = esc(t.name || (d.answers && d.answers.name) || payload.demoName || "");
@@ -277,6 +281,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     '<div class="fineprint">Scholary · scholary.kz · Оценка модели не является гарантией поступления</div>';
 
   track("report_open", { demo: params.get("demo") === "1" });
+  } catch (err) {
+    try { if (window.Sentry) Sentry.captureException(err); } catch (e) {}
+    box.innerHTML =
+      '<div class="card" style="display:flex; flex-direction:column; gap:12px">' +
+        '<strong style="font-size:17px">Отчёт есть, но страница не смогла его показать</strong>' +
+        '<p style="color:var(--muted); font-size:14px; margin:0">Такое бывает с очень старыми отчётами. Ничего не потеряно — напиши нам, пришлём отчёт в удобном виде за несколько минут.</p>' +
+        '<a class="btn btn-primary" href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Не открывается отчёт по ссылке " + location.href.split("?")[0]) + '" target="_blank" rel="noopener">Написать в WhatsApp</a>' +
+      "</div>";
+    if (window.track) track("report_render_error");
+  }
 });
 </script>
 <!-- Счётчик Яндекс.Метрики для посетителей без JavaScript.

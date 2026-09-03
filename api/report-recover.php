@@ -64,6 +64,17 @@ function rr_send($name, $wa, $mail, $token) {
   return $out;
 }
 
+/* Флаг «уже уведомляли» на файловой системе (как tt_once в tiptop.php). */
+function rr_once($key) {
+  $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiptop';
+  if (!is_dir($dir)) @mkdir($dir, 0700, true);
+  $f = $dir . '/seen-' . substr(hash('sha256', $key), 0, 32) . '.flag';
+  $h = @fopen($f, 'x');
+  if ($h === false) return false;
+  fwrite($h, (string)time()); fclose($h);
+  return true;
+}
+
 /* ---------- вызов узкой RPC с секретом вебхука ---------- */
 function rr_rpc($fn, $args) {
   $c = cfg();
@@ -118,10 +129,21 @@ if ($contact === '' || mb_strlen($contact) > 120) jout(['ok' => true, 'note' => 
 $rl = rate_check('recover:' . client_ip(), 6);
 if (!$rl['ok']) jout(['ok' => false, 'why' => 'rate_limited'], 429);
 
-$found = rr_rpc('find_paid_report', ['p_contact' => $contact]);
-
-/* Ответ клиенту одинаков в любом случае: есть заказ или нет — наружу не видно. */
+/* Ответ клиенту одинаков в любом случае и отдаётся ДО поиска и отправки:
+   иначе по времени ответа (2–3 HTTP-вызова при найденном контакте против
+   одного RPC при ненайденном) можно было проверять, кто наш клиент. */
 $answer = ['ok' => true, 'note' => 'checked'];
+ignore_user_abort(true);
+http_response_code(200);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
+$__body = json_encode($answer, JSON_UNESCAPED_UNICODE);
+header('Content-Length: ' . strlen($__body));
+echo $__body;
+if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+else { while (ob_get_level() > 0) @ob_end_flush(); @flush(); }
+
+$found = rr_rpc('find_paid_report', ['p_contact' => $contact]);
 
 if (is_array($found) && !empty($found['ok']) && !empty($found['token'])) {
   $sent = rr_send($found['name'] ?? '', $found['whatsapp'] ?? '', $found['email'] ?? '', $found['token']);
@@ -138,9 +160,10 @@ if (is_array($found) && !empty($found['ok']) && !empty($found['token'])) {
       'Что делать' => 'открыть админку → Отчёты → скопировать ссылку и отправить вручную',
     ]);
   }
-} elseif (is_array($found) && ($found['why'] ?? '') === 'no_report') {
+} elseif (is_array($found) && ($found['why'] ?? '') === 'no_report' && rr_once('noreport-' . ($found['lead'] ?? '') . '-' . gmdate('Y-m-d'))) {
   /* Оплата есть, отчёта нет — самый болезненный случай. Клиенту тот же
-     нейтральный ответ, а владельцу — срочное уведомление. */
+     нейтральный ответ, а владельцу — срочное уведомление (не чаще раза в сутки на лид,
+     иначе форму можно использовать как звонилку владельцу). */
   notify_owner('СРОЧНО: оплатил, отчёта нет — клиент ищет его сам', [
     'ID лида'   => clean_txt((string)($found['lead'] ?? ''), 64) ?: '—',
     'Имя'       => clean_txt((string)($found['name'] ?? ''), 60) ?: '—',
@@ -149,4 +172,4 @@ if (is_array($found) && !empty($found['ok']) && !empty($found['token'])) {
   ]);
 }
 
-jout($answer);
+exit;
