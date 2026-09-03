@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#5B4BFF">
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=65">
-  <script src="/js/config.js?v=65"></script>
-<script src="/js/telemetry.js?v=65"></script>
-  <script src="/js/report-engine.js?v=65"></script>
-  <script src="/js/app.js?v=65" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=66">
+  <script src="/js/config.js?v=66"></script>
+<script src="/js/telemetry.js?v=66"></script>
+  <script src="/js/report-engine.js?v=66"></script>
+  <script src="/js/app.js?v=66" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -319,6 +323,7 @@ function renderContact() {
     answers.name = name; answers.whatsapp = wa;
     saveLead(Object.assign(flatAnswers(), { name: name, whatsapp: wa }, engineSnapshot()));
     track("quiz_done");
+    if (window.scholaryTtIdentify) window.scholaryTtIdentify({ phone: wa });
     renderPaywall();
   });
   nav.appendChild(back); nav.appendChild(go);
@@ -615,6 +620,7 @@ function renderPayment() {
     phase2.email = em;
     persist();
     saveLead({ email: em });
+    if (window.scholaryTtIdentify) window.scholaryTtIdentify({ email: em, phone: answers.whatsapp || "" });
     return true;
   }
 
