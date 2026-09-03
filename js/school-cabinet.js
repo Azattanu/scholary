@@ -117,7 +117,7 @@ function __schoolCabinetMain() {
       else if (j && j.why === "taken") toast("Эта школа уже привязана к другому аккаунту — войдите им или напишите нам", "bad");
       else if (j && j.why === "not_found") toast("Ссылка привязки не найдена — откройте актуальное письмо", "bad");
     }) : Promise.resolve();
-    p.then(function () { return sb.rpc("school_mine"); }).then(function (r) {
+    p.then(function () { return sb.rpc("school_mine", { p_kind: "school" }); }).then(function (r) {
       S.entering = false;
       S.school = r.data || null;
       if (!S.school) {
@@ -250,12 +250,12 @@ function __schoolCabinetMain() {
   $("btn-regen-no").onclick = function () { $("regenBox").hidden = true; };
   $("btn-regen-yes").onclick = function () {
     $("regenBox").hidden = true;
-    sb.rpc("school_regen_code").then(function (r) {
+    sb.rpc("school_regen_code", { p_kind: "school" }).then(function (r) {
       if (r.data && r.data.ok) { S.school.invite_code = r.data.invite_code; drawHead(); toast("Новая ссылка выпущена — старая больше не работает", "ok"); track("school_link_regen"); }
       else toast("Не получилось выпустить ссылку", "bad");
     });
   };
-  $("btn-refresh").onclick = function () { sb.rpc("school_mine").then(function (r) { if (r.data) { S.school = r.data; drawHead(); } loadRoster(); }); };
+  $("btn-refresh").onclick = function () { sb.rpc("school_mine", { p_kind: "school" }).then(function (r) { if (r.data) { S.school = r.data; drawHead(); } loadRoster(); }); };
   $("btn-print").onclick = function () { track("school_print"); window.print(); };
   $("btn-csv").onclick = function () {
     var rows = filtered();

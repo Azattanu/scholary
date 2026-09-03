@@ -49,8 +49,9 @@ function __counselorMain() {
   function daysTo(s) { if (!s) return null; var d = new Date(s); d.setHours(0, 0, 0, 0); var n = new Date(); n.setHours(0, 0, 0, 0); return Math.round((d - n) / 864e5); }
   function daysAgo(s) { if (!s) return null; return Math.floor((new Date() - new Date(s)) / 864e5); }
   function plural(n, a, b, c) { n = Math.abs(n) % 100; var m = n % 10; if (n > 10 && n < 20) return c; if (m > 1 && m < 5) return b; if (m === 1) return a; return c; }
-  function isoToday(off) { var d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.toISOString().slice(0, 10); }
-  function nextMD(md) { if (!md || !/^\d{2}-\d{2}$/.test(md)) return null; var y = new Date().getFullYear(); var d = new Date(y + "-" + md + "T00:00:00"); if (isNaN(d)) return null; if (daysTo(d) < 0) d = new Date((y + 1) + "-" + md + "T00:00:00"); return d.toISOString().slice(0, 10); }
+  function isoToday(off) { var d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  /* дата строкой, без toISOString: он уводит в UTC и в Алматы теряет день */
+  function nextMD(md) { if (!md || !/^\d{2}-\d{2}$/.test(md)) return null; var y = new Date().getFullYear(); var d = new Date(y + "-" + md + "T00:00:00"); if (isNaN(d)) return null; if (daysTo(d) < 0) y++; return y + "-" + md; }
   function dlPill(s, doneLike) {
     var d = daysTo(s); if (d == null) return '<span class="pill pill-mut">без дедлайна</span>';
     if (doneLike) return '<span class="pill pill-mut">' + fmtD(s) + "</span>";
@@ -185,7 +186,8 @@ function __counselorMain() {
   } else {
     var tbl = function (name) {
       return {
-        list: function (sid) { return sb.from(name).select("*").eq("student_id", sid).order("created_at", { ascending: name === "ws_notes" ? false : true }).order("id", { ascending: true }); },
+        /* у ws_docs нет created_at — только updated_at; сортируем по id (порядок добавления) */
+        list: function (sid) { var q = sb.from(name).select("*").eq("student_id", sid); if (name !== "ws_docs") q = q.order("created_at", { ascending: name !== "ws_notes" }); return q.order("id", { ascending: true }); },
         add: function (o) { return sb.from(name).insert(o).select().single(); },
         update: function (id, patch) { patch = Object.assign({}, patch, { updated_at: new Date().toISOString() }); if (name === "ws_notes") delete patch.updated_at; return sb.from(name).update(patch).eq("id", id).select().single(); },
         remove: function (id) { return sb.from(name).delete().eq("id", id); }
@@ -193,7 +195,7 @@ function __counselorMain() {
     };
     DB = {
       claim: function (t) { return sb.rpc("school_claim", { p_token: t }); },
-      mine: function () { return sb.rpc("school_mine"); },
+      mine: function () { return sb.rpc("school_mine", { p_kind: "counselor" }); },
       roster: function () { return sb.rpc("ws_roster"); },
       today: function () { return sb.rpc("ws_today"); },
       cabinet: function (sid) { return sb.rpc("ws_student_cabinet", { p_student: sid }); },
@@ -210,7 +212,7 @@ function __counselorMain() {
         return sb.storage.from("docs").upload(path, file, { upsert: true, contentType: file.type || "application/octet-stream" }).then(function (r) { return r.error ? r : { data: { path: path, name: file.name }, error: null }; });
       },
       fileUrl: function (path) { return sb.storage.from("docs").createSignedUrl(path, 600).then(function (r) { return { data: r.data && r.data.signedUrl, error: r.error }; }); },
-      regen: function () { return sb.rpc("school_regen_code"); }
+      regen: function () { return sb.rpc("school_regen_code", { p_kind: "counselor" }); }
     };
   }
 

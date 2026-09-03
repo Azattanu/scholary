@@ -342,7 +342,7 @@ function __scholaryMain() {
     var h = kpi([["Заявок ждут", pending.length], ["Активных школ", active.length - activeC], ["Workspace профориентологов", activeC], ["Учеников / мест", seatsUsed + " / " + seatsAll]]);
     h += '<div class="box"><h2>Школы и профориентологи · ' + rows.length + '</h2><p class="sub">Активация выпускает ссылку для учеников и вход в кабинет (школы) или workspace (профориентолога); письмо уходит на почту контакта автоматически. Пробный период профориентолога — 14 дней, если поле «мес.» пустое.</p>' +
       (rows.length ? '<div class="scroll"><table class="adm"><tr><th>Школа</th><th>Контакт</th><th>Тариф</th><th class="num">Места</th><th>Срок</th><th>Статус</th><th>Действия</th></tr>' +
-        rows.map(schoolRow).join("") + "</table></div>" : '<div class="muted">Заявок пока нет. Страница для школ: <a href="/schools/" target="_blank">scholary.kz/schools</a></div>') +
+        rows.map(function (r) { return "<tr>" + schoolRow(r) + "</tr>"; }).join("") + "</table></div>" : '<div class="muted">Заявок пока нет. Страница для школ: <a href="/schools/" target="_blank">scholary.kz/schools</a></div>') +
       "</div>";
     return h;
   }
