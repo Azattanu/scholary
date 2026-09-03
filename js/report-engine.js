@@ -1,5 +1,5 @@
 /* ============================================================
-   Scholary Report Engine v1 — единая логика персонального отчёта.
+   Scholary Report Engine v3 — единая логика персонального отчёта.
    Работает и в браузере (window.ScholaryEngine — превью на пейволле),
    и в Node на бэкенде (module.exports — генерация полного отчёта).
 
@@ -10,9 +10,26 @@
    P(хотя бы один оффер).
 
    ВАЖНО ДЛЯ КАЛИБРОВКИ: базовые ставки (baseAdm/baseSch) — экспертные
-   оценки v1. Они честно «около-правильные», не точные. С первых исходов
-   (слой 4 видения) их калибруем данными. Формулы простые и монотонные
-   специально: их легко объяснить абитуриенту и легко калибровать.
+   оценки с приорами из публичной статистики программ (там, где она
+   публикуется: SH, Türkiye, GKS...). Они честно «около-правильные»,
+   не точные. С первых исходов их калибруем данными. Формулы простые
+   и монотонные специально: их легко объяснить и легко калибровать.
+
+   НОВОЕ В v3 (сентябрь 2026):
+   · каталог загружается из Supabase (витрина programs_engine) с жёсткой
+     валидацией и фолбэком на встроенный список — сайт живёт при любом
+     состоянии базы;
+   · ТОЧКА Б: вероятность считается дважды — «профиль сегодня» и «профиль
+     к дедлайну при выполнении плана» (рост языка ~0.5 балла IELTS за
+     8–10 недель подготовки — ориентир Cambridge/IELTS о ~100–200 часах
+     на балл; письма; SAT по плану);
+   · ОКНА ЦИКЛА: у программ есть машиночитаемые деадлайны (MM-DD) —
+     движок говорит «осталось N недель» и честно помечает, куда в этот
+     цикл уже не успеть;
+   · УВЕРЕННОСТЬ: интервал вокруг вероятности; ширина зависит от полноты
+     данных (7 ответов квиза → шире, фаза 2 и кабинет → уже).
+   Выход evaluate() — строгое НАДМНОЖЕСТВО v1/v2: старые отчёты и старые
+   страницы продолжают работать без изменений.
    ============================================================ */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -165,6 +182,13 @@
     { id: "isdb_msp", name: "Merit-стипендия Исламского банка", country: "Саудовская Аравия", cc: "sa", levels: ["phd"], baseAdm: .08, baseSch: .08, req: { academics: 8, language: 6, budget: 0 }, deadline: "уточняй окно на сайте", fields: ["it", "eng", "sci", "med"], note: "подать самому нельзя — нужна номинация научного института Казахстана; возраст до 35 и опыт исследований", funding: "обучение, стипендия, страховка, билет и обустройство, поездки на конференции", source_url: "https://www.isdb.org/scholarships/scholarship-programs" }
   ];
 
+  var WINDOWS = {"sh": {"md": "01-15", "open": "11-15"}, "edisu": {"md": "09-04", "open": "07-20"}, "disco": {"md": "07-22", "open": "06-10"}, "maeci": {"md": "03-26", "open": "03-01"}, "tb": {"md": "02-20", "open": "01-10"}, "de_pub": {"md": "07-15", "open": "05-01"}, "daad": {"md": "10-15", "open": "08-01"}, "cz_free": {"md": "02-28", "open": "11-01"}, "csc": {"md": "02-15", "open": "01-01"}, "anso": {"md": "01-31", "open": "10-15"}, "gks": {"md": "10-17", "open": "09-01"}, "mext": {"md": "05-29", "open": "04-20"}, "erasmus": {"md": "01-15", "open": "10-15"}, "si": {"md": "02-15", "open": "02-01"}, "us_need": {"md": "01-01", "open": "08-01"}, "kaust": {"md": "01-03", "open": "09-01"}, "mbzuai": {"md": "12-15", "open": "09-01"}, "nawa": {"md": "05-08", "open": "03-15"}, "hkphd": {"md": "12-01", "open": "09-01"}, "singa": {"md": "12-01", "open": "10-01"}, "chevening": {"md": "10-06", "open": "08-05"}, "clarendon": {"md": "01-06", "open": "09-01"}, "gates_cam": {"md": "01-06", "open": "09-01"}, "goi_ies": {"md": "03-12", "open": "01-15"}, "eth_esop": {"md": "11-30", "open": "11-01"}, "swiss_gov": {"md": "11-27", "open": "08-01"}, "eiffel": {"md": "01-08", "open": "10-01"}, "abai_verne": {"md": "05-17", "open": "03-15"}, "kuleuven_sci": {"md": "02-15", "open": "10-01"}, "tudelft_vef": {"md": "12-01", "open": "10-15"}, "nl_scholarship": {"md": "01-31", "open": "10-01"}, "dk_gov": {"md": "01-15", "open": "11-01"}, "fi_uni": {"md": "01-05", "open": "12-01"}, "ee_national": {"md": "10-15", "open": "09-01"}, "lv_state": {"md": "04-01", "open": "02-01"}, "lt_state": {"md": "04-20", "open": "03-01"}, "ro_gov": {"md": "03-31", "open": "01-15"}, "ceu": {"md": "02-02", "open": "10-15"}, "ada_az": {"md": "04-08", "open": "02-01"}, "hk_ug": {"md": "11-26", "open": "09-15"}, "macau_ug": {"md": "04-09", "open": "02-03"}, "kaist_ug": {"md": "01-14", "open": "09-01"}, "cn_provincial": {"md": "04-30", "open": "02-01"}, "cis_cn": {"md": "05-15", "open": "03-01"}, "schwarzman": {"md": "09-09", "open": "04-01"}, "yenching": {"md": "11-30", "open": "08-15"}, "ait_th": {"md": "07-15", "open": "03-01"}, "iccr_in": {"md": "04-22", "open": "02-27"}, "brunei_gov": {"md": "02-15", "open": "12-15"}, "berea": {"md": "11-30", "open": "09-01"}, "pearson_utoronto": {"md": "11-06", "open": "09-01"}, "ubc_isp": {"md": "11-15", "open": "09-01"}, "fulbright_kz": {"md": "07-15", "open": "03-01"}, "nyuad": {"md": "01-05", "open": "09-01"}, "khalifa": {"md": "03-02", "open": "12-01"}, "qatar_uni": {"md": "03-25", "open": "03-01"}};
+  PROGRAMS.forEach(function (p) {
+    var w = WINDOWS[p.id];
+    if (w) { p.deadlineMd = p.deadlineMd || w.md; p.openMd = p.openMd || w.open; }
+  });
+  if (typeof PROGRAMS !== "undefined") PROGRAMS.forEach(function (p) { p.exam = p.exam || (p.id === "csc" ? "csca" : null); });
+
   /* ---------- 3. ВЕРОЯТНОСТИ ---------- */
   function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
 
@@ -226,7 +250,16 @@
        высокая ценность). Так портфель похож на нормальный совет, а не на
        список самого лёгкого. */
     function pick(arr, from, to, n) {
-      return arr.filter(function (p) { return p.p.adm >= from && p.p.adm < to; }).slice(0, n);
+      var out = [], perCc = {};
+      for (var i = 0; i < arr.length && out.length < n; i++) {
+        var p = arr[i];
+        if (p.p.adm < from || p.p.adm >= to) continue;
+        var k = p.cc || p.country;
+        if ((perCc[k] || 0) >= 2) continue;   // портфель — это диверсификация, а не три гранта одной страны
+        perCc[k] = (perCc[k] || 0) + 1;
+        out.push(p);
+      }
+      return out;
     }
     var anchors    = pick(list, 0.45, 1.01, 4);
     var targets    = pick(list, 0.20, 0.45, 3);
@@ -255,7 +288,16 @@
   // смешиваем лучший одиночный шанс с «независимой» оценкой по топ-6.
   function pAtLeastOne(portfolio) {
     if (!portfolio.length) return 0.05;
-    var ps = portfolio.map(function (p) { return p.p.adm; }).sort(function (a, b) { return b - a; });
+    /* Внутри одной страны исходы почти полностью коррелированы: три
+       итальянских DSU решаются одним и тем же доходом семьи и одним
+       пакетом, поэтому страна даёт один «бросок», а не три. Берём лучший
+       шанс на страну и только потом считаем квази-независимость стран. */
+    var byCc = {};
+    portfolio.forEach(function (p) {
+      var k = p.cc || p.country || p.id;
+      if (!byCc[k] || p.p.adm > byCc[k]) byCc[k] = p.p.adm;
+    });
+    var ps = Object.keys(byCc).map(function (k) { return byCc[k]; }).sort(function (a, b) { return b - a; });
     var maxP = ps[0];
     var pNone = 1;
     ps.slice(0, 6).forEach(function (p) { pNone *= (1 - Math.min(p, 0.85)); });
@@ -294,28 +336,263 @@
     return out.slice(0, 3);
   }
 
-  /* ---------- 6. ГЛАВНАЯ ФУНКЦИЯ ---------- */
-  // evaluate(answers) → всё, что нужно и превью, и полному отчёту
-  function evaluate(a) {
+  /* ---------- 6. v3: ОКНА ЦИКЛА И РЕАЛИЗУЕМОСТЬ ---------- */
+  // 'MM-DD' → ближайшая будущая дата этого дня (типовое окно цикла; год к году дрейфует на дни)
+  function nextWindowDate(md, now) {
+    if (!md || !/^\d\d-\d\d$/.test(md)) return null;
+    var m = +md.slice(0, 2), d = +md.slice(3, 5);
+    var y = now.getFullYear();
+    var dt = new Date(Date.UTC(y, m - 1, d, 23, 59));
+    if (dt.getTime() < now.getTime()) dt = new Date(Date.UTC(y + 1, m - 1, d, 23, 59));
+    return dt;
+  }
+  function weeksUntil(dt, now) { return dt ? Math.max(0, Math.round((dt.getTime() - now.getTime()) / 6048e5)) : null; }
+  var MONTHS_RU = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  function fmtRu(dt) { return dt ? dt.getUTCDate() + " " + MONTHS_RU[dt.getUTCMonth()] + " " + dt.getUTCFullYear() : null; }
+  // сессии CSCA (csca.cn): янв, мар, апр, июн, дек
+  var CSCA_MONTHS = [1, 3, 4, 6, 12];
+
+  var DEFAULT_HORIZON_WEEKS = 16;   // для программ без известного окна
+
+  /* Окно и реализуемость цикла для программы.
+     needsCertNow: сертификат нужен уже при подаче, а его нет и получить
+     не успеть — тогда честно говорим «в этот цикл не успеть». */
+  function windowFor(prog, a, profile, now) {
+    var dt = nextWindowDate(prog.deadlineMd, now);
+    var weeks = weeksUntil(dt, now);
+    var w = { known: !!dt, date: dt ? dt.toISOString().slice(0, 10) : null,
+              human: fmtRu(dt), weeksLeft: weeks, feasible: true, note: null, nextCycle: false };
+    if (!dt) return w;
+    /* Окно закрывается на днях: собрать пакет за пару недель нереально почти
+       всем, поэтому честно целимся в СЛЕДУЮЩЕЕ окно этой программы (+1 год) —
+       программа остаётся в портфеле, а не выбрасывается. */
+    if (weeks < 4) {
+      var dt2 = new Date(Date.UTC(dt.getUTCFullYear() + 1, dt.getUTCMonth(), dt.getUTCDate(), 23, 59));
+      w.nextCycle = true;
+      w.note = "ближайшее окно закрывается " + fmtRu(dt) + " — реалистичная цель: следующее, до " + fmtRu(dt2);
+      w.date = dt2.toISOString().slice(0, 10);
+      w.human = fmtRu(dt2);
+      w.weeksLeft = weeksUntil(dt2, now);
+      weeks = w.weeksLeft;
+    }
+    var needsCert = (prog.req.language || 0) >= 4.5 && !prog.langYear && a.lang_status !== "have";
+    if (needsCert && weeks < 6 && a.lang_status !== "soon") {
+      w.feasible = false; w.note = "нужен сертификат при подаче — в это окно уже не успеть, целься в следующий цикл";
+    } else if (needsCert && weeks < 4) {
+      w.feasible = false; w.note = "до закрытия окна меньше месяца — сертификат получить не успеть";
+    } else if (weeks <= 6 && !w.nextCycle) {
+      w.note = "окно закрывается через " + weeks + " нед — документы должны быть почти готовы";
+    }
+    if (prog.exam === "csca" && w.feasible) {
+      // ближайшая сессия CSCA минимум за 3 недели подготовки и до дедлайна
+      var ses = null;
+      for (var k = 0; k < 18; k++) {
+        var cand = new Date(now.getTime()); cand.setUTCDate(15); cand.setUTCMonth(cand.getUTCMonth() + k);
+        if (CSCA_MONTHS.indexOf(cand.getUTCMonth() + 1) !== -1 && cand.getTime() > now.getTime() + 3 * 6048e5) { ses = cand; break; }
+      }
+      if (ses && dt && ses.getTime() > dt.getTime()) { w.note = "сессию экзамена CSCA до дедлайна поймать не успеть — планируй следующий цикл"; w.feasible = false; }
+      else if (ses) { w.note = (w.note ? w.note + " · " : "") + "нужен экзамен CSCA (csca.cn), ближайшие сессии: янв/мар/апр/июн/дек"; }
+    }
+    return w;
+  }
+
+  /* ---------- 7. v3: ТОЧКА Б — профиль к дедлайну ---------- */
+  /* Ориентир скорости языка: ~100–200 часов направленной подготовки на +1.0
+     балла IELTS (Cambridge/IELTS.org), т.е. при 10–12 ч/нед ≈ +0.5 балла за
+     8–10 недель. Наша ось языка: 1.0 балла IELTS ≈ 3 балла оси. */
+  function projectProfile(profile, a, weeks) {
+    var eff = Math.max(0, (weeks == null ? DEFAULT_HORIZON_WEEKS : weeks) - 5); // буфер: слот экзамена + результат + подача
+    var p2 = JSON.parse(JSON.stringify(profile));
+    var gains = [];
+    // язык растёт, только если человек сам заявил, что готовится
+    if (a.lang_status === "soon" && eff >= 4) {
+      var perWeek = profile.axes.language < 7.5 ? 1.5 / 9 : 1.5 / 13;
+      var gain = Math.min(3, eff * perWeek, 9 - profile.axes.language);
+      if (gain > 0.2) {
+        p2.axes.language = clamp(profile.axes.language + gain, 0, 10);
+        gains.push({ what: "Подготовка к IELTS по плану (~10 ч/нед)", axis: "language",
+                     detail: "+" + (Math.round(gain / 3 * 10) / 10) + " балла IELTS реалистично за " + Math.min(eff, 18) + " нед" });
+      }
+    }
+    if (eff >= 3 && profile.axes.motivation < 7.5) {
+      p2.axes.motivation = 7.5;
+      gains.push({ what: "Мотивационные письма под каждую программу", axis: "motivation",
+                   detail: "письмо под требования программы, не одно на всех" });
+    }
+    if (eff >= 12 && profile.axes.achievements < 9) {
+      p2.axes.achievements = clamp(profile.axes.achievements + 1, 0, 10);
+      gains.push({ what: "Добавить проект или олимпиаду в профиль", axis: "achievements",
+                   detail: "один завершённый пункт портфолио за 3 месяца" });
+    }
+    if (a.sat === "plan" && eff >= 10 && (profile.sat || 0) < 6.5) {
+      p2.sat = 6.5;
+      gains.push({ what: "Сдать SAT по плану", axis: "sat", detail: "важно для США и части топ-вузов" });
+    }
+    return { profile: p2, gains: gains };
+  }
+
+  /* ---------- 8. v3: УВЕРЕННОСТЬ ---------- */
+  /* Ширина интервала = зрелость модели + полнота данных. Экспертная модель
+     с приорами из публичной статистики даёт базовые ±10 п.п.; каждый
+     неотвеченный ключевой вопрос расширяет интервал. */
+  function confidenceFor(a, pAny) {
+    var keys = ["level", "lang_status", "field", "achievements", "budget", "priority"];
+    keys.push(a.level === "master" ? "gpa_uni" : (a.level === "phd" ? "gpa_phd" : "gpa_band"));
+    if (a.lang_status === "have" || a.lang_status === "soon") keys.push("ielts_band");
+    var have = 0;
+    keys.forEach(function (k) { var v = a[k]; if (v != null && v !== "" && !(Array.isArray(v) && !v.length) && v !== "unknown") have++; });
+    var completeness = have / keys.length;
+    if (a.p2_gpa_exact) completeness = Math.min(1, completeness + 0.08);
+    if (a.p2_ielts_date) completeness = Math.min(1, completeness + 0.04);
+    if (a.p2_docs_ready) completeness = Math.min(1, completeness + 0.03);
+    var width = 0.10 + 0.10 * (1 - completeness);
+    return {
+      completeness: Math.round(completeness * 100) / 100,
+      low: clamp(Math.round((pAny - width) * 100) / 100, 0.02, 0.97),
+      high: clamp(Math.round((pAny + width) * 100) / 100, 0.02, 0.97),
+      label: completeness >= 0.8 ? "высокая" : (completeness >= 0.5 ? "средняя" : "низкая")
+    };
+  }
+
+  /* ---------- 9. ГЛАВНАЯ ФУНКЦИЯ ---------- */
+  // evaluate(answers[, opts]) → всё, что нужно и превью, и полному отчёту.
+  // Выход — надмножество v1/v2: старые поля не менялись.
+  function evaluate(a, opts) {
+    a = a || {}; opts = opts || {};
+    var now = opts.now ? new Date(opts.now) : new Date();
     var profile = profileFromAnswers(a);
     var portfolio = buildPortfolio(profile, a);
     var pAny = pAtLeastOne(portfolio);
+
+    // точка Б: по каждой программе — своё окно и своя проекция
+    var anyDl = [];
+    portfolio.forEach(function (p) {
+      var w = windowFor(p, a, profile, now);
+      p.window = w;
+      var proj = projectProfile(profile, a, w.weeksLeft);
+      var pd = w.feasible ? probabilities(proj.profile, p) : { adm: p.p.adm, sch: p.p.sch };
+      p.p.admAtDeadline = Math.max(p.p.adm, pd.adm);
+      p.p.schAtDeadline = pd.sch == null ? null : Math.max(p.p.sch || 0, pd.sch);
+      anyDl.push({ p: { adm: p.p.admAtDeadline } });
+    });
+    var pAnyDl = Math.max(pAny, pAtLeastOne(anyDl));
+
+    // глобальный план — по медианному окну портфеля
+    var wks = portfolio.map(function (p) { return p.window && p.window.weeksLeft; })
+                       .filter(function (x) { return x != null; }).sort(function (x, y) { return x - y; });
+    var horizon = wks.length ? wks[Math.floor(wks.length / 2)] : DEFAULT_HORIZON_WEEKS;
+    var plan = projectProfile(profile, a, horizon).gains;
+
+    var confidence = confidenceFor(a, pAny);
+
     var axes = profile.axes;
     var axisNames = { academics: "Академика", language: "Язык", achievements: "Достижения", motivation: "Мотивационное", budget: "Бюджет", fit: "Соответствие" };
-    // сильное/слабое место — только из осей, на которые человек может влиять
     var sorted = ["academics", "language", "achievements", "motivation"].sort(function (x, y) { return axes[y] - axes[x]; });
+
+    var verdict = verdictFor(pAny, profile);
+    if (pAny < 0.35 && pAnyDl >= 0.5) {
+      verdict = { t: "К дедлайнам — реалистично, если начать сейчас",
+                  s: "Сегодняшние шансы низкие, но к окнам подачи профиль успевает вырасти. В отчёте — план по неделям." };
+    }
+
     return {
       profile: profile,
       portfolio: portfolio,
       pAtLeastOne: pAny,
+      pAtLeastOneAtDeadline: Math.round(pAnyDl * 100) / 100,
+      confidence: confidence,
+      plan: plan,
       programsCount: portfolio.length,
       topCountry: portfolio.length ? portfolio[0].country : "—",
       strongest: axisNames[sorted[0]],
       weakest: axisNames[sorted[sorted.length - 1]],
-      verdict: verdictFor(pAny, profile),
-      boosters: boosters(profile, a)
+      verdict: verdict,
+      boosters: boosters(profile, a),
+      engineVersion: 3,
+      catalogSource: CATALOG.source,
+      catalogSize: PROGRAMS.length,
+      generatedFor: now.toISOString().slice(0, 10)
     };
   }
 
-  return { evaluate: evaluate, profileFromAnswers: profileFromAnswers, PROGRAMS: PROGRAMS };
+  /* ---------- 10. v3: КАТАЛОГ ИЗ БАЗЫ ---------- */
+  var CATALOG = { source: "builtin" };
+  var BUILTIN = PROGRAMS.slice();
+
+  // Строка витрины programs_engine → формат движка. Мусор не пропускаем:
+  // сломанная строка каталога не должна ломать расчёт.
+  function normalizeRow(r) {
+    if (!r || !r.id || !r.name || !r.country || !Array.isArray(r.levels) || !r.levels.length) return null;
+    var adm = Number(r.baseAdm != null ? r.baseAdm : r.base_adm);
+    if (!(adm > 0 && adm < 1)) return null;
+    var bs = r.baseSch != null ? r.baseSch : r.base_sch;
+    var sch = (bs == null || bs === "") ? null : Number(bs);
+    if (sch != null && !(sch >= 0 && sch <= 1)) sch = null;
+    var req = (r.req && typeof r.req === "object") ? r.req : {};
+    if (typeof req.academics !== "number" || typeof req.language !== "number") return null;
+    return {
+      id: String(r.id), name: String(r.name), country: String(r.country), cc: r.cc || "",
+      levels: r.levels, fields: (Array.isArray(r.fields) && r.fields.length) ? r.fields : null,
+      baseAdm: adm, baseSch: sch,
+      req: { academics: req.academics, language: req.language, budget: typeof req.budget === "number" ? req.budget : 0, sat: typeof req.sat === "number" ? req.sat : undefined },
+      deadline: r.deadline || "уточняется", note: r.note || "", funding: r.funding || "",
+      langYear: !!(r.langYear || r.lang_year),
+      deadlineMd: r.deadlineMd || r.deadline_md || null,
+      openMd: r.openMd || r.apply_open_md || null,
+      exam: r.exam || null,
+      source_url: r.source_url || ""
+    };
+  }
+
+  function setPrograms(rows, source) {
+    if (!Array.isArray(rows)) return false;
+    var out = [];
+    for (var i = 0; i < rows.length; i++) { var n = normalizeRow(rows[i]); if (n) out.push(n); }
+    if (out.length < 40) return false;   // подозрительно мало — каталог не подменяем
+    PROGRAMS = out;
+    CATALOG.source = source || "db";
+    return true;
+  }
+
+  // Загрузка каталога (только браузер). Фолбэк — встроенный список: сайт
+  // обязан считать даже при лежащей базе. Кэш на 6 часов.
+  function initCatalog(cfg) {
+    if (typeof fetch === "undefined" || !cfg || !cfg.SUPABASE_URL) return Promise.resolve(false);
+    var CK = "scholary_catalog_v3";
+    try {
+      var c = JSON.parse(sessionStorage.getItem(CK) || "null");
+      if (c && c.t && Date.now() - c.t < 216e5 && setPrograms(c.rows, "db-cache")) return Promise.resolve(true);
+    } catch (e) {}
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    if (ctrl) setTimeout(function () { ctrl.abort(); }, 3500);
+    return fetch(cfg.SUPABASE_URL + "/rest/v1/programs_engine?select=*", {
+      headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: "Bearer " + cfg.SUPABASE_ANON_KEY },
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rows) {
+        var ok = rows ? setPrograms(rows, "db") : false;
+        if (ok) { try { sessionStorage.setItem(CK, JSON.stringify({ t: Date.now(), rows: rows })); } catch (e) {} }
+        try { if (typeof window !== "undefined" && window.track) window.track("engine_catalog", { source: ok ? "db" : "fallback", n: PROGRAMS.length }); } catch (e) {}
+        return ok;
+      })
+      .catch(function () {
+        try { if (typeof window !== "undefined" && window.track) window.track("engine_catalog", { source: "fallback_error", n: PROGRAMS.length }); } catch (e) {}
+        return false;
+      });
+  }
+
+  var api = {
+    evaluate: evaluate,
+    profileFromAnswers: profileFromAnswers,
+    setPrograms: setPrograms,
+    initCatalog: initCatalog,
+    VERSION: 3,
+    get PROGRAMS() { return PROGRAMS; },
+    get BUILTIN() { return BUILTIN; }
+  };
+  // автозагрузка каталога в браузере: страницы могут ждать ScholaryEngine.ready
+  if (typeof window !== "undefined" && window.SCHOLARY_CONFIG) {
+    api.ready = initCatalog(window.SCHOLARY_CONFIG);
+  }
+  return api;
 });
