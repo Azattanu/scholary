@@ -80,7 +80,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   <!-- основной сценарий -->
   <div id="v-main" hidden>
     <div class="card school">
-      <div class="k">Регистрация по ссылке школы</div>
+      <div class="k" id="schKind">Регистрация по ссылке школы</div>
       <div class="n" id="schName">—</div>
       <div class="c" id="schCity"></div>
       <div class="row">
@@ -133,7 +133,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
         <div class="links"><a href="#" id="lnk-login2">Назад ко входу</a></div>
       </form>
 
-      <div class="xs" style="text-align:center;margin-top:22px">Продолжая, ты принимаешь <a href="/oferta/">оферту</a> и <a href="/privacy/">политику данных</a>. Школа увидит твоё имя, класс, направление и прогресс — не пароль и не переписку.</div>
+      <div class="xs" style="text-align:center;margin-top:22px">Продолжая, ты принимаешь <a href="/oferta/">оферту</a> и <a href="/privacy/">политику данных</a>. <span class="who-sees">Школа</span> увидит твоё имя, класс, направление и прогресс — не пароль и не переписку.</div>
     </div>
 
     <!-- шаг 2: класс -->
@@ -162,7 +162,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
         </div>
         <label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:var(--ink-soft);cursor:pointer">
           <input type="checkbox" id="cl-consent" style="width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex-shrink:0">
-          <span>Регистрируюсь с ведома родителей (если мне нет 18). Школа увидит моё имя, класс, направление и прогресс — не пароль и не переписку.</span>
+          <span>Регистрируюсь с ведома родителей (если мне нет 18). <span class="who-sees">Школа</span> увидит моё имя, класс, направление и прогресс — не пароль и не переписку.</span>
         </label>
         <button class="btn btn-primary btn-block" style="margin-top:14px" type="submit" id="joinBtn">Получить доступ</button>
         <div class="err" id="cl-err" hidden></div>
@@ -191,8 +191,8 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   document.head.appendChild(s);
 })();
 </script>
-<script src="/js/config.js?v=62"></script>
-<script src="/js/telemetry.js?v=62"></script>
-<script src="/js/school-join.js?v=62"></script>
+<script src="/js/config.js?v=63"></script>
+<script src="/js/telemetry.js?v=63"></script>
+<script src="/js/school-join.js?v=63"></script>
 </body>
 </html>
