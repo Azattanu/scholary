@@ -19,8 +19,8 @@ PAGES = {          # исходник -> каталог
     "schools.html": "schools",
     "school-join.html": "schools/join",
     "school-cabinet.html": "schools/cabinet",
-    "counselors.html": "counselors",
-    "counselor-cabinet.html": "counselors/cabinet",
+    "prof.html": "prof",
+    "prof-cabinet.html": "prof/cabinet",
 }
 STUB = """<!doctype html>
 <html lang="ru"><head><meta charset="utf-8">
@@ -59,6 +59,15 @@ for src, d in PAGES.items():
 for src, d in PAGES.items():
     io.open(os.path.join(out, src), "w", encoding="utf-8").write(STUB.format(d=d))
 
+# 2b. старые адреса → новые (переименования): вечные заглушки-редиректы
+ALIASES = {"counselors": "prof", "counselors/cabinet": "prof/cabinet", "counselors.html": "prof", "counselor-cabinet.html": "prof/cabinet"}
+for old, d in ALIASES.items():
+    if old.endswith(".html"):
+        io.open(os.path.join(out, old), "w", encoding="utf-8").write(STUB.format(d=d))
+    else:
+        os.makedirs(os.path.join(out, old), exist_ok=True)
+        io.open(os.path.join(out, old, "index.html"), "w", encoding="utf-8").write(STUB.format(d=d))
+
 # 3. главная остаётся настоящей на /
 shutil.copy(os.path.join(root, "index.html"), os.path.join(out, "index.html"))
 
@@ -67,7 +76,7 @@ for d in ("css", "js", "images", "data", "api", "error_docs"):
     src = os.path.join(root, d)
     if os.path.isdir(src):
         shutil.copytree(src, os.path.join(out, d))
-for f in ("robots.txt", "sitemap.xml"):
+for f in ("robots.txt", "sitemap.xml", "favicon.ico", "favicon.svg", "apple-touch-icon.png", "icon-512.png"):
     if os.path.isfile(os.path.join(root, f)):
         shutil.copy(os.path.join(root, f), os.path.join(out, f))
 
