@@ -24,6 +24,8 @@ $period= in_array($in['period'] ?? '', ['year', 'month', 'pilot'], true) ? $in['
 $note  = clean_txt((string)($in['note'] ?? ''), 1000);
 $exp   = (int)($in['students_expected'] ?? 0);
 $src   = clean_txt((string)($in['source'] ?? ''), 60);
+/* Ловушка для ботов: поле спрятано со страницы, человек его не заполняет. */
+if (trim((string)($in['website'] ?? '')) !== '') jout(['ok' => true, 'bot' => true]);
 
 if (mb_strlen($name) < 3)                                   jout(['ok' => false, 'why' => 'bad_name'], 400);
 if (mb_strlen($cname) < 2)                                  jout(['ok' => false, 'why' => 'bad_contact'], 400);
@@ -71,7 +73,7 @@ if (empty($j['dup'])) {
       . '<p>Спасибо, что написали от имени <b>' . htmlspecialchars($name) . '</b>. Мы свяжемся с вами в течение рабочего дня, '
       . 'ответим на вопросы и откроем доступ: вы получите закрытую ссылку для учеников и вход в кабинет школы.</p>'
       . '<p><b>Что вы просили:</b> ' . htmlspecialchars($PLANS[$plan]) . ($period === 'month' ? ' (помесячно)' : '') . '.</p>'
-      . '<p>Пока ждёте — посмотрите, что увидит ученик: <a href="https://scholary.kz/demo/" style="color:#5B4BFF">пример отчёта</a>.</p>'
+      . '<p>Пока ждёте — посмотрите <a href="https://scholary.kz/schools/cabinet/?demo=1" style="color:#5B4BFF">демо-кабинет школы</a> и <a href="https://scholary.kz/demo/" style="color:#5B4BFF">пример отчёта ученика</a>.</p>'
       . '<p style="color:#6B7280;font-size:13px">Если это письмо пришло по ошибке — просто не отвечайте на него.</p></div>';
     http_json('https://api.resend.com/emails', 'POST', [
       'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
