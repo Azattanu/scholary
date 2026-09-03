@@ -61,6 +61,8 @@ if ($isC && $plan === 'pilot') $PLANS['pilot'] = 'Пробный (бесплат
 /* Школе — «получили, ответим». Владельцу — карточка заявки. Оба письма
    не критичны: заявка уже в базе, поэтому сбой почты не ломает ответ. */
 if (empty($j['dup'])) {
+  tt_api_event('SubmitForm', ['content_name' => $isC ? 'counselor_apply' : 'school_apply', 'contents' => [['content_id' => $plan, 'content_type' => 'product', 'content_name' => $PLANS[$plan] ?? $plan]]],
+    ['email' => $email, 'phone' => $phone, 'url' => $isC ? 'https://scholary.kz/prof/' : 'https://scholary.kz/schools/']);
   notify_owner(($isC ? 'Заявка профориентолога: ' : 'Заявка от школы: ') . $name, [
     'Имя'        => $cname . ($crole !== '' ? ' (' . $crole . ')' : ''),
     ($isC ? 'Workspace' : 'Школа') => $name . ($city !== '' ? ', ' . $city : '') . ' · ' . $KIND[$kind],
@@ -80,7 +82,7 @@ if (empty($j['dup'])) {
         . '<p>Спасибо! Откроем ваш workspace <b>' . htmlspecialchars($name) . '</b> в течение рабочего дня и пришлём на эту почту письмо «доступ открыт» — '
         . 'с кнопкой входа и вашей ссылкой для учеников. Входить нужно будет этой же почтой (' . htmlspecialchars($email) . ').</p>'
         . '<p><b>Что вы просили:</b> ' . htmlspecialchars($PLANS[$plan]) . ($period === 'month' ? ' (помесячно)' : '') . '.</p>'
-        . '<p>Пока ждёте — посмотрите <a href="https://scholary.kz/counselors/cabinet/?demo=1" style="color:#5B4BFF">демо workspace</a> и <a href="https://scholary.kz/demo/" style="color:#5B4BFF">пример отчёта ученика</a>.</p>'
+        . '<p>Пока ждёте — посмотрите <a href="https://scholary.kz/prof/cabinet/?demo=1" style="color:#5B4BFF">демо workspace</a> и <a href="https://scholary.kz/demo/" style="color:#5B4BFF">пример отчёта ученика</a>.</p>'
         . '<p style="color:#6B7280;font-size:13px">Если это письмо пришло по ошибке — просто не отвечайте на него.</p></div>';
     } else {
       $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F;max-width:560px">'

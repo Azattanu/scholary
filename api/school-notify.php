@@ -36,7 +36,7 @@ if (empty($c['RESEND_KEY'])) jout(['ok' => false, 'why' => 'mail_off'], 503);
 
 $isC   = (($s['kind'] ?? '') === 'counselor');
 $join  = 'https://scholary.kz/schools/join/?code=' . rawurlencode($s['invite_code']);
-$cab   = ($isC ? 'https://scholary.kz/counselors/cabinet/?claim=' : 'https://scholary.kz/schools/cabinet/?claim=') . rawurlencode($s['claim_token']);
+$cab   = ($isC ? 'https://scholary.kz/prof/cabinet/?claim=' : 'https://scholary.kz/schools/cabinet/?claim=') . rawurlencode($s['claim_token']);
 $first = trim(explode(' ', trim((string)($s['contact_name'] ?? '')))[0]);
 $hi    = $first !== '' ? $first . ', ' : '';
 $until = !empty($s['ends_on']) ? date('d.m.Y', strtotime($s['ends_on'])) : '—';

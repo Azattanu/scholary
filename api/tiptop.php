@@ -111,6 +111,7 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
     $granted = is_array($r) && !empty($r['ok']);
     tt_finish('{"code":0}');
     if (tt_once('pro-' . $txn)) {
+      if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $who, 'external_id' => (string)$txn, 'url' => 'https://scholary.kz/cabinet/'], 'pay_' . $txn);
       notify_owner($test ? 'Оплачена подписка Pro (ТЕСТ)' : 'Оплачена подписка Pro', [
         'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
         'План'       => $plan === 'season' ? 'сезон (183 дня)' : 'месяц (31 день)',
@@ -174,6 +175,7 @@ if ($type === 'pay' || $type === 'confirm' || $type === 'recurrent') {
     }
 
     if (tt_once('paid-' . $txn)) {
+      if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $email, 'external_id' => (string)$txn, 'url' => 'https://scholary.kz/quiz/'], 'pay_' . $txn);
       notify_owner($test ? 'Оплата прошла (ТЕСТ)' : 'Оплата прошла', [
         'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
         'За что'     => tt_kind_ru($kind),

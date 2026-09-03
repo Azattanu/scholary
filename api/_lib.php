@@ -19,6 +19,42 @@ function cfg() {
   }
   return $c;
 }
+/* ---------- TikTok Events API (серверные события) ----------
+   Дублируем ключевые события с сервера: оплата приходит вебхуком, когда
+   браузера уже нет, а заявка с сервера надёжнее, чем из вкладки с
+   блокировщиком. Идентификатор пикселя — общий с браузерным кодом;
+   токен доступа лежит в /private (TIKTOK_ACCESS_TOKEN) и в репозиторий
+   не попадает. Почта/телефон — только SHA-256. Нет токена — тихо выходим. */
+function tt_api_event($event, $props = [], $user = [], $event_id = null) {
+  $c = cfg();
+  $tok = (string)($c['TIKTOK_ACCESS_TOKEN'] ?? '');
+  $pix = (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG');
+  if ($tok === '' || $pix === '') return null;
+  $h = function ($v) { $v = trim((string)$v); return $v === '' ? null : hash('sha256', $v); };
+  $phone = preg_replace('/\D/', '', (string)($user['phone'] ?? ''));
+  if (strlen($phone) === 11 && $phone[0] === '8') $phone = '7' . substr($phone, 1);
+  if (strlen($phone) === 10) $phone = '7' . $phone;
+  $u = array_filter([
+    'email'        => $h(strtolower((string)($user['email'] ?? ''))),
+    'phone'        => $phone !== '' ? $h('+' . $phone) : null,
+    'external_id'  => $h((string)($user['external_id'] ?? '')),
+    'ip'           => function_exists('client_ip') ? client_ip() : null,
+    'user_agent'   => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+    'ttclid'       => (string)($user['ttclid'] ?? ($_COOKIE['ttclid'] ?? '')),
+    'ttp'          => (string)($_COOKIE['_ttp'] ?? ''),
+  ], function ($v) { return $v !== null && $v !== ''; });
+  $body = ['event_source' => 'web', 'event_source_id' => $pix, 'data' => [[
+    'event'      => $event,
+    'event_time' => time(),
+    'event_id'   => $event_id ?: ($event . '_' . bin2hex(random_bytes(6))),
+    'user'       => (object)$u,
+    'page'       => ['url' => (string)($user['url'] ?? ('https://scholary.kz' . ($_SERVER['REQUEST_URI'] ?? '/'))), 'referrer' => (string)($_SERVER['HTTP_REFERER'] ?? '')],
+    'properties' => (object)$props,
+  ]]];
+  $r = http_json('https://business-api.tiktok.com/open_api/v1.3/event/track/', 'POST',
+    ['Access-Token: ' . $tok, 'Content-Type: application/json'], $body, 8);
+  return $r;
+}
 function jout($data, $code = 200) {
   http_response_code($code);
   header('Content-Type: application/json; charset=utf-8');
