@@ -187,39 +187,181 @@
     var w = WINDOWS[p.id];
     if (w) { p.deadlineMd = p.deadlineMd || w.md; p.openMd = p.openMd || w.open; }
   });
-  if (typeof PROGRAMS !== "undefined") PROGRAMS.forEach(function (p) { p.exam = p.exam || (p.id === "csc" ? "csca" : null); });
+  if (typeof PROGRAMS !== "undefined") PROGRAMS.forEach(function (p) {
+    p.exam = p.exam || (p.id === "csc" ? "csca" : null);
+    // ставки этих программ опёрты на публичную статистику приёма → сильный приор
+    if (["sh", "tb", "gks", "csc", "mext", "daad", "chevening", "erasmus"].indexOf(p.id) !== -1) p.statNote = p.statNote || "public-stats";
+  });
 
-  /* ---------- 3. ВЕРОЯТНОСТИ ---------- */
+  /* ================================================================
+     3. ВЕРОЯТНОСТИ — ЯДРО v4
+     ================================================================
+     Что было (v1–v3): adm = clamp(base × (1 + 0.16·Σвес·(ось−треб)), …)
+     — линейный множитель, одинаковый для Оксфорда и немецкого госвуза,
+     компенсирующий провал по GPA мотивацией, с обрезкой clamp'ами,
+     которая и делала всю работу в хвостах.
+
+     Что стало (v4), по вердикту совета профориентологов:
+     1) ЛОГ-ОДДСЫ вместо множителя: P = E × σ(logit(base) + λ·Σβ·s(ось−треб)).
+        Якорь тот же, что в v1–v3: профиль «ровно по требованиям» → base.
+        Возле якоря наклон совпадает с прежним (клиенты не видят скачка),
+        в хвостах кривая насыщается сама — без обрезок-обрывов.
+     2) ФОРМА ОТДАЧИ s(d): ниже требования — квадратично круче вниз
+        (полбалла до порога — риск, два балла — почти стена), выше —
+        логарифмически с убывающей отдачей (IELTS 8.5 против 8.0 даёт
+        меньше, чем 6.5 против 6.0).
+     3) ТИП ОТБОРА: формульный (немецкий NC: только цифры, мотивация не
+        компенсирует), конкурс на квоту (SH/TB/GKS: важно место в очереди
+        из Казахстана), холистический (США/топ-вузы: эссе и достижения
+        весят почти как оценки). У каждого — свои веса осей.
+     4) КОГОРТА: для конкурсных программ шанс зависит от позиции
+        относительно других казахстанцев. Перцентиль считается по
+        распределению реальных профилей из нашей базы, смешанному с
+        экспертным приором по весу n/(n+n₀) — данные растут, вес растёт.
+     5) ГЕЙТЫ (некомпенсируемые): язык ниже входного порога режет
+        мультипликативно (те же якоря, что v2: −2 балла → ×0.5, −3 → ×0.25,
+        теперь гладко); формульный отбор с провалом GPA — почти ноль;
+        US need-based без SAT — ×0.3.
+     6) СТИПЕНДИЯ ДВУМЯ СТУПЕНЯМИ: P(стипендия) = P(admit) × P(sch|admit),
+        якорь P(sch|admit)=baseSch/baseAdm, меритная добавка — половина
+        избыточной силы профиля. Стипендия математически не может
+        превышать поступление.
+     ================================================================ */
   function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+  function logit(p) { p = clamp(p, 0.005, 0.995); return Math.log(p / (1 - p)); }
+  function sigma(z) { return 1 / (1 + Math.exp(-z)); }
 
-  // Взвешенное отклонение профиля от требований → множитель к базовой ставке.
+  /* Форма отдачи оси относительно требования. s(0)=0, наклон у нуля ≈ 1. */
+  function shape(d) { return d >= 0 ? 2.2 * Math.log(1 + d / 2) : d * (1 - d / 8); }
+
+  /* --- Тип отбора программы --- */
+  var SEL_CONTEST = ["sh", "tb", "gks", "csc", "mext", "mext_univrec", "daad", "chevening",
+    "si", "maeci", "ro_gov", "lv_state", "lt_state", "ee_national", "nawa", "nawa_banach",
+    "cis_cn", "cn_provincial", "iccr_in", "brunei_gov", "abai_verne", "fulbright_kz",
+    "goi_ies", "eiffel", "swiss_gov", "ada_az", "anso", "erasmus", "tr_uni_merit"];
+  var SEL_FORMULA = ["de_pub", "cz_free", "edisu", "disco", "macau_ug"];
+  var SEL_HOLISTIC = ["us_need", "berea", "pearson_utoronto", "ubc_isp", "schwarzman",
+    "yenching", "weidenfeld", "gates_cam", "clarendon", "hk_ug", "hkphd", "singa",
+    "oist_phd", "epfl_excellence", "kaust", "mbzuai", "khalifa", "kfupm", "tudelft_vef",
+    "ceu", "kuleuven_sci", "eth_esop", "qatar_uni", "ait_th"];
+  function selType(prog) {
+    if (prog.selType) return prog.selType; // когда появится в каталоге — каталог главнее
+    if (SEL_FORMULA.indexOf(prog.id) !== -1) return "formula";
+    if (SEL_HOLISTIC.indexOf(prog.id) !== -1) return "holistic";
+    if (SEL_CONTEST.indexOf(prog.id) !== -1) return "contest";
+    // эвристика для строк каталога без явной метки (x-*): госстипендии с полным
+    // покрытием — конкурс на квоту; бесплатное обучение без стипендии — формула;
+    // остальное — холистический вузовский отбор
+    if (prog.baseSch == null) return "formula";
+    if ((prog.req.budget || 0) === 0 && prog.baseSch >= 0.1) return "contest";
+    return "holistic";
+  }
+
+  /* Веса осей по типу отбора (в единицах формы на логит) + вес когорты. */
+  var SEL_W = {
+    formula:  { academics: 0.55, language: 0.45, achievements: 0.04, motivation: 0.02, sat: 0.30, cohort: 0 },
+    contest:  { academics: 0.34, language: 0.30, achievements: 0.14, motivation: 0.10, sat: 0.18, cohort: 0.25 },
+    holistic: { academics: 0.30, language: 0.26, achievements: 0.22, motivation: 0.16, sat: 0.22, cohort: 0 }
+  };
+  var LAMBDA = 0.72; // глобальный масштаб: чувствительность у якоря ≈ прежним 0.16·base на взвешенную ось
+
+  /* --- Когорта: где профиль стоит среди казахстанских абитуриентов ---
+     Эмпирические децили композита посчитаны по УНИКАЛЬНЫМ профилям из нашей
+     базы лидов (повторные тестовые прогоны схлопнуты — иначе пул был бы
+     завышен) и смешаны с экспертным приором по весу n/(n+n₀). С ростом базы
+     каждый деплой обновляет emp — вес данных растёт сам. */
+  var COHORT = {
+    asOf: "2026-09-03", n0: 60,
+    emp: {
+      bachelor: { n: 13, q: [6.47, 6.59, 6.74, 7.00, 7.08, 8.29, 8.53, 8.53, 8.61] },
+      master:   { n: 3,  q: [4.98, 5.23, 5.48, 5.73, 5.98, 6.16, 6.35, 6.53, 6.72] },
+      phd:      { n: 0,  q: null }
+    },
+    prior: {
+      bachelor: [3.9, 4.5, 4.9, 5.3, 5.6, 5.9, 6.3, 6.7, 7.3],
+      master:   [4.2, 4.8, 5.2, 5.5, 5.8, 6.1, 6.5, 6.9, 7.4],
+      phd:      [4.4, 5.0, 5.4, 5.7, 6.0, 6.3, 6.7, 7.1, 7.6]
+    }
+  };
+  function compositeOf(ax) {
+    return 0.5 * ax.academics + 0.35 * ax.language + 0.10 * ax.achievements + 0.05 * ax.motivation;
+  }
+  function cohortQuantiles(level) {
+    var lvl = COHORT.prior[level] ? level : "bachelor";
+    var emp = COHORT.emp[lvl], prior = COHORT.prior[lvl];
+    if (!emp || !emp.q || !emp.n) return prior;
+    var w = emp.n / (emp.n + COHORT.n0);
+    return prior.map(function (pv, i) { return (1 - w) * pv + w * emp.q[i]; });
+  }
+  // композит → перцентиль (0.02..0.98) линейной интерполяцией по децилям
+  function percentileOf(C, q) {
+    if (C <= q[0]) return clamp(0.02 + 0.08 * (C - (q[0] - 2)) / 2, 0.02, 0.1);
+    if (C >= q[8]) return clamp(0.9 + 0.08 * (C - q[8]) / 2, 0.9, 0.98);
+    for (var i = 0; i < 8; i++) {
+      if (C <= q[i + 1]) {
+        var span = q[i + 1] - q[i];
+        var t = span > 1e-9 ? (C - q[i]) / span : 1;
+        return 0.1 * (i + 1) + 0.1 * t;
+      }
+    }
+    return 0.9;
+  }
+
+  /* Сохраняем публичную сигнатуру: «взвешенное отклонение от требований».
+     Теперь это Σβ·s(ось−треб) в единицах формы (для бустеров и отладки). */
   function fitDelta(profile, prog) {
-    var ax = profile.axes;
-    var d = 0.45 * (ax.academics - prog.req.academics)
-          + 0.4 * (ax.language - prog.req.language)
-          + 0.12 * (ax.achievements - 5)
-          + 0.08 * (ax.motivation - 5);
-    if (prog.req.sat != null) d += 0.25 * (profile.sat - prog.req.sat);
-    return d; // ~ -5..+5
+    var ax = profile.axes, w = SEL_W[selType(prog)];
+    var d = w.academics * shape(ax.academics - prog.req.academics)
+          + w.language * shape(ax.language - prog.req.language)
+          + w.achievements * shape(ax.achievements - 5)
+          + w.motivation * shape(ax.motivation - 5);
+    if (prog.req.sat != null) d += w.sat * shape(profile.sat - prog.req.sat);
+    return d;
   }
 
   function probabilities(profile, prog) {
-    var d = fitDelta(profile, prog);
-    var adm = clamp(prog.baseAdm * (1 + 0.16 * d), 0.03, 0.92);
-    var sch = prog.baseSch == null ? null : clamp(prog.baseSch * (1 + 0.16 * d), 0.02, 0.9);
+    var type = selType(prog);
+    var ax = profile.axes;
 
-    /* Жёсткая отсечка по языку.
-       Раньше модель была чисто множительной: не хватает трёх баллов языка —
-       вероятность падала всего на четверть, и абитуриент без единого сертификата
-       видел «40 % на итальянский грант». Это не «шанс поменьше», это закрытая
-       дверь: без сертификата заявку просто не примут. Программам, которые сами
-       дают год языка (Турция, Корея, Япония, Китай, чешские госвузы), поблажка
-       в 2,5 балла — там язык действительно учат уже внутри программы. */
-    var gap = (prog.req.language || 0) - profile.axes.language - (prog.langYear ? 2.5 : 0);
-    if (gap >= 2) {
-      var k = Math.pow(0.5, gap - 1);           // не хватает 2 → ×0,5; 3 → ×0,25; 4 → ×0,125
-      adm = clamp(adm * k, 0.02, 0.92);
-      if (sch != null) sch = clamp(sch * k, 0.01, 0.9);
+    /* 1) Конкурентный балл в лог-оддсах, якорь — базовая ставка программы. */
+    var z = logit(prog.baseAdm) + LAMBDA * fitDelta(profile, prog);
+
+    /* 2) Конкурс на квоту: добавка за место в казахстанской когорте.
+       Центрируем по перцентилю «профиля ровно по требованиям» — якорь
+       base не сдвигается, добавка меряет именно превосходство над
+       типичным проходным. */
+    if (type === "contest") {
+      var q = cohortQuantiles(profile.level);
+      var piMe = percentileOf(compositeOf(ax), q);
+      var piRef = percentileOf(
+        0.5 * prog.req.academics + 0.35 * prog.req.language + 0.10 * 5 + 0.05 * 5, q);
+      // клэмп ±1.5 логита: когорта — поправка, а не главный фактор
+      z += SEL_W.contest.cohort * clamp(logit(piMe) - logit(piRef), -1.5, 1.5);
+    }
+
+    /* 3) Гейты — то, что не компенсируется ничем. */
+    var E = 1;
+    // язык: без нужного уровня заявку не примут; программам с годом языка — поблажка 2.5
+    var gap = (prog.req.language || 0) - ax.language - (prog.langYear ? 2.5 : 0);
+    if (gap > 1) E *= Math.pow(0.5, gap - 1); // gap 2 → ×0.5, 3 → ×0.25 (как v2, но гладко)
+    // формульный отбор: GPA ниже порога — стена, эссе не поможет
+    if (type === "formula") {
+      var da = ax.academics - prog.req.academics;
+      if (da < -1) E *= Math.pow(0.3, Math.min(3, -da - 1));
+    }
+    // need-based США и т.п.: подача без SAT почти всегда мертва (test-optional — редкость)
+    if (prog.req.sat != null && (profile.sat || 0) <= 0) E *= 0.3;
+
+    var adm = clamp(E * sigma(z), 0.02, 0.95);
+
+    /* 4) Стипендия — второй этап: P(sch|admit), якорь baseSch/baseAdm,
+       меритная добавка — 45% избыточной силы сверх якоря. */
+    var sch = null;
+    if (prog.baseSch != null) {
+      var r0 = clamp(prog.baseSch / Math.max(prog.baseAdm, 0.01), 0.03, 0.97);
+      var zx = z - logit(prog.baseAdm); // избыток конкурентности сверх якоря
+      sch = clamp(adm * sigma(logit(r0) + 0.45 * zx), 0.01, 0.9);
+      if (sch > adm) sch = adm;
     }
     return { adm: adm, sch: sch };
   }
@@ -431,11 +573,15 @@
     return { profile: p2, gains: gains };
   }
 
-  /* ---------- 8. v3: УВЕРЕННОСТЬ ---------- */
-  /* Ширина интервала = зрелость модели + полнота данных. Экспертная модель
-     с приорами из публичной статистики даёт базовые ±10 п.п.; каждый
-     неотвеченный ключевой вопрос расширяет интервал. */
-  function confidenceFor(a, pAny) {
+  /* ---------- 8. УВЕРЕННОСТЬ (v4: полнота данных + сила приоров) ---------- */
+  /* Ширина интервала складывается из двух честных источников:
+     1) полнота профиля — каждый неотвеченный ключевой вопрос расширяет;
+     2) сила приоров портфеля — программы, чья базовая ставка опёрта на
+        публичную статистику (stat_note в каталоге), несут эффективное
+        n≈200; чисто экспертные оценки — n≈25. Ширина ~ бином. ошибке
+        √(p(1−p)/n_eff): портфель из статистически обоснованных программ
+        даёт более узкий интервал, чем портфель из экспертных догадок. */
+  function confidenceFor(a, pAny, portfolio) {
     var keys = ["level", "lang_status", "field", "achievements", "budget", "priority"];
     keys.push(a.level === "master" ? "gpa_uni" : (a.level === "phd" ? "gpa_phd" : "gpa_band"));
     if (a.lang_status === "have" || a.lang_status === "soon") keys.push("ielts_band");
@@ -445,9 +591,18 @@
     if (a.p2_gpa_exact) completeness = Math.min(1, completeness + 0.08);
     if (a.p2_ielts_date) completeness = Math.min(1, completeness + 0.04);
     if (a.p2_docs_ready) completeness = Math.min(1, completeness + 0.03);
-    var width = 0.10 + 0.10 * (1 - completeness);
+
+    var nEff = 25;
+    if (portfolio && portfolio.length) {
+      var s = 0;
+      portfolio.forEach(function (p) { s += (p.statNote ? 200 : 25); });
+      nEff = s / portfolio.length;
+    }
+    var priorW = 1.28 * Math.sqrt(Math.max(0.04, pAny * (1 - pAny)) / nEff);
+    var width = 0.05 + 0.08 * (1 - completeness) + priorW;
     return {
       completeness: Math.round(completeness * 100) / 100,
+      nEff: Math.round(nEff),
       low: clamp(Math.round((pAny - width) * 100) / 100, 0.02, 0.97),
       high: clamp(Math.round((pAny + width) * 100) / 100, 0.02, 0.97),
       label: completeness >= 0.8 ? "высокая" : (completeness >= 0.5 ? "средняя" : "низкая")
@@ -483,7 +638,7 @@
     var horizon = wks.length ? wks[Math.floor(wks.length / 2)] : DEFAULT_HORIZON_WEEKS;
     var plan = projectProfile(profile, a, horizon).gains;
 
-    var confidence = confidenceFor(a, pAny);
+    var confidence = confidenceFor(a, pAny, portfolio);
 
     var axes = profile.axes;
     var axisNames = { academics: "Академика", language: "Язык", achievements: "Достижения", motivation: "Мотивационное", budget: "Бюджет", fit: "Соответствие" };
@@ -499,7 +654,7 @@
       profile: profile,
       portfolio: portfolio,
       pAtLeastOne: pAny,
-      pAtLeastOneAtDeadline: Math.round(pAnyDl * 100) / 100,
+      pAtLeastOneAtDeadline: pAnyDl,   // без округления: инвариант «к дедлайну не хуже» точный
       confidence: confidence,
       plan: plan,
       programsCount: portfolio.length,
@@ -508,7 +663,7 @@
       weakest: axisNames[sorted[sorted.length - 1]],
       verdict: verdict,
       boosters: boosters(profile, a),
-      engineVersion: 3,
+      engineVersion: 4,
       catalogSource: CATALOG.source,
       catalogSize: PROGRAMS.length,
       generatedFor: now.toISOString().slice(0, 10)
@@ -540,6 +695,7 @@
       deadlineMd: r.deadlineMd || r.deadline_md || null,
       openMd: r.openMd || r.apply_open_md || null,
       exam: r.exam || null,
+      statNote: r.statNote || r.stat_note || null,
       source_url: r.source_url || ""
     };
   }
@@ -558,7 +714,7 @@
   // обязан считать даже при лежащей базе. Кэш на 6 часов.
   function initCatalog(cfg) {
     if (typeof fetch === "undefined" || !cfg || !cfg.SUPABASE_URL) return Promise.resolve(false);
-    var CK = "scholary_catalog_v3";
+    var CK = "scholary_catalog_v4";
     try {
       var c = JSON.parse(sessionStorage.getItem(CK) || "null");
       if (c && c.t && Date.now() - c.t < 216e5 && setPrograms(c.rows, "db-cache")) return Promise.resolve(true);
@@ -586,7 +742,7 @@
     profileFromAnswers: profileFromAnswers,
     setPrograms: setPrograms,
     initCatalog: initCatalog,
-    VERSION: 3,
+    VERSION: 4,
     get PROGRAMS() { return PROGRAMS; },
     get BUILTIN() { return BUILTIN; }
   };
