@@ -256,8 +256,8 @@ function tt_send_report($name, $wa, $mail, $token, $test) {
   $hi = $first !== '' ? $first . ', привет!' : 'Привет!';
   $out = ['whatsapp' => false, 'email' => false];
 
-  $digits = preg_replace('/\D/', '', (string)$wa);
-  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && strlen($digits) >= 10 && strlen($digits) <= 15) {
+  $digits = wa_digits($wa);
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && $digits !== null) {
     $msg = $hi . " Твой отчёт Scholary готов 🎓
 
 "

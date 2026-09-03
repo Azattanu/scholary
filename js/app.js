@@ -138,6 +138,64 @@
 
   window.scholaryLeadId = leadId;
 
+  // ---- Телефон WhatsApp: один формат на клиенте, в базе и в отправке ----
+  // Люди набирают «8 775…», «+7 775…», «7775…», «775…» — всё это один номер.
+  // normalize → «+77753831836» (E.164) или null, если это не похоже на номер.
+  // Правила: 10 цифр → +7 + цифры; 11 цифр с 8 → +7 + хвост; 11 с 7 → как есть;
+  // 11–15 цифр с другим кодом (набрано через «+») → международный как есть.
+  window.ScholaryPhone = (function () {
+    function digitsOf(v) { return String(v || "").replace(/\D/g, ""); }
+    function normalize(v) {
+      var raw = String(v || "").trim();
+      var d = digitsOf(raw);
+      if (!d) return null;
+      if (d.length === 12 && d.slice(0, 2) === "78") d = "7" + d.slice(2); // «+7 8 775…» — привычка набирать через 8
+      if (d.length === 10 && raw[0] !== "+") d = "7" + d; // «775 383 18 36» без кода страны; «+7 775 383 18 3» — недобор
+      else if (d.length === 11 && d[0] === "8") d = "7" + d.slice(1);
+      else if (d.length === 11 && d[0] === "7") { /* ок */ }
+      else if (raw[0] === "+" && d.length >= 11 && d.length <= 15) { /* другой код страны */ }
+      else return null;
+      return "+" + d;
+    }
+    // Абонентская часть (10 цифр после +7) из того, что набрано.
+    // Если в поле уже стоит «+7 …», всё после него — абонентская часть: так
+    // «+7 775 383 18 3» не превращается в «+7 753 831 83». Без префикса:
+    // 11 цифр с 7/8 — код страны, отбрасываем; ≤10 — всё абонентская часть.
+    function subscriber(v) {
+      v = String(v || "");
+      var t = v.trim(), sub;
+      if (t.slice(0, 2) === "+7") sub = digitsOf(t.slice(2));
+      else sub = digitsOf(t);
+      if (sub.length >= 11 && (sub[0] === "7" || sub[0] === "8")) sub = sub.slice(1);
+      return sub.slice(0, 10);
+    }
+    // Красивый вид: +7 775 383 18 36
+    function format(v) {
+      var t = String(v || "").trim();
+      if (!t) return "";
+      var sub = subscriber(t);
+      var p = [sub.slice(0, 3), sub.slice(3, 6), sub.slice(6, 8), sub.slice(8, 10)].filter(Boolean);
+      return "+7" + (p.length ? " " + p.join(" ") : "");
+    }
+    function valid(v) { var n = normalize(v); return !!n && (n.length === 12 && n.slice(0, 2) === "+7" || n.length > 12); }
+    // Маска на input: форматирует по мере ввода, каретка — в конце
+    function attach(input) {
+      if (!input || input.__phoneMask) return;
+      input.__phoneMask = true;
+      input.addEventListener("input", function () {
+        var v = input.value, t = v.trim();
+        var d = digitsOf(v);
+        // международный номер (не +7/8) не трогаем — только чистим мусор
+        if (t[0] === "+" && d.length > 1 && d[0] !== "7" && d[0] !== "8") { input.value = "+" + d.slice(0, 15); return; }
+        if (t === "+" || t === "") { input.value = t; return; }
+        input.value = format(v);
+      });
+      input.addEventListener("focus", function () { if (!input.value) input.value = "+7 "; });
+      input.addEventListener("blur", function () { if (input.value.trim() === "+7" || input.value.trim() === "+") input.value = ""; });
+    }
+    return { normalize: normalize, format: format, valid: valid, attach: attach, digits: digitsOf };
+  })();
+
 
   // ---- Меню в шапке на телефоне и планшете ----
   // Второстепенные ссылки прячутся под кнопку, а вход в кабинет и главная

@@ -102,11 +102,17 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .moreline span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 
 /* ---- компоненты ---- */
-.pointb{background:#1D1D1F;color:#fff;border-radius:20px;padding:16px 18px;margin:14px 0}
-.pointb .lbl{font-size:11px;letter-spacing:.14em;font-weight:700;color:#A78BFA;text-transform:uppercase}
-.pointb .big{font-size:19px;font-weight:750;margin:3px 0 10px}
-.pbar{height:5px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
-.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7C6CFF,#B7A8FF)}
+/* «Точка Б» — светлая glow-карточка вместо тёмной плашки: те же фирменные цвета, что и кнопки */
+.pointb{position:relative;overflow:hidden;background:linear-gradient(135deg,#FFFFFF 0%,#F3F1FF 58%,#ECF8F2 100%);border:1px solid #E3DFFF;color:var(--ink);border-radius:20px;padding:16px 18px;margin:14px 0;box-shadow:0 22px 48px -28px rgba(91,75,255,.4)}
+.pointb::before{content:"";position:absolute;width:220px;height:220px;top:-120px;right:-70px;border-radius:50%;background:radial-gradient(circle,rgba(91,75,255,.22),rgba(91,75,255,0) 68%);animation:glowDrift 9s ease-in-out infinite alternate;pointer-events:none}
+.pointb>*{position:relative}
+@keyframes glowDrift{from{transform:translate(0,0) scale(1)}to{transform:translate(-26px,20px) scale(1.15)}}
+.pointb .lbl{font-size:11px;letter-spacing:.14em;font-weight:800;color:var(--accent-dark);text-transform:uppercase}
+.pointb .big{font-size:21px;font-weight:800;margin:3px 0 10px;letter-spacing:-0.02em}
+.pbar{height:6px;border-radius:99px;background:#E9E7F5;overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#16A35C);transform-origin:left;animation:barIn 1.1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barIn{from{transform:scaleX(0)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.pointb::before,.pbar i{animation:none}}
 .nextstep{background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin:0 0 14px}
 .nextstep .tag{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent-dark);text-transform:uppercase}
 .nextstep h3{margin:6px 0 4px;font-size:18px;letter-spacing:-0.01em}
@@ -132,7 +138,7 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .chk{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:14.5px}
 .box{width:21px;height:21px;border-radius:7px;border:1.5px solid #C9C9D2;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
 .box.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-.minirep{background:#1D1D1F;color:#fff;border-radius:18px;padding:16px;margin:14px 0}
+.minirep{background:linear-gradient(135deg,#FFFFFF 0%,#F3F1FF 58%,#ECF8F2 100%);border:1px solid #E3DFFF;color:var(--ink);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 22px 48px -28px rgba(91,75,255,.4)}
 .minirep .pct{font-size:34px;font-weight:800;letter-spacing:-0.03em}
 .aicard{background:linear-gradient(135deg,#FBFAFF,#F2EFFF);border:1px solid var(--accent-border);border-radius:20px;padding:16px;margin-bottom:14px}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
@@ -417,12 +423,12 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
 })();
 </script>
-<script src="/js/config.js?v=56"></script>
-<script src="/js/telemetry.js?v=56"></script>
-<script src="/js/report-engine.js?v=56"></script>
-<script src="/js/app.js?v=56"></script>
-<script src="/js/doc-rules.js?v=56"></script>
-<script src="/js/cabinet2.js?v=56"></script>
+<script src="/js/config.js?v=57"></script>
+<script src="/js/telemetry.js?v=57"></script>
+<script src="/js/report-engine.js?v=57"></script>
+<script src="/js/app.js?v=57"></script>
+<script src="/js/doc-rules.js?v=57"></script>
+<script src="/js/cabinet2.js?v=57"></script>
 <!-- Счётчик Яндекс.Метрики для посетителей без JavaScript.
      Сам счётчик подключается в js/telemetry.js. -->
 <noscript><div><img src="https://mc.yandex.ru/watch/111376927" style="position:absolute; left:-9999px;" alt=""></div></noscript>

@@ -211,6 +211,24 @@ function mail_reply_to() {
   return $t !== '' ? $t : null;
 }
 
+/* Номер WhatsApp → цифры для GREEN-API (chatId = <цифры>@c.us).
+   Люди пишут «8 775…», «+7 775…», «775…» — это один номер 77753831836.
+   Те же правила, что в js/app.js (ScholaryPhone) и в базе (norm_phone):
+   10 цифр → 7+цифры; 11 с 8 → 7+хвост; 11 с 7 → как есть; «+7 8 775…» → без 8;
+   11–15 цифр с другим кодом → как есть. Иначе null — отправлять некуда. */
+function wa_digits($phone) {
+  $raw = trim((string)$phone);
+  $d = preg_replace('/\D/', '', $raw);
+  if ($d === '') return null;
+  if (strlen($d) === 12 && substr($d, 0, 2) === '78') $d = '7' . substr($d, 2);
+  if (strlen($d) === 10 && $raw[0] !== '+') $d = '7' . $d;
+  elseif (strlen($d) === 11 && $d[0] === '8') $d = '7' . substr($d, 1);
+  elseif (strlen($d) === 11 && $d[0] === '7') { /* ок */ }
+  elseif ($raw !== '' && $raw[0] === '+' && strlen($d) >= 11 && strlen($d) <= 15) { /* другой код страны */ }
+  else return null;
+  return $d;
+}
+
 /* Уведомление владельцу: почта через Resend + WhatsApp через GREEN-API.
    Получатели жёстко заданы в конфиге, поэтому это не ретранслятор спама. */
 function notify_owner($title, $rows) {
