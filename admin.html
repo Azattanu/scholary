@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Scholary — панель управления</title>
-  <link rel="stylesheet" href="/css/style.css?v=56">
+  <link rel="stylesheet" href="/css/style.css?v=57">
   <style>
     body { background: #F5F5F7; }
     .aw { max-width: 1180px; margin: 0 auto; padding: 20px 18px 90px; }
@@ -22,14 +22,14 @@
     .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 6px 0 18px; padding-bottom: 4px; }
     .tabs button { flex: 0 0 auto; border: 1px solid #E0E0E6; background: #fff; border-radius: 999px; padding: 8px 15px;
       font-size: 14px; font-weight: 650; color: #55555D; cursor: pointer; white-space: nowrap; }
-    .tabs button.on { background: #1D1D1F; color: #fff; border-color: #1D1D1F; }
+    .tabs button.on { background: #5B4BFF; color: #fff; border-color: #5B4BFF; box-shadow: 0 8px 18px -10px rgba(91,75,255,.6); }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; margin-bottom: 18px; }
     .kpi { background: #fff; border: 1px solid #E8E8ED; border-radius: 16px; padding: 14px 15px; }
     .kpi .n { font-size: 26px; font-weight: 750; letter-spacing: -0.02em; line-height: 1.15; }
     .kpi .l { color: #6E6E73; font-size: 12.5px; margin-top: 3px; }
     .kpi .s { color: #8A8A90; font-size: 11.5px; margin-top: 5px; }
-    .kpi.hl { background: #1D1D1F; color: #fff; border-color: #1D1D1F; }
-    .kpi.hl .l, .kpi.hl .s { color: rgba(255,255,255,.62); }
+    .kpi.hl { background: linear-gradient(135deg, #FFFFFF 0%, #F3F1FF 58%, #ECF8F2 100%); border-color: #E3DFFF; box-shadow: 0 18px 40px -26px rgba(91,75,255,.45); }
+    .kpi.hl .n { color: #4739E0; }
     .box { background: #fff; border: 1px solid #E8E8ED; border-radius: 18px; padding: 18px; margin-bottom: 16px; }
     .box h2 { font-size: 17.5px; margin: 0 0 4px; letter-spacing: -0.01em; }
     .box .sub { color: #6E6E73; font-size: 13px; margin: 0 0 14px; }
@@ -145,11 +145,11 @@
   setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
 })();
 </script>
-<script src="/js/config.js?v=56"></script>
+<script src="/js/config.js?v=57"></script>
 <!-- Движок вероятностей нужен админке, чтобы собрать отчёт задним числом
      по ответам анкеты: формулы одни и те же, что и в квизе. -->
-<script src="/js/report-engine.js?v=56"></script>
-<script src="/js/admin.js?v=56"></script>
+<script src="/js/report-engine.js?v=57"></script>
+<script src="/js/admin.js?v=57"></script>
 <!-- Панель управления намеренно не попадает в Яндекс.Метрику: это внутренний
      инструмент, а Вебвизор записывал бы почты и имена абитуриентов. -->
 </body>

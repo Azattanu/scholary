@@ -6,11 +6,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=56">
-  <script src="/js/config.js?v=56"></script>
-<script src="/js/telemetry.js?v=56"></script>
-  <script src="/js/report-engine.js?v=56"></script>
-  <script src="/js/app.js?v=56" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=57">
+  <script src="/js/config.js?v=57"></script>
+<script src="/js/telemetry.js?v=57"></script>
+  <script src="/js/report-engine.js?v=57"></script>
+  <script src="/js/app.js?v=57" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -38,6 +38,7 @@
 document.addEventListener("DOMContentLoaded", function () {
 
 const C = window.SCHOLARY_CONFIG;
+const PH = window.ScholaryPhone;
 const $ = (id) => document.getElementById(id);
 const screen = $("screen");
 const answers = {};           // ответы фазы 1
@@ -276,19 +277,33 @@ function renderContact() {
   const form = h(
     '<div style="display:flex; flex-direction:column; gap:14px">' +
       '<div class="field"><label for="fName">Имя</label><input id="fName" class="input" autocomplete="name" placeholder="Аида" value="' + esc(answers.name || "") + '"></div>' +
-      '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __" value="' + esc(answers.whatsapp || "") + '"></div>' +
+      '<div class="field"><label for="fWa">Номер WhatsApp</label><input id="fWa" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __" maxlength="20" value="' + esc(PH.format(answers.whatsapp || "")) + '">' +
+        '<div id="fWaHint" class="field-hint">Можно начать с 8 или +7 — приведём к одному формату. На этот номер придёт ссылка на отчёт.</div></div>' +
       '<div class="fineprint" style="text-align:left">Нажимая «Показать результат», ты соглашаешься с <a href="/oferta/" target="_blank">офертой</a> и <a href="/privacy/" target="_blank">политикой конфиденциальности</a>. Не звоним без предупреждения — сначала пишем в WhatsApp.</div>' +
     "</div>");
   screen.appendChild(form);
+  PH.attach($("fWa"));
+  const setErr = (id, hintId, msg) => {
+    const el = $(id); el.classList.toggle("input-error", !!msg);
+    const hint = $(hintId); if (hint) { hint.classList.toggle("is-error", !!msg); if (msg) hint.textContent = msg; }
+    if (msg) { el.focus(); try { el.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {} }
+  };
+  $("fName").addEventListener("input", () => $("fName").classList.remove("input-error"));
+  $("fWa").addEventListener("input", () => { if ($("fWa").classList.contains("input-error") && PH.valid($("fWa").value)) setErr("fWa", "fWaHint", ""); });
   const nav = h('<div class="quiz-nav"></div>');
   const back = h('<button type="button" class="btn btn-ghost" style="width:auto">← Назад</button>');
   back.addEventListener("click", prev);
   const go = h('<button type="button" class="btn btn-primary">Показать результат</button>');
   go.addEventListener("click", () => {
     const name = $("fName").value.trim().slice(0, 60);
-    const wa = $("fWa").value.replace(/[^\d+]/g, "").slice(0, 20);
-    if (name.length < 2) { $("fName").focus(); return; }
-    if (wa.replace(/\D/g, "").length < 10) { $("fWa").focus(); return; }
+    const wa = PH.normalize($("fWa").value);
+    if (name.length < 2) { setErr("fName", null, "Как к тебе обращаться?"); return; }
+    if (!PH.valid($("fWa").value)) {
+      setErr("fWa", "fWaHint", "Проверь номер: нужно 10 цифр после +7, например +7 775 383 18 36. Сюда придёт ссылка на отчёт.");
+      track("quiz_phone_invalid", { len: PH.digits($("fWa").value).length });
+      return;
+    }
+    $("fWa").value = PH.format(wa);
     answers.name = name; answers.whatsapp = wa;
     saveLead(Object.assign(flatAnswers(), { name: name, whatsapp: wa }, engineSnapshot()));
     track("quiz_done");
@@ -357,7 +372,8 @@ function previewCalcFallback() {
 function renderPaywall() {
   const p = previewCalc();
   setProgress(0, STEPS.length, true);
-  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex, paywall: true })); } catch (e) {}
+  try { localStorage.setItem("scholary_quiz_v1", JSON.stringify({ answers: answers, step: stepIndex, paywall: true,
+    result: (typeof p.pAdm === "number") ? { pAtLeastOne: p.pAdm / 100, pSch: (typeof p.pSch === "number") ? p.pSch / 100 : null } : null })); } catch (e) {}
   track("paywall_view");
   screen.innerHTML = "";
   screen.appendChild(h(
@@ -590,7 +606,7 @@ function renderSuccess() {
       '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
         '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--green-soft); border-radius:999px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#187E54" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
         '<div style="font-size:21px; font-weight:800">Оплата прошла</div>' +
-        '<div style="font-size:14px; color:var(--muted)">Ссылка на отчёт уже летит на WhatsApp ' + esc(answers.whatsapp || "") + (phase2.email ? ' и на почту ' + esc(phase2.email) : '') + ' — обычно это меньше минуты</div>' +
+        '<div style="font-size:14px; color:var(--muted)">Ссылка на отчёт уже летит на WhatsApp ' + esc(PH.format(answers.whatsapp || "")) + (phase2.email ? ' и на почту ' + esc(phase2.email) : '') + ' — обычно это меньше минуты</div>' +
       "</div>" +
       '<div class="card" style="display:flex; flex-direction:column; gap:6px">' +
         '<div style="font-size:15.5px; font-weight:800">Сделай отчёт точнее — 7 коротких уточнений</div>' +
