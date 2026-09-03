@@ -9,7 +9,7 @@
    Доступ: обычный вход Supabase + функция is_admin() на стороне базы.
    Ни одного секрета в этом файле нет.
    ============================================================ */
-(function () {
+function __scholaryMain() {
   "use strict";
   var C = window.SCHOLARY_CONFIG || {};
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
@@ -536,9 +536,9 @@
     var act = t.closest("[data-act]");
     if (act) {
       var a = act.getAttribute("data-act");
-      if (a === "issue")  { e.preventDefault(); issueReport(act); return; }
-      if (a === "resend") { e.preventDefault(); resendReport(act); return; }
-      if (a === "copy")   { e.preventDefault(); copyLink(act); return; }
+      if (a === "issue")  { ev.preventDefault(); issueReport(act); return; }
+      if (a === "resend") { ev.preventDefault(); resendReport(act); return; }
+      if (a === "copy")   { ev.preventDefault(); copyLink(act); return; }
     }
     var seg = t.closest("#periodSeg button");
     if (seg) {
@@ -660,4 +660,19 @@
     });
   }
   boot();
+}
+
+/* Библиотека Supabase грузится с CDN; если основной адрес заблокирован,
+   cabinet.html подставляет запасной — но он async и может приехать ПОЗЖЕ
+   этого файла. Раньше в этом случае страница падала с TypeError и человек
+   видел вечный спиннер. Ждём библиотеку до 8 секунд, потом честно говорим. */
+(function boot() {
+  if (window.supabase && window.supabase.createClient) { __scholaryMain(); return; }
+  boot.t = boot.t || Date.now();
+  if (Date.now() - boot.t < 8000) { setTimeout(boot, 100); return; }
+  var el = document.getElementById("loading") || document.body;
+  el.innerHTML = '<div style="max-width:520px;margin:14vh auto;padding:28px;text-align:center;font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F">' +
+    '<h1 style="font-size:22px;margin:0 0 10px">Не получилось загрузить страницу</h1>' +
+    '<p style="color:#6E6E73">Часть кода заблокирована (блокировщик рекламы, VPN или сеть оператора). Отключи блокировщик и обнови страницу или зайди из другого браузера.</p>' +
+    '<p><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") + '" style="display:inline-flex;min-height:44px;align-items:center;padding:0 22px;background:#0B7A3E;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
 })();

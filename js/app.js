@@ -28,6 +28,9 @@
   function leadId() {
     try {
       let id = localStorage.getItem("scholary_lead_id");
+      /* Старые id вида «anon-<время>» перебираемы и сервером больше не принимаются —
+         такому посетителю выдаём новый криптостойкий id. */
+      if (id && !/^[0-9a-fA-F-]{20,64}$/.test(id)) id = null;
       if (!id) {
         id = randId();
         localStorage.setItem("scholary_lead_id", id);

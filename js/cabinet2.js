@@ -10,7 +10,7 @@
    проверки документов — doc-rules.js (детерминированные правила;
    слой модели подключается через SCHOLARY_CONFIG.AI_CHECK_URL).
    ============================================================ */
-(function () {
+function __scholaryMain() {
   "use strict";
   var C = window.SCHOLARY_CONFIG || {};
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
@@ -1104,7 +1104,7 @@
     openSub(function () {
       return subHead("Scholary Pro", pro ? "активна до " + fmtDL(new Date(S.profile.pro_until)) : "ИИ без ограничений на весь сезон") +
         (pro ? '<div class="card" style="border-color:var(--ok);background:var(--ok-soft);margin-bottom:12px"><b class="sm">Подписка активна</b>' +
-              '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 120 разборов ИИ в день и модель посильнее</div></div>" : "") +
+              '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 60 разборов ИИ в день и модель посильнее</div></div>" : "") +
         '<div class="card" style="margin-bottom:12px"><div class="h-row"><b>Бесплатно</b><span class="pill pill-mut">сейчас у тебя</span></div>' +
           '<div class="feat">✅ Все подачи, чек-листы и дедлайны</div>' +
           '<div class="feat">✅ Каталог 97 программ с твоими вероятностями</div>' +
@@ -1137,8 +1137,19 @@
 
   function openTg() {
     // код одноразовый и стирается на сервере после привязки, поэтому берём длинный
-    var code = (S.tg && S.tg.code) || (Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6)).toUpperCase();
-    if (!S.tg) { S.tg = { code: code }; sb.from("tg_links").upsert({ user_id: S.session.user.id, code: code }).then(function () {}); }
+    var code = (S.tg && S.tg.code) || "";
+    if (S.tg && S.tg.chat_id) {
+      openSub(function () {
+        return subHead("Уведомления в Telegram", "шаг дня, дедлайны, дайджест") +
+          '<div class="card"><b class="sm">Telegram привязан ✓</b><p class="xs mut" style="margin:6px 0 0">Дедлайны за 30 / 14 / 7 / 3 / 1 день, шаг дня и дайджест недели приходят в бот. Не больше одного сообщения в день, тихие часы 22:00–08:00.</p></div>';
+      });
+      return;
+    }
+    if (!code) {
+      /* код генерирует сервер (64 бита, живёт 30 минут) — раньше Math.random() на клиенте */
+      sb.rpc("tg_new_code").then(function (r) { if (r.data) { S.tg = S.tg || {}; S.tg.code = r.data; openTg(); } else toast("Не удалось получить код — попробуй ещё раз", "bad"); });
+      code = "……";
+    }
     var bot = (C.TELEGRAM_BOT || "").replace(/^@/, "");
     openSub(function () {
       return subHead("Уведомления в Telegram", "шаг дня, дедлайны, дайджест") +
@@ -1210,9 +1221,12 @@
   }
   function openFile(d) {
     if (!d.file_path) return;
+    /* Safari на iPhone блокирует window.open после асинхронного вызова —
+       окно открываем сразу по тапу, адрес подставляем, когда придёт. */
+    var w = null; try { w = window.open("", "_blank"); } catch (e) {}
     sb.storage.from("docs").createSignedUrl(d.file_path, 300).then(function (r) {
-      if (r.data && r.data.signedUrl) window.open(r.data.signedUrl, "_blank", "noopener");
-      else toast("Не удалось открыть файл", "bad");
+      if (r.data && r.data.signedUrl) { if (w) w.location = r.data.signedUrl; else window.open(r.data.signedUrl, "_blank", "noopener"); }
+      else { if (w) w.close(); toast("Не удалось открыть файл", "bad"); }
     });
   }
 
@@ -1414,7 +1428,7 @@
       window.open("https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" + encodeURIComponent("Прошу удалить мой аккаунт Scholary и все файлы"), "_blank", "noopener");
       return;
     }
-    if (act === "logout") { sb.auth.signOut(); return; }
+    if (act === "logout") { forgetLocal(); sb.auth.signOut(); return; }
   });
 
   document.addEventListener("change", function (e) {
@@ -1464,7 +1478,15 @@
   $("f-signup").onsubmit = function (e) {
     e.preventDefault(); $("su-err").hidden = true;
     sb.auth.signUp({ email: $("su-email").value.trim(), password: $("su-pass").value, options: { data: { name: $("su-name").value.trim() } } })
-      .then(function (r) { if (r.error) { authErr("su-err", r.error); return; } if (window.track) track("cab_signup", {}); });
+      .then(function (r) {
+        if (r.error) { authErr("su-err", r.error); return; }
+        if (window.track) track("cab_signup", {});
+        if (!r.data || !r.data.session) {
+          /* подтверждение почты включено (или адрес уже занят — Supabase отвечает одинаково) */
+          var el = $("su-err"); el.textContent = "Письмо с подтверждением отправлено на " + $("su-email").value.trim() + " — открой ссылку из него, и кабинет откроется. Если письма нет 2 минуты — проверь «Спам» или попробуй «Забыл пароль».";
+          el.style.color = "#187E54"; el.hidden = false;
+        }
+      });
   };
   $("f-forgot").onsubmit = function (e) {
     e.preventDefault(); $("fg-err").hidden = true;
@@ -1481,7 +1503,12 @@
     sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/cabinet/" } })
       .then(function (r) { if (r.error) toast("Google-вход недоступен — войди по почте", "bad"); });
   };
-  $("btn-empty-out").onclick = function () { sb.auth.signOut(); };
+  $("btn-empty-out").onclick = function () { forgetLocal(); sb.auth.signOut(); };
+  /* На общем компьютере следующий пользователь не должен получить чужой расчёт
+     и токен отчёта из localStorage. */
+  function forgetLocal() {
+    try { ["scholary_lead_id", "scholary_report_token", "scholary_quiz_v1"].forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {}
+  }
   $("btn-empty-setup").onclick = function () { startSetup(); };
   $("setup-next").onclick = function () { setupNext(); };
   $("setup-back").onclick = function () { if (SU.i > 0) { SU.i--; drawSetup(); } };
@@ -1627,6 +1654,14 @@
         sb.from("profiles").update({ name: metaName }).eq("user_id", S.session.user.id).then(function () {});
       }
       var haveAnswers = S.profile && S.profile.answers && S.profile.answers.level;
+      /* Пришёл по ссылке из отчёта (?t=…) в уже заведённый кабинет — привязываем
+         отчёт молча, без экрана «забрать расчёт»: раньше «Мои отчёты» оставались пустыми. */
+      var llq = localLead();
+      if (haveAnswers && llq.lead && llq.token && !(S.profile.lead_ids || []).some(function (x) { return x === llq.lead; })) {
+        sb.rpc("claim_lead", { p_lead_id: llq.lead, p_token: llq.token }).then(function (r) {
+          if (r.data && r.data.ok) { try { localStorage.removeItem("scholary_report_token"); } catch (e) {} }
+        });
+      }
       if (!haveAnswers) {
         var ll = localLead(); entering = false;
         if (ll.lead) offerClaim(ll); else show("v-empty");
@@ -1666,10 +1701,30 @@
 
   var recoveryMode = /type=recovery/.test(location.hash);
   sb.auth.onAuthStateChange(function (event, session) {
+    /* Supabase шлёт SIGNED_IN при каждом возврате во вкладку и TOKEN_REFRESHED
+       раз в час. Раньше каждое такое событие перерисовывало кабинет с нуля —
+       и человек терял недописанное мотивационное. Тот же пользователь → только
+       обновляем сессию. */
+    if (session && S.session && S.session.user && S.session.user.id === session.user.id && S.profile && event !== "PASSWORD_RECOVERY") { S.session = session; return; }
     S.session = session;
     if (event === "PASSWORD_RECOVERY") { show("v-recovery"); return; }
     if (session) { if (recoveryMode) { recoveryMode = false; show("v-recovery"); return; } enter(); }
     else { entering = false; show("v-auth"); authView("login"); }
   });
   sb.auth.getSession().then(function (r) { if (!r.data.session) { show("v-auth"); authView("login"); } });
+}
+
+/* Библиотека Supabase грузится с CDN; если основной адрес заблокирован,
+   cabinet.html подставляет запасной — но он async и может приехать ПОЗЖЕ
+   этого файла. Раньше в этом случае страница падала с TypeError и человек
+   видел вечный спиннер. Ждём библиотеку до 8 секунд, потом честно говорим. */
+(function boot() {
+  if (window.supabase && window.supabase.createClient) { __scholaryMain(); return; }
+  boot.t = boot.t || Date.now();
+  if (Date.now() - boot.t < 8000) { setTimeout(boot, 100); return; }
+  var el = document.getElementById("loading") || document.body;
+  el.innerHTML = '<div style="max-width:520px;margin:14vh auto;padding:28px;text-align:center;font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F">' +
+    '<h1 style="font-size:22px;margin:0 0 10px">Не получилось загрузить страницу</h1>' +
+    '<p style="color:#6E6E73">Часть кода заблокирована (блокировщик рекламы, VPN или сеть оператора). Отключи блокировщик и обнови страницу или зайди из другого браузера.</p>' +
+    '<p><a href="https://wa.me/' + ((window.SCHOLARY_CONFIG && window.SCHOLARY_CONFIG.WHATSAPP_NUMBER) || "77024666852") + '" style="display:inline-flex;min-height:44px;align-items:center;padding:0 22px;background:#0B7A3E;color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Написать нам в WhatsApp</a></p></div>';
 })();

@@ -50,6 +50,8 @@
               if (event.request && event.request.url) event.request.url = event.request.url.split("?")[0];
               if (event.breadcrumbs) event.breadcrumbs = event.breadcrumbs.map(function (b) {
                 if (b && b.data) b.data = clean(b.data);
+                /* токен отчёта (?t=) и id лида (?lead=) — ключи доступа, в крошки навигации не попадают */
+                if (b && b.data) ["to", "from", "url"].forEach(function (k) { if (typeof b.data[k] === "string") b.data[k] = b.data[k].replace(/([?&])(t|lead)=[^&#]*/g, "$1$2=~"); });
                 return b;
               });
               if (event.user) delete event.user;
@@ -83,10 +85,12 @@
         clickmap: true,            // карта кликов
         trackLinks: true,          // переходы по внешним ссылкам
         accurateTrackBounce: true, // отказ считается только при уходе за 15 секунд
-        webvisor: !!C.YANDEX_WEBVISOR,
+        /* вебвизор не пишет кабинет и отчёт: там имя, почта, мотивационные, заметки —
+           политика конфиденциальности обещает, что это не записывается */
+        webvisor: !!C.YANDEX_WEBVISOR && !/^\/(cabinet|report|r\.html)/.test(location.pathname),
         ecommerce: "dataLayer",    // доход по целям едет через dataLayer
         referrer: document.referrer,
-        url: location.href,
+        url: location.origin + location.pathname,   // без ?t=<токен отчёта> и ?lead=<id>
         defer: false
       });
     } catch (e) {}
@@ -125,6 +129,63 @@
     window.scholaryYm = function () {};
   }
 
+  /* ---------- Пиксель Meta (Instagram/Facebook Ads) ----------
+     Нужен, чтобы реклама оптимизировалась на людей, которые реально
+     оставляют заявку, а не просто кликают. Плюс ретаргет и look-alike.
+     ID пустой — блок просто не грузится, сайт работает как обычно. */
+  var FB_ID = String(C.META_PIXEL_ID || "").replace(/\D/g, "");
+  if (FB_ID) {
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = [];
+      t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+    try { window.fbq("init", FB_ID); window.fbq("track", "PageView"); } catch (e) {}
+
+    /* Наши события → стандартные события Meta. Только эти умеют быть
+       целью оптимизации в кабинете; остальное шлём как кастомные. */
+    var STD = {
+      quiz_start:        "ViewContent",
+      lead_form_submit:  "Lead",
+      quiz_done:         "Lead",
+      paywall_view:      "InitiateCheckout",
+      pay_click:         "AddPaymentInfo",
+      cab_signup:        "CompleteRegistration",
+      cab_setup_done:    "CompleteRegistration",
+      free_cabinet_click:"Contact",
+      pay_kaspi_click:   "Contact"
+    };
+    var PRICE = { pro_season: 14900, pro_month: 4990, consult: 15000, package: 35000 };
+
+    window.scholaryFb = function (event, data, props) {
+      try {
+        if (!window.fbq) return;
+        var d = data || {}, safe = clean(props || {});
+        /* оплата: успех — Purchase с суммой, остальные исходы не считаем продажей */
+        if (event === "pay_result") {
+          var st = d.status || "", tp = d.type || "";
+          if ((st === "success" || st === "appointment") && tp !== "cancel" && tp !== "error") {
+            window.fbq("track", "Purchase", {
+              value: PRICE[d.kind] || C.PRICE_REPORT || 4000,
+              currency: "KZT", content_name: d.kind || "report"
+            });
+          } else {
+            window.fbq("trackCustom", "pay_not_completed", { status: st, type: tp });
+          }
+          return;
+        }
+        if (event === "pro_click") {
+          window.fbq("track", "InitiateCheckout", { value: PRICE[d.plan === "season" ? "pro_season" : "pro_month"], currency: "KZT" });
+          return;
+        }
+        if (STD[event]) window.fbq("track", STD[event], safe);
+        else window.fbq("trackCustom", event, safe);
+      } catch (e) {}
+    };
+  } else {
+    window.scholaryFb = function () {};
+  }
+
   /* ---------- PostHog: продуктовая аналитика ---------- */
   if (C.POSTHOG_KEY) {
     var host = C.POSTHOG_HOST || "https://us.i.posthog.com";
@@ -148,7 +209,10 @@
               var src = ev.properties, out = {};
               Object.keys(src).forEach(function (k) {
                 // $-свойства, token и distinct_id нужны самому PostHog — без них событие отбрасывается
-                if (k.charAt(0) === "$" || k === "token" || k === "distinct_id") { out[k] = src[k]; return; }
+                if (k.charAt(0) === "$" || k === "token" || k === "distinct_id") {
+                  out[k] = (typeof src[k] === "string" && /url|referrer|pathname/.test(k)) ? src[k].replace(/([?&])(t|lead)=[^&#]*/g, "$1$2=~") : src[k];
+                  return;
+                }
                 if (PII.test(k)) return;
                 out[k] = (src[k] && typeof src[k] === "object") ? clean(src[k]) : src[k];
               });
