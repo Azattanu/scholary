@@ -362,7 +362,8 @@ function __scholaryMain() {
         '<button class="btn-adm btn-ghost" data-act="sch-mail" data-id="' + id + '">Письмо школе</button>' +
         '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(link) + '">Ссылка учеников</button>' +
         '<button class="btn-adm btn-ghost" data-act="copy" data-link="' + esc(cab) + '">Вход в кабинет</button>' +
-        '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="paused">Пауза</button></div>' +
+        '<button class="btn-adm btn-ghost" data-act="sch-status" data-id="' + id + '" data-status="paused">Пауза</button>' +
+        (r.claimed ? '<button class="btn-adm btn-ghost" data-act="sch-reset" data-id="' + id + '" title="Профориентолог сменился: старая ссылка кабинета перестанет работать, новая уйдёт письмом">Сменить профориентолога</button>' : "") + '</div>' +
         '<div class="tools" style="grid-template-columns:90px 90px auto;gap:6px">' +
         '<input type="number" min="1" placeholder="мест" value="' + (r.seats || 50) + '" data-seats="' + id + '" title="Мест">' +
         '<input type="number" min="1" max="60" placeholder="+мес." data-months="' + id + '" title="Продлить на N месяцев">' +
@@ -414,6 +415,15 @@ function __scholaryMain() {
     if (act === "sch-update")   return schoolSet(id, { p_seats: seats || null, p_months: months || null }, "Сохранено" + (months ? " · срок продлён, Pro ученикам продлена" : ""));
     if (act === "sch-status")   return schoolSet(id, { p_status: btn.getAttribute("data-status") }, "Статус изменён");
     if (act === "sch-mail")     return schoolMail(id);
+    if (act === "sch-reset") {
+      if (!btn.getAttribute("data-armed")) { btn.setAttribute("data-armed", "1"); btn.textContent = "Точно сменить? Нажмите ещё раз"; setTimeout(function () { if (btn.isConnected) { btn.removeAttribute("data-armed"); btn.textContent = "Сменить профориентолога"; } }, 5000); return; }
+      schoolSay(id, "Отвязываю…");
+      return rpc("admin_school_reset_owner", { p_id: id }).then(function (j) {
+        if (!j || !j.ok) { schoolSay(id, "Не получилось", true); return; }
+        schoolSay(id, "Кабинет отвязан, новая ссылка выпущена");
+        return schoolMail(id).then(loadSchools);
+      }, function (e) { schoolSay(id, "Ошибка: " + e.message, true); });
+    }
   }
 
   function viewProduct() {

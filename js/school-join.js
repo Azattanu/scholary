@@ -121,7 +121,11 @@ function __schoolJoinMain() {
     e.preventDefault(); $("cl-err").hidden = true;
     var name = $("cl-name").value.trim();
     if (name.length < 2) { authErr("cl-err", { message: "Напиши имя и фамилию" }); return; }
-    var grade = $("cl-grade").value, letter = $("cl-letter").value.trim().toUpperCase();
+    if (!$("cl-consent").checked) { authErr("cl-err", { message: "Поставь галочку про согласие — без неё школа не может тебя добавить" }); return; }
+    /* Буква класса: на телефоне с английской раскладкой набирают латинскую B/E/A —
+       приводим к кириллице, иначе «11B» и «11В» станут разными классами в списке. */
+    var LAT = { A: "А", B: "В", C: "С", E: "Е", H: "Н", K: "К", M: "М", O: "О", P: "Р", T: "Т", X: "Х", Y: "У" };
+    var grade = $("cl-grade").value, letter = $("cl-letter").value.trim().toUpperCase().replace(/[ABCEHKMOPTXY]/g, function (ch) { return LAT[ch]; });
     var cls = grade === "other" ? letter : (grade + letter);
     var btn = $("joinBtn"); btn.disabled = true; btn.textContent = "Открываю доступ…";
     sb.rpc("school_join", { p_code: S.code, p_grade: grade, p_class: cls, p_name: name }).then(function (r) {

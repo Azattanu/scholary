@@ -6,10 +6,42 @@
 function __schoolCabinetMain() {
   "use strict";
   var C = window.SCHOLARY_CONFIG || {};
-  var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY) : null;
   var $ = function (id) { return document.getElementById(id); };
   var track = window.track || function () {};
-  var S = { session: null, school: null, roster: [], q: "", cls: "", risk: false, entering: false };
+  var S = { session: null, school: null, roster: [], q: "", cls: "", risk: false, entering: false, demo: /[?&]demo=1/.test(location.search) };
+
+  /* Демо-режим (/schools/cabinet/?demo=1): директор открывает кабинет с телефона
+     без входа и видит, как это выглядит на живой школе. Данные вымышленные,
+     действия не пишут в базу. */
+  function demoData() {
+    var now = Date.now(), d = function (n) { return new Date(now + n * 864e5).toISOString().slice(0, 10); }, ago = function (n) { return new Date(now - n * 864e5).toISOString(); };
+    var school = { id: "demo", name: "Школа-лицей №39", city: "Алматы", kind: "state", plan: "s500", plan_label: "Школа · до 500", period: "year",
+      seats: 500, used: 212, status: "active", open: true, invite_code: "DEMO2026", starts_on: d(-40), ends_on: d(290), contact_name: "Айгуль Сериковна", contact_email: "school39@edu.kz" };
+    var names = [["Айгерим Сериккызы","11Б","bachelor","it","hu,de",0.74,4,1,6,5,70,0,1],["Данияр Касымов","11Б","bachelor","eng","it",0.61,3,0,5,1,12,9,0],["Томирис Жаксыбек","10А","bachelor","med","tr",null,0,0,0,0,null,null,0],
+      ["Алихан Бекжан","11А","bachelor","bus","cn",0.56,2,2,4,4,120,2,0],["Аружан Нурланова","11А","bachelor","sci","de,cz",0.68,5,2,7,6,44,1,0],["Ерасыл Мухамедиев","11Б","bachelor","it","kr",0.47,2,0,3,1,21,12,0],
+      ["Диана Ахметова","10Б","bachelor","hum","pl",0.52,1,0,2,2,160,3,0],["Санжар Оразбек","11В","bachelor","eng","tr,hu",0.71,3,3,5,5,33,0,2],["Мадина Сулейменова","9А","bachelor","art","it",null,0,0,1,0,null,6,0],
+      ["Нурсултан Абай","11В","bachelor","law","nl",0.39,2,0,4,1,18,14,0],["Камила Ержан","11А","bachelor","med","cn,hu",0.63,4,1,6,4,58,1,0],["Бекзат Тулеген","10А","bachelor","it","de",0.58,2,0,3,3,131,4,0]];
+    var roster = names.map(function (r, i) { return { user_id: "demo" + i, name: r[0], grade: r[1].replace(/\D/g, ""), class_label: r[1], level: r[2], field: r[3], countries: r[4], p_adm: r[5], apps: r[6], apps_sent: r[7], docs: r[8], docs_ready: r[9], next_deadline: r[10] == null ? null : d(r[10]), last_active: r[11] == null ? null : ago(r[11]), offers: r[12], joined_at: ago(30 - i) }; });
+    return { school: school, roster: roster };
+  }
+  if (S.demo) {
+    var DEMO = demoData();
+    sb = { rpc: function (fn, args) {
+      var data = null;
+      if (fn === "school_mine") data = DEMO.school;
+      else if (fn === "school_roster") data = DEMO.roster;
+      else if (fn === "school_regen_code") data = { ok: true, invite_code: "DEMO" + Math.random().toString(36).slice(2, 6).toUpperCase() };
+      else if (fn === "school_remove_member") data = { ok: true };
+      return Promise.resolve({ data: data, error: null });
+    }, auth: {
+      getSession: function () { return Promise.resolve({ data: { session: { user: { id: "demo", email: "demo@scholary.kz" } } } }); },
+      onAuthStateChange: function (cb) { setTimeout(function () { cb("SIGNED_IN", { user: { id: "demo", email: "demo@scholary.kz" } }); }, 10); return { data: { subscription: { unsubscribe: function () {} } } }; },
+      signOut: function () { return Promise.resolve({}); }, signInWithOAuth: function () { return Promise.resolve({}); }, signInWithPassword: function () { return Promise.resolve({}); }, signUp: function () { return Promise.resolve({}); }, resetPasswordForEmail: function () { return Promise.resolve({}); }
+    } };
+    $("demoBar").hidden = false;
+    document.title = "Демо кабинета школы — Scholary";
+  }
 
   function esc(s) { return String(s == null ? "" : s).replace(/[<>&"]/g, function (c) { return { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]; }); }
   function show(id) { ["loading", "v-auth", "v-none", "v-app"].forEach(function (v) { $(v).hidden = v !== id; }); }
@@ -72,7 +104,7 @@ function __schoolCabinetMain() {
     e.preventDefault(); $("fg-err").hidden = true;
     sb.auth.resetPasswordForEmail($("fg-email").value.trim(), { redirectTo: location.origin + "/cabinet/" }).then(function (r) { if (r.error) { authErr("fg-err", r.error); return; } $("fg-ok").hidden = false; });
   };
-  function out() { sb.auth.signOut().then(function () { location.href = "/schools/cabinet/"; }); }
+  function out() { if (S.demo) { location.href = "/schools/"; return; } sb.auth.signOut().then(function () { location.href = "/schools/cabinet/"; }); }
   $("btn-out").onclick = out; $("btn-out2").onclick = out;
 
   /* ---------- вход в кабинет ---------- */
@@ -124,7 +156,13 @@ function __schoolCabinetMain() {
   }
   function drawKpi() {
     var risk = S.roster.filter(isRisk).length, idle = S.roster.filter(isIdle).length, nocalc = S.roster.filter(function (r) { return r.p_adm == null; }).length;
+    var offers = S.roster.reduce(function (a, r) { return a + (Number(r.offers) || 0); }, 0);
     $("riskN").textContent = risk; $("idleN").textContent = idle; $("noCalcN").textContent = nocalc;
+    $("offersN").textContent = offers; $("offersW").textContent = plural(offers, "оффер", "оффера", "офферов");
+    var calc = S.roster.filter(function (r) { return r.p_adm != null; }).length;
+    var sent = S.roster.reduce(function (a, r) { return a + (Number(r.apps_sent) || 0); }, 0);
+    $("printMeta").textContent = "Сводка на " + new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }) + ": " + S.roster.length + " " + plural(S.roster.length, "ученик", "ученика", "учеников") +
+      ", с расчётом — " + calc + ", подач отправлено — " + sent + ", офферов — " + offers + ". Scholary · scholary.kz/schools";
   }
   function classes() {
     var m = {}; S.roster.forEach(function (r) { var k = r.class_label || (r.grade && r.grade !== "other" ? r.grade : "—"); m[k] = (m[k] || 0) + 1; });
@@ -168,7 +206,7 @@ function __schoolCabinetMain() {
         '<td><div class="name">' + esc(r.name) + '</div><div class="sub">' + esc(r.class_label || (r.grade !== "other" ? r.grade + " класс" : "класс не указан")) + "</div></td>" +
         '<td><div>' + esc(direction(r) || "—") + '</div><div class="sub">' + esc(L.level[r.level] || "") + "</div></td>" +
         "<td>" + (p == null ? '<span class="sub">квиз не пройден</span>' : '<span class="pbar"><i><b style="width:' + p + '%"></b></i><b>' + p + "%</b></span>") + "</td>" +
-        '<td class="num">' + (r.apps_sent || 0) + " / " + (r.apps || 0) + "</td>" +
+        '<td class="num">' + (r.apps_sent || 0) + " / " + (r.apps || 0) + (Number(r.offers) ? '<div class="sub" style="color:var(--ok);font-weight:700">' + r.offers + " " + plural(r.offers, "оффер", "оффера", "офферов") + "</div>" : "") + "</td>" +
         '<td class="num">' + (r.docs_ready || 0) + " / " + (r.docs || 0) + "</td>" +
         "<td>" + dl + "</td>" +
         "<td>" + act + "</td>" +
@@ -218,12 +256,13 @@ function __schoolCabinetMain() {
     });
   };
   $("btn-refresh").onclick = function () { sb.rpc("school_mine").then(function (r) { if (r.data) { S.school = r.data; drawHead(); } loadRoster(); }); };
+  $("btn-print").onclick = function () { track("school_print"); window.print(); };
   $("btn-csv").onclick = function () {
     var rows = filtered();
-    var head = ["Ученик", "Класс", "Направление", "Уровень", "Вероятность %", "Подач отправлено", "Подач всего", "Документов готово", "Документов всего", "Ближайший дедлайн", "Последняя активность", "Зарегистрирован"];
+    var head = ["Ученик", "Класс", "Направление", "Уровень", "Вероятность %", "Подач отправлено", "Подач всего", "Документов готово", "Документов всего", "Офферов", "Ближайший дедлайн", "Последняя активность", "Зарегистрирован"];
     var lines = [head.join(";")].concat(rows.map(function (r) {
       return [r.name, r.class_label || r.grade || "", direction(r), L.level[r.level] || "", r.p_adm == null ? "" : Math.round(Number(r.p_adm) * 100),
-              r.apps_sent || 0, r.apps || 0, r.docs_ready || 0, r.docs || 0, r.next_deadline || "", r.last_active ? String(r.last_active).slice(0, 10) : "", r.joined_at ? String(r.joined_at).slice(0, 10) : ""]
+              r.apps_sent || 0, r.apps || 0, r.docs_ready || 0, r.docs || 0, r.offers || 0, r.next_deadline || "", r.last_active ? String(r.last_active).slice(0, 10) : "", r.joined_at ? String(r.joined_at).slice(0, 10) : ""]
         .map(function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }).join(";");
     }));
     var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
@@ -241,7 +280,8 @@ function __schoolCabinetMain() {
   sb.auth.getSession().then(function (r) { if (!r.data.session) { show("v-auth"); authView("login"); } });
 }
 (function boot() {
-  if (window.supabase && window.supabase.createClient) { __schoolCabinetMain(); return; }
+  /* Демо-режиму библиотека не нужна — стартуем сразу, даже если CDN заблокирован. */
+  if (/[?&]demo=1/.test(location.search) || (window.supabase && window.supabase.createClient)) { __schoolCabinetMain(); return; }
   boot.t = boot.t || Date.now();
   if (Date.now() - boot.t < 8000) { setTimeout(boot, 100); return; }
   document.getElementById("loading").innerHTML = '<div style="text-align:center;padding:20px;color:#6E6E73">Не получилось загрузить страницу — отключите блокировщик рекламы или откройте в другом браузере.</div>';
