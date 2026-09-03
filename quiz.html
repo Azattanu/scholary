@@ -511,8 +511,11 @@ function renderPayment() {
         "</div>" +
 
         '<div class="field"><label for="fEmail">Почта <span style="color:var(--accent)">— обязательно</span></label>' +
-          '<input id="fEmail" class="input" type="email" inputmode="email" autocomplete="email" placeholder="aida@example.com" value="' + esc(phase2.email || "") + '">' +
+          /* autocapitalize/autocorrect выключены: на iOS клавиатура иначе делает
+             «Aida@Gmail.com» и подставляет свои варианты — адрес ломается. */
+          '<input id="fEmail" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="aida@example.com" value="' + esc(phase2.email || "") + '">' +
           '<div id="fEmailHint" class="field-hint">Второй канал доставки и чек об оплате. Если в номере окажется опечатка, отчёт всё равно дойдёт.</div>' +
+          '<div id="fEmailFix" hidden style="margin-top:6px; font-size:13px; font-weight:600">Может, <button type="button" id="fEmailFixBtn" class="btn-link" style="background:none; border:0; padding:0; color:var(--accent); font:inherit; text-decoration:underline; cursor:pointer"></button>?</div>' +
         "</div>" +
       "</div>" +
 
@@ -561,8 +564,26 @@ function renderPayment() {
      и вернётся на страницу, поле уже будет заполнено. */
   $("fEmail").addEventListener("change", () => {
     const v = ($("fEmail").value || "").trim();
+    suggestEmail(v);
     if (emailOk(v)) { phase2.email = v; persist(); saveLead({ email: v }); }
   });
+  $("fEmail").addEventListener("blur", () => suggestEmail(($("fEmail").value || "").trim()));
+  /* Подсказка про опечатку в домене. «aida@gmial.com» проходит любую проверку
+     формата, но письмо не дойдёт — а это наш запасной канал доставки. */
+  function suggestEmail(v) {
+    const box = $("fEmailFix"), btn = $("fEmailFixBtn");
+    if (!box || !btn) return;
+    const fixed = emailFix(v);
+    if (!fixed) { box.hidden = true; return; }
+    btn.textContent = fixed;
+    box.hidden = false;
+    btn.onclick = () => {
+      $("fEmail").value = fixed; box.hidden = true;
+      setErr("fEmail", "fEmailHint", "");
+      phase2.email = fixed; persist(); saveLead({ email: fixed });
+      track("pay_email_fixed");
+    };
+  }
 
   /* Единая проверка контактов перед любой оплатой: и картой, и через Kaspi.
      Раньше почта была необязательной — при опечатке в номере отчёт было
@@ -625,6 +646,31 @@ function renderPayment() {
   });
 }
 function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim()); }
+/* Опечатки в популярных доменах. Список короткий и только про то, что реально
+   набирают в Казахстане: gmail, mail.ru, yandex, icloud, outlook, inbox.ru.
+   Возвращает исправленный адрес или null, если придираться не к чему. */
+const EMAIL_DOMAINS = {
+  "gmail.com":   ["gmial.com","gmai.com","gmail.co","gmail.cm","gmail.con","gmail.ru","gmaill.com","gmail.om","gnail.com","gamil.com","gmail.comm","g-mail.com","googlemail.co"],
+  "mail.ru":     ["mai.ru","mail.ry","mail.tu","meil.ru","mail.ru.com","mial.ru","mail.rru"],
+  "yandex.ru":   ["yandex.ry","yndex.ru","yandex.ru.com","yandx.ru","yanex.ru"],
+  "yandex.kz":   ["yandex.zk","yandx.kz","yanex.kz"],
+  "icloud.com":  ["iclod.com","icloud.co","icloud.con","iclould.com"],
+  "outlook.com": ["outlok.com","outloo.com","outlook.co","outlook.con","hotmai.com"],
+  "inbox.ru":    ["inbox.ry","inbox.tu"],
+  "bk.ru":       ["bk.ry"],
+  "list.ru":     ["list.ry"]
+};
+function emailFix(v) {
+  const s = String(v || "").trim();
+  const at = s.lastIndexOf("@");
+  if (at < 1 || at === s.length - 1) return null;
+  const local = s.slice(0, at), dom = s.slice(at + 1).toLowerCase();
+  for (const good in EMAIL_DOMAINS) {
+    if (dom === good) return null;
+    if (EMAIL_DOMAINS[good].indexOf(dom) !== -1) return local + "@" + good;
+  }
+  return null;
+}
 
 // Общая обвязка живёт в js/app.js (window.scholaryPay), чтобы виджет
 // был подключён одинаково и в квизе, и в кабинете.
