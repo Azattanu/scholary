@@ -416,7 +416,7 @@ function __scholaryMain() {
 
     $("tab-today").innerHTML =
       '<div class="h2" style="margin-top:10px">Салем, ' + esc(name) + "!</div>" +
-      '<div class="pointb"><div class="lbl">ТОЧКА Б · ' + target.toUpperCase() + '</div><div class="big">Осталось ' + left + " " + plural(left, "день", "дня", "дней") + "</div>" +
+      '<div class="pointb"><div class="lbl">ТОЧКА Б · ' + target.toUpperCase() + '</div><div class="big">Осталось <span style="color:var(--accent)">' + left + "</span> " + plural(left, "день", "дня", "дней") + "</div>" +
         '<div class="pbar"><i style="width:' + Math.max(3, Math.min(100, Math.round((1 - left / 400) * 100))) + '%"></i></div></div>' +
       (ns ? '<div class="nextstep"><div class="tag">СЛЕДУЮЩИЙ ШАГ</div><h3>' + esc(ns.title) + "</h3>" +
         '<p class="sm mut" style="margin:2px 0 10px">' + esc(ns.why) + "</p>" +
@@ -1529,11 +1529,34 @@ function __scholaryMain() {
   function offerClaim(ll) {
     var saved = null;
     try { saved = JSON.parse(localStorage.getItem("scholary_quiz_v1") || "null"); } catch (e) {}
-    var lvl = saved && saved.answers && saved.answers.level;
+    var a = (saved && saved.answers) || {};
+    var lvl = a.level;
+    /* Светлая карточка с тем, что реально нашли: уровень, оценки, язык,
+       направления, вероятность (если пейволл уже считал). Раньше это была
+       маленькая тёмная плашка без содержания — непонятно, что забираем. */
+    var rows = [];
+    var gpa = a.gpa_band ? L.gpa_band[a.gpa_band] : (a.gpa_uni ? L.gpa4[a.gpa_uni] : (a.gpa_phd ? L.gpa4[a.gpa_phd] : null));
+    if (gpa) rows.push(["Оценки", gpa]);
+    if (a.lang_status) rows.push(["Английский", (a.ielts_band && a.lang_status !== "none" ? "IELTS " + (L.ielts[a.ielts_band] || a.ielts_band) + " · " : "") + (L.lang_status[a.lang_status] || "")]);
+    var fl = typeof a.field === "string" ? a.field.split(",") : (a.field || []);
+    if (fl.length) rows.push(["Направления", fl.map(function (f) { return L.field[f] || f; }).filter(Boolean).join(", ")]);
+    if (a.budget) rows.push(["Бюджет", L.budget[a.budget] || a.budget]);
+    var pct = null;
+    try {
+      var snap = a.result || (saved && saved.result);
+      if (snap && typeof snap.pAtLeastOne === "number") pct = Math.round(snap.pAtLeastOne * 100);
+    } catch (e) {}
+    var name = a.name ? esc(String(a.name).split(" ")[0]) : "";
     $("claim-card").innerHTML =
-      '<div class="xs" style="letter-spacing:.14em;color:#A78BFA;font-weight:700">ТВОЙ РАСЧЁТ НА ЭТОМ УСТРОЙСТВЕ</div>' +
-      '<div style="font-size:16px;margin-top:6px">' + (lvl ? (L.level[lvl] || "") + " · " : "") + "ответы квиза и результат</div>" +
-      '<div class="xs" style="color:rgba(255,255,255,.55);margin-top:6px">Из них соберём подачи и план документов</div>';
+      '<div class="xs" style="letter-spacing:.14em;color:var(--accent-dark);font-weight:800">ТВОЙ РАСЧЁТ НА ЭТОМ УСТРОЙСТВЕ</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px">' +
+        '<div><div style="font-size:18px;font-weight:800;letter-spacing:-0.01em">' + (name ? name + " · " : "") + (lvl ? (L.level[lvl] || "") : "ответы квиза") + "</div>" +
+        '<div class="xs mut" style="margin-top:2px">' + (rows.length ? rows.length + " " + plural(rows.length, "ответ", "ответа", "ответов") + " из квиза" : "ответы квиза и результат") + "</div></div>" +
+        (pct !== null ? '<div style="text-align:right;flex-shrink:0"><div style="font-size:30px;font-weight:800;line-height:1;color:var(--accent)">' + pct + '%</div><div class="xs mut">хотя бы один оффер</div></div>' : "") +
+      "</div>" +
+      (rows.length ? '<div style="margin-top:12px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13.5px">' +
+        rows.map(function (r) { return '<span class="mut">' + r[0] + "</span><b style=\"font-weight:700\">" + esc(r[1]) + "</b>"; }).join("") + "</div>" : "") +
+      '<div class="xs mut" style="margin-top:12px;padding-top:10px;border-top:1px solid #E3DFFF">Из этого соберём подачи, календарь дедлайнов и план документов. Ничего заново вводить не нужно.</div>';
     show("v-claim");
     $("btn-claim").onclick = function () {
       $("btn-claim").disabled = true; $("claim-err").hidden = true;

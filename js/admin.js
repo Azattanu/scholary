@@ -38,7 +38,15 @@ function __scholaryMain() {
     if (d.getFullYear() !== new Date().getFullYear()) o.year = "numeric";
     return d.toLocaleDateString("ru-RU", o);
   }
-  function wa(n) { if (!n) return "—"; var d = String(n).replace(/\D/g, ""); return '<a href="https://wa.me/' + d + '" target="_blank" rel="noopener">' + esc(n) + "</a>"; }
+  function wa(n) {
+    if (!n) return "—";
+    // «8 775…» и «+7 775…» — один номер; wa.me ждёт 77753831836
+    var d = String(n).replace(/\D/g, "");
+    if (d.length === 12 && d.slice(0, 2) === "78") d = "7" + d.slice(2);
+    if (d.length === 10) d = "7" + d; else if (d.length === 11 && d[0] === "8") d = "7" + d.slice(1);
+    var pretty = d.length === 11 && d[0] === "7" ? "+7 " + d.slice(1, 4) + " " + d.slice(4, 7) + " " + d.slice(7, 9) + " " + d.slice(9) : n;
+    return '<a href="https://wa.me/' + d + '" target="_blank" rel="noopener">' + esc(pretty) + "</a>";
+  }
   function plural(n, a, b, c) { n = Math.abs(n) % 100; var m = n % 10; if (n > 10 && n < 20) return c; if (m > 1 && m < 5) return b; if (m === 1) return a; return c; }
 
   var KIND = { report: "Отчёт", consult: "Консультация", package: "Документы и подача",
