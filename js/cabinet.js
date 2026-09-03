@@ -188,7 +188,7 @@
       '<button class="btn btn-soft btn-sm btn-block" style="margin-top:12px" id="btn-todocs">Открыть чек-лист</button></div>' +
       tip +
       '<div class="sm mut" style="text-align:center;padding:2px 10px 8px">Хочешь, документы соберёт консультант? ' +
-      '<a href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 25 000 ₸ (из кабинета)") + '" style="font-weight:650">Пакет 25 000 ₸</a></div>';
+      '<a href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸ (из кабинета)") + '" style="font-weight:650">Пакет 35 000 ₸</a></div>';
 
     $("btn-todocs").onclick = function () { setTab("docs"); };
     $("lnk-alldl").onclick = function (e) { e.preventDefault(); setTab("portfolio"); };
@@ -438,7 +438,7 @@
       '<div class="dl"><div style="flex:1"><span class="sm mut">Тариф</span><b>' + (S.reports && S.reports.length ? "Отчёт · оплачен" : "Бесплатный расчёт") + "</b></div>" +
       (S.reports && S.reports.length ? '<span class="pill pill-ok">активен</span>' : '<a class="sm" href="/quiz/" style="font-weight:700">Купить отчёт</a>') + "</div>" +
       '<div class="dl"><div style="flex:1"><span class="sm mut">Апгрейд</span><b>Документы + подача</b></div>' +
-      '<a class="sm" style="font-weight:700" href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Интересует пакет за 25 000 ₸ (из кабинета)") + '">25 000 ₸</a></div></div>' +
+      '<a class="sm" style="font-weight:700" href="https://wa.me/' + C.WHATSAPP_NUMBER + '?text=' + encodeURIComponent("Здравствуйте! Интересует пакет за 35 000 ₸ (из кабинета)") + '">35 000 ₸</a></div></div>' +
       '<button class="btn btn-ghost btn-block" id="btn-passwd">Сменить пароль</button>' +
       '<button class="btn btn-ghost btn-block" style="margin-top:10px;color:var(--bad)" id="btn-out">Выйти</button>';
 

@@ -535,6 +535,22 @@ function __scholaryMain() {
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.id === "loginBtn") { login(); return; }
+    /* Аккаунт владельца заведён через Google и пароля не имеет — без этой
+       ветки в панель было не попасть вообще. Кнопка ловится и по вложенным
+       элементам (svg внутри), поэтому closest, а не сравнение id. */
+    if (t.id === "googleBtn" || (t.closest && t.closest("#googleBtn"))) {
+      var gb = document.getElementById("googleBtn");
+      if (gb) { gb.disabled = true; gb.textContent = "Открываю Google…"; }
+      sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/admin/" } })
+        .then(function (r) {
+          if (r && r.error) {
+            var e2 = document.getElementById("gateErr");
+            if (e2) { e2.textContent = "Google-вход недоступен: " + r.error.message; e2.hidden = false; }
+            if (gb) { gb.disabled = false; gb.textContent = "Войти через Google"; }
+          }
+        });
+      return;
+    }
     if (t.id === "btnReload") { loadAll(); return; }
     if (t.id === "btnReport") { downloadReport(); return; }
     if (t.id === "btnLogout") { sb.auth.signOut().then(function () { location.reload(); }); return; }
