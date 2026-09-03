@@ -301,10 +301,11 @@ p { margin: 0; text-wrap: pretty; }
    не уезжали под сгиб на 1440×900; на телефоне отступ прежний. */
 .hero { background: var(--surface); padding-block: clamp(44px, 5rem + 2vw, 96px) clamp(44px, 4rem + 2vw, 80px); border-bottom: 1px solid var(--border); }
 @media (min-width: 961px) {
-  .hero { padding-block: clamp(36px, 2.6rem + 1vw, 56px) clamp(40px, 3rem + 1vw, 60px); }
+  .hero { padding-block: 22px clamp(36px, 2.4rem + 1vw, 52px); }
   .hero-grid { align-items: start; }
-  .hero-visual { padding: 118px 0 150px; }
-  .hero-cta { margin-top: var(--s5); }
+  .hero h1 { margin: 12px 0 12px; }
+  .hero-visual { padding: 80px 0 136px; }
+  .hero-cta { margin-top: var(--s4); }
 }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
 .hero h1 { font-size: var(--fz-h1); margin: var(--s4) 0 var(--s4); max-width: 16ch; }
