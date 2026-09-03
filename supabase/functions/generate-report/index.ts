@@ -61,7 +61,7 @@ async function sendEmail(to: string, name: string, link: string) {
       from: Deno.env.get("EMAIL_FROM") ?? "Scholary <onboarding@resend.dev>",
       to: [to],
       subject: `${name}, твой отчёт Scholary готов`,
-      html: `<p>${name}, привет!</p><p>Твой персональный отчёт о вероятности поступления готов:</p><p><a href="${link}">Открыть отчёт</a></p><p>Вопросы — просто ответь на это письмо или напиши в WhatsApp +7 775 383 18 36.</p><p>— Scholary · scholary.kz</p>`
+      html: `<p>${name}, привет!</p><p>Твой персональный отчёт о вероятности поступления готов:</p><p><a href="${link}">Открыть отчёт</a></p><p>Вопросы — просто ответь на это письмо или напиши в WhatsApp +7 702 466 68 52.</p><p>— Scholary · scholary.kz</p>`
     })
   });
   return res.ok ? "sent" : `error:${res.status}`;
@@ -88,6 +88,14 @@ Deno.serve(async (req) => {
   const db = createClient(Deno.env.get("SB_URL")!, Deno.env.get("SB_SERVICE_KEY")!);
   const { data: lead, error } = await db.from("leads").select("*").eq("id", lead_id).single();
   if (error || !lead) return Response.json({ error: "lead not found" }, { status: 404 });
+
+  // 1а. Каталог из базы — ТОТ ЖЕ, что видит сайт (view programs_engine).
+  // Иначе превью на пейволле и оплаченный отчёт считались бы на разных
+  // каталогах, и человек увидел бы два разных числа. Фолбэк — встроенный.
+  try {
+    const { data: cat } = await db.from("programs_engine").select("*");
+    if (cat && cat.length >= 40) (Engine as unknown as { setPrograms: (r: unknown[], s: string) => boolean }).setPrograms(cat, "db");
+  } catch (_e) { /* builtin-каталог — честный фолбэк, отчёт всё равно уйдёт */ }
 
   // 1–2. Расчёт той же логикой, что на сайте
   const answers = answersFromLead(lead);
