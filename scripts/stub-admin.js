@@ -6,7 +6,7 @@
     admin_dash_summary: { revenue_all: 187000, revenue_period: 121000, payments_all: 24, payments_period: 15,
       refunds_all: 2, refunded_sum: 8000, users_total: 27, users_period: 11, users_with_answers: 17, pro_active: 3,
       leads_total: 49, leads_period: 22, leads_paid: 12, leads_with_contact: 31, applications_total: 153,
-      applications_submitted: 9, documents_ready: 22, reports_total: 0, telegram_linked: 4, programs_total: 108,
+      applications_submitted: 9, documents_ready: 22, reports_total: 3, telegram_linked: 4, programs_total: 108,
       events_24h: 340, period_days: 30 },
     admin_revenue_daily: days(30, function (d, i) { return { den: d, summa: (i % 5 === 0 ? 0 : (i * 700) % 19000), oplat: i % 4 === 0 ? 0 : (i % 3) }; }),
     admin_revenue_by_kind: [ { vid: "report", oplat: 9, summa: 36000 }, { vid: "package", oplat: 2, summa: 70000 },
@@ -29,7 +29,21 @@
     admin_leads: [
       { id: "l1", name: "Аида", whatsapp: "+7 701 111 22 33", level: "bachelor", field: "it", gpa_band: "4.4-4.0", ielts_band: "6.5", paid: true, paid_at: new Date().toISOString(), paid_amount: 4000, report_sent_at: null, updated_at: new Date().toISOString() },
       { id: "l2", name: "Данияр", whatsapp: "+7 702 333 44 55", level: "master", field: "eng", gpa_uni: "3.67+", ielts_band: "7+", paid: false, updated_at: new Date().toISOString() },
-      { id: "l3", name: "", whatsapp: "", level: "phd", field: "sci", paid: false, updated_at: new Date().toISOString() } ]
+      { id: "l3", name: "", whatsapp: "", level: "phd", field: "sci", paid: false, updated_at: new Date().toISOString() } ],
+    admin_reports: [
+      { lead_id: "l1", name: "Аида", token: "abc123def456", created_at: new Date(Date.now()-3*36e5).toISOString(), level: "bachelor", programm_v_otchete: 12, est_teksty: true, report_sent_at: new Date(Date.now()-2*36e5).toISOString() },
+      { lead_id: "l7", name: "Мадина", token: "zzz999yyy888", created_at: new Date(Date.now()-27*36e5).toISOString(), level: "master", programm_v_otchete: 9, est_teksty: false, report_sent_at: null },
+      { lead_id: "l9", name: "Ерасыл", token: "qqq111www222", created_at: new Date(Date.now()-52*36e5).toISOString(), level: "phd", programm_v_otchete: 7, est_teksty: true, report_sent_at: new Date(Date.now()-50*36e5).toISOString() } ],
+    admin_paid_without_report: [
+      { lead_id: "l4", name: "Динара", whatsapp: "+7 705 444 55 66", email: "dinara@example.com", paid_at: new Date(Date.now()-9*36e5).toISOString(), paid_amount: 4000, chasov_zhdet: 9 },
+      { lead_id: "l5", name: "Тимур", whatsapp: "+7 707 222 33 44", email: "", paid_at: new Date(Date.now()-31*36e5).toISOString(), paid_amount: 4000, chasov_zhdet: 31 } ],
+    admin_timings: { kviz_mediana_sek: 268, kviz_p90_sek: 640, razdumya_mediana_sek: 151,
+      ves_put_mediana_sek: 419, chtenie_lendinga_mediana_sek: 92, vyborka_kviz: 34, vyborka_put: 12 },
+    admin_quiz_steps: [
+      { shag: 1, vopros: "level", doshli: 412 }, { shag: 2, vopros: "gpa", doshli: 351 },
+      { shag: 3, vopros: "lang", doshli: 307 }, { shag: 4, vopros: "field", doshli: 235 },
+      { shag: 5, vopros: "budget", doshli: 205 }, { shag: 6, vopros: "achievements", doshli: 179 },
+      { shag: 7, vopros: "contact", doshli: 158 } ]
   };
   window.supabase = { createClient: function () { return {
     rpc: function (fn) { return res(FIX[fn] !== undefined ? FIX[fn] : []); },

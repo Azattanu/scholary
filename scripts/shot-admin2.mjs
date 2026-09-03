@@ -15,7 +15,7 @@ for (const [w, h] of [[1280, 1000], [390, 850]]) {
   }));
   console.log(w + 'px обзор:', JSON.stringify(info));
   await p.screenshot({ path: `/tmp/adm-${w}-overview.png`, fullPage: w > 500 });
-  for (const t of ['money', 'funnel', 'channels', 'people', 'product', 'system']) {
+  for (const t of ['money', 'funnel', 'channels', 'people', 'reports', 'product', 'system']) {
     await p.click(`#tabs button[data-t="${t}"]`);
     await p.waitForTimeout(250);
     const r = await p.evaluate(() => ({ boxes: document.querySelectorAll('#view .box').length,
