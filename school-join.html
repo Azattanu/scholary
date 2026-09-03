@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Регистрация по ссылке школы — Scholary</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<style>
+:root{
+  --bg:#F5F5F7; --surface:#fff; --ink:#1D1D1F; --ink-soft:#424245; --muted:#6E6E73;
+  --border:#E8E8ED; --accent:#5B4BFF; --accent-dark:#4739E0; --accent-soft:#F0EEFF; --accent-border:#ECE8FF;
+  --ok:#0B7A3E; --ok-soft:#E7F8EE; --warn:#A05F00; --warn-soft:#FFF3E0; --bad:#C0392B; --bad-soft:#FDEEEC;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.47;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:460px;margin:0 auto;padding:6vh 20px 60px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.02em;text-align:center;margin-bottom:22px}
+.logo span{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px}
+.school{position:relative;overflow:hidden;background:linear-gradient(135deg,#FFFFFF 0%,#F4F2FF 58%,#EDF9F3 100%);border:1px solid #E3DFFF;box-shadow:0 26px 60px -30px rgba(91,75,255,.38)}
+.school .k{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)}
+.school .n{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:4px 0 2px}
+.school .c{font-size:13.5px;color:var(--muted);font-weight:600}
+.school .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;background:#fff;border:1px solid var(--border)}
+.pill.ok{background:var(--ok-soft);color:var(--ok);border-color:#D6F0E1}
+.pill.bad{background:var(--bad-soft);color:var(--bad);border-color:#F6D5D1}
+.h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:22px 0 4px}
+.sub{color:var(--muted);font-size:14.5px;margin:0 0 14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;border-radius:999px;padding:13px 22px;font-size:16px;font-weight:600;text-decoration:none;transition:.15s;min-height:50px}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.55;cursor:default}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:999px;border:1px solid #D2D2D7;background:#fff;font-size:16px;font-weight:600;cursor:pointer;min-height:50px}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:16px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+input.f,select.f{width:100%;padding:13px 15px;border:1px solid #D2D2D7;border-radius:13px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input.f:focus,select.f:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);margin:14px 0 5px}
+.err{color:var(--bad);font-size:14px;margin-top:10px}
+.links{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:14px}
+.links a{min-height:44px;display:inline-flex;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.who{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:10px 12px;font-size:14px;margin-top:6px}
+.who .ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#5B4BFF,#9B8CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.who a{margin-left:auto;font-size:13px;font-weight:700}
+.steps{display:flex;gap:6px;margin:0 0 16px}
+.steps i{flex:1;height:4px;border-radius:999px;background:var(--border)}
+.steps i.on{background:var(--accent)}
+.done{ text-align:center; padding:6px 0 0 }
+.done .big{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.xs{font-size:12.5px;color:var(--muted)}
+.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Scholary<span>.</span></div>
+
+  <div id="loading"><div class="spin"></div></div>
+
+  <!-- школа не найдена / закрыта -->
+  <div id="v-bad" hidden>
+    <div class="card">
+      <div class="h2" style="margin-top:0" id="badTitle">Ссылка не работает</div>
+      <p class="sub" id="badText">Проверь, что открыл(а) ссылку целиком — она приходит от школы. Если всё верно, напиши своему профориентологу: возможно, школа выпустила новую ссылку.</p>
+      <a class="btn btn-ghost btn-block" href="/cabinet/">Открыть обычный кабинет</a>
+    </div>
+  </div>
+
+  <!-- основной сценарий -->
+  <div id="v-main" hidden>
+    <div class="card school">
+      <div class="k">Регистрация по ссылке школы</div>
+      <div class="n" id="schName">—</div>
+      <div class="c" id="schCity"></div>
+      <div class="row">
+        <span class="pill ok" id="schPro">Scholary Pro бесплатно</span>
+        <span class="pill" id="schUntil"></span>
+        <span class="pill" id="schSeats"></span>
+      </div>
+    </div>
+
+    <!-- шаг 1: вход / регистрация -->
+    <div id="s-auth">
+      <div class="steps"><i class="on"></i><i></i></div>
+      <div class="h2" style="margin-top:0">Создай аккаунт</div>
+      <p class="sub">Минута — и у тебя личный кабинет с полным доступом: вероятности, план документов, дедлайны.</p>
+
+      <button class="gbtn" id="btn-google">
+        <svg width="19" height="19" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 40.4 44 35 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+        Продолжить с Google
+      </button>
+      <div class="divider">или по почте</div>
+
+      <form id="f-signup">
+        <label class="fl" for="su-name">Имя и фамилия</label>
+        <input class="f" id="su-name" placeholder="Айгерим Сериккызы" autocomplete="name" required>
+        <label class="fl" for="su-email">Email</label>
+        <input class="f" id="su-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="you@gmail.com" required>
+        <label class="fl" for="su-pass">Пароль</label>
+        <input class="f" id="su-pass" type="password" autocomplete="new-password" placeholder="Минимум 6 символов" required minlength="6">
+        <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Создать аккаунт</button>
+        <div class="err" id="su-err" hidden></div>
+        <div class="links"><span class="xs" style="align-self:center">Уже есть аккаунт Scholary?</span><a href="#" id="lnk-login">Войти</a></div>
+      </form>
+
+      <form id="f-login" hidden>
+        <label class="fl" for="li-email">Email</label>
+        <input class="f" id="li-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="you@gmail.com" required>
+        <label class="fl" for="li-pass">Пароль</label>
+        <input class="f" id="li-pass" type="password" autocomplete="current-password" required minlength="6">
+        <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Войти</button>
+        <div class="err" id="li-err" hidden></div>
+        <div class="links"><a href="#" id="lnk-forgot">Забыл пароль</a><a href="#" id="lnk-signup">Создать аккаунт</a></div>
+      </form>
+
+      <form id="f-forgot" hidden>
+        <label class="fl" for="fg-email">Email</label>
+        <input class="f" id="fg-email" type="email" placeholder="you@gmail.com" required>
+        <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Прислать ссылку для сброса</button>
+        <div class="err" id="fg-err" hidden></div>
+        <div class="xs" id="fg-ok" style="margin-top:12px" hidden>Письмо отправлено — открой ссылку из него, задай новый пароль и вернись по ссылке школы.</div>
+        <div class="links"><a href="#" id="lnk-login2">Назад ко входу</a></div>
+      </form>
+
+      <div class="xs" style="text-align:center;margin-top:22px">Продолжая, ты принимаешь <a href="/oferta/">оферту</a> и <a href="/privacy/">политику данных</a>. Школа увидит твоё имя, класс, направление и прогресс — не пароль и не переписку.</div>
+    </div>
+
+    <!-- шаг 2: класс -->
+    <div id="s-class" hidden>
+      <div class="steps"><i class="on"></i><i class="on"></i></div>
+      <div class="h2" style="margin-top:0">Ты в каком классе?</div>
+      <p class="sub">Профориентолог увидит тебя в списке своего класса.</p>
+      <div class="who"><div class="ava" id="whoAva">S</div><div><b id="whoName">—</b><div class="xs" id="whoEmail"></div></div><a href="#" id="lnk-out">Не я</a></div>
+      <form id="f-class">
+        <label class="fl" for="cl-name">Имя и фамилия</label>
+        <input class="f" id="cl-name" autocomplete="name" placeholder="Айгерим Сериккызы" required>
+        <div class="grid2">
+          <div>
+            <label class="fl" for="cl-grade">Класс</label>
+            <select class="f" id="cl-grade" required>
+              <option value="9">9 класс</option>
+              <option value="10">10 класс</option>
+              <option value="11" selected>11 класс</option>
+              <option value="other">Другое</option>
+            </select>
+          </div>
+          <div>
+            <label class="fl" for="cl-letter">Буква</label>
+            <input class="f" id="cl-letter" placeholder="А, Б, В…" maxlength="4" autocapitalize="characters">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:18px" type="submit" id="joinBtn">Получить доступ</button>
+        <div class="err" id="cl-err" hidden></div>
+      </form>
+    </div>
+
+    <!-- готово -->
+    <div id="s-done" hidden>
+      <div class="card done">
+        <div class="big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <div class="h2" style="margin-top:0">Доступ открыт</div>
+        <p class="sub" id="doneText">Scholary Pro активна. Дальше — кабинет: за 2 минуты посчитаем твою вероятность по 97 программам и соберём план документов.</p>
+        <a class="btn btn-primary btn-block" href="/cabinet/" id="goCab">Открыть кабинет</a>
+        <div class="xs" style="margin-top:12px">Ссылка на кабинет: scholary.kz/cabinet — сохрани.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script>
+(function () {
+  if (window.supabase && window.supabase.createClient) return;
+  var s = document.createElement("script");
+  s.src = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"; s.async = false;
+  document.head.appendChild(s);
+})();
+</script>
+<script src="/js/config.js?v=61"></script>
+<script src="/js/telemetry.js?v=61"></script>
+<script src="/js/school-join.js?v=61"></script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="https://scholary.kz/schools/">
+  <title>Scholary для школ — поступление за рубеж для всего 9–11 класса</title>
+  <meta name="description" content="Школа подключает Scholary один раз — и каждый ученик 9–11 класса получает вероятность поступления, план документов и дедлайны, а профориентолог видит весь класс в одном кабинете. Пилот бесплатно.">
+  <link rel="stylesheet" href="/css/style.css?v=61">
+  <script src="/js/config.js?v=61"></script>
+  <script src="/js/telemetry.js?v=61"></script>
+  <script src="/js/app.js?v=61" defer></script>
+  <style>
+    /* Страница для школ: всё, что нужно сверх общего стиля, лежит здесь,
+       чтобы не трогать style.css и не рисковать главной. */
+    .sch-hero { background: var(--surface); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; padding-block: clamp(40px, 3rem + 2vw, 72px) clamp(40px, 3rem + 2vw, 64px); }
+    .sch-hero::before { content: ""; position: absolute; width: 640px; height: 640px; right: -220px; top: -260px; background: radial-gradient(closest-side, rgba(91,75,255,.11), transparent); pointer-events: none; }
+    .sch-hero::after { content: ""; position: absolute; width: 460px; height: 460px; left: -200px; bottom: -240px; background: radial-gradient(closest-side, rgba(22,163,92,.09), transparent); pointer-events: none; }
+    .sch-hero .container { position: relative; }
+    .sch-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+    .sch-hero h1 { font-size: var(--fz-h1); margin: var(--s4) 0 var(--s4); max-width: 17ch; }
+    .sch-hero .sub { font-size: var(--fz-lead); color: var(--muted); max-width: 48ch; }
+    .sch-cta { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
+    .sch-cta .btn { min-height: 54px; }
+    .sch-mini { font-size: 13px; color: var(--muted); margin-top: var(--s3); font-weight: 600; }
+
+    /* Витрина: карточка кабинета профориентолога */
+    .demo-cab { border-radius: var(--radius-lg); padding: var(--s5); max-width: 460px; margin-inline: auto; }
+    .demo-cab .dh { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); margin-bottom: var(--s4); }
+    .demo-cab .dh b { font-size: 15px; }
+    .demo-cab .dh span { font-size: 12px; font-weight: 700; color: var(--accent-dark); background: #fff; border: 1px solid var(--accent-border); border-radius: 999px; padding: 4px 10px; }
+    .demo-row { display: grid; grid-template-columns: 1.3fr 1fr .8fr; gap: var(--s3); align-items: center; padding: 10px 0; border-top: 1px solid rgba(91,75,255,.10); font-size: 13px; }
+    .demo-row:first-of-type { border-top: 0; }
+    .demo-row .n { font-weight: 700; }
+    .demo-row .c { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+    .demo-bar { height: 7px; background: var(--track); border-radius: 999px; overflow: hidden; }
+    .demo-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--green-bright)); border-radius: 999px; }
+    .demo-row .p { font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+    .demo-row .p.warn { color: var(--yellow); }
+    .demo-foot { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s4); }
+    .demo-foot span { font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 5px 10px; background: #fff; border: 1px solid var(--border); }
+    .demo-foot .bad { color: #B42318; border-color: #FDE2E0; background: #FFF4F3; }
+    .demo-foot .ok { color: var(--green); border-color: #D6F0E1; background: var(--green-soft); }
+
+    .steps4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+    .two .card h3 { font-size: 17px; margin: var(--s3) 0 var(--s2); }
+    .two ul { margin: 0; padding-left: 18px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
+    .two li + li { margin-top: 6px; }
+    .who { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+    .who i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .who.g { color: var(--green); } .who.g i { background: var(--green); }
+
+    .sch-tariffs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s4); align-items: stretch; }
+    .sch-tariffs .tariff .per { font-size: 12.5px; color: var(--muted); font-weight: 600; margin-top: -6px; }
+    .sch-tariffs .tariff .seat { font-size: 12.5px; color: var(--accent-dark); font-weight: 700; }
+    .switch { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px; gap: 4px; margin-bottom: var(--s5); }
+    .switch button { border: 0; background: transparent; border-radius: 999px; padding: 8px 16px; font: inherit; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; }
+    .switch button.on { background: var(--accent); color: #fff; }
+
+    /* форма заявки */
+    .apply { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s4); }
+    .apply .field { display: flex; flex-direction: column; gap: 6px; }
+    .apply .field.full { grid-column: 1 / -1; }
+    .apply label { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+    .apply input, .apply select, .apply textarea { width: 100%; padding: 13px 15px; border: 1px solid #D2D2D7; border-radius: 13px; font: inherit; font-size: 16px; background: #fff; color: var(--ink); }
+    .apply input:focus, .apply select:focus, .apply textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+    .apply .input-error { border-color: #C0392B; }
+    .apply .hint { font-size: 12.5px; color: var(--muted); }
+    .apply .hint.is-error { color: #C0392B; font-weight: 600; }
+    .apply .plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+    .apply .plan { display: flex; align-items: center; gap: 10px; border: 1px solid #D2D2D7; border-radius: 13px; padding: 11px 13px; cursor: pointer; font-size: 14px; font-weight: 700; background: #fff; }
+    .apply .plan input { width: auto; margin: 0; accent-color: var(--accent); }
+    .apply .plan:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .apply .plan small { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+    #applyOk { display: none; }
+    #applyOk.on { display: block; }
+
+    @media (max-width: 960px) {
+      .sch-grid { grid-template-columns: 1fr; gap: var(--s7); }
+      .sch-tariffs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .steps4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .sch-hero h1 { max-width: none; }
+      .sch-cta .btn { width: 100%; }
+      .two { grid-template-columns: 1fr; }
+      .sch-tariffs { grid-template-columns: 1fr; }
+      .steps4 { grid-template-columns: 1fr; }
+      .apply { grid-template-columns: 1fr; }
+      .apply .plans { grid-template-columns: 1fr; }
+      .demo-row { grid-template-columns: 1.2fr 1fr .7fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="/">Scholary</a>
+  <nav class="nav" aria-label="Основная навигация">
+    <a class="nav-link" href="/schools/" aria-current="page">Школам</a>
+    <a class="nav-link" href="/tariffs/">Тарифы</a>
+    <a class="nav-link" href="/#faq">Вопросы</a>
+    <a class="nav-icon" href="https://wa.me/77024666852" target="_blank" rel="noopener" aria-label="Написать в WhatsApp" title="Написать в WhatsApp"><svg width="19" height="19" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-2.6-.8-4.9-2.9-6.2-5.3-.5-.9-.9-2-.6-2.9.2-.6.9-1.5 1.5-1.5h.5c.3 0 .5.1.7.6l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.2.2-.3.4-.1.7.7 1.2 1.8 2.2 3.1 2.8.3.1.5.1.7-.1l.8-.9c.2-.2.4-.3.6-.2l2 1c.4.2.6.3.6.6 0 .1 0 .4-.2.7z"/></svg></a>
+    <a class="nav-icon" href="https://t.me/azattanux" target="_blank" rel="noopener" aria-label="Написать в Telegram" title="Написать в Telegram"><svg width="19" height="19" viewBox="0 0 24 24" fill="#2AABEE" aria-hidden="true"><path d="M21.9 4.4 18.9 19c-.2 1-.8 1.2-1.6.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-.9.5l.3-4.7 8.5-7.7c.4-.3-.1-.5-.6-.2L7.3 13.1 2.7 11.7c-1-.3-1-1 .2-1.5l17.7-6.8c.8-.3 1.5.2 1.3 1z"/></svg></a>
+    <a class="nav-login" href="/schools/cabinet/">Кабинет школы</a>
+    <a class="nav-cta" href="#apply" onclick="track('cta_header_school')"><span class="cta-long">Подключить школу</span><span class="cta-short">Подключить</span></a>
+    <button class="nav-burger" type="button" id="navBurger" aria-label="Открыть меню" aria-expanded="false" aria-controls="siteMenu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+<div class="site-menu" id="siteMenu" hidden>
+  <a href="#apply">Подключить школу</a>
+  <a href="/schools/cabinet/">Кабинет школы</a>
+  <a href="#how">Как это работает</a>
+  <a href="#tariffs">Тарифы для школ</a>
+  <a href="#faq">Частые вопросы</a>
+  <div class="site-menu-sep"></div>
+  <a href="/">Scholary для абитуриентов</a>
+  <a href="https://wa.me/77024666852" target="_blank" rel="noopener">Написать в WhatsApp</a>
+</div>
+
+<!-- ХИРО -->
+<section class="sch-hero">
+  <div class="container sch-grid">
+    <div>
+      <span class="badge-pill">Для школ и профориентологов · 9–11 классы</span>
+      <h1>Поступление за рубеж — для всего класса, а не для двух отличников</h1>
+      <p class="sub">Школа подключается один раз. Каждый ученик получает свою вероятность поступления, план документов и дедлайны. Профориентолог видит весь класс в одном кабинете — кто куда целится и что горит.</p>
+      <div class="sch-cta">
+        <a class="btn btn-primary" href="#apply" onclick="track('cta_school_hero')">Подключить школу</a>
+        <a class="btn btn-outline" href="#apply" data-plan="pilot" onclick="track('cta_school_pilot')">Бесплатный пилот на 30 дней</a>
+      </div>
+      <div class="sch-mini">Договор, счёт и акт · оплата с бюджета школы или родительского комитета · без ИИН и лишних данных</div>
+    </div>
+
+    <div class="demo-cab card-glow" aria-hidden="true">
+      <div class="dh"><b>Кабинет школы · 11 «Б»</b><span>24 из 30 мест</span></div>
+      <div class="demo-row"><div><div class="n">Айгерим С.</div><div class="c">Венгрия · IT</div></div><div class="demo-bar"><i style="width:74%"></i></div><div class="p">74%</div></div>
+      <div class="demo-row"><div><div class="n">Данияр К.</div><div class="c">Италия · инженерия</div></div><div class="demo-bar"><i style="width:61%"></i></div><div class="p">61%</div></div>
+      <div class="demo-row"><div><div class="n">Томирис Ж.</div><div class="c">Турция · медицина</div></div><div class="demo-bar"><i style="width:38%"></i></div><div class="p warn">38%</div></div>
+      <div class="demo-row"><div><div class="n">Алихан Б.</div><div class="c">Китай · бизнес</div></div><div class="demo-bar"><i style="width:56%"></i></div><div class="p">56%</div></div>
+      <div class="demo-foot"><span class="bad">3 дедлайна ближе 30 дней</span><span class="ok">17 документов готово</span><span>4 не заходили неделю</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ЦИФРЫ -->
+<section class="section section-tight">
+  <div class="container">
+    <div class="stats4">
+      <div class="stat-big"><div class="num">215 000</div><div class="cap">выпускников 11 класса в Казахстане в 2026 году</div></div>
+      <div class="stat-big"><div class="num">91 000</div><div class="cap">казахстанцев учатся за рубежом — 9-е место в мире по данным ЮНЕСКО</div></div>
+      <div class="stat-big"><div class="num">~80%</div><div class="cap">из них поступали сами, за свой счёт или на стипендию, а не по «Болашаку»</div></div>
+      <div class="stat-big"><div class="num">1 : 500</div><div class="cap">один профориентолог на 9–11 классы — вручную довести всех до подачи невозможно</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ПРОБЛЕМА → РЕШЕНИЕ -->
+<section class="section" id="why">
+  <div class="container">
+    <h2>Почему это нужно именно школе</h2>
+    <p class="lead">С 2025 года в каждой государственной школе есть педагог-профориентатор, и в его обязанности входит выстраивать образовательную траекторию ученика. Но один человек на 500 старшеклассников физически не может посчитать шансы каждому, собрать документы и следить за дедлайнами в 54 странах.</p>
+    <div class="steps3">
+      <div class="card"><div class="step-num">1</div><h3>Сейчас</h3><p>Зарубежные вузы — тема для «сильных» детей и семей с агентством за 400 000 – 1 000 000 ₸. Остальные даже не пробуют, хотя половина молодёжи хотела бы учиться за границей.</p></div>
+      <div class="card"><div class="step-num">2</div><h3>Со Scholary</h3><p>Каждый ученик за 2 минуты видит реальную вероятность по 97 программам в 54 странах — с суммой стипендии и дедлайном. Дальше кабинет ведёт его по документам шаг за шагом.</p></div>
+      <div class="card"><div class="step-num">3</div><h3>Для школы</h3><p>Профориентолог получает готовую картину класса: кто куда целится, у кого шансы выше, у кого горит дедлайн. Это и есть «индивидуальная траектория» — без ручной работы.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- КАК РАБОТАЕТ -->
+<section class="section" id="how">
+  <div class="container">
+    <h2>Как это работает</h2>
+    <p class="lead">От заявки до первого расчёта у учеников — один день. Ничего устанавливать не нужно.</p>
+    <div class="steps3 steps4" id="howGrid">
+      <div class="card"><div class="step-num">1</div><h3>Заявка</h3><p>Профориентолог, завуч или директор заполняет форму ниже. Мы перезваниваем в течение рабочего дня, согласуем тариф и присылаем договор.</p></div>
+      <div class="card"><div class="step-num">2</div><h3>Ссылка школы</h3><p>После активации школа получает письмо с закрытой ссылкой и кодом. Ссылку можно разослать в чат класса, в дневник или дать на классном часе.</p></div>
+      <div class="card"><div class="step-num">3</div><h3>Ученики регистрируются</h3><p>Ученик открывает ссылку, создаёт аккаунт, указывает класс — и сразу получает Scholary Pro на весь срок. Место занимает только тот, кто зарегистрировался.</p></div>
+      <div class="card"><div class="step-num">4</div><h3>Кабинет школы</h3><p>Профориентолог видит список учеников с направлением, вероятностью, готовностью документов и ближайшим дедлайном. Выгрузка в таблицу — одной кнопкой.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ЧТО ПОЛУЧАЮТ -->
+<section class="section" id="what">
+  <div class="container">
+    <h2>Что получает каждый</h2>
+    <p class="lead">Ученикам открываем полный Pro-доступ, а не урезанную «школьную версию»: школа покупает места оптом, и экономить на детях здесь не на чем.</p>
+    <div class="two">
+      <div class="card">
+        <span class="who g"><i></i>Ученик 9–11 класса</span>
+        <h3>Scholary Pro на весь срок подключения</h3>
+        <ul>
+          <li>Две вероятности — поступления и стипендии — по 97 программам в 54 странах, с суммой финансирования и дедлайном каждой.</li>
+          <li>Личный кабинет: портфель подач, план документов с критическим путём (что делать первым, чтобы успеть к дедлайну), проверка загруженных документов.</li>
+          <li>Разбор мотивационных и рекомендательных писем ИИ — до 60 разборов в день, симулятор «что если подтянуть IELTS».</li>
+          <li>Напоминания о дедлайнах в Telegram за 30, 14, 7, 3 и 1 день.</li>
+          <li>Контакт своего профориентолога прямо в кабинете.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="who"><i></i>Профориентолог / школа</span>
+        <h3>Кабинет школы</h3>
+        <ul>
+          <li>Ссылка и код школы; сколько мест занято и сколько свободно; срок действия.</li>
+          <li>Список учеников по классам: направление, страны, вероятность, сколько подач и документов готово, ближайший дедлайн, когда заходил последний раз.</li>
+          <li>Фильтр «кто в зоне риска»: дедлайн ближе 30 дней и документы не собраны.</li>
+          <li>Выгрузка в CSV — для отчёта завучу или управлению образования.</li>
+          <li>Новая ссылка одной кнопкой, если старая ушла не тем; удаление посторонних.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ТАРИФЫ -->
+<section class="section" id="tariffs">
+  <div class="container">
+    <h2>Тарифы для школ</h2>
+    <p class="lead">Цена за место — в 3–6 раз ниже розничной подписки Scholary Pro (14 900 ₸ за сезон). Место занимает только зарегистрировавшийся ученик, поэтому платить за «мёртвые души» не придётся.</p>
+    <div class="switch" role="tablist" aria-label="Период оплаты">
+      <button type="button" class="on" data-period="year" role="tab" aria-selected="true">На учебный год</button>
+      <button type="button" data-period="month" role="tab" aria-selected="false">Помесячно</button>
+    </div>
+    <div class="sch-tariffs">
+      <div class="card tariff">
+        <div class="tariff-head"><strong>Пилот</strong><span class="price">0 ₸</span></div>
+        <div class="per">30 дней · до 50 учеников</div>
+        <p class="tariff-note">Один класс пробует всё без ограничений. Договор не нужен — только заявка.</p>
+        <ul><li>Полный Pro каждому ученику</li><li>Кабинет школы</li><li>Созвон-инструктаж для профориентолога</li></ul>
+        <a class="btn btn-outline" href="#apply" data-plan="pilot" onclick="track('cta_school_tariff_pilot')">Запросить пилот</a>
+      </div>
+      <div class="card tariff">
+        <div class="tariff-head"><strong>Класс</strong><span class="price" data-year="490 000 ₸" data-month="59 000 ₸">490 000 ₸</span></div>
+        <div class="per" data-year="в год · до 100 учеников" data-month="в месяц · до 100 учеников">в год · до 100 учеников</div>
+        <div class="seat" data-year="4 900 ₸ за место в год" data-month="590 ₸ за место в месяц">4 900 ₸ за место в год</div>
+        <p class="tariff-note">Для одной параллели или профильного класса.</p>
+        <ul><li>Полный Pro каждому ученику</li><li>Кабинет школы + выгрузка CSV</li><li>Договор, счёт, акт</li></ul>
+        <a class="btn btn-primary" href="#apply" data-plan="s100" onclick="track('cta_school_tariff_100')">Подключить</a>
+      </div>
+      <div class="card tariff featured">
+        <div class="tariff-flag">Выбирают школы</div>
+        <div class="tariff-head"><strong>Школа</strong><span class="price" data-year="1 490 000 ₸" data-month="179 000 ₸">1 490 000 ₸</span></div>
+        <div class="per" data-year="в год · до 500 учеников" data-month="в месяц · до 500 учеников">в год · до 500 учеников</div>
+        <div class="seat" data-year="2 980 ₸ за место в год" data-month="358 ₸ за место в месяц">2 980 ₸ за место в год</div>
+        <p class="tariff-note">Все 9–11 классы обычной школы.</p>
+        <ul><li>Всё из «Класса»</li><li>Классный час «Как поступить за рубеж» от нас — онлайн</li><li>Отчёт для управления образования раз в четверть</li></ul>
+        <a class="btn btn-primary" href="#apply" data-plan="s500" onclick="track('cta_school_tariff_500')">Подключить</a>
+      </div>
+      <div class="card tariff">
+        <div class="tariff-head"><strong>Сеть</strong><span class="price" data-year="2 490 000 ₸" data-month="299 000 ₸">2 490 000 ₸</span></div>
+        <div class="per" data-year="в год · до 1000 учеников" data-month="в месяц · до 1000 учеников">в год · до 1000 учеников</div>
+        <div class="seat" data-year="2 490 ₸ за место в год" data-month="299 ₸ за место в месяц">2 490 ₸ за место в год</div>
+        <p class="tariff-note">Сеть школ, лицей с филиалами или район.</p>
+        <ul><li>Всё из «Школы»</li><li>Несколько кабинетов — по одному на школу</li><li>Персональный менеджер</li></ul>
+        <a class="btn btn-outline" href="#apply" data-plan="s1000" onclick="track('cta_school_tariff_1000')">Обсудить</a>
+      </div>
+    </div>
+    <p class="tariff-note" style="margin-top: var(--s4)">Больше мест, чем в тарифе? Каждое дополнительное место — 4 900 ₸ в год по допсоглашению. Лимит разборов ИИ — 60 в день на ученика, как в обычном Pro; если школа стабильно выходит за суммарный лимит, обсуждаем расширение отдельно. Цены без НДС, ИП на упрощёнке.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <h2>Частые вопросы школ</h2>
+    <div class="narrow" style="padding-inline: 0; margin-inline: 0; max-width: 760px">
+      <details class="faq-item"><summary>Мы государственная школа. Как оплатить?</summary><p>Заключаем договор с ИП «АТТА» (упрощённый режим, без НДС), выставляем счёт, после оплаты — акт. Оплата возможна из внебюджетных средств школы, через попечительский совет или родительский комитет — многие школы так покупают Kundelik и олимпиадные платформы. Для управления образования подготовим презентацию и отчёт по итогам пилота.</p></details>
+      <details class="faq-item"><summary>Что такое пилот и что будет после 30 дней?</summary><p>Пилот — один класс (до 50 учеников) с полным доступом на 30 дней и без договора. В конце мы показываем, сколько учеников зарегистрировалось, что они посчитали и какие дедлайны у них впереди. Если школа продолжает — переводим на годовой тариф, ученики ничего не теряют. Если нет — доступ просто закрывается, никаких списаний.</p></details>
+      <details class="faq-item"><summary>Какие данные детей вы собираете?</summary><p>Минимум: имя, класс, почта для входа и ответы анкеты (оценки, язык, интересы). ИИН, адреса и документы удостоверения личности не запрашиваем. Данные хранятся в базе с разграничением доступа: ученик видит только своё, профориентолог — сводку по своей школе, без файлов и переписки ученика. Подробнее — в <a href="/privacy/">политике конфиденциальности</a>.</p></details>
+      <details class="faq-item"><summary>Ссылка утекла к чужим детям — что делать?</summary><p>В кабинете школы есть кнопка «Новая ссылка»: старая перестаёт работать в ту же секунду, уже зарегистрированные ученики остаются. Посторонних видно в списке — их можно убрать одной кнопкой, место освободится.</p></details>
+      <details class="faq-item"><summary>А если ученик уже купил Scholary сам?</summary><p>Он регистрируется по школьной ссылке тем же аккаунтом — и его подписка просто продлевается до конца школьного срока. Ничего не теряется, платить дважды не нужно.</p></details>
+      <details class="faq-item"><summary>Нужно ли что-то устанавливать или обучать учителей?</summary><p>Нет. Всё работает в браузере с телефона и компьютера. Профориентологу хватает 20-минутного созвона: показываем кабинет, даём памятку и текст для чата класса. На тарифе «Школа» проводим онлайн классный час «Как поступить за рубеж» для учеников.</p></details>
+      <details class="faq-item"><summary>Это заменяет профориентолога?</summary><p>Нет — усиливает. Scholary считает и напоминает, а решения, разговоры с родителями и мотивацию даёт человек. Кабинет показывает, к кому подойти первым: у кого горит дедлайн, кто неделю не заходил, у кого шансы низкие и стоит сменить цель.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ЗАЯВКА -->
+<section class="section" id="apply">
+  <div class="container">
+    <div class="card card-glow" style="max-width: 820px; margin-inline: auto; padding: clamp(20px, 3vw, 32px)">
+      <h2 style="margin-top:0">Подключить школу</h2>
+      <p class="lead" style="margin-bottom: var(--s5)">Заполните форму — перезвоним в течение рабочего дня. Пилот открываем в тот же день.</p>
+
+      <form class="apply" id="applyForm" novalidate>
+        <div class="field full">
+          <label for="sName">Школа</label>
+          <input id="sName" name="name" placeholder="Например, Школа-лицей №39 или Haileybury Almaty" maxlength="120" required autocomplete="organization">
+          <div class="hint" id="sNameHint"></div>
+        </div>
+        <div class="field">
+          <label for="sCity">Город</label>
+          <input id="sCity" name="city" placeholder="Алматы" maxlength="60" autocomplete="address-level2">
+        </div>
+        <div class="field">
+          <label for="sKind">Тип школы</label>
+          <select id="sKind" name="kind">
+            <option value="state">Государственная</option>
+            <option value="private">Частная</option>
+            <option value="other">Лицей / гимназия / другое</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sContact">Ваше имя</label>
+          <input id="sContact" name="contact_name" placeholder="Айгуль Сериковна" maxlength="80" required autocomplete="name">
+          <div class="hint" id="sContactHint"></div>
+        </div>
+        <div class="field">
+          <label for="sRole">Должность</label>
+          <input id="sRole" name="contact_role" placeholder="Профориентолог, завуч, директор" maxlength="80" autocomplete="organization-title">
+        </div>
+        <div class="field">
+          <label for="sEmail">Рабочая почта</label>
+          <input id="sEmail" name="contact_email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="school39@edu.kz" required>
+          <div class="hint" id="sEmailHint">Сюда придёт ссылка школы и вход в кабинет</div>
+        </div>
+        <div class="field">
+          <label for="sPhone">WhatsApp для связи</label>
+          <input id="sPhone" name="contact_phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __" maxlength="20">
+          <div class="hint" id="sPhoneHint"></div>
+        </div>
+        <div class="field">
+          <label for="sExpected">Сколько учеников 9–11 классов</label>
+          <input id="sExpected" name="students_expected" type="number" inputmode="numeric" min="1" max="20000" placeholder="около 450">
+        </div>
+        <div class="field">
+          <label>Период</label>
+          <div class="plans">
+            <label class="plan"><input type="radio" name="period" value="year" checked>На учебный год</label>
+            <label class="plan"><input type="radio" name="period" value="month">Помесячно</label>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Тариф</label>
+          <div class="plans" id="planPick">
+            <label class="plan"><input type="radio" name="plan" value="pilot" checked><span>Пилот<small>бесплатно · 30 дней · до 50 учеников</small></span></label>
+            <label class="plan"><input type="radio" name="plan" value="s100"><span>Класс<small>до 100 учеников</small></span></label>
+            <label class="plan"><input type="radio" name="plan" value="s500"><span>Школа<small>до 500 учеников</small></span></label>
+            <label class="plan"><input type="radio" name="plan" value="s1000"><span>Сеть<small>до 1000 учеников</small></span></label>
+          </div>
+        </div>
+        <div class="field full">
+          <label for="sNote">Комментарий</label>
+          <textarea id="sNote" name="note" rows="3" maxlength="1000" placeholder="Когда удобно созвониться, какие классы хотите подключить, есть ли вопросы по оплате"></textarea>
+        </div>
+        <div class="field full">
+          <button class="btn btn-primary btn-block" type="submit" id="applyBtn" style="min-height:54px">Отправить заявку</button>
+          <div class="hint" id="applyHint" style="text-align:center; margin-top: 8px">Нажимая кнопку, вы соглашаетесь с <a href="/oferta/">офертой</a> и <a href="/privacy/">политикой данных</a>. Без спама: одно письмо и один звонок.</div>
+        </div>
+      </form>
+
+      <div id="applyOk">
+        <div style="display:flex; gap:14px; align-items:flex-start">
+          <div style="width:44px; height:44px; border-radius:50%; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <div style="font-size:19px; font-weight:800">Заявку получили</div>
+            <p style="color:var(--muted); font-size:15px; margin:6px 0 0">На <b id="okEmail"></b> ушло подтверждение. Перезвоним в течение рабочего дня, согласуем детали и откроем доступ: вы получите ссылку для учеников и вход в кабинет школы.</p>
+            <p style="font-size:14px; margin:12px 0 0">Хотите быстрее? <a id="okWa" href="#" target="_blank" rel="noopener">Напишите нам в WhatsApp</a> — ответим сразу.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <div class="logo">Scholary</div>
+      <p style="font-size:13.5px; line-height:1.6; max-width:36ch">Помогаем казахстанцам поступать в университеты по всему миру. Считаем реальную вероятность, а не обещаем гарантии.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-title">Сервис</div>
+      <div class="footer-links">
+        <a href="/">Scholary для абитуриентов</a>
+        <a href="/schools/cabinet/">Кабинет школы</a>
+        <a href="/demo/" target="_blank" rel="noopener">Пример отчёта ученика</a>
+        <a href="/tariffs/" target="_blank" rel="noopener">Розничные тарифы</a>
+        <a href="/oferta/" target="_blank" rel="noopener">Публичная оферта</a>
+        <a href="/privacy/" target="_blank" rel="noopener">Политика конфиденциальности</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-title">Связаться</div>
+      <a class="btn-msg" href="https://wa.me/77024666852" target="_blank" rel="noopener">Написать в WhatsApp</a>
+      <a class="btn-msg" href="https://t.me/azattanux" target="_blank" rel="noopener">Написать в Telegram</a>
+      <div class="footer-requisites">
+        ИП «АТТА» · Омиргали Азат · ИИН 920725301448<br>
+        г. Алматы, ул. Розыбакиева, 250Б<br>
+        +7 (702) 466-68-52 · azattanu@gmail.com
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Scholary. Оценка модели не является гарантией поступления. Условия программ и даты приёма проверяйте на официальных сайтах.</div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var C = window.SCHOLARY_CONFIG || {};
+  var $ = function (id) { return document.getElementById(id); };
+  var track = window.track || function () {};
+
+  /* --- переключатель год / месяц --- */
+  document.querySelectorAll(".switch button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var p = b.getAttribute("data-period");
+      document.querySelectorAll(".switch button").forEach(function (x) { var on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-selected", on ? "true" : "false"); });
+      document.querySelectorAll("[data-year]").forEach(function (el) { el.textContent = el.getAttribute("data-" + p); });
+      var r = document.querySelector('input[name="period"][value="' + p + '"]'); if (r) r.checked = true;
+      track("school_period_" + p);
+    });
+  });
+
+  /* --- клик по тарифу подставляет его в форму --- */
+  document.querySelectorAll("[data-plan]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var r = document.querySelector('input[name="plan"][value="' + a.getAttribute("data-plan") + '"]');
+      if (r) r.checked = true;
+    });
+  });
+
+  /* --- маска телефона, та же, что в квизе --- */
+  var PH = window.ScholaryPhone;
+  if (PH && PH.attach) PH.attach($("sPhone"));
+
+  function setErr(id, hintId, msg) {
+    var el = $(id); if (!el) return;
+    el.classList.toggle("input-error", !!msg);
+    var h = $(hintId);
+    if (h) { h.classList.toggle("is-error", !!msg); if (msg) h.textContent = msg; }
+    if (msg) { el.focus(); try { el.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {} }
+  }
+  function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim()); }
+
+  $("applyForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = e.target;
+    var name = $("sName").value.trim(), cname = $("sContact").value.trim(), email = $("sEmail").value.trim(), phone = $("sPhone").value.trim();
+    setErr("sName", "sNameHint", ""); setErr("sContact", "sContactHint", ""); setErr("sEmail", "sEmailHint", ""); setErr("sPhone", "sPhoneHint", "");
+    if (name.length < 3) { setErr("sName", "sNameHint", "Напишите название школы"); return; }
+    if (cname.length < 2) { setErr("sContact", "sContactHint", "Как к вам обращаться?"); return; }
+    if (!emailOk(email)) { setErr("sEmail", "sEmailHint", "Проверьте адрес — сюда придёт ссылка школы"); return; }
+    if (phone && PH && !PH.valid(phone)) { setErr("sPhone", "sPhoneHint", "Проверьте номер: нужно 10 цифр после +7"); return; }
+
+    var btn = $("applyBtn"); btn.disabled = true; btn.textContent = "Отправляю…";
+    var payload = {
+      name: name, city: $("sCity").value.trim(), kind: $("sKind").value,
+      contact_name: cname, contact_role: $("sRole").value.trim(), contact_email: email,
+      contact_phone: phone && PH ? PH.normalize(phone) : phone,
+      students_expected: parseInt($("sExpected").value, 10) || null,
+      plan: (f.querySelector('input[name="plan"]:checked') || {}).value || "pilot",
+      period: (f.querySelector('input[name="period"]:checked') || {}).value || "year",
+      note: $("sNote").value.trim(), source: "schools_page"
+    };
+    fetch("/api/school-apply.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.__status = r.status; return j; }); })
+      .then(function (j) {
+        if (j && j.ok) {
+          track("school_apply_ok", { plan: payload.plan });
+          f.hidden = true; $("applyOk").classList.add("on");
+          $("okEmail").textContent = email;
+          $("okWa").href = "https://wa.me/" + (C.WHATSAPP_NUMBER || "77024666852") + "?text=" + encodeURIComponent("Здравствуйте! Только что отправил(а) заявку на подключение школы «" + name + "» к Scholary. Хочу обсудить детали.");
+          try { $("applyOk").scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {}
+          return;
+        }
+        btn.disabled = false; btn.textContent = "Отправить заявку";
+        var why = (j && j.why) || "";
+        if (why === "bad_email") setErr("sEmail", "sEmailHint", "Проверьте адрес");
+        else if (why === "bad_phone") setErr("sPhone", "sPhoneHint", "Проверьте номер");
+        else if (why === "rate_limited") $("applyHint").textContent = "Слишком много заявок с этого адреса. Напишите нам в WhatsApp — ответим сразу.";
+        else $("applyHint").textContent = "Не получилось отправить. Напишите нам в WhatsApp +7 702 466 68 52 — подключим вручную.";
+        track("school_apply_fail", { why: why || String(j && j.__status) });
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = "Отправить заявку";
+        $("applyHint").textContent = "Нет связи. Напишите нам в WhatsApp +7 702 466 68 52 — подключим вручную.";
+      });
+  });
+
+  track("schools_view");
+});
+</script>
+</body>
+</html>

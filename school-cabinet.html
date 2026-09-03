@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Кабинет школы — Scholary</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+<style>
+:root{
+  --bg:#F5F5F7; --surface:#fff; --ink:#1D1D1F; --ink-soft:#424245; --muted:#6E6E73;
+  --border:#E8E8ED; --accent:#5B4BFF; --accent-dark:#4739E0; --accent-soft:#F0EEFF; --accent-border:#ECE8FF;
+  --ok:#0B7A3E; --ok-soft:#E7F8EE; --warn:#A05F00; --warn-soft:#FFF3E0; --bad:#C0392B; --bad-soft:#FDEEEC; --track:#E9E7F5;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.47;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+[hidden]{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:650;text-decoration:none;transition:.15s;min-height:44px}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+.btn-soft{background:var(--accent-soft);color:var(--accent-dark)}
+.btn-block{width:100%}
+.btn-sm{padding:7px 12px;font-size:13.5px;min-height:36px}
+.btn[disabled]{opacity:.55;cursor:default}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px}
+.glow{position:relative;overflow:hidden;background:linear-gradient(135deg,#FFFFFF 0%,#F4F2FF 58%,#EDF9F3 100%);border:1px solid #E3DFFF;box-shadow:0 26px 60px -30px rgba(91,75,255,.38)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:650;white-space:nowrap}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)}
+.pill-bad{background:var(--bad-soft);color:var(--bad)} .pill-mut{background:var(--bg);color:var(--muted)} .pill-acc{background:var(--accent-soft);color:var(--accent-dark)}
+.mut{color:var(--muted)} .sm{font-size:13.5px} .xs{font-size:12px}
+.h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0}
+.h2{font-size:18px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px}
+input.f,select.f{width:100%;padding:12px 14px;border:1px solid #D2D2D7;border-radius:13px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input.f:focus,select.f:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);margin:14px 0 5px}
+.err{color:var(--bad);font-size:14px;margin-top:10px}
+.authwrap{max-width:420px;margin:0 auto;padding:8vh 22px 60px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:999px;border:1px solid #D2D2D7;background:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:16px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.links{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:14px}
+.links a{min-height:44px;display:inline-flex;align-items:center}
+.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1D1D1F;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:50;max-width:92vw}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--bad)}
+
+/* каркас */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px 8px;max-width:1120px;margin:0 auto}
+.top .logo{font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--ink)}
+.top .logo span{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:8px 20px 80px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-top:14px}
+.kpi{display:flex;flex-direction:column;gap:4px}
+.kpi .n{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.bar{height:8px;background:var(--track);border-radius:999px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#16A35C);border-radius:999px}
+.link-row{display:flex;gap:8px;align-items:stretch}
+.link-row input{flex:1;min-width:0;font-size:14px;font-weight:600}
+.code{font-size:24px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums;margin-top:6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13.5px;font-weight:650;cursor:pointer;color:var(--ink-soft)}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.risk.on{background:var(--bad);border-color:var(--bad)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.tools input{max-width:320px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.r{width:100%;border-collapse:collapse;font-size:13.5px}
+table.r th{text-align:left;color:var(--muted);font-weight:650;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:12.5px}
+table.r td{padding:11px 10px;border-bottom:1px solid #F0F0F4;vertical-align:middle}
+table.r tr:last-child td{border-bottom:none}
+table.r td.num,table.r th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.r .name{font-weight:700}
+table.r .sub{font-size:12px;color:var(--muted)}
+.pbar{display:inline-flex;align-items:center;gap:8px;min-width:120px}
+.pbar i{display:block;height:6px;border-radius:999px;background:var(--track);width:70px;overflow:hidden;position:relative}
+.pbar i b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),#16A35C);border-radius:999px}
+.rm{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:8px}
+.rm:hover{background:var(--bad-soft);color:var(--bad)}
+.confirm{display:inline-flex;gap:6px;align-items:center;font-size:12.5px}
+.memo ol{margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--ink-soft)}
+.memo li+li{margin-top:6px}
+textarea.msg{width:100%;min-height:120px;padding:12px 14px;border:1px solid #D2D2D7;border-radius:13px;font:inherit;font-size:14px;resize:vertical;background:#fff;margin-top:8px}
+@media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+@media (max-width: 640px){
+  .top{padding-inline:16px} .wrap{padding-inline:16px}
+  .h1{font-size:22px}
+  table.r{font-size:13px}
+  .link-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="toast-root"></div>
+<div id="loading"><div class="spin"></div></div>
+
+<!-- вход -->
+<div id="v-auth" hidden>
+  <div class="authwrap">
+    <div style="text-align:center;margin-bottom:22px">
+      <div style="font-weight:800;font-size:24px;letter-spacing:-.02em">Scholary<span style="color:var(--accent)">.</span> <span class="mut" style="font-weight:600;font-size:16px">для школ</span></div>
+      <div class="h1" style="font-size:24px;margin-top:18px" id="auth-title">Кабинет школы</div>
+      <div class="mut sm" style="margin-top:4px" id="auth-sub">Войдите тем аккаунтом, на который активировали доступ. Если вы открыли ссылку из письма — после входа кабинет привяжется автоматически.</div>
+    </div>
+    <button class="gbtn" id="btn-google">
+      <svg width="19" height="19" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 40.4 44 35 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Войти через Google
+    </button>
+    <div class="divider">или по почте</div>
+    <form id="f-login">
+      <label class="fl" for="li-email">Email</label>
+      <input class="f" id="li-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="school@edu.kz" required>
+      <label class="fl" for="li-pass">Пароль</label>
+      <input class="f" id="li-pass" type="password" autocomplete="current-password" placeholder="Минимум 6 символов" required minlength="6">
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Войти</button>
+      <div class="err" id="li-err" hidden></div>
+      <div class="links"><a href="#" id="lnk-forgot">Забыл пароль</a><a href="#" id="lnk-signup" style="font-weight:700">Создать аккаунт</a></div>
+    </form>
+    <form id="f-signup" hidden>
+      <label class="fl" for="su-name">Имя</label>
+      <input class="f" id="su-name" placeholder="Айгуль Сериковна" autocomplete="name" required>
+      <label class="fl" for="su-email">Email</label>
+      <input class="f" id="su-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="school@edu.kz" required>
+      <label class="fl" for="su-pass">Пароль</label>
+      <input class="f" id="su-pass" type="password" autocomplete="new-password" placeholder="Минимум 6 символов" required minlength="6">
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Создать аккаунт</button>
+      <div class="err" id="su-err" hidden></div>
+      <div class="links"><a href="#" id="lnk-login">У меня уже есть аккаунт</a></div>
+    </form>
+    <form id="f-forgot" hidden>
+      <label class="fl" for="fg-email">Email</label>
+      <input class="f" id="fg-email" type="email" placeholder="school@edu.kz" required>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Прислать ссылку для сброса</button>
+      <div class="err" id="fg-err" hidden></div>
+      <div class="xs mut" id="fg-ok" style="margin-top:12px" hidden>Письмо отправлено — откройте ссылку из него, задайте новый пароль и вернитесь сюда.</div>
+      <div class="links"><a href="#" id="lnk-login2">Назад ко входу</a></div>
+    </form>
+    <div class="xs mut" style="text-align:center;margin-top:26px">Нет доступа? <a href="/schools/#apply">Подать заявку от школы</a></div>
+  </div>
+</div>
+
+<!-- вошёл, но школы нет -->
+<div id="v-none" hidden>
+  <div class="authwrap">
+    <div class="card">
+      <div class="h1" style="font-size:22px">К этому аккаунту школа не привязана</div>
+      <p class="sm mut" style="margin:8px 0 14px" id="noneText">Кабинет школы привязывается по ссылке из письма «доступ открыт». Откройте это письмо и нажмите кнопку «Открыть кабинет школы» — войдя этим же аккаунтом (<b id="noneEmail"></b>).</p>
+      <a class="btn btn-primary btn-block" href="/schools/#apply">Подать заявку от школы</a>
+      <a class="btn btn-ghost btn-block" style="margin-top:8px" href="/cabinet/">Открыть кабинет ученика</a>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px" id="btn-out2">Выйти</button>
+    </div>
+  </div>
+</div>
+
+<!-- кабинет -->
+<div id="v-app" hidden>
+  <div class="top">
+    <a class="logo" href="/schools/">Scholary<span>.</span> <span class="mut" style="font-weight:600;font-size:14px">для школ</span></a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" id="btn-refresh">Обновить</button>
+      <button class="btn btn-ghost btn-sm" id="btn-out">Выйти</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      <div>
+        <div class="xs" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)">Кабинет школы</div>
+        <h1 class="h1" id="scName">—</h1>
+        <div class="sm mut" id="scMeta"></div>
+      </div>
+      <div id="scStatus"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card glow">
+        <div class="h2">Ссылка для учеников</div>
+        <div class="xs mut">Разошлите в чат класса, дневник или дайте на классном часе. Место занимает только тот, кто зарегистрировался.</div>
+        <div class="link-row" style="margin-top:10px">
+          <input class="f" id="inviteLink" readonly>
+          <button class="btn btn-primary" id="btn-copy">Копировать</button>
+        </div>
+        <div class="xs mut" style="margin-top:8px">Код школы</div>
+        <div class="code" id="inviteCode">—</div>
+        <div class="actions">
+          <a class="btn btn-soft btn-sm" id="btn-wa" href="#" target="_blank" rel="noopener">Отправить в WhatsApp</a>
+          <button class="btn btn-ghost btn-sm" id="btn-msg">Текст для чата класса</button>
+          <button class="btn btn-ghost btn-sm" id="btn-regen">Новая ссылка</button>
+        </div>
+        <div id="regenBox" class="sm" hidden style="margin-top:10px;background:var(--warn-soft);color:var(--warn);padding:10px 12px;border-radius:12px">Старая ссылка перестанет работать сразу; ученики, которые уже зарегистрировались, останутся. Выпустить новую? <button class="btn btn-sm btn-primary" id="btn-regen-yes" style="margin-left:6px">Да, выпустить</button> <button class="btn btn-sm btn-ghost" id="btn-regen-no">Отмена</button></div>
+        <div id="msgBox" hidden><textarea class="msg" id="msgText" readonly></textarea><div class="actions"><button class="btn btn-soft btn-sm" id="btn-msg-copy">Скопировать текст</button></div></div>
+      </div>
+      <div class="card kpi">
+        <div class="l">Места</div>
+        <div class="n"><span id="seatUsed">0</span><span class="mut" style="font-size:18px;font-weight:700"> / <span id="seatTotal">0</span></span></div>
+        <div class="bar"><i id="seatBar" style="width:0%"></i></div>
+        <div class="xs mut" id="seatFree" style="margin-top:6px"></div>
+        <div class="xs mut" style="margin-top:auto;padding-top:10px">Нужно больше мест — <a href="https://wa.me/77024666852?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9D%D1%83%D0%B6%D0%BD%D0%BE%20%D1%80%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B8%D1%82%D1%8C%20%D0%BC%D0%B5%D1%81%D1%82%D0%B0%20%D0%B4%D0%BB%D1%8F%20%D1%88%D0%BA%D0%BE%D0%BB%D1%8B" target="_blank" rel="noopener">напишите нам</a>, расширим в тот же день.</div>
+      </div>
+      <div class="card kpi">
+        <div class="l">В зоне риска</div>
+        <div class="n" id="riskN">0</div>
+        <div class="xs mut" id="riskText">дедлайн ближе 30 дней, а документы не собраны</div>
+        <div class="xs mut" style="margin-top:auto;padding-top:10px"><span id="idleN">0</span> не заходили 7+ дней · <span id="noCalcN">0</span> без расчёта</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div><div class="h2">Ученики</div><div class="xs mut" id="rosterSub">—</div></div>
+        <button class="btn btn-ghost btn-sm" id="btn-csv">Скачать CSV</button>
+      </div>
+      <div class="tools">
+        <input class="f" id="q" placeholder="Поиск по имени" autocomplete="off">
+        <div class="chips" id="classChips" style="margin:0"></div>
+      </div>
+      <div class="scroll" style="margin-top:10px"><div id="roster"></div></div>
+    </div>
+
+    <div class="card memo" style="margin-top:14px">
+      <div class="h2">Как запустить в школе</div>
+      <ol>
+        <li><b>Разошлите ссылку</b> ученикам 9–11 классов и родителям — кнопка «Отправить в WhatsApp» выше уже содержит готовый текст.</li>
+        <li><b>Классный час 10 минут:</b> ученики открывают ссылку с телефона, регистрируются и проходят квиз из 7 вопросов — сразу видят свою вероятность.</li>
+        <li><b>Раз в неделю</b> открывайте этот кабинет: первыми подходите к тем, кто в зоне риска — дедлайн близко, документы не собраны или ученик давно не заходил.</li>
+        <li><b>Родителям</b> достаточно одной фразы: «У школы есть доступ к сервису, который считает шансы на стипендию за рубежом; ссылка у ребёнка в чате класса».</li>
+      </ol>
+      <div class="xs mut" style="margin-top:10px">Вопросы — <a href="https://wa.me/77024666852" target="_blank" rel="noopener">WhatsApp +7 702 466 68 52</a>, ответим сразу.</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script>
+(function () {
+  if (window.supabase && window.supabase.createClient) return;
+  var s = document.createElement("script");
+  s.src = "https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"; s.async = false;
+  document.head.appendChild(s);
+})();
+</script>
+<script src="/js/config.js?v=61"></script>
+<script src="/js/telemetry.js?v=61"></script>
+<script src="/js/school-cabinet.js?v=61"></script>
+</body>
+</html>
