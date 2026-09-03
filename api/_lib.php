@@ -221,7 +221,12 @@ function wa_digits($phone) {
   $d = preg_replace('/\D/', '', $raw);
   if ($d === '') return null;
   if (strlen($d) === 12 && substr($d, 0, 2) === '78') $d = '7' . substr($d, 2);
-  if (strlen($d) === 10 && $raw[0] !== '+') $d = '7' . $d;
+  // 10 цифр без «+» — это абонентская часть, она у всех номеров РК начинается
+  // на 7. Начинается на 8 — потеряна цифра; достраивать нельзя, вернём null.
+  if (strlen($d) === 10 && $raw[0] !== '+') {
+    if ($d[0] !== '7') return null;
+    $d = '7' . $d;
+  }
   elseif (strlen($d) === 11 && $d[0] === '8') $d = '7' . substr($d, 1);
   elseif (strlen($d) === 11 && $d[0] === '7') { /* ок */ }
   elseif ($raw !== '' && $raw[0] === '+' && strlen($d) >= 11 && strlen($d) <= 15) { /* другой код страны */ }
