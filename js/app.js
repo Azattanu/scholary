@@ -333,19 +333,26 @@
   window.scholaryKaspiReady = function () { return !!(window.SCHOLARY_CONFIG || {}).KASPI_ON; };
   window.scholaryKaspi = function (o) {
     o = o || {};
-    var stopped = false, timer = null, started = Date.now();
+    var stopped = false, timer = null, started = Date.now(), bad = 0;
     var api = (window.SCHOLARY_CONFIG || {}).KASPI_URL || "/api/kaspi.php";
     function stop() { stopped = true; if (timer) clearTimeout(timer); }
+    /* Сервер молчит или отвечает ошибкой 8 раз подряд — не крутим спиннер
+       вечно, показываем «временно недоступен». Счёт живёт сутки: после
+       этого тоже останавливаемся. */
+    function failed(why) { bad++; if (bad >= 8) { stop(); if (o.onError) o.onError(why, ""); return true; } return false; }
     function poll(order, delay) {
       if (stopped) return;
       timer = setTimeout(function () {
         if (stopped) return;
+        if (Date.now() - started > 86400000) { stop(); if (o.onStatus) o.onStatus("expired", { status: "expired", error_code: "" }); return; }
         fetch(api + "?a=status&o=" + encodeURIComponent(order), { cache: "no-store" })
           .then(function (r) { return r.json(); })
           .then(function (j) {
             if (stopped) return;
-            if (!j || !j.ok) { poll(order, 5000); return; }
+            if (!j || !j.ok) { if (!failed("network")) poll(order, 5000); return; }
+            bad = 0;
             var st = j.status;
+            if (st === "partially_refunded") st = "paid";   /* деньги были — покупка выдана; частичный возврат доступ не снимает */
             if (o.onStatus) o.onStatus(st, j);
             if (st === "paid" || st === "cancelled" || st === "expired" || st === "error" || st === "partially_refunded") {
               if (window.track && st === "paid") window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: "kaspi_" + order });
@@ -355,13 +362,13 @@
             /* первые 10 минут — каждые 3 с, дальше реже: счёт живёт сутки */
             poll(order, Date.now() - started < 600000 ? 3000 : 15000);
           })
-          .catch(function () { poll(order, 6000); });
+          .catch(function () { if (!failed("network")) poll(order, 6000); });
       }, delay);
     }
     if (window.track) window.track("pay_widget_open", { kind: o.kind || "report", amount: o.amount, via: "kaspi" });
     fetch(api + "?a=create", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: o.kind || "report", phone: o.phone || "", email: o.email || "", lead: o.lead || "", account: o.account || "" })
+      body: JSON.stringify({ kind: o.kind || "report", phone: o.phone || "", email: o.email || "", lead: o.lead || "", account: o.account || "", name: o.name || "" })
     }).then(function (r) { return r.json().then(function (j) { j._http = r.status; return j; }); })
       .then(function (j) {
         if (stopped) return;
@@ -376,6 +383,146 @@
       .catch(function () { if (o.onError) o.onError("network", ""); });
     return { stop: stop };
   };
+
+  /* ---------- Покупка консультации / пакета через Kaspi ----------
+     Окно с тремя полями (имя, номер Kaspi/WhatsApp, почта) → счёт в Kaspi →
+     ожидание → «Оплата прошла: профориентолог напишет и назначит дату».
+     Кнопки на страницах: <button data-kaspi="consult|package">.
+     Тот же движок scholaryKaspi, что у квиза и кабинета. */
+  var KPAY = {
+    consult: { title: "Разбор со специалистом", price: "PRICE_CONSULT", what: "консультацию", next: "назначит дату и время онлайн-консультации (90 минут, Zoom / Google Meet)", wa: "Здравствуйте! Хочу разбор со специалистом за 15 000 ₸" },
+    package: { title: "Документы и подача", price: "PRICE_PACKAGE", what: "пакет «Документы и подача»", next: "назначит дату первого созвона и соберёт список твоих программ", wa: "Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸" }
+  };
+  function kpEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function kpFmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function kpLoad() { try { return JSON.parse(localStorage.getItem("scholary_contact") || "{}") || {}; } catch (e) { return {}; } }
+  function kpSave(o) { try { localStorage.setItem("scholary_contact", JSON.stringify(o)); } catch (e) {} }
+  var kpCtl = null, kpRoot = null;
+  function kpStop() { if (kpCtl) { try { kpCtl.stop(); } catch (e) {} kpCtl = null; } }
+  function kpClose() { kpStop(); if (kpRoot) { kpRoot.remove(); kpRoot = null; } document.body.classList.remove("kpay-open"); }
+  function kpWaLink(text) { return "https://wa.me/" + ((window.SCHOLARY_CONFIG || {}).WHATSAPP_NUMBER || "77024666852") + "?text=" + encodeURIComponent(text); }
+
+  window.scholaryKaspiOrder = function (kind, source) {
+    var P = KPAY[kind]; if (!P) return;
+    var C = window.SCHOLARY_CONFIG || {};
+    var amount = C[P.price] || (kind === "package" ? 35000 : 15000);
+    var PH = window.ScholaryPhone;
+    var saved = kpLoad();
+    var ctx = { name: saved.name || "", phone: saved.phone || "", email: saved.email || "" };
+    kpClose();
+    kpRoot = document.createElement("div");
+    kpRoot.className = "kpay-bg";
+    kpRoot.innerHTML = '<div class="kpay" role="dialog" aria-modal="true" aria-labelledby="kpayTitle"><button type="button" class="kpay-x" aria-label="Закрыть">×</button><div class="kpay-body"></div></div>';
+    document.body.appendChild(kpRoot);
+    document.body.classList.add("kpay-open");
+    var body = kpRoot.querySelector(".kpay-body");
+    kpRoot.querySelector(".kpay-x").addEventListener("click", kpClose);
+    kpRoot.addEventListener("click", function (e) { if (e.target === kpRoot) kpClose(); });
+    document.addEventListener("keydown", function onKey(e) { if (e.key === "Escape") { kpClose(); document.removeEventListener("keydown", onKey); } });
+    if (window.track) window.track("pay_click", { kind: kind, via: "kaspi", source: source || location.pathname });
+
+    function head(sub) {
+      return '<div class="kpay-head"><div><div class="kpay-kicker">Оплата через Kaspi</div><div class="kpay-title" id="kpayTitle">' + P.title + '</div></div><div class="kpay-price">' + kpFmt(amount) + '&nbsp;₸</div></div>' + (sub ? '<p class="kpay-sub">' + sub + '</p>' : "");
+    }
+    function phoneBox() {
+      return '<div class="kpay-phone"><div><div class="kpay-kicker">Номер Kaspi</div><div class="kpay-num">' + kpEsc(PH ? PH.format(ctx.phone) : ctx.phone) + '</div></div><button type="button" class="btn btn-ghost" data-kp="change">Другой номер</button></div>';
+    }
+
+    function renderForm(focusPhone) {
+      kpStop();
+      body.innerHTML = head("Счёт придёт в приложение Kaspi на этот номер. После оплаты профориентолог напишет тебе в WhatsApp и на почту и " + P.next + ".") +
+        '<div class="kpay-form">' +
+          '<div class="field"><label for="kpName">Имя</label><input id="kpName" class="input" autocomplete="name" placeholder="Аида" value="' + kpEsc(ctx.name) + '"></div>' +
+          '<div class="field"><label for="kpPhone">Номер Kaspi (он же WhatsApp)</label><input id="kpPhone" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __" value="' + kpEsc(ctx.phone ? (PH ? PH.format(ctx.phone) : ctx.phone) : "") + '"><div class="field-hint" id="kpPhoneHint">На этом номере должно быть приложение Kaspi.kz</div></div>' +
+          '<div class="field"><label for="kpEmail">Почта</label><input id="kpEmail" class="input" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="' + kpEsc(ctx.email) + '"><div class="field-hint" id="kpEmailHint">Сюда придёт подтверждение оплаты</div></div>' +
+          '<button type="button" class="btn btn-kaspi" data-kp="go">Выставить счёт — ' + kpFmt(amount) + '&nbsp;₸</button>' +
+          '<div class="kpay-fine">Нажимая кнопку, соглашаешься с <a href="/oferta/" target="_blank" rel="noopener">офертой</a>. Консультация отменяется с полным возвратом за 24 часа. Удобнее сначала поговорить? <a href="' + kpWaLink(P.wa) + '" target="_blank" rel="noopener">Напиши нам в WhatsApp</a>.</div>' +
+        "</div>";
+      var ph = body.querySelector("#kpPhone");
+      if (PH) PH.attach(ph);
+      if (focusPhone) setTimeout(function () { ph.focus(); }, 30);
+      body.querySelector('[data-kp="go"]').addEventListener("click", submit);
+      body.querySelectorAll("input").forEach(function (i) { i.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); }); });
+    }
+    function submit() {
+      var name = body.querySelector("#kpName").value.trim();
+      var phoneIn = body.querySelector("#kpPhone"), emailIn = body.querySelector("#kpEmail");
+      var phone = PH ? PH.normalize(phoneIn.value) : phoneIn.value.replace(/\D/g, "");
+      var email = emailIn.value.trim();
+      var bad = false;
+      if (!phone || (PH && !PH.valid(phoneIn.value))) { phoneIn.classList.add("input-error"); body.querySelector("#kpPhoneHint").classList.add("is-error"); body.querySelector("#kpPhoneHint").textContent = "Проверь номер: нужен формат +7 7XX XXX XX XX"; bad = true; }
+      else { phoneIn.classList.remove("input-error"); }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { emailIn.classList.add("input-error"); body.querySelector("#kpEmailHint").classList.add("is-error"); body.querySelector("#kpEmailHint").textContent = "Проверь почту: сюда придёт подтверждение"; bad = true; }
+      else { emailIn.classList.remove("input-error"); }
+      if (bad) { (phoneIn.classList.contains("input-error") ? phoneIn : emailIn).focus(); return; }
+      ctx = { name: name, phone: String(phone).replace(/\D/g, ""), email: email };
+      kpSave(ctx);
+      start();
+    }
+    function start() {
+      renderWait("creating");
+      kpStop();
+      kpCtl = window.scholaryKaspi({
+        kind: kind, amount: amount, phone: "+" + ctx.phone, email: ctx.email, name: ctx.name, lead: (window.scholaryLeadId ? window.scholaryLeadId() : ""),
+        onCreated: function (j) { renderWait(j.status === "pending" ? "pending" : "processing"); },
+        onStatus: function (st, j) {
+          if (st === "paid") { kpStop(); renderDone(); return; }
+          if (st === "error" || st === "expired" || st === "cancelled") { kpStop(); renderError(j); return; }
+          var s = body.querySelector("#kpStatus"); if (s) s.lastChild.textContent = st === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…";
+        },
+        onError: function (why, msg) { kpStop(); renderError({ status: "create_failed", error_code: why, error_message: msg }); }
+      });
+    }
+    function renderWait(state) {
+      body.innerHTML = head() +
+        '<div class="kpay-center"><span class="kpay-ico kpay-ico-kaspi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E5442F" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M11 18h2"/></svg></span>' +
+          '<div class="kpay-h">Счёт отправлен в Kaspi</div>' +
+          '<div class="kpay-p">Открой приложение <b>Kaspi.kz</b> — придёт уведомление, или зайди в <b>Платежи → Счета на оплату</b> и подтверди <b>' + kpFmt(amount) + ' ₸</b>.<br>Как только оплата пройдёт, это окно само покажет результат.</div>' +
+          phoneBox() +
+          '<div class="kpay-status" id="kpStatus"><span class="spin"></span><span>' + (state === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…") + '</span></div>' +
+        "</div>" +
+        '<div class="kpay-fine">Счёт действует 24 часа. Не пришёл? Проверь, что номер зарегистрирован в Kaspi, или <a href="' + kpWaLink("Здравствуйте! Не приходит счёт Kaspi за " + P.what + " Scholary") + '" target="_blank" rel="noopener">напиши нам в WhatsApp</a>.</div>';
+      body.querySelector('[data-kp="change"]').addEventListener("click", function () { renderForm(true); });
+    }
+    function renderDone() {
+      body.innerHTML = head() +
+        '<div class="kpay-center"><span class="kpay-ico kpay-ico-ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1D9A5B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>' +
+          '<div class="kpay-h">Оплата прошла</div>' +
+          '<div class="kpay-p">' + (ctx.name ? kpEsc(ctx.name) + ", спасибо!" : "Спасибо!") + ' Профориентолог Scholary скоро напишет тебе в WhatsApp на <b>' + kpEsc(PH ? PH.format(ctx.phone) : ctx.phone) + '</b> и на почту <b>' + kpEsc(ctx.email) + '</b> и ' + P.next + '.<br>Подтверждение оплаты придёт туда же в течение пары минут.</div>' +
+          '<a class="btn btn-outline" href="' + kpWaLink("Здравствуйте! Оплатил(а) " + P.what + " Scholary через Kaspi, жду связи") + '" target="_blank" rel="noopener">Написать первым в WhatsApp</a>' +
+          '<button type="button" class="btn btn-ghost" data-kp="close">Готово</button>' +
+        "</div>";
+      body.querySelector('[data-kp="close"]').addEventListener("click", kpClose);
+    }
+    function renderError(j) {
+      var code = (j && j.error_code) || "", st = (j && j.status) || "";
+      var title = "Оплата не прошла", text = "Деньги не списаны. Можно попробовать ещё раз.", btn = "Попробовать ещё раз";
+      if (code === "client_not_found" || code === "bad_phone") { title = "Этот номер не зарегистрирован в Kaspi"; text = "Kaspi не нашёл приложение по номеру " + kpEsc(PH ? PH.format(ctx.phone) : ctx.phone) + ". Укажи номер, на который установлен Kaspi.kz."; btn = "Указать другой номер"; }
+      else if (st === "expired") { title = "Срок счёта истёк"; text = "Счёт в Kaspi действовал 24 часа. Ничего страшного — выставим новый."; }
+      else if (st === "cancelled") { title = "Счёт отменён"; text = "Оплата не подтверждена в Kaspi. Деньги не списаны — можно выставить счёт заново."; }
+      else if (code === "rate") { title = "Слишком много попыток"; text = "Мы выставили несколько счетов подряд. Открой Kaspi → Платежи → Счета: оплатить можно любой из них, или напиши нам."; }
+      else if (code === "kaspi_off" || code === "kaspi_session_expired" || code === "tariff_inactive" || code === "network" || /^http/.test(code)) { title = "Kaspi временно недоступен"; text = "Не получилось выставить счёт. Попробуй через минуту или напиши нам в WhatsApp — оформим вручную."; }
+      else if (j && j.error_message) { text = kpEsc(j.error_message); }
+      if (window.track) window.track("kaspi_error_screen", { status: st, code: code, kind: kind });
+      body.innerHTML = head() +
+        '<div class="kpay-center"><span class="kpay-ico kpay-ico-warn"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D9A413" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.5" r=".5" fill="#D9A413"/></svg></span>' +
+          '<div class="kpay-h">' + title + '</div><div class="kpay-p">' + text + '</div>' +
+          '<button type="button" class="btn btn-kaspi" data-kp="retry">' + btn + '</button>' +
+          '<a class="btn btn-ghost" href="' + kpWaLink("Здравствуйте! Не проходит оплата Kaspi за " + P.what + " Scholary (" + (code || st) + ")") + '" target="_blank" rel="noopener">Написать нам в WhatsApp</a>' +
+        "</div>";
+      body.querySelector('[data-kp="retry"]').addEventListener("click", function () { if (window.track) window.track("pay_retry", { via: "kaspi", kind: kind }); renderForm(code === "client_not_found" || code === "bad_phone"); });
+    }
+    renderForm(false);
+  };
+  function initKaspiButtons() {
+    var ready = window.scholaryKaspiReady();
+    document.querySelectorAll("[data-kaspi]").forEach(function (b) {
+      if (!ready) { b.hidden = true; return; }
+      b.addEventListener("click", function (e) { e.preventDefault(); window.scholaryKaspiOrder(b.getAttribute("data-kaspi"), b.getAttribute("data-source") || location.pathname); });
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initKaspiButtons);
+  else initKaspiButtons();
 
   // UX: все внешние ссылки (мессенджеры, соцсети, чужие сайты) — в новой вкладке
   function externalizeLinks() {

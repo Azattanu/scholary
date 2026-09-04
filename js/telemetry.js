@@ -274,7 +274,8 @@
           return;
         }
         if (event === "pay_click" || event === "paywall_view" || event === "pay_kaspi_click") {
-          window.ttq.track(TT_STD[event], ttProduct("report", TT_PRICE.report), { event_id: ttEventId(event) });
+          var ck = (d.kind && TT_PRICE[d.kind]) ? d.kind : "report";
+          window.ttq.track(TT_STD[event], ttProduct(ck, TT_PRICE[ck]), { event_id: ttEventId(event) });
           return;
         }
         if (event === "pay_widget_open") {
