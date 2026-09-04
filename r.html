@@ -9,11 +9,11 @@
 <meta name="theme-color" content="#5B4BFF">
   <title>Твой отчёт | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=68">
-  <script src="/js/config.js?v=68"></script>
-<script src="/js/telemetry.js?v=68"></script>
-  <script src="/js/report-engine.js?v=68"></script>
-  <script src="/js/app.js?v=68" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=69">
+  <script src="/js/config.js?v=69"></script>
+<script src="/js/telemetry.js?v=69"></script>
+  <script src="/js/report-engine.js?v=69"></script>
+  <script src="/js/app.js?v=69" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Персональный отчёт Scholary</h1>
@@ -281,8 +281,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       /* Цены берём из config.js, а не пишем руками: на этой кнопке уже была
          рассинхронизация — подпись «25 000 ₸» при сообщении на 35 000 ₸.
          Человек видел одну цену, а в WhatsApp уходила другая. */
-      '<a class="btn btn-primary" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за " + rub(PRICE_CONSULT)) + '">Разбор · ' + rub(PRICE_CONSULT) + '</a>' +
-      '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за " + rub(PRICE_PACKAGE)) + '">Документы и подача · ' + rub(PRICE_PACKAGE) + '</a>' +
+      (window.scholaryKaspiReady && window.scholaryKaspiReady()
+        ? '<button type="button" class="btn btn-kaspi" onclick="scholaryKaspiOrder(\'consult\',\'report\')">Kaspi · Разбор — ' + rub(PRICE_CONSULT) + '</button>' +
+          '<button type="button" class="btn btn-kaspi" onclick="scholaryKaspiOrder(\'package\',\'report\')">Kaspi · Документы — ' + rub(PRICE_PACKAGE) + '</button>' +
+          '<div style="display:flex; gap:10px; flex-wrap:wrap"><a class="btn btn-outline" style="background:#fff; flex:1 1 200px" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за " + rub(PRICE_CONSULT)) + '">Заявка на разбор</a>' +
+          '<a class="btn btn-outline" style="background:#fff; flex:1 1 200px" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за " + rub(PRICE_PACKAGE)) + '">Заявка на документы</a></div>'
+        : '<a class="btn btn-primary" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу разбор со специалистом за " + rub(PRICE_CONSULT)) + '">Разбор · ' + rub(PRICE_CONSULT) + '</a>' +
+          '<a class="btn btn-outline" style="background:#fff" href="' + wa("Здравствуйте! Получил(а) отчёт, хочу пакет «Документы и подача» за " + rub(PRICE_PACKAGE)) + '">Документы и подача · ' + rub(PRICE_PACKAGE) + '</a>') +
     "</div>" +
     '<div class="fineprint">Scholary · scholary.kz · Оценка модели не является гарантией поступления</div>';
 

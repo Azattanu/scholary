@@ -10,10 +10,10 @@
 <link rel="canonical" href="https://scholary.kz/">
   <title>Scholary — реальная вероятность поступить за границу со стипендией</title>
   <meta name="description" content="7 вопросов — и ты видишь реальные шансы на поступление и на стипендию. Каталог из 97 программ в 54 странах: у каждой сумма финансирования, дедлайн и официальная ссылка. Кабинет бесплатный, персональный отчёт — 4 000 ₸.">
-  <link rel="stylesheet" href="/css/style.css?v=68">
-  <script src="/js/config.js?v=68"></script>
-<script src="/js/telemetry.js?v=68"></script>
-  <script src="/js/app.js?v=68" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=69">
+  <script src="/js/config.js?v=69"></script>
+<script src="/js/telemetry.js?v=69"></script>
+  <script src="/js/app.js?v=69" defer></script>
 </head>
 <body>
 
@@ -215,7 +215,10 @@
           <li>план документов и мотивационного письма</li>
           <li>отчёт о вероятности включён</li>
         </ul>
-        <a class="btn btn-outline" id="waConsult" href="#" onclick="track('cta_tariff_consult')">Оставить заявку</a>
+        <div class="tariff-actions">
+          <a class="btn btn-outline" id="waConsult" href="#" onclick="track('cta_tariff_consult')">Оставить заявку</a>
+          <button type="button" class="btn btn-kaspi" data-kaspi="consult" data-source="home">Оплатить через Kaspi</button>
+        </div>
       </div>
       <div class="card tariff">
         <div class="tariff-head">
@@ -231,7 +234,10 @@
           <li><b>Финальная сверка пакета</b> перед отправкой по каждой из 5 программ</li>
           <li><b>Ведение по дедлайнам</b> до конца сезона: пишем сами, когда пора действовать</li>
         </ul>
-        <a class="btn btn-outline" id="waPackage" href="#" onclick="track('cta_tariff_package')">Оставить заявку</a>
+        <div class="tariff-actions">
+          <a class="btn btn-outline" id="waPackage" href="#" onclick="track('cta_tariff_package')">Оставить заявку</a>
+          <button type="button" class="btn btn-kaspi" data-kaspi="package" data-source="home">Оплатить через Kaspi</button>
+        </div>
       </div>
     </div>
   </div>

@@ -10,10 +10,10 @@
 <link rel="canonical" href="https://scholary.kz/tariffs/">
   <title>Тарифы | Scholary</title>
   <meta name="description" content="Тарифы Scholary: личный кабинет бесплатно, отчёт о вероятности — 4 000 ₸, Scholary Pro — 14 900 ₸ за сезон, разбор со специалистом — 15 000 ₸, документы и подача — 35 000 ₸.">
-  <link rel="stylesheet" href="/css/style.css?v=68">
-  <script src="/js/config.js?v=68"></script>
-<script src="/js/telemetry.js?v=68"></script>
-  <script src="/js/app.js?v=68" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=69">
+  <script src="/js/config.js?v=69"></script>
+<script src="/js/telemetry.js?v=69"></script>
+  <script src="/js/app.js?v=69" defer></script>
 </head>
 <body>
 <h1 class="sr-only">Тарифы Scholary</h1>
@@ -50,7 +50,7 @@
     <div class="tariffs">
       <div class="card tariff">
         <span class="tariff-flag" style="background:#EAF6EE;color:#187E54">Начни отсюда</span>
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <div class="tariff-head">
           <strong style="font-size:16px">Личный кабинет</strong>
           <span class="price" style="color:#187E54">бесплатно</span>
         </div>
@@ -65,7 +65,7 @@
         <a class="btn btn-outline" href="/cabinet/">Открыть кабинет</a>
       </div>
       <div class="card tariff featured">
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <div class="tariff-head">
           <strong style="font-size:16px">Отчёт о вероятности</strong>
           <span class="price" style="color:var(--accent)">4 000&nbsp;₸</span>
         </div>
@@ -79,7 +79,7 @@
       </div>
       <div class="card tariff">
         <span class="tariff-flag">Когда ИИ нужен каждый день</span>
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <div class="tariff-head">
           <strong style="font-size:16px">Scholary Pro</strong>
           <span class="price">14 900&nbsp;₸<span style="font-size:13px; font-weight:600; color:var(--faint)"> / сезон</span></span>
         </div>
@@ -94,7 +94,7 @@
       </div>
       <div class="card tariff">
         <span class="tariff-flag">Если сомневаешься, куда подавать</span>
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <div class="tariff-head">
           <strong style="font-size:16px">Разбор со специалистом</strong>
           <span class="price">15 000&nbsp;₸</span>
         </div>
@@ -102,12 +102,15 @@
           <li>90 минут онлайн (Zoom / Google Meet)</li>
           <li>приоритеты по программам, план документов, мотивационное</li>
           <li>отчёт о вероятности включён</li>
-          <li>оплата после согласования времени</li>
+          <li>оплата через Kaspi сразу или после согласования времени</li>
         </ul>
-        <a class="btn btn-outline" id="waConsult" href="#">Оставить заявку</a>
+        <div class="tariff-actions">
+          <a class="btn btn-outline" id="waConsult" href="#">Оставить заявку</a>
+          <button type="button" class="btn btn-kaspi" data-kaspi="consult" data-source="tariffs">Оплатить через Kaspi</button>
+        </div>
       </div>
       <div class="card tariff">
-        <div style="display:flex; justify-content:space-between; align-items:baseline">
+        <div class="tariff-head">
           <strong style="font-size:16px">Документы и подача</strong>
           <span class="price">35 000&nbsp;₸</span>
         </div>
@@ -120,7 +123,10 @@
           <li><b>Финальная сверка пакета</b> перед отправкой по каждой из 5 программ</li>
           <li><b>Ведение по дедлайнам</b> до конца сезона: пишем сами, когда пора действовать</li>
         </ul>
-        <a class="btn btn-outline" id="waPackage" href="#">Оставить заявку</a>
+        <div class="tariff-actions">
+          <a class="btn btn-outline" id="waPackage" href="#">Оставить заявку</a>
+          <button type="button" class="btn btn-kaspi" data-kaspi="package" data-source="tariffs">Оплатить через Kaspi</button>
+        </div>
       </div>
     </div>
     <p style="font-size:13px; color:var(--faint); font-weight:600; margin-top:18px">Возвраты — согласно разделу 5 <a href="/oferta/">публичной оферты</a>: недоставленный отчёт — повторная отправка или полный возврат; консультация отменяется с полным возвратом за 24 часа.</p>

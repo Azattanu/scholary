@@ -45,6 +45,8 @@ ErrorDocument 503 /error_docs/503.html
   RewriteRule ^ph/(.*)$ /api/ph.php?p=$1 [QSA,L]
   # Вебхук ApiPay (оплата Kaspi): адрес прописан в кабинете apipay.kz
   RewriteRule ^kaspi/webhook/?$ /api/kaspi-webhook.php [L]
+  # на случай, если папка с секретами когда-нибудь окажется внутри сайта
+  RewriteRule ^private(/|$) - [F]
 </IfModule>
 
 # 5) Служебные подключаемые файлы бэкенда наружу не отдаём.
