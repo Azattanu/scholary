@@ -10,10 +10,10 @@
   <link rel="canonical" href="https://scholary.kz/prof/">
   <title>Scholary для профориентологов — workspace для ведения учеников к поступлению за рубеж</title>
   <meta name="description" content="Рабочее место профориентолога и образовательного консультанта: все ученики, программы с точными ссылками на подачу, дедлайны, документы с файлами, заметки о звонках родителям — в одном кабинете. Каждому ученику — Scholary Pro. 14 дней бесплатно.">
-  <link rel="stylesheet" href="/css/style.css?v=66">
-  <script src="/js/config.js?v=66"></script>
-  <script src="/js/telemetry.js?v=66"></script>
-  <script src="/js/app.js?v=66" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=67">
+  <script src="/js/config.js?v=67"></script>
+  <script src="/js/telemetry.js?v=67"></script>
+  <script src="/js/app.js?v=67" defer></script>
   <style>
     /* Страница для профориентологов: всё сверх общего стиля лежит здесь. */
     .sch-hero { background: var(--surface); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; padding-block: clamp(40px, 3rem + 2vw, 72px) clamp(40px, 3rem + 2vw, 64px); }
@@ -21,10 +21,10 @@
     .sch-hero::after { content: ""; position: absolute; width: 460px; height: 460px; left: -200px; bottom: -240px; background: radial-gradient(closest-side, rgba(22,163,92,.09), transparent); pointer-events: none; }
     .sch-hero .container { position: relative; }
     .sch-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
-    .sch-hero h1 { font-size: var(--fz-h1); margin: var(--s4) 0 var(--s4); max-width: 18ch; }
+    .sch-hero h1 { font-size: var(--fz-h1); margin: var(--s4) 0 var(--s4); max-width: 20ch; text-wrap: balance; }
     .sch-hero .sub { font-size: var(--fz-lead); color: var(--muted); max-width: 50ch; }
     .sch-cta { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
-    .sch-cta .btn { min-height: 54px; }
+    .sch-cta .btn { min-height: 54px; white-space: nowrap; }
     .sch-mini { font-size: 13px; color: var(--muted); margin-top: var(--s3); font-weight: 600; }
 
     /* Витрина: экран «Сегодня» */
@@ -71,6 +71,8 @@
     .sch-tariffs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s4); align-items: stretch; }
     .sch-tariffs .tariff .per { font-size: 12.5px; color: var(--muted); font-weight: 600; margin-top: -6px; }
     .sch-tariffs .tariff .seat { font-size: 12.5px; color: var(--accent-dark); font-weight: 700; }
+    .sch-tariffs .tariff-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .sch-tariffs .tariff-head strong { font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
     .sch-tariffs .tariff .was { font-size: 13px; color: var(--muted); text-decoration: line-through; font-weight: 600; margin-right: 6px; }
     .sch-tariffs .tariff .early { display: inline-block; font-size: 11.5px; font-weight: 800; color: #B42318; background: #FFF4F3; border: 1px solid #FDE2E0; border-radius: 999px; padding: 3px 9px; margin: 4px 0 6px; }
     .switch { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px; gap: 4px; margin-bottom: var(--s5); }
@@ -105,7 +107,7 @@
     }
     @media (max-width: 640px) {
       .sch-hero h1 { max-width: none; }
-      .sch-cta .btn { width: 100%; }
+      .sch-cta .btn { width: 100%; white-space: normal; }
       .two, .sch-tariffs, .steps4, .feat, .pain { grid-template-columns: 1fr; }
       .apply { grid-template-columns: 1fr; }
       .apply .plans { grid-template-columns: 1fr; }
@@ -145,14 +147,14 @@
 <section class="sch-hero">
   <div class="container sch-grid">
     <div>
-      <span class="badge-pill">Для профориентологов и образовательных консультантов</span>
-      <h1>Все ваши ученики, дедлайны и документы — в одном рабочем месте</h1>
-      <p class="sub">Вы ведёте 15, 50 или 100 учеников — в WhatsApp, Excel и в голове. Scholary Workspace собирает это в одну систему: карточка каждого ученика, программы с точной ссылкой на подачу, чек-лист документов с файлами, заметки о звонках родителям — и экран «Сегодня», который сам показывает, что горит.</p>
+      <span class="badge-pill">Для профориентологов и консультантов</span>
+      <h1>Все ученики, дедлайны и&nbsp;документы&nbsp;— в&nbsp;одном месте</h1>
+      <p class="sub">Вы ведёте 15, 50 или 100 учеников — в&nbsp;WhatsApp, Excel и&nbsp;в&nbsp;голове. Workspace собирает всё в&nbsp;одну систему: карточка ученика, программы с&nbsp;точной ссылкой на подачу, чек‑лист документов, заметки о&nbsp;звонках — и&nbsp;экран «Сегодня», который показывает, что горит.</p>
       <div class="sch-cta">
-        <a class="btn btn-primary" href="#apply" onclick="track('cta_counselor_hero')">Открыть workspace — 14 дней бесплатно</a>
+        <a class="btn btn-primary" href="#apply" onclick="track('cta_counselor_hero')">Открыть workspace бесплатно</a>
         <a class="btn btn-outline" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo')">Посмотреть демо</a>
       </div>
-      <div class="sch-mini">Каждому вашему ученику — Scholary Pro за счёт тарифа · с телефона и компьютера · первым 50 профориентологам — год за полцены</div>
+      <div class="sch-mini">14 дней бесплатно · до 5 учеников · Scholary Pro каждому ученику · первым 50 профориентологам — год за полцены</div>
     </div>
 
     <a class="demo-cab card-glow" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo_card')">
@@ -171,10 +173,10 @@
 <section class="section section-tight">
   <div class="container">
     <div class="stats4">
-      <div class="stat-big"><div class="num" data-count="91000" data-fmt="space">91 000</div><div class="cap">казахстанцев учатся за рубежом — и почти каждого кто-то вёл к подаче</div></div>
-      <div class="stat-big"><div class="num">108 000 – 1,5 млн ₸</div><div class="cap">стоит сопровождение одного ученика у агентств Казахстана — при этом учёт ведут в Excel</div></div>
+      <div class="stat-big"><div class="num" data-count="91000" data-fmt="space">91 000</div><div class="cap">казахстанцев учатся за рубежом — почти каждого кто-то вёл к подаче</div></div>
+      <div class="stat-big"><div class="num">до 1,5&nbsp;млн&nbsp;₸</div><div class="cap">стоит сопровождение одного ученика у агентств Казахстана — а учёт ведут в Excel</div></div>
       <div class="stat-big"><div class="num" data-count="97">97</div><div class="cap">программ в 54 странах с проверенными ссылками на подачу и дедлайнами — уже внутри</div></div>
-      <div class="stat-big"><div class="num" data-count="2" data-suffix=" мин">2 мин</div><div class="cap">занимает регистрация ученика по вашей ссылке — и он получает Pro и расчёт шансов</div></div>
+      <div class="stat-big"><div class="num" data-count="2" data-suffix=" мин">2 мин</div><div class="cap">занимает регистрация ученика по вашей ссылке — он сразу получает Pro</div></div>
     </div>
   </div>
 </section>
@@ -226,7 +228,7 @@
 <section class="section">
   <div class="container">
     <h2>Ученик тоже выигрывает</h2>
-    <p class="lead">Ваш тариф включает Scholary Pro для каждого ученика — то, что в рознице стоит 14 900 ₸ за сезон. Это ваш аргумент для родителей: «в сопровождение входит сервис, который считает шансы и ведёт по документам».</p>
+    <p class="lead">Ваш тариф включает Scholary Pro для каждого ученика — то, что в рознице стоит 14&nbsp;900&nbsp;₸ за&nbsp;сезон. Это ваш аргумент для родителей: «в сопровождение входит сервис, который считает шансы и ведёт по документам».</p>
     <div class="two">
       <div class="card">
         <span class="who g"><i></i>Ученик</span>
@@ -258,7 +260,7 @@
 <section class="section" id="tariffs">
   <div class="container">
     <h2>Тарифы</h2>
-    <p class="lead">Цена привязана к числу учеников, которых вы ведёте одновременно. В любом тарифе — полный workspace и Scholary Pro каждому ученику. Считайте: один ученик обходится вам от 2 100 до 5 300 ₸ в год — меньше 2% от стоимости сопровождения.</p>
+    <p class="lead">Цена привязана к числу учеников, которых вы ведёте одновременно. В любом тарифе — полный workspace и Scholary Pro каждому ученику. Считайте: один ученик обходится вам от 2&nbsp;100 до 5&nbsp;300&nbsp;₸ в&nbsp;год — меньше 2% от стоимости сопровождения.</p>
     <div class="early-banner"><span class="tag">🔥</span><div><b>Первым 50 профориентологам — годовой тариф за полцены.</b> Цена фиксируется на весь первый год и продлевается по обычной, если захотите остаться. Мы собираем обратную связь и допиливаем workspace под вас.</div></div>
     <div class="switch" role="tablist" aria-label="Период оплаты">
       <button type="button" class="on" data-period="year" role="tab" aria-selected="true">На год</button>
