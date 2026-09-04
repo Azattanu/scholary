@@ -401,15 +401,15 @@ p { margin: 0; text-wrap: pretty; }
 .tariff-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
 .tariff-head strong { font-size: 16.5px; }
 .tariff .price { font-size: clamp(22px, 2vw, 26px); font-weight: 800; white-space: nowrap; }
-.tariff.featured { border: 1.5px solid var(--accent); background: #FBFAFF; }
+.tariff.featured { border: 1.5px solid var(--accent); background: #FBFAFF; padding-top: clamp(28px, 2vw + 12px, 34px); }
 .tariff-note { margin: 2px 0 10px; font-size: 13.5px; line-height: 1.55; color: var(--muted); }
-.tariff-flag { position: absolute; top: -12px; right: 16px; left: 16px; background: var(--green); color: #fff; font-size: 12.5px; font-weight: 750; border-radius: 999px; padding: 5px 12px; text-align: center; }
+.tariff-flag { position: absolute; top: -13px; right: 16px; left: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--green); color: #fff; font-size: 12.5px; font-weight: 750; border-radius: 999px; padding: 5px 12px; text-align: center; }
 .tariff ul { margin: 0 0 var(--s2); padding-left: 18px; font-size: var(--fz-small); color: var(--muted); line-height: 1.6; flex-grow: 1; }
 .tariff .btn { width: 100%; margin-top: auto; }
 
 .stats4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--s4); }
 .stat-big { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--s5) var(--s4); }
-.stat-big .num { font-size: clamp(26px, 2.4vw, 34px); font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+.stat-big .num { font-size: clamp(26px, 2.4vw, 34px); font-weight: 800; letter-spacing: -0.02em; color: var(--accent); white-space: nowrap; }
 .stat-big .cap { font-size: 13px; color: var(--muted); font-weight: 600; line-height: 1.45; margin-top: var(--s1); }
 
 .countries { display: flex; flex-wrap: wrap; gap: var(--s2); }
@@ -503,6 +503,9 @@ p { margin: 0; text-wrap: pretty; }
   .hero-cta { max-width: none; }
   .hero-cta .btn { width: 100%; }
   .stats4 { grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--s3); }
+  .stat-big { padding: var(--s4) var(--s3); }
+  .stat-big .num { font-size: 22px; white-space: nowrap; }
+  .stat-big .cap { font-size: 12.5px; }
   .facts { grid-template-columns: 1fr; }
   .cta-band { flex-direction: column; align-items: stretch; text-align: left; }
   .cta-band .btn { width: 100%; white-space: normal; }
@@ -736,3 +739,9 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
 
 /* предел длины строки: длиннее ~90 знаков глаз теряет начало следующей строки */
 .card > p, .par-card p, .section > .container > p, .tariff-note { max-width: 78ch; }
+
+/* Узкие телефоны (≤374px): кнопки чуть компактнее, чтобы текст оставался в одну строку. */
+@media (max-width: 374px) {
+  .btn { font-size: 15px; padding-inline: 16px; }
+  .chip { font-size: 12.5px; }
+}
