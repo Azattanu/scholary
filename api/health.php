@@ -107,6 +107,12 @@ chk($out, 'tiptop', 'TipTop Pay — приём оплат', $hasApi && $hasRpc,
   ($hasApi ? 'ключ подписи на месте' : 'НЕТ ключа подписи') . '; ' . ($hasRpc ? 'связь с базой настроена' : 'НЕТ секрета для базы'),
   ($hasApi && $hasRpc) ? '' : 'уведомления шлюза будут отвергаться — оплаты не отметятся');
 
+/* ---- TikTok Events API (серверные события: заявки, оплаты) ---- */
+$ttTok = !empty($c['TIKTOK_ACCESS_TOKEN']);
+chk($out, 'tiktok', 'TikTok — Events API', $ttTok,
+  $ttTok ? 'токен доступа на месте, пиксель ' . (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG') : 'токен не прописан — уходят только события браузера',
+  $ttTok ? '' : "добавьте 'TIKTOK_ACCESS_TOKEN' => '…' в /private/scholary-config.php");
+
 /* ---- Дневные лимиты ИИ ---- */
 $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/usage/' . gmdate('Y-m-d') . '.json';
 $used = 0;
