@@ -203,6 +203,10 @@
       ttq.page();
     }(window, document, "ttq");
 
+    /* Воронка под требования TikTok для нашей вертикали: ViewContent → AddToCart →
+       InitiateCheckout → CompletePayment (+ SubmitForm / CompleteRegistration для
+       заявок и регистраций). AddToCart = человек выбрал конкретный товар/тариф,
+       InitiateCheckout = открыл оплату (виджет или Kaspi), CompletePayment = деньги. */
     var TT_STD = {
       quiz_start:          "ViewContent",
       tariffs_view:        "ViewContent",
@@ -210,6 +214,7 @@
       schools_view:        "ViewContent",
       prof_view:           "ViewContent",
       report_view:         "ViewContent",
+      paywall_view:        "ViewContent",
       lead_form_submit:    "SubmitForm",
       quiz_done:           "SubmitForm",
       school_apply_ok:     "SubmitForm",
@@ -219,13 +224,29 @@
       school_join_ok:      "CompleteRegistration",
       school_claim_ok:     "CompleteRegistration",
       ws_claim_ok:         "CompleteRegistration",
-      paywall_view:        "InitiateCheckout",
-      pro_click:           "InitiateCheckout",
-      pay_click:           "AddPaymentInfo",
-      pay_kaspi_click:     "Contact"
-      /* cta_* и клики по кнопкам не дублируем: их ловит глобальный обработчик кликов ниже */
+      pay_click:           "AddToCart",
+      pro_click:           "AddToCart",
+      pay_widget_open:     "InitiateCheckout",
+      pay_kaspi_click:     "InitiateCheckout"
+      /* остальные cta_* и клики по кнопкам не дублируем: их ловит глобальный обработчик кликов ниже */
     };
-    var TT_PRICE = { pro_season: 14900, pro_month: 4990, consult: 15000, package: 35000 };
+    /* Цены товаров и тарифов (₸) — value для AddToCart/InitiateCheckout/CompletePayment. */
+    var TT_PRICE = {
+      report: 4000, pro_season: 14900, pro_month: 4990, consult: 15000, package: 35000,
+      counselor_pilot: 0, counselor_15: 39000, counselor_50: 79000, counselor_150: 159000,
+      school_pilot: 0, school_100: 300000, school_500: 990000, school_1000: 1500000
+    };
+    /* Кнопки выбора тарифа на страницах → AddToCart с ценой. */
+    var TT_CART = {
+      cta_tariff_report: "report", cta_tariff_consult: "consult", cta_tariff_package: "package",
+      cta_counselor_tariff_pilot: "counselor_pilot", cta_counselor_tariff_15: "counselor_15",
+      cta_counselor_tariff_50: "counselor_50", cta_counselor_tariff_150: "counselor_150",
+      cta_school_tariff_pilot: "school_pilot", cta_school_tariff_100: "school_100",
+      cta_school_tariff_500: "school_500", cta_school_tariff_1000: "school_1000"
+    };
+    function ttProduct(id, price) {
+      return { contents: [{ content_id: id, content_type: "product", content_name: id, price: price, quantity: 1 }], value: price, currency: "KZT" };
+    }
     var ttSeq = 0;
     function ttEventId(name) { ttSeq++; return name + "_" + Date.now().toString(36) + "_" + ttSeq; }
 
@@ -237,19 +258,33 @@
         if (event === "pay_result") {
           var st = d.status || "", tp = d.type || "";
           if ((st === "success" || st === "appointment") && tp !== "cancel" && tp !== "error") {
-            var val = TT_PRICE[d.kind] || C.PRICE_REPORT || 4000;
+            var val = TT_PRICE[d.kind] || TT_PRICE.report;
             window.ttq.track("CompletePayment", {
               contents: [{ content_id: d.kind || "report", content_type: "product", content_name: d.kind || "report", price: val, quantity: 1 }],
               value: val, currency: "KZT"
             }, { event_id: d.txn ? "pay_" + d.txn : ttEventId("pay") });   /* тот же id, что у серверного события — TikTok не посчитает дважды */
           } else {
-            window.ttq.track("pay_not_completed", { description: st + "/" + tp });
+            window.ttq.track("pay_not_completed", { description: st + "/" + tp }, { event_id: ttEventId("pay_nc") });
           }
           return;
         }
         if (event === "pro_click") {
-          var pv = TT_PRICE[d.plan === "season" ? "pro_season" : "pro_month"];
-          window.ttq.track("InitiateCheckout", { contents: [{ content_id: "pro_" + (d.plan || "month"), content_type: "product", price: pv, quantity: 1 }], value: pv, currency: "KZT" }, { event_id: ttEventId(event) });
+          var pk = d.plan === "season" ? "pro_season" : "pro_month";
+          window.ttq.track("AddToCart", ttProduct(pk, TT_PRICE[pk]), { event_id: ttEventId(event) });
+          return;
+        }
+        if (event === "pay_click" || event === "paywall_view" || event === "pay_kaspi_click") {
+          window.ttq.track(TT_STD[event], ttProduct("report", TT_PRICE.report), { event_id: ttEventId(event) });
+          return;
+        }
+        if (event === "pay_widget_open") {
+          var wk = d.kind || "report", wv = Number(d.amount) || TT_PRICE[wk] || TT_PRICE.report;
+          window.ttq.track("InitiateCheckout", ttProduct(wk, wv), { event_id: ttEventId(event) });
+          return;
+        }
+        if (TT_CART[event]) {
+          var ck = TT_CART[event];
+          window.ttq.track("AddToCart", ttProduct(ck, TT_PRICE[ck]), { event_id: ttEventId(event) });
           return;
         }
         var std = TT_STD[event];

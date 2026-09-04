@@ -287,6 +287,7 @@
     var fail = o.onError || function () {};
     if (!window.scholaryTerminalReady()) { fail(new Error("no_terminal")); return; }
     if (!o.amount || !o.externalId) { fail(new Error("bad_params")); return; }
+    if (window.track) window.track("pay_widget_open", { kind: o.kind || "report", amount: o.amount });
     loadWidget().then(function () {
       var widget = new window.tiptop.Widget();
       /* Разбор ответа виджета. Типы шлюза: payment, installment, installmentKz, sbp,
