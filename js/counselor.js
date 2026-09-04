@@ -66,7 +66,7 @@ function __counselorMain() {
     var who = S.ws && S.ws.contact_name ? S.ws.contact_name : "ваш профориентолог";
     return (name ? name + ", привет! " : "Привет! ") + "Это " + who + ". Я веду твоё поступление в Scholary — там будут все твои программы, дедлайны и документы, и мы будем видеть их вместе.\n\n" +
       "Зарегистрируйся по моей ссылке — Scholary Pro для тебя бесплатно" + (S.ws && S.ws.ends_on ? " до " + fmtDL(S.ws.ends_on) : "") + ":\n" + inviteLink() +
-      "\n\nЗаймёт 2 минуты: создать аккаунт, ответить на 7 вопросов — и ты увидишь свои шансы по 97 программам. Регистрируйся на ту же почту, что дал(а) мне.";
+      "\n\nЗаймёт 2 минуты: создать аккаунт, ответить на 7 вопросов — и ты увидишь свои шансы по 236 программам. Регистрируйся на ту же почту, что дал(а) мне.";
   }
 
   /* ---------- модалка ---------- */
@@ -310,7 +310,7 @@ function __counselorMain() {
         h += '<div class="card glow"><div class="h2">С чего начать</div><p class="sm mut" style="margin:4px 0 12px">Workspace пустой — три шага, и он начнёт работать на вас.</p>' +
           '<div class="lst"><span class="pill pill-acc">1</span><div class="t"><b>Добавьте первого ученика</b><span class="xs mut">Имя и класс — остальное заполните по ходу</span></div><button class="btn btn-primary btn-sm" id="ob-add">Добавить</button></div>' +
           '<div class="lst"><span class="pill pill-acc">2</span><div class="t"><b>Отправьте ему ссылку на регистрацию</b><span class="xs mut">Ученик получит Scholary Pro, а вы — его шансы и кабинет</span></div><a class="btn btn-ghost btn-sm" href="#/settings">Ссылка</a></div>' +
-          '<div class="lst"><span class="pill pill-acc">3</span><div class="t"><b>Добавьте программы и дедлайны</b><span class="xs mut">Из каталога 97 программ или свою — дальше «Сегодня» само покажет, что горит</span></div></div></div>';
+          '<div class="lst"><span class="pill pill-acc">3</span><div class="t"><b>Добавьте программы и дедлайны</b><span class="xs mut">Из каталога 236 программ или свою — дальше «Сегодня» само покажет, что горит</span></div></div></div>';
         $("todayBody").innerHTML = h; $("ob-add").onclick = addStudentModal; return;
       }
       h += '<div class="cols"><div>';
@@ -474,7 +474,7 @@ function __counselorMain() {
       if (r.error) { body.innerHTML = '<div class="card empty">' + esc(r.error.message) + "</div>"; return; }
       var apps = (r.data || []).slice().sort(function (a, b) { var da = a.deadline || "9999", db = b.deadline || "9999"; return da < db ? -1 : da > db ? 1 : 0; });
       var h = '<div class="card"><div class="head" style="margin:0 0 6px"><div><div class="h2">Программы и подачи</div><div class="xs mut">Точная ссылка на подачу и дедлайн — у каждой программы</div></div><button class="btn btn-primary btn-sm" id="app-add">+ Программа</button></div>';
-      if (!apps.length) h += '<div class="empty">Пока нет ни одной программы. Добавьте из каталога Scholary (97 программ с проверенными ссылками) или свою.</div>';
+      if (!apps.length) h += '<div class="empty">Пока нет ни одной программы. Добавьте из каталога Scholary (236 программ с проверенными ссылками) или свою.</div>';
       apps.forEach(function (a) {
         var done = a.status === "admit" || a.status === "reject" || a.status === "applied" || a.status === "waitlist", url = safeUrl(a.apply_url);
         h += '<div class="lst" data-app="' + a.id + '"><div class="t"><b>' + esc(a.name) + '</b><span class="xs mut">' + esc(a.country || "") + (a.note ? " · " + esc(a.note) : "") + "</span>" + (url ? '<a class="xs" target="_blank" rel="noopener" href="' + esc(url) + '">' + esc(url.replace(/^https?:\/\//, "").slice(0, 60)) + "</a>" : "") + "</div>" + dlPill(a.deadline, done) +

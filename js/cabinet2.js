@@ -46,7 +46,7 @@ function __scholaryMain() {
     ach: { intl_olymp: "Межд. олимпиады", rep_olymp: "Респ. олимпиады", city_olymp: "Обл. олимпиады", publications: "Публикации", work_exp: "Опыт работы", project: "Проекты", volunteer: "Волонтёрство", sport_art: "Спорт/творчество", none: "пока нет" },
     status: { study: "Изучаю", prep: "Готовлю", applied: "Подала", done: "Ответ" },
     outcome: { admit: "Принята 🎉", reject: "Отказ", waitlist: "Лист ожидания" },
-    cflag: { hu: "🇭🇺", de: "🇩🇪", it: "🇮🇹", cz: "🇨🇿", tr: "🇹🇷", cn: "🇨🇳", kr: "🇰🇷", jp: "🇯🇵", pl: "🇵🇱", us: "🇺🇸", fr: "🇫🇷", nl: "🇳🇱", ae: "🇦🇪", eu: "🇪🇺", se: "🇸🇪", sa: "🇸🇦", hk: "🇭🇰", sg: "🇸🇬", uk: "🇬🇧", gb: "🇬🇧", ca: "🇨🇦", kz: "🇰🇿", ch: "🇨🇭", at: "🇦🇹", be: "🇧🇪", fi: "🇫🇮", no: "🇳🇴", dk: "🇩🇰", ro: "🇷🇴", sk: "🇸🇰", si: "🇸🇮", hr: "🇭🇷", ee: "🇪🇪", lv: "🇱🇻", lt: "🇱🇹", pt: "🇵🇹", es: "🇪🇸", gr: "🇬🇷", ie: "🇮🇪", qa: "🇶🇦", my: "🇲🇾", in: "🇮🇳" }
+    cflag: { hu: "🇭🇺", de: "🇩🇪", it: "🇮🇹", cz: "🇨🇿", tr: "🇹🇷", cn: "🇨🇳", kr: "🇰🇷", jp: "🇯🇵", pl: "🇵🇱", us: "🇺🇸", fr: "🇫🇷", nl: "🇳🇱", ae: "🇦🇪", eu: "🇪🇺", se: "🇸🇪", sa: "🇸🇦", hk: "🇭🇰", sg: "🇸🇬", uk: "🇬🇧", gb: "🇬🇧", ca: "🇨🇦", kz: "🇰🇿", ch: "🇨🇭", at: "🇦🇹", be: "🇧🇪", fi: "🇫🇮", no: "🇳🇴", dk: "🇩🇰", ro: "🇷🇴", sk: "🇸🇰", si: "🇸🇮", hr: "🇭🇷", ee: "🇪🇪", lv: "🇱🇻", lt: "🇱🇹", pt: "🇵🇹", es: "🇪🇸", gr: "🇬🇷", ie: "🇮🇪", qa: "🇶🇦", my: "🇲🇾", in: "🇮🇳", kg: "🇰🇬", uz: "🇺🇿", am: "🇦🇲", az: "🇦🇿", bg: "🇧🇬", au: "🇦🇺", nz: "🇳🇿", eg: "🇪🇬", il: "🇮🇱", mx: "🇲🇽", tw: "🇹🇼", mo: "🇲🇴", ge: "🇬🇪", rs: "🇷🇸", th: "🇹🇭", bn: "🇧🇳", id: "🇮🇩", ru: "🇷🇺" }
   };
   function flag(cc) { return L.cflag[(cc || "").toLowerCase()] || "🎓"; }
 
@@ -1339,7 +1339,7 @@ function __scholaryMain() {
               '<div class="xs mut" style="margin-top:4px">До ' + fmtDL(new Date(S.profile.pro_until)) + " · 60 разборов ИИ в день и модель посильнее</div></div>" : "") +
         '<div class="card" style="margin-bottom:12px"><div class="h-row"><b>Бесплатно</b><span class="pill pill-mut">сейчас у тебя</span></div>' +
           '<div class="feat">✅ Все подачи, чек-листы и дедлайны</div>' +
-          '<div class="feat">✅ Каталог 97 программ с твоими вероятностями</div>' +
+          '<div class="feat">✅ Каталог 236 программ с твоими вероятностями</div>' +
           '<div class="feat">✅ Проверка документов по правилам — без лимита</div>' +
           '<div class="feat">✅ 8 разборов с ИИ в день: документы и письмо</div></div>' +
         '<div class="card" style="border:1.5px solid var(--accent);box-shadow:0 0 0 4px var(--accent-soft);margin-bottom:12px">' +
