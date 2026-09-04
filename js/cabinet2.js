@@ -1363,7 +1363,7 @@ function __scholaryMain() {
           '<div class="feat">5️⃣ Финальная сверка пакета перед отправкой по каждой программе</div>' +
           '<div class="feat">6️⃣ Ведём по дедлайнам до конца сезона и пишем, когда пора</div>' +
           '<a class="btn btn-ghost btn-block" style="margin-top:10px" target="_blank" rel="noopener" href="' + wa("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸") + '">Написать в WhatsApp</a></div>' +
-        '<p class="xs mut" style="margin-top:12px">Оплата картой подключается на этой неделе. Пока оформляем через WhatsApp — доступ включим вручную в тот же день. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p>';
+        '<p class="xs mut" style="margin-top:12px">Оплата через Kaspi — счёт приходит в приложение, доступ включается автоматически в течение минуты. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p>';
     });
   }
 
@@ -1499,13 +1499,21 @@ function __scholaryMain() {
   /* Оплата подписки. Доступ продлевает СЕРВЕР по уведомлению шлюза
      (api/tiptop.php → tiptop_grant_pro), поэтому в AccountId кладём почту
      аккаунта — иначе непонятно, кому продлевать. */
-  function payPro(plan) {
+  function payPro(plan, method) {
     var season = plan === "season";
     var amount = season ? 14900 : 4990;
     var email = (S.session && S.session.user && S.session.user.email) || "";
-    if (window.track) track("pro_click", { plan: plan });
-
-    if (!window.scholaryTerminalReady || !window.scholaryTerminalReady() || !email) { proByHand(plan, email); return; }
+    var cardOk = !!(window.scholaryTerminalReady && window.scholaryTerminalReady());
+    var kaspiOk = !!(window.scholaryKaspiReady && window.scholaryKaspiReady());
+    if (!method) {
+      if (window.track) track("pro_click", { plan: plan });
+      if (!email) { proByHand(plan, email); return; }
+      if (kaspiOk && cardOk) { openPayMethod(plan); return; }
+      if (kaspiOk) { openKaspiPro(plan); return; }
+      if (!cardOk) { proByHand(plan, email); return; }
+    }
+    if (method === "kaspi") { openKaspiPro(plan); return; }
+    if (!cardOk || !email) { proByHand(plan, email); return; }
 
     var extId = "pro_" + (email ? email.replace(/[^a-z0-9]/gi, "").slice(0, 10) : "x") + "_" + Date.now().toString(36);
     toast("Открываем оплату…");
@@ -1544,6 +1552,85 @@ function __scholaryMain() {
       });
     }, attempt * 2500);
   }
+  /* Выбор способа оплаты подписки: Kaspi (счёт в приложение) или карта. */
+  function openPayMethod(plan) {
+    var season = plan === "season";
+    openSub(function () {
+      return subHead("Оплата Scholary Pro", (season ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸")) +
+        '<div class="card" style="margin-bottom:12px"><b>Как удобнее оплатить?</b>' +
+          '<button class="btn btn-block" style="margin-top:12px;background:#E5442F;color:#fff" data-act="pay-pro-kaspi" data-v="' + plan + '">Через Kaspi — счёт в приложение</button>' +
+          '<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="pay-pro-card" data-v="' + plan + '">Картой / Apple Pay / Google Pay</button>' +
+          '<p class="xs mut" style="margin:10px 0 0">Доступ включится автоматически в течение минуты после оплаты. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p></div>';
+    });
+  }
+
+  /* Kaspi: спрашиваем номер (по умолчанию — WhatsApp из профиля), выставляем
+     счёт, ждём подтверждения сервера и перечитываем pro_until. */
+  var kaspiProCtl = null;
+  function fmtKz(d) { d = String(d || "").replace(/\D/g, ""); return d.length === 11 ? "+7 " + d.slice(1, 4) + " " + d.slice(4, 7) + " " + d.slice(7, 9) + " " + d.slice(9) : d; }
+  function stopKaspiPro() { if (kaspiProCtl) { try { kaspiProCtl.stop(); } catch (e) {} kaspiProCtl = null; } }
+  function openKaspiPro(plan) {
+    var season = plan === "season";
+    var amount = season ? 14900 : 4990;
+    var email = (S.session && S.session.user && S.session.user.email) || "";
+    var phone0 = (S.profile && S.profile.whatsapp) || "";
+    var st = { phase: "ask", status: "", code: "", msg: "", phone: phone0 };
+    stopKaspiPro();
+    var render = function () {
+      var body;
+      if (st.phase === "ask") {
+        body = '<div class="card"><b>Номер, на который установлен Kaspi</b>' +
+          '<p class="xs mut" style="margin:4px 0 10px">Счёт на ' + (season ? "14 900" : "4 990") + ' ₸ придёт в приложение Kaspi.kz — подтвердить можно в два тапа.</p>' +
+          '<input id="kaspiPhone" class="f" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="' + esc(fmtKz(st.phone) || st.phone) + '" style="width:100%;box-sizing:border-box">' +
+          (st.msg ? '<p class="xs" style="color:var(--bad);margin:8px 0 0">' + esc(st.msg) + '</p>' : '') +
+          '<button class="btn btn-block" style="margin-top:12px;background:#E5442F;color:#fff" data-act="kaspi-pro-go" data-v="' + plan + '">Выставить счёт в Kaspi</button>' +
+          '<p class="xs mut" style="margin:10px 0 0">Аккаунт: ' + esc(email) + ' — доступ Pro включится на нём. <a href="/oferta/" target="_blank" rel="noopener">Оферта</a></p></div>';
+      } else if (st.phase === "wait") {
+        body = '<div class="card" style="text-align:center"><div style="font-size:19px;font-weight:800;margin:6px 0">Счёт отправлен в Kaspi</div>' +
+          '<p class="xs mut" style="margin:0 0 10px">Открой приложение <b>Kaspi.kz</b> → уведомление или <b>Платежи → Счета на оплату</b> и подтверди ' + (season ? "14 900" : "4 990") + ' ₸ на номере <b>' + esc(fmtKz(st.phone)) + '</b>.<br>Страница сама увидит оплату и включит Pro.</p>' +
+          '<div class="xs mut" style="display:flex;justify-content:center;align-items:center;gap:8px;font-weight:700"><span class="spin"></span><span id="kaspiProStatus">' + (st.status === "pending" ? "Счёт выставлен — ждём оплату" : "Отправляем счёт в Kaspi…") + '</span></div>' +
+          '<button class="btn btn-ghost btn-block" style="margin-top:12px" data-act="kaspi-pro-change">Другой номер</button></div>';
+      } else if (st.phase === "done") {
+        body = '<div class="card" style="border-color:var(--ok);background:var(--ok-soft);text-align:center"><div style="font-size:19px;font-weight:800;margin:6px 0">Оплата прошла</div>' +
+          '<p class="xs mut" style="margin:0">Включаем Scholary Pro на аккаунте ' + esc(email) + '…</p></div>';
+      } else {
+        var t = "Оплата не прошла", d = st.msg || "Деньги не списаны. Можно попробовать ещё раз.";
+        if (st.code === "client_not_found") { t = "Номер не зарегистрирован в Kaspi"; d = "Укажи номер, на который установлен Kaspi.kz."; }
+        else if (st.status === "expired") { t = "Срок счёта истёк"; d = "Счёт действовал 24 часа. Выставим новый."; }
+        else if (st.status === "cancelled") { t = "Счёт отменён"; d = "Оплата не подтверждена в Kaspi. Деньги не списаны."; }
+        else if (st.code === "rate") { t = "Слишком много попыток"; d = "Открой Kaspi → Платежи → Счета: оплатить можно любой из них."; }
+        else if (!st.msg) { t = "Kaspi временно недоступен"; d = "Попробуй через минуту или напиши нам в WhatsApp."; }
+        body = '<div class="card"><b>' + esc(t) + '</b><p class="xs mut" style="margin:4px 0 10px">' + esc(d) + '</p>' +
+          '<button class="btn btn-block" style="background:#E5442F;color:#fff" data-act="kaspi-pro-change">' + (st.code === "client_not_found" ? "Указать другой номер" : "Попробовать ещё раз") + '</button>' +
+          '<a class="btn btn-ghost btn-block" style="margin-top:8px" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Здравствуйте! Не проходит оплата Kaspi за Scholary Pro. Аккаунт: " + email) + '">Написать в WhatsApp</a></div>';
+      }
+      return subHead("Оплата через Kaspi", (season ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸")) + body;
+    };
+    openSub(render);
+    kaspiProState = { st: st, plan: plan, amount: amount, email: email, render: render };
+  }
+  var kaspiProState = null;
+  function kaspiProGo() {
+    var k = kaspiProState; if (!k) return;
+    var inp = $("kaspiPhone");
+    var digits = (inp ? inp.value : k.st.phone).replace(/\D/g, "");
+    if (digits.length === 11 && digits[0] === "8") digits = "7" + digits.slice(1);
+    if (digits.length === 10) digits = "7" + digits;
+    if (!/^7\d{10}$/.test(digits)) { k.st.msg = "Проверь номер: нужно 10 цифр после +7"; drawSub(); return; }
+    k.st.phone = digits; k.st.msg = ""; k.st.phase = "wait"; k.st.status = "";
+    drawSub();
+    stopKaspiPro();
+    kaspiProCtl = window.scholaryKaspi({
+      kind: k.plan === "season" ? "pro_season" : "pro_month", amount: k.amount, phone: digits, email: k.email, account: k.email,
+      onCreated: function (j) { k.st.status = j.status; var el = $("kaspiProStatus"); if (el) el.textContent = j.status === "pending" ? "Счёт выставлен — ждём оплату" : "Отправляем счёт в Kaspi…"; },
+      onStatus: function (s2, j) {
+        if (s2 === "paid") { stopKaspiPro(); k.st.phase = "done"; drawSub(); toast("Оплата прошла. Обновляем доступ…", "ok"); refreshPro(1); setTimeout(function () { if (S.stack.length) backSub(); }, 3500); return; }
+        if (s2 === "error" || s2 === "expired" || s2 === "cancelled") { stopKaspiPro(); k.st.phase = "fail"; k.st.status = s2; k.st.code = j.error_code || ""; k.st.msg = j.error_message || ""; drawSub(); return; }
+        k.st.status = s2; var el = $("kaspiProStatus"); if (el) el.textContent = s2 === "pending" ? "Счёт выставлен — ждём оплату" : "Отправляем счёт в Kaspi…";
+      },
+      onError: function (why, msg) { stopKaspiPro(); k.st.phase = "fail"; k.st.status = "create_failed"; k.st.code = why; k.st.msg = msg || ""; drawSub(); }
+    });
+  }
   function proByHand(plan, email) {
     var label = plan === "season" ? "сезон · 14 900 ₸" : "месяц · 4 990 ₸";
     toast("Онлайн-оплата недоступна — пишем в WhatsApp");
@@ -1567,6 +1654,10 @@ function __scholaryMain() {
     if (act === "tab-docs") { setTab("docs"); return; }
     if (act === "subscribe") { openSubscribe(); return; }
     if (act === "pay-pro") { payPro(v); return; }
+    if (act === "pay-pro-kaspi") { S.stack.pop(); payPro(v, "kaspi"); return; }
+    if (act === "pay-pro-card") { S.stack.pop(); drawSub(); payPro(v, "card"); return; }
+    if (act === "kaspi-pro-go") { kaspiProGo(); return; }
+    if (act === "kaspi-pro-change") { stopKaspiPro(); if (kaspiProState) { kaspiProState.st.phase = "ask"; kaspiProState.st.msg = ""; drawSub(); } return; }
     if (act === "apptab") { appTab = v; drawSub(); return; }
     if (act === "status" && app) { saveApp(app, { status: v }, function () { drawSub(); }); return; }
     if (act === "outcome" && app) {

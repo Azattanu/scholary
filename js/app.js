@@ -323,6 +323,60 @@
     });
   };
 
+  /* ---------- Оплата через Kaspi (ApiPay.kz) ----------
+     Счёт уходит покупателю прямо в приложение Kaspi по номеру телефона,
+     дальше страница раз в 3 секунды спрашивает сервер о статусе. Факт
+     оплаты ставит сервер (вебхук или его же опрос ApiPay) — с фронта
+     ничего не «засчитывается».
+     o: {kind, phone, email, lead, account, onCreated, onStatus(status, info), onError(why, msg)}
+     Возвращает {stop()} — остановить опрос (ушли с экрана). */
+  window.scholaryKaspiReady = function () { return !!(window.SCHOLARY_CONFIG || {}).KASPI_ON; };
+  window.scholaryKaspi = function (o) {
+    o = o || {};
+    var stopped = false, timer = null, started = Date.now();
+    var api = (window.SCHOLARY_CONFIG || {}).KASPI_URL || "/api/kaspi.php";
+    function stop() { stopped = true; if (timer) clearTimeout(timer); }
+    function poll(order, delay) {
+      if (stopped) return;
+      timer = setTimeout(function () {
+        if (stopped) return;
+        fetch(api + "?a=status&o=" + encodeURIComponent(order), { cache: "no-store" })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (stopped) return;
+            if (!j || !j.ok) { poll(order, 5000); return; }
+            var st = j.status;
+            if (o.onStatus) o.onStatus(st, j);
+            if (st === "paid" || st === "cancelled" || st === "expired" || st === "error" || st === "partially_refunded") {
+              if (window.track && st === "paid") window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: "kaspi_" + order });
+              if (window.track && st !== "paid") window.track("pay_result", { type: "kaspi", status: st, kind: o.kind || "" });
+              stop(); return;
+            }
+            /* первые 10 минут — каждые 3 с, дальше реже: счёт живёт сутки */
+            poll(order, Date.now() - started < 600000 ? 3000 : 15000);
+          })
+          .catch(function () { poll(order, 6000); });
+      }, delay);
+    }
+    if (window.track) window.track("pay_widget_open", { kind: o.kind || "report", amount: o.amount, via: "kaspi" });
+    fetch(api + "?a=create", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: o.kind || "report", phone: o.phone || "", email: o.email || "", lead: o.lead || "", account: o.account || "" })
+    }).then(function (r) { return r.json().then(function (j) { j._http = r.status; return j; }); })
+      .then(function (j) {
+        if (stopped) return;
+        if (!j || !j.ok) {
+          if (window.track) window.track("pay_widget_error", { why: "kaspi_" + ((j && j.why) || "http"), via: "kaspi" });
+          if (o.onError) o.onError((j && j.why) || "http", (j && j.message) || "");
+          return;
+        }
+        if (o.onCreated) o.onCreated(j);
+        poll(j.order, 2500);
+      })
+      .catch(function () { if (o.onError) o.onError("network", ""); });
+    return { stop: stop };
+  };
+
   // UX: все внешние ссылки (мессенджеры, соцсети, чужие сайты) — в новой вкладке
   function externalizeLinks() {
     document.querySelectorAll('a[href^="http"]').forEach(function (a) {

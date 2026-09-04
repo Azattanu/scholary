@@ -12,6 +12,7 @@ window.SCHOLARY_CONFIG = {
   // поставить "live", и кнопка появится у всех. Это единственное место,
   // которое нужно поменять.
   TIPTOP_MODE: "test",
+  KASPI_ON: true,               /* оплата через Kaspi (ApiPay.kz): счёт на номер телефона */
 
   // --- Цены (тенге) ---
   PRICE_REPORT: 4000,
@@ -36,7 +37,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-67",
+  RELEASE:      "web-68",
 
   // --- Яндекс.Метрика ---
   // Номер счётчика из metrika.yandex.ru (только цифры). Пустая строка = выключено.
