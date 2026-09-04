@@ -10,11 +10,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=67">
-  <script src="/js/config.js?v=67"></script>
-<script src="/js/telemetry.js?v=67"></script>
-  <script src="/js/report-engine.js?v=67"></script>
-  <script src="/js/app.js?v=67" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=68">
+  <script src="/js/config.js?v=68"></script>
+<script src="/js/telemetry.js?v=68"></script>
+  <script src="/js/report-engine.js?v=68"></script>
+  <script src="/js/app.js?v=68" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -427,7 +427,7 @@ function renderPaywall() {
       "</div>" +
       '<div style="display:flex; flex-direction:column; gap:8px; margin-top:4px">' +
         '<button type="button" class="btn btn-primary" id="toPay" style="min-height:54px; font-size:16.5px">Получить полный отчёт — ' + fmt(C.PRICE_REPORT) + '&nbsp;₸</button>' +
-        '<div class="fineprint">Отчёт сразу на WhatsApp и почту — регистрация не нужна<br>' + (C.TIPTOP_MODE === "live" ? 'Карта / Apple Pay / Google Pay / Kaspi' : 'Kaspi (карта онлайн — скоро)') + ' · не придёт за 10 минут — вернём деньги</div>' +
+        '<div class="fineprint">Отчёт сразу на WhatsApp и почту — регистрация не нужна<br>' + (C.TIPTOP_MODE === "live" ? 'Kaspi / карта / Apple Pay / Google Pay' : 'Оплата через Kaspi — счёт придёт в приложение') + ' · не придёт за 10 минут — вернём деньги</div>' +
       "</div>" +
       /* Второй честный выход. Без него квиз упирался в оплату и человек,
          не готовый платить сразу, уходил ни с чем — а кабинет и каталог
@@ -487,6 +487,7 @@ function lockedRow(name, pct, ok) {
 function renderPayment() {
   screen.innerHTML = "";
   const terminalReady = window.scholaryTerminalReady && window.scholaryTerminalReady();
+  const kaspiReady = window.scholaryKaspiReady && window.scholaryKaspiReady();
   screen.appendChild(h(
     '<div style="display:flex; flex-direction:column; gap:14px">' +
       '<div class="quiz-q" style="font-size:21px">Оплата</div>' +
@@ -525,12 +526,15 @@ function renderPayment() {
       "</div>" +
 
       '<div style="display:flex; flex-direction:column; gap:10px" id="payButtons">' +
+        (kaspiReady
+          ? '<button type="button" class="btn btn-kaspi" id="payKaspi" style="min-height:54px; font-size:16.5px">Оплатить через Kaspi — ' + fmt(C.PRICE_REPORT) + '&nbsp;₸</button>' +
+            '<div class="fineprint" style="margin-top:-4px">Счёт придёт в приложение Kaspi на номер ' + esc(PH.format(answers.whatsapp || "")) + ' · оплата в два тапа</div>'
+          : '<a class="btn btn-kaspi" id="payKaspi" href="#">Оплатить через Kaspi</a>') +
         (terminalReady
           ? '<button type="button" class="btn btn-dark" id="payCard" style="min-height:52px">Оплатить картой / Apple Pay / Google Pay</button>'
-          : '<div class="notice">Онлайн-оплата картой подключается. Пока можно оплатить через Kaspi — отчёт пришлём вручную в течение часа.</div>') +
-        '<a class="btn btn-kaspi" id="payKaspi" href="#">Оплатить через Kaspi</a>' +
+          : '') +
       "</div>" +
-      '<div class="fineprint">Нажимая «Оплатить», ты принимаешь <a href="/oferta/" target="_blank">оферту</a>. Данные карты обрабатывает TipTop Pay (PCI DSS) — мы их не видим и не храним.</div>' +
+      '<div class="fineprint">Нажимая «Оплатить», ты принимаешь <a href="/oferta/" target="_blank">оферту</a>. Платёж проходит в приложении Kaspi' + (terminalReady ? ' или у TipTop Pay (PCI DSS)' : '') + ' — данные карты мы не видим и не храним.</div>' +
       '<button type="button" class="btn btn-ghost" id="payBack">← Вернуться к результату</button>' +
     "</div>"));
 
@@ -624,6 +628,16 @@ function renderPayment() {
     return true;
   }
 
+  if (kaspiReady) {
+    $("payKaspi").addEventListener("click", () => {
+      const btn = $("payKaspi");
+      if (btn.dataset.busy) return;            // двойной тап — один счёт
+      if (!contactsOk()) return;
+      btn.dataset.busy = "1"; setTimeout(() => { delete btn.dataset.busy; }, 4000);
+      track("pay_kaspi_click");
+      startKaspi(answers.whatsapp, phase2.email);
+    });
+  } else {
   $("payKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
     "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
   $("payKaspi").addEventListener("click", (ev) => {
@@ -642,6 +656,7 @@ function renderPayment() {
       }).catch(() => {});
     } catch (e) {}
   });
+  }
 
   if (terminalReady) $("payCard").addEventListener("click", () => {
     const btn = $("payCard");
@@ -699,6 +714,85 @@ function startTipTop(email) {
     onError: function () { alertBox("Виджет оплаты не загрузился. Проверь интернет или оплати через Kaspi."); }
   });
 }
+/* ---------- Kaspi: счёт на номер + ожидание оплаты ----------
+   Kaspi присылает счёт в приложение на указанный номер. Экран ждёт
+   подтверждения от сервера (вебхук ApiPay или опрос) и сам переключается
+   на «Оплата прошла». Ошибки Kaspi (номер без приложения, истёк, отменён)
+   показываем словами и даём поменять номер или попробовать снова. */
+let kaspiCtl = null;
+function stopKaspi() { if (kaspiCtl) { try { kaspiCtl.stop(); } catch (e) {} kaspiCtl = null; } }
+function startKaspi(phone, email) {
+  const snap = engineSnapshot();
+  if (snap.result) saveLead(snap);
+  renderKaspiWait(phone, "creating");
+  stopKaspi();
+  kaspiCtl = window.scholaryKaspi({
+    kind: "report", amount: C.PRICE_REPORT, phone: phone, email: email || "", lead: window.scholaryLeadId(),
+    onCreated: function (j) { renderKaspiWait(phone, j.status === "pending" ? "pending" : "processing", j); },
+    onStatus: function (st, j) {
+      if (st === "paid") { stopKaspi(); renderSuccess(); return; }
+      if (st === "error") { stopKaspi(); renderKaspiError(phone, j); return; }
+      if (st === "expired" || st === "cancelled") { stopKaspi(); renderKaspiError(phone, j); return; }
+      const box = $("kaspiStatus");
+      if (box) box.textContent = st === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…";
+    },
+    onError: function (why, msg) { stopKaspi(); renderKaspiError(phone, { status: "create_failed", error_code: why, error_message: msg }); }
+  });
+}
+function kaspiPhoneBox(phone) {
+  return '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--bg); border-radius:12px; padding:12px 14px; width:100%; box-sizing:border-box">' +
+    '<div style="min-width:0; text-align:left"><div style="font-size:11.5px; font-weight:800; color:var(--muted); letter-spacing:.06em; text-transform:uppercase">Номер Kaspi</div>' +
+    '<div style="font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap">' + esc(PH.format(phone || "")) + '</div></div>' +
+    '<button type="button" id="kaspiChange" class="btn btn-ghost" style="width:auto; min-height:40px; padding:0 12px; flex-shrink:0; font-size:14px">Другой номер</button></div>';
+}
+function renderKaspiWait(phone, state, j) {
+  track("kaspi_wait_screen", { state: state });
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
+        '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:#FFE9E6; border-radius:999px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E5442F" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M11 18h2"/></svg></span>' +
+        '<div style="font-size:21px; font-weight:800">Счёт отправлен в Kaspi</div>' +
+        '<div style="font-size:14px; color:var(--muted); line-height:1.55">Открой приложение <b>Kaspi.kz</b> — придёт уведомление, или зайди в <b>Платежи → Счета на оплату</b> и подтверди <b>' + fmt(C.PRICE_REPORT) + ' ₸</b>.<br>Как только оплата пройдёт, эта страница сама покажет результат, а отчёт улетит на WhatsApp и почту.</div>' +
+        kaspiPhoneBox(phone) +
+        '<div id="kaspiStatus" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--muted)"><span class="spin"></span>' + (state === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…") + '</div>' +
+      "</div>" +
+      '<div class="fineprint">Счёт действует 24 часа. Не пришёл? Проверь, что номер зарегистрирован в Kaspi, или <a id="kaspiWa" href="#" target="_blank" rel="noopener">напиши нам в WhatsApp</a>.</div>' +
+      '<button type="button" class="btn btn-ghost" id="kaspiBack">← Вернуться к оплате</button>' +
+    "</div>"));
+  $("kaspiWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Здравствуйте! Не приходит счёт Kaspi за отчёт Scholary. Заявка: " + window.scholaryLeadId());
+  $("kaspiBack").addEventListener("click", () => { stopKaspi(); renderPayment(); });
+  $("kaspiChange").addEventListener("click", () => { stopKaspi(); renderPayment(); setTimeout(() => { const b = $("waEditBtn"); if (b) b.click(); }, 50); });
+}
+function renderKaspiError(phone, j) {
+  const code = (j && j.error_code) || "", st = (j && j.status) || "";
+  track("kaspi_error_screen", { status: st, code: code });
+  let title = "Оплата не прошла", text = "Деньги не списаны. Твои ответы сохранены — можно попробовать ещё раз.";
+  if (code === "client_not_found" || code === "bad_phone") { title = "Этот номер не зарегистрирован в Kaspi"; text = "Kaspi не нашёл приложение по номеру " + esc(PH.format(phone || "")) + ". Укажи номер, на который установлен Kaspi.kz, — счёт придёт туда, а отчёт всё равно уйдёт на WhatsApp и почту."; }
+  else if (st === "expired") { title = "Срок счёта истёк"; text = "Счёт в Kaspi действовал 24 часа. Ничего страшного — выставим новый, ответы сохранены."; }
+  else if (st === "cancelled") { title = "Счёт отменён"; text = "Оплата не подтверждена в Kaspi. Деньги не списаны — можно выставить счёт заново."; }
+  else if (code === "rate") { title = "Слишком много попыток"; text = "Мы выставили несколько счетов подряд. Открой Kaspi → Платежи → Счета: оплатить можно любой из них, или напиши нам."; }
+  else if (code === "kaspi_off" || code === "kaspi_session_expired" || code === "tariff_inactive" || code === "network" || /^http/.test(code)) { title = "Kaspi временно недоступен"; text = "Не получилось выставить счёт. Попробуй через минуту или напиши нам в WhatsApp — оформим вручную."; }
+  else if (j && j.error_message) { text = esc(j.error_message); }
+  screen.innerHTML = "";
+  screen.appendChild(h(
+    '<div style="display:flex; flex-direction:column; gap:14px">' +
+      '<div class="card" style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:26px 20px">' +
+        '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--yellow-soft); border-radius:999px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D9A413" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.5" r=".5" fill="#D9A413"/></svg></span>' +
+        '<div style="font-size:21px; font-weight:800">' + title + '</div>' +
+        '<div style="font-size:14px; color:var(--muted); line-height:1.55">' + text + '</div>' +
+      "</div>" +
+      '<button type="button" class="btn btn-kaspi" id="kaspiRetry">' + (code === "client_not_found" ? "Указать другой номер" : "Попробовать ещё раз") + '</button>' +
+      '<a class="btn btn-ghost" id="kaspiErrWa" href="#" target="_blank" rel="noopener">Написать нам в WhatsApp</a>' +
+      '<a class="btn btn-ghost" href="/cabinet/" onclick="track(\'free_cabinet_click\')">Пока открыть бесплатный кабинет</a>' +
+    "</div>"));
+  $("kaspiErrWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Здравствуйте! Не проходит оплата Kaspi за отчёт Scholary (" + (code || st) + "). Заявка: " + window.scholaryLeadId());
+  $("kaspiRetry").addEventListener("click", () => {
+    track("pay_retry", { via: "kaspi" });
+    renderPayment();
+    if (code === "client_not_found") setTimeout(() => { const b = $("waEditBtn"); if (b) b.click(); }, 50);
+  });
+}
 function alertBox(text) {
   const n = h('<div class="notice" style="margin-top:10px">' + text + "</div>");
   $("payButtons").appendChild(n);
@@ -741,8 +835,12 @@ function renderPayFail() {
       '<a class="btn btn-ghost" href="/cabinet/" onclick="track(\'free_cabinet_click\')">Пока открыть бесплатный кабинет</a>' +
     "</div>"));
   $("failRetry").addEventListener("click", () => { track("pay_retry"); renderPayment(); });
+  if (window.scholaryKaspiReady && window.scholaryKaspiReady()) {
+    $("failKaspi").addEventListener("click", (ev) => { ev.preventDefault(); track("pay_kaspi_click", { from: "fail" }); startKaspi(answers.whatsapp, phase2.email); });
+  } else {
   $("failKaspi").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
     "Здравствуйте! Хочу отчёт Scholary за " + fmt(C.PRICE_REPORT) + " ₸, оплачу через Kaspi. Заявка: " + window.scholaryLeadId());
+  }
   $("failWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent(
     "Здравствуйте! Не проходит оплата отчёта на сайте. Заявка: " + window.scholaryLeadId());
 }
