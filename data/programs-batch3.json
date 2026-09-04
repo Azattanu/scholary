@@ -5,7 +5,7 @@
  "programs": [
   {
    "id": "boell",
-   "name": "Heinrich-Böll-Stiftung Scholarship for International Students (Studienwerk)",
+   "name": "Heinrich-Böll-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -23,7 +23,7 @@
    "deadline": "1 марта",
    "deadline_md": "03-01",
    "apply_open_md": "01-15",
-   "note": "Только магистратура и PhD (бакалавриат для иностранцев закрыт). Приоритет — кандидаты из стран DAC-списка (Казахстан входит), ещё не проживающие в Германии. Отбор с интервью, важна общественная активность, экология, права человека; немецкий B2 обязателен.",
+   "note": "Официально: Heinrich-Böll-Stiftung Scholarship for International Students (Studienwerk). Только магистратура и PhD (бакалавриат для иностранцев закрыт). Приоритет — кандидаты из стран DAC-списка (Казахстан входит), ещё не проживающие в Германии. Отбор с интервью, важна общественная активность, экология, права человека; немецкий B2 обязателен.",
    "fields": null,
    "source_url": "https://www.boell.de/en/application",
    "verified": false,
@@ -37,7 +37,7 @@
   },
   {
    "id": "kas_intl",
-   "name": "Konrad-Adenauer-Stiftung — International Talent Development (scholarships for international students and doctoral candidates)",
+   "name": "Konrad-Adenauer-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -55,7 +55,7 @@
    "deadline": "15 июля",
    "deadline_md": "07-15",
    "apply_open_md": null,
-   "note": "Нужен немецкий B2 даже для англоязычных программ, отбор с интервью (в т.ч. в региональных офисах KAS). Ценностный фонд ХДС: важна общественная/политическая активность. Возрастного лимита нет.",
+   "note": "Официально: Konrad-Adenauer-Stiftung — International Talent Development (scholarships for international students and doctoral candidates). Нужен немецкий B2 даже для англоязычных программ, отбор с интервью (в т.ч. в региональных офисах KAS). Ценностный фонд ХДС: важна общественная/политическая активность. Возрастного лимита нет.",
    "fields": null,
    "source_url": "https://www.kas.de/en/web/begabtenfoerderung-und-kultur/international-talent-development",
    "verified": false,
@@ -69,7 +69,7 @@
   },
   {
    "id": "x-fes-foreign-students",
-   "name": "Friedrich-Ebert-Stiftung — Scholarship for foreign students (Grundförderung für Ausländer:innen)",
+   "name": "Friedrich-Ebert-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -84,7 +84,7 @@
    "deadline": "по семестрам; подача возможна только после зачисления в немецкий вуз (магистр…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Подавать можно ТОЛЬКО уже будучи зачисленным/обучающимся в вузе Германии — нельзя получить до переезда. Обязательны немецкий и подтверждённая общественно-политическая активность; ценностный фонд СДПГ.",
+   "note": "Официально: Friedrich-Ebert-Stiftung — Scholarship for foreign students (Grundförderung für Ausländer:innen). Подавать можно ТОЛЬКО уже будучи зачисленным/обучающимся в вузе Германии — нельзя получить до переезда. Обязательны немецкий и подтверждённая общественно-политическая активность; ценностный фонд СДПГ.",
    "fields": null,
    "source_url": "https://www.fes.de/studienfoerderung/information-in-english",
    "verified": false,
@@ -98,7 +98,7 @@
   },
   {
    "id": "x-hanns-seidel",
-   "name": "Hanns-Seidel-Stiftung — Stipendium für internationale Studierende und Promovierende",
+   "name": "Hanns-Seidel-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -112,7 +112,7 @@
    "deadline": "15 января",
    "deadline_md": "01-15",
    "apply_open_md": "12-15",
-   "note": "Фонд ХСС (Бавария): отбор с интервью, нужен немецкий и общественная активность; для иностранцев — как правило магистратура/PhD в немецком вузе. Две волны в год.",
+   "note": "Официально: Hanns-Seidel-Stiftung — Stipendium für internationale Studierende und Promovierende. Фонд ХСС (Бавария): отбор с интервью, нужен немецкий и общественная активность; для иностранцев — как правило магистратура/PhD в немецком вузе. Две волны в год.",
    "fields": null,
    "source_url": "https://www.hss.de/stipendium/",
    "verified": false,
@@ -126,7 +126,7 @@
   },
   {
    "id": "rosalux",
-   "name": "Rosa-Luxemburg-Stiftung — Scholarships for international students (Studienwerk)",
+   "name": "Rosa-Luxemburg-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -144,7 +144,7 @@
    "deadline": "1 октября",
    "deadline_md": "10-01",
    "apply_open_md": null,
-   "note": "Для иностранцев — только магистратура (Master only) и PhD (кроме медицины/стоматологии/ветеринарии); нужно проживать в Германии на период учёбы и планировать возврат на родину. Немецкий B2, левые/социально-политические ценности фонда, интервью.",
+   "note": "Официально: Rosa-Luxemburg-Stiftung — Scholarships for international students (Studienwerk). Для иностранцев — только магистратура (Master only) и PhD (кроме медицины/стоматологии/ветеринарии); нужно проживать в Германии на период учёбы и планировать возврат на родину. Немецкий B2, левые/социально-политические ценности фонда, интервью.",
    "fields": null,
    "source_url": "https://www.rosalux.de/en/foundation/studienwerk",
    "verified": false,
@@ -158,7 +158,7 @@
   },
   {
    "id": "fnf_intl",
-   "name": "Friedrich-Naumann-Stiftung für die Freiheit — Stipendium für ausländische Studierende und Promovierende",
+   "name": "Friedrich-Naumann-Stiftung (Германия)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -176,7 +176,7 @@
    "deadline": "30 апреля",
    "deadline_md": "04-30",
    "apply_open_md": "04-01",
-   "note": "Иностранцы — только очная магистратура или PhD в Германии; до начала выплат нельзя жить в Германии >15 месяцев (кроме учёбы). Заявка и собеседование полностью на немецком; либеральный фонд (СвДП).",
+   "note": "Официально: Friedrich-Naumann-Stiftung für die Freiheit — Stipendium für ausländische Studierende und Promovierende. Иностранцы — только очная магистратура или PhD в Германии; до начала выплат нельзя жить в Германии >15 месяцев (кроме учёбы). Заявка и собеседование полностью на немецком; либеральный фонд (СвДП).",
    "fields": null,
    "source_url": "https://www.freiheit.org/scholarships",
    "verified": false,
@@ -190,7 +190,7 @@
   },
   {
    "id": "daad_master",
-   "name": "DAAD Study Scholarships — Master Studies for All Academic Disciplines",
+   "name": "DAAD Master Studies (все дисциплины)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -207,7 +207,7 @@
    "deadline": "осень (обычно окт–ноя, approx) — через DAAD Information Centre Алматы; даты о…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Подача через DAAD-портал и офис в Казахстане; нужен диплом бакалавра не старше 6 лет, отличная успеваемость, мотивация; часто требуют одновременно подать в вузы. Не путать с EPOS/Helmut-Schmidt (уже в каталоге).",
+   "note": "Официально: DAAD Study Scholarships — Master Studies for All Academic Disciplines. Подача через DAAD-портал и офис в Казахстане; нужен диплом бакалавра не старше 6 лет, отличная успеваемость, мотивация; часто требуют одновременно подать в вузы. Не путать с EPOS/Helmut-Schmidt (уже в каталоге).",
    "fields": null,
    "source_url": "https://www.daad.de/en/studying-in-germany/scholarships/daad-scholarships/",
    "verified": false,
@@ -221,7 +221,7 @@
   },
   {
    "id": "daad_phd",
-   "name": "DAAD Research Grants — Doctoral Programmes in Germany",
+   "name": "DAAD Research Grants (PhD)",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -238,7 +238,7 @@
    "deadline": "осень (approx, по стране — см. DAAD Алматы); дедлайны публикуются ежегодно во…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Нужны диплом магистра, письмо-согласие научного руководителя в Германии и проработанный исследовательский план; отбор комиссией DAAD. Доступно гражданам почти всех стран, включая Казахстан.",
+   "note": "Официально: DAAD Research Grants — Doctoral Programmes in Germany. Нужны диплом магистра, письмо-согласие научного руководителя в Германии и проработанный исследовательский план; отбор комиссией DAAD. Доступно гражданам почти всех стран, включая Казахстан.",
    "fields": null,
    "source_url": "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/?detail=57135739",
    "verified": false,
@@ -252,7 +252,7 @@
   },
   {
    "id": "x-daad-summer-courses",
-   "name": "DAAD University Summer Courses in Germany for Foreign Students and Graduates (Hochschulsommerkurse)",
+   "name": "DAAD летние языковые курсы",
    "country": "Германия",
    "cc": "de",
    "levels": [
@@ -265,7 +265,7 @@
    "deadline": "30 октября",
    "deadline_md": "10-30",
    "apply_open_md": "09-01",
-   "note": "Для студентов бакалавриата (после 2 курсов) и магистратуры всех специальностей; курс 18+ дней в немецком вузе летом. Это краткосрочный языковой грант, а не полный год, но хорошая «ступень» к DAAD-магистратуре.",
+   "note": "Официально: DAAD University Summer Courses in Germany for Foreign Students and Graduates (Hochschulsommerkurse). Для студентов бакалавриата (после 2 курсов) и магистратуры всех специальностей; курс 18+ дней в немецком вузе летом. Это краткосрочный языковой грант, а не полный год, но хорошая «ступень» к DAAD-магистратуре.",
    "fields": null,
    "source_url": "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/?detail=50035295",
    "verified": false,
@@ -279,7 +279,7 @@
   },
   {
    "id": "ista_phd",
-   "name": "ISTA PhD Program (Institute of Science and Technology Austria)",
+   "name": "ISTA PhD (Австрия)",
    "country": "Австрия",
    "cc": "at",
    "levels": [
@@ -296,7 +296,7 @@
    "deadline": "8 января",
    "deadline_md": "01-08",
    "apply_open_md": null,
-   "note": "Можно поступать сразу после бакалавра; треки: биология, химия/материалы, CS, data science, математика, нейронауки, физика. Очень конкурентный отбор с интервью в кампусе под Веной.",
+   "note": "Официально: ISTA PhD Program (Institute of Science and Technology Austria). Можно поступать сразу после бакалавра; треки: биология, химия/материалы, CS, data science, математика, нейронауки, физика. Очень конкурентный отбор с интервью в кампусе под Веной.",
    "fields": [
     "sci",
     "it",
@@ -314,7 +314,7 @@
   },
   {
    "id": "unige_excellence",
-   "name": "University of Geneva — Excellence Master Fellowships (Faculty of Science)",
+   "name": "Excellence Master Fellowships (Женева)",
    "country": "Швейцария",
    "cc": "ch",
    "levels": [
@@ -331,7 +331,7 @@
    "deadline": "28 февраля (ориентировочно)",
    "deadline_md": "02-28",
    "apply_open_md": null,
-   "note": "Только факультет наук: астрономия, биология, химия/биохимия, CS, математика, физика, фармацевтика, науки о Земле. Отбор по досье (CV, транскрипт, мотивация, 2 рекомендации); продление после 1-го семестра при хороших оценках.",
+   "note": "Официально: University of Geneva — Excellence Master Fellowships (Faculty of Science). Только факультет наук: астрономия, биология, химия/биохимия, CS, математика, физика, фармацевтика, науки о Земле. Отбор по досье (CV, транскрипт, мотивация, 2 рекомендации); продление после 1-го семестра при хороших оценках.",
    "fields": [
     "sci"
    ],
@@ -347,7 +347,7 @@
   },
   {
    "id": "unil_master",
-   "name": "Unil Master's Scholarship (UNIL Master's grants, Université de Lausanne)",
+   "name": "UNIL Master's Grant (Лозанна)",
    "country": "Швейцария",
    "cc": "ch",
    "levels": [
@@ -364,7 +364,7 @@
    "deadline": "1 ноября",
    "deadline_md": "11-01",
    "apply_open_md": null,
-   "note": "~10 стипендий в год, только для выпускников зарубежных вузов с очень высокими оценками. Не для медицины, педагогики и большинства юридических магистратур; 2 рекомендательных письма напрямую от авторов.",
+   "note": "Официально: Unil Master's Scholarship (UNIL Master's grants, Université de Lausanne). ~10 стипендий в год, только для выпускников зарубежных вузов с очень высокими оценками. Не для медицины, педагогики и большинства юридических магистратур; 2 рекомендательных письма напрямую от авторов.",
    "fields": null,
    "source_url": "https://www.unil.ch/unil/en/home/menuinst/etudier/mobilite-et-echange/etudiantes-et-etudiants-internationaux/etudiantes-internationaux-reguliers/bourse-de-master.html",
    "verified": false,
@@ -378,7 +378,7 @@
   },
   {
    "id": "iheid",
-   "name": "Geneva Graduate Institute (IHEID) — Scholarships and financial aid for Master programmes",
+   "name": "Geneva Graduate Institute (IHEID)",
    "country": "Швейцария",
    "cc": "ch",
    "levels": [
@@ -395,7 +395,7 @@
    "deadline": "15 января (ориентировочно)",
    "deadline_md": "01-15",
    "apply_open_md": null,
-   "note": "Отдельно подавать не нужно — заявка на финансовую помощь идёт в общей анкете; решение по сочетанию академических успехов и финансовой нужды. Профиль: международные отношения, развитие, право, экономика.",
+   "note": "Официально: Geneva Graduate Institute (IHEID) — Scholarships and financial aid for Master programmes. Отдельно подавать не нужно — заявка на финансовую помощь идёт в общей анкете; решение по сочетанию академических успехов и финансовой нужды. Профиль: международные отношения, развитие, право, экономика.",
    "fields": [
     "hum",
     "law",
@@ -413,7 +413,7 @@
   },
   {
    "id": "leiden_lexs",
-   "name": "Leiden University Excellence Scholarship (LExS)",
+   "name": "Leiden Excellence Scholarship (LExS)",
    "country": "Нидерланды",
    "cc": "nl",
    "levels": [
@@ -430,7 +430,7 @@
    "deadline": "1 декабря",
    "deadline_md": "12-01",
    "apply_open_md": null,
-   "note": "Только для не-EEA студентов очной магистратуры (кроме обычных LLM и MSc юрфака); ~25 стипендий на >1000 заявок. Не полная стипендия — нужно доказать остаток средств для визы.",
+   "note": "Официально: Leiden University Excellence Scholarship (LExS). Только для не-EEA студентов очной магистратуры (кроме обычных LLM и MSc юрфака); ~25 стипендий на >1000 заявок. Не полная стипендия — нужно доказать остаток средств для визы.",
    "fields": null,
    "source_url": "https://www.universiteitleiden.nl/en/scholarships/sea/leiden-university-excellence-scholarship-lexs",
    "verified": false,
@@ -444,7 +444,7 @@
   },
   {
    "id": "um_high_potential",
-   "name": "UM NL-High Potential Scholarship (Maastricht University)",
+   "name": "Maastricht NL-High Potential",
    "country": "Нидерланды",
    "cc": "nl",
    "levels": [
@@ -461,7 +461,7 @@
    "deadline": "1 февраля",
    "deadline_md": "02-01",
    "apply_open_md": "10-01",
-   "note": "Только для не-EU/EEA, возраст до 35 лет на 1 сентября, GPA ≥7.5/10, желательно без имеющейся магистратуры; сначала нужно полностью подать в программу через Studielink. Выигрывают ~2% заявителей.",
+   "note": "Официально: UM NL-High Potential Scholarship (Maastricht University). Только для не-EU/EEA, возраст до 35 лет на 1 сентября, GPA ≥7.5/10, желательно без имеющейся магистратуры; сначала нужно полностью подать в программу через Studielink. Выигрывают ~2% заявителей.",
    "fields": null,
    "source_url": "https://www.maastrichtuniversity.nl/studeren/toelating-inschrijving/financing-your-studies/scholarships/maastricht-university-nl-high",
    "verified": false,
@@ -506,7 +506,7 @@
   },
   {
    "id": "master_mind",
-   "name": "Master Mind Scholarships (Government of Flanders)",
+   "name": "Master Mind (Фландрия, Бельгия)",
    "country": "Бельгия",
    "cc": "be",
    "levels": [
@@ -523,7 +523,7 @@
    "deadline": "15 января (ориентировочно)",
    "deadline_md": "01-15",
    "apply_open_md": null,
-   "note": "Открыто всем гражданствам, кроме России; нужен GPA ≥3.5/4.0 и IELTS 7.0. Подаёте через фламандский вуз (каждый выдвигает до 20 кандидатов) — сначала заявка на магистратуру, потом номинация.",
+   "note": "Официально: Master Mind Scholarships (Government of Flanders). Открыто всем гражданствам, кроме России; нужен GPA ≥3.5/4.0 и IELTS 7.0. Подаёте через фламандский вуз (каждый выдвигает до 20 кандидатов) — сначала заявка на магистратуру, потом номинация.",
    "fields": null,
    "source_url": "https://www.studyinflanders.be/scholarships/master-mind-scholarships/eligibility-criteria",
    "verified": false,
@@ -537,7 +537,7 @@
   },
   {
    "id": "boutmy",
-   "name": "Émile Boutmy Scholarship (Sciences Po)",
+   "name": "Émile Boutmy (Sciences Po)",
    "country": "Франция",
    "cc": "fr",
    "levels": [
@@ -555,7 +555,7 @@
    "deadline": "1 февраля",
    "deadline_md": "02-01",
    "apply_open_md": "10-01",
-   "note": "Только для граждан не-ЕС, чья семья не платит налоги в ЕС, впервые поступающих в Sciences Po; учитываются и доход семьи, и academic excellence. Нельзя подать после зачисления — только в анкете поступления.",
+   "note": "Официально: Émile Boutmy Scholarship (Sciences Po). Только для граждан не-ЕС, чья семья не платит налоги в ЕС, впервые поступающих в Sciences Po; учитываются и доход семьи, и academic excellence. Нельзя подать после зачисления — только в анкете поступления.",
    "fields": [
     "hum",
     "law",
@@ -573,7 +573,7 @@
   },
   {
    "id": "paris_saclay",
-   "name": "Université Paris-Saclay International Master's Scholarships Program",
+   "name": "Paris-Saclay International Master's",
    "country": "Франция",
    "cc": "fr",
    "levels": [
@@ -590,7 +590,7 @@
    "deadline": "31 марта (ориентировочно)",
    "deadline_md": "03-31",
    "apply_open_md": null,
-   "note": "Иностранцы до 30 лет, впервые учащиеся во Франции, зачисленные на магистратуру Paris-Saclay; кандидатуру выдвигает координатор программы. Нельзя совмещать с Eiffel/France Excellence/Erasmus Mundus.",
+   "note": "Официально: Université Paris-Saclay International Master's Scholarships Program. Иностранцы до 30 лет, впервые учащиеся во Франции, зачисленные на магистратуру Paris-Saclay; кандидатуру выдвигает координатор программы. Нельзя совмещать с Eiffel/France Excellence/Erasmus Mundus.",
    "fields": null,
    "source_url": "https://www.universite-paris-saclay.fr/en/admission/bourses-et-aides-financieres/international-masters-scholarships-program",
    "verified": false,
@@ -604,7 +604,7 @@
   },
   {
    "id": "ens_intl",
-   "name": "ENS International Selection (École normale supérieure – PSL, Paris)",
+   "name": "ENS International Selection (Париж)",
    "country": "Франция",
    "cc": "fr",
    "levels": [
@@ -621,7 +621,7 @@
    "deadline": "15 декабря (ориентировочно)",
    "deadline_md": "12-15",
    "apply_open_md": "10-01",
-   "note": "Возраст до 26 лет на 1 декабря, минимум 1–2 года бакалавриата в зарубежном вузе, нельзя жить во Франции >10 мес в год отбора и подавать повторно. Письменные и устные экзамены в Париже; крайне конкурентно.",
+   "note": "Официально: ENS International Selection (École normale supérieure – PSL, Paris). Возраст до 26 лет на 1 декабря, минимум 1–2 года бакалавриата в зарубежном вузе, нельзя жить во Франции >10 мес в год отбора и подавать повторно. Письменные и устные экзамены в Париже; крайне конкурентно.",
    "fields": [
     "sci",
     "hum"
@@ -638,7 +638,7 @@
   },
   {
    "id": "ampere_lyon",
-   "name": "Ampère Scholarships of Excellence (ENS de Lyon)",
+   "name": "Ampère Excellence (ENS de Lyon)",
    "country": "Франция",
    "cc": "fr",
    "levels": [
@@ -655,7 +655,7 @@
    "deadline": "23 января",
    "deadline_md": "01-23",
    "apply_open_md": "11-14",
-   "note": "Для иностранных студентов, поступающих в магистратуру ENS Lyon по точным наукам, искусствам и гуманитарным наукам; заявка на стипендию подаётся вместе с заявкой на магистратуру. Результаты в середине марта.",
+   "note": "Официально: Ampère Scholarships of Excellence (ENS de Lyon). Для иностранных студентов, поступающих в магистратуру ENS Lyon по точным наукам, искусствам и гуманитарным наукам; заявка на стипендию подаётся вместе с заявкой на магистратуру. Результаты в середине марта.",
    "fields": null,
    "source_url": "https://www.ens-lyon.fr/en/studies/admissions/application-masters-degrees-and-scholarships",
    "verified": false,
@@ -669,7 +669,7 @@
   },
   {
    "id": "iyt_italy",
-   "name": "Invest Your Talent in Italy (IYT) — MAECI / Uni-Italia",
+   "name": "Invest Your Talent in Italy (IYT)",
    "country": "Италия",
    "cc": "it",
    "levels": [
@@ -686,7 +686,7 @@
    "deadline": "11 мая (ориентировочно)",
    "deadline_md": "05-11",
    "apply_open_md": "03-01",
-   "note": "Казахстан входит в список стран IYT. Только англоязычные магистратуры-партнёры по инженерии/IT/экономике/дизайну; отбор по академическим результатам и мотивации, обязателен интерншип.",
+   "note": "Официально: Invest Your Talent in Italy (IYT) — MAECI / Uni-Italia. Казахстан входит в список стран IYT. Только англоязычные магистратуры-партнёры по инженерии/IT/экономике/дизайну; отбор по академическим результатам и мотивации, обязателен интерншип.",
    "fields": [
     "eng",
     "it",
@@ -706,7 +706,7 @@
   },
   {
    "id": "unibo_talents",
-   "name": "International Talents @Unibo — study grants for international students (University of Bologna)",
+   "name": "International Talents @Unibo (Болонья)",
    "country": "Италия",
    "cc": "it",
    "levels": [
@@ -723,7 +723,7 @@
    "deadline": "30 мая (ориентировочно)",
    "deadline_md": "05-30",
    "apply_open_md": null,
-   "note": "Для первокурсников магистратуры с дипломом, полученным вне итальянской системы (гражданство не важно). Ранжирование строго по GRE General (мин. V+Q 290, AW 3.0) — нужно сдать тест заранее. Есть требование по доходу семьи (ISEE €16 000–35 000) и возраст до 30 лет.",
+   "note": "Официально: International Talents @Unibo — study grants for international students (University of Bologna). Для первокурсников магистратуры с дипломом, полученным вне итальянской системы (гражданство не важно). Ранжирование строго по GRE General (мин. V+Q 290, AW 3.0) — нужно сдать тест заранее. Есть требование по доходу семьи (ISEE €16 000–35 000) и возраст до 30 лет.",
    "fields": null,
    "source_url": "https://bandi.unibo.it/s/diri/bando-international-talents-unibo-borse-di-studio-per-studenti-internazionali-che-si-immatricolano-ai-corsi-di-laurea-magistrale-dell-universita-di-bologna-per-l-a-a-2025-26/call-for-application/en-bando_international-talents-2526_17-1-25.pdf/@@download/file/EN%20BANDO_INTERNATIONAL%20TALENTS%202526_17-1-25.pdf",
    "verified": false,
@@ -737,7 +737,7 @@
   },
   {
    "id": "padua_excellence",
-   "name": "Padua International Excellence Scholarship Programme (Università di Padova)",
+   "name": "Padua International Excellence",
    "country": "Италия",
    "cc": "it",
    "levels": [
@@ -755,7 +755,7 @@
    "deadline": "2 февраля (ориентировочно)",
    "deadline_md": "02-02",
    "apply_open_md": "11-01",
-   "note": "Отдельно не подаётся — рассматриваются все, кто подал в англоязычную программу в первом раунде (иностранный диплом/аттестат, не резидент Италии). Нужно набрать ≥20 ECTS к 30 ноября, иначе стипендия отзывается.",
+   "note": "Официально: Padua International Excellence Scholarship Programme (Università di Padova). Отдельно не подаётся — рассматриваются все, кто подал в англоязычную программу в первом раунде (иностранный диплом/аттестат, не резидент Италии). Нужно набрать ≥20 ECTS к 30 ноября, иначе стипендия отзывается.",
    "fields": null,
    "source_url": "https://www.unipd.it/en/padua-excellence",
    "verified": false,
@@ -769,7 +769,7 @@
   },
   {
    "id": "topolito",
-   "name": "TOPoliTO Scholarships (Politecnico di Torino)",
+   "name": "TOPoliTO (Politecnico di Torino)",
    "country": "Италия",
    "cc": "it",
    "levels": [
@@ -786,7 +786,7 @@
    "deadline": "31 августа (ориентировочно)",
    "deadline_md": "08-31",
    "apply_open_md": null,
-   "note": "~10 стипендий (6 инженерия, 4 архитектура) для обладателей зарубежного бакалавра, не живших в Италии последние 5 лет; ранжирование по GRE. Небольшая программа — рассматривать как дополнение к DSU/EDISU (уже в каталоге).",
+   "note": "Официально: TOPoliTO Scholarships (Politecnico di Torino). ~10 стипендий (6 инженерия, 4 архитектура) для обладателей зарубежного бакалавра, не живших в Италии последние 5 лет; ранжирование по GRE. Небольшая программа — рассматривать как дополнение к DSU/EDISU (уже в каталоге).",
    "fields": [
     "eng",
     "it"
@@ -803,7 +803,7 @@
   },
   {
    "id": "inphinit",
-   "name": "\"la Caixa\" Foundation Doctoral INPhINIT Fellowships — Incoming",
+   "name": "«la Caixa» INPhINIT PhD (Испания)",
    "country": "Испания",
    "cc": "es",
    "levels": [
@@ -820,7 +820,7 @@
    "deadline": "28 января (ориентировочно)",
    "deadline_md": "01-28",
    "apply_open_md": "11-01",
-   "note": "Любое гражданство; нельзя жить/работать в Испании или Португалии >12 мес за последние 3 года и иметь >4 лет исследовательского опыта. Только центры с аккредитацией Severo Ochoa / María de Maeztu / ISCIII (или португальские «excellent»); STEM-профиль, интервью.",
+   "note": "Официально: \"la Caixa\" Foundation Doctoral INPhINIT Fellowships — Incoming. Любое гражданство; нельзя жить/работать в Испании или Португалии >12 мес за последние 3 года и иметь >4 лет исследовательского опыта. Только центры с аккредитацией Severo Ochoa / María de Maeztu / ISCIII (или португальские «excellent»); STEM-профиль, интервью.",
    "fields": [
     "sci",
     "eng",
@@ -839,7 +839,7 @@
   },
   {
    "id": "x-fct-phd-portugal",
-   "name": "FCT PhD Research Studentships (Bolsas de Investigação para Doutoramento, Fundação para a Ciência e a Tecnologia)",
+   "name": "FCT PhD Studentships (Португалия)",
    "country": "Португалия",
    "cc": "pt",
    "levels": [
@@ -852,7 +852,7 @@
    "deadline": "31 марта (ориентировочно)",
    "deadline_md": "03-31",
    "apply_open_md": "03-01",
-   "note": "Открыто гражданам любых стран, зачисленным (или готовым зачислиться) в докторантуру португальского вуза; нужны научный руководитель и принимающая исследовательская единица. Конкуренция высокая (3.6 тыс. заявок в 2026).",
+   "note": "Официально: FCT PhD Research Studentships (Bolsas de Investigação para Doutoramento, Fundação para a Ciência e a Tecnologia). Открыто гражданам любых стран, зачисленным (или готовым зачислиться) в докторантуру португальского вуза; нужны научный руководитель и принимающая исследовательская единица. Конкуренция высокая (3.6 тыс. заявок в 2026).",
    "fields": null,
    "source_url": "https://www.fct.pt/concurso-de-bolsas-de-doutoramento-2026-regista-novo-maximo-de-candidaturas/",
    "verified": false,
@@ -866,7 +866,7 @@
   },
   {
    "id": "kth_scholarship",
-   "name": "KTH Scholarship (KTH Royal Institute of Technology)",
+   "name": "KTH Scholarship (Швеция)",
    "country": "Швеция",
    "cc": "se",
    "levels": [
@@ -883,7 +883,7 @@
    "deadline": "15 января",
    "deadline_md": "01-15",
    "apply_open_md": "12-01",
-   "note": "Только для fee-paying (не-EU) студентов, поставивших KTH-программу первым приоритетом на universityadmissions.se и оплативших сбор. В 2025 получили ~8% (65 из 803 заявителей).",
+   "note": "Официально: KTH Scholarship (KTH Royal Institute of Technology). Только для fee-paying (не-EU) студентов, поставивших KTH-программу первым приоритетом на universityadmissions.se и оплативших сбор. В 2025 получили ~8% (65 из 803 заявителей).",
    "fields": [
     "eng",
     "it",
@@ -901,7 +901,7 @@
   },
   {
    "id": "lund_global",
-   "name": "Lund University Global Scholarship",
+   "name": "Lund Global Scholarship (Швеция)",
    "country": "Швеция",
    "cc": "se",
    "levels": [
@@ -919,7 +919,7 @@
    "deadline": "16 февраля",
    "deadline_md": "02-16",
    "apply_open_md": "02-01",
-   "note": "Только граждане вне EU/EEA/Швейцарии, обязанные платить tuition, подавшие Lund первым приоритетом; отбор по академическим результатам, финансовая нужда не учитывается. Мотивационное письмо до 600 слов.",
+   "note": "Официально: Lund University Global Scholarship. Только граждане вне EU/EEA/Швейцарии, обязанные платить tuition, подавшие Lund первым приоритетом; отбор по академическим результатам, финансовая нужда не учитывается. Мотивационное письмо до 600 слов.",
    "fields": null,
    "source_url": "https://www.lunduniversity.lu.se/admissions/scholarships-and-awards/lund-university-global-scholarship",
    "verified": false,
@@ -933,7 +933,7 @@
   },
   {
    "id": "uppsala_global",
-   "name": "Uppsala University Global Scholarship (Master's)",
+   "name": "Uppsala Global Scholarship (Швеция)",
    "country": "Швеция",
    "cc": "se",
    "levels": [
@@ -950,7 +950,7 @@
    "deadline": "2 февраля",
    "deadline_md": "02-02",
    "apply_open_md": "01-16",
-   "note": "Для fee-paying студентов вне EU/EEA; отдельная заявка на стипендию после подачи в программу через universityadmissions.se. Отбор по академическим результатам; программы Uppsala первым приоритетом.",
+   "note": "Официально: Uppsala University Global Scholarship (Master's). Для fee-paying студентов вне EU/EEA; отдельная заявка на стипендию после подачи в программу через universityadmissions.se. Отбор по академическим результатам; программы Uppsala первым приоритетом.",
    "fields": null,
    "source_url": "https://www.uu.se/en/study/masters-studies/scholarships/uppsala-university-scholarships",
    "verified": false,
@@ -964,7 +964,7 @@
   },
   {
    "id": "chalmers_ipoet",
-   "name": "Chalmers IPOET and Avancez Scholarships (Chalmers University of Technology)",
+   "name": "Chalmers IPOET / Avancez (Швеция)",
    "country": "Швеция",
    "cc": "se",
    "levels": [
@@ -981,7 +981,7 @@
    "deadline": "15 января",
    "deadline_md": "01-15",
    "apply_open_md": "11-25",
-   "note": "Доступно всем fee-paying (не-EU) студентам, подавшим на магистратуру Chalmers; нужен номер заявки universityadmissions.se. Финансовое положение не учитывается — только академические достижения.",
+   "note": "Официально: Chalmers IPOET and Avancez Scholarships (Chalmers University of Technology). Доступно всем fee-paying (не-EU) студентам, подавшим на магистратуру Chalmers; нужен номер заявки universityadmissions.se. Финансовое положение не учитывается — только академические достижения.",
    "fields": [
     "eng",
     "it",
@@ -999,7 +999,7 @@
   },
   {
    "id": "ki_global",
-   "name": "KI Global Master's Scholarship for fee-paying students (Karolinska Institutet)",
+   "name": "KI Global Master's (Karolinska)",
    "country": "Швеция",
    "cc": "se",
    "levels": [
@@ -1016,7 +1016,7 @@
    "deadline": "15 февраля",
    "deadline_md": "02-15",
    "apply_open_md": "02-01",
-   "note": "Только для fee-paying студентов, поставивших программу KI первым приоритетом; ~10–12 стипендий в год, по одной на программу (лучший по KI CV-форме). Медицина/биомедицина/общественное здоровье.",
+   "note": "Официально: KI Global Master's Scholarship for fee-paying students (Karolinska Institutet). Только для fee-paying студентов, поставивших программу KI первым приоритетом; ~10–12 стипендий в год, по одной на программу (лучший по KI CV-форме). Медицина/биомедицина/общественное здоровье.",
    "fields": [
     "med"
    ],
@@ -1032,7 +1032,7 @@
   },
   {
    "id": "imperial_phd",
-   "name": "President's PhD Scholarships (Imperial College London)",
+   "name": "Imperial President's PhD (Лондон)",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1049,7 +1049,7 @@
    "deadline": "12 января (ориентировочно)",
    "deadline_md": "01-12",
    "apply_open_md": "10-01",
-   "note": "Без ограничений по гражданству; нужны диплом с отличием (first class / distinction) и предварительное согласие научного руководителя. Заявка через обычный doctoral admissions с research proposal.",
+   "note": "Официально: President's PhD Scholarships (Imperial College London). Без ограничений по гражданству; нужны диплом с отличием (first class / distinction) и предварительное согласие научного руководителя. Заявка через обычный doctoral admissions с research proposal.",
    "fields": null,
    "source_url": "https://www.imperial.ac.uk/study/fees-and-funding/postgraduate-doctoral/grants-scholarships/presidents-phd/",
    "verified": false,
@@ -1063,7 +1063,7 @@
   },
   {
    "id": "ucl_res",
-   "name": "UCL Research Excellence Scholarship (UCL-RES)",
+   "name": "UCL Research Excellence (PhD)",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1080,7 +1080,7 @@
    "deadline": "9 января (ориентировочно)",
    "deadline_md": "01-09",
    "apply_open_md": "10-01",
-   "note": "Для кандидатов из любой страны, подавших полную заявку на PhD в UCL; нужен диплом уровня UK 2:1+. Отдельная заявка на стипендию, конкурс очень высокий.",
+   "note": "Официально: UCL Research Excellence Scholarship (UCL-RES). Для кандидатов из любой страны, подавших полную заявку на PhD в UCL; нужен диплом уровня UK 2:1+. Отдельная заявка на стипендию, конкурс очень высокий.",
    "fields": null,
    "source_url": "https://www.ucl.ac.uk/scholarships/research-excellence-scholarship",
    "verified": false,
@@ -1094,7 +1094,7 @@
   },
   {
    "id": "lse_gss",
-   "name": "LSE Graduate Support Scheme (GSS)",
+   "name": "LSE Graduate Support Scheme",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1111,7 +1111,7 @@
    "deadline": "23 апреля (ориентировочно)",
    "deadline_md": "04-23",
    "apply_open_md": "10-01",
-   "note": "Открыт всем гражданствам на taught master's/diploma (кроме executive/модульных программ); оценивается финансовая нужда, а не успеваемость. Заявка через Graduate Financial Support после подачи на поступление; не влияет на решение о приёме.",
+   "note": "Официально: LSE Graduate Support Scheme (GSS). Открыт всем гражданствам на taught master's/diploma (кроме executive/модульных программ); оценивается финансовая нужда, а не успеваемость. Заявка через Graduate Financial Support после подачи на поступление; не влияет на решение о приёме.",
    "fields": [
     "hum",
     "bus",
@@ -1129,7 +1129,7 @@
   },
   {
    "id": "warwick_phd",
-   "name": "Chancellor's International / Chancellor's Scholarships (University of Warwick, PGR)",
+   "name": "Warwick Chancellor's PhD",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1146,7 +1146,7 @@
    "deadline": "11 декабря (ориентировочно)",
    "deadline_md": "12-11",
    "apply_open_md": "10-01",
-   "note": "Любое гражданство и fee status; нужен оффер на PGR-программу Warwick на октябрь, отсрочка невозможна. Проект по любой дисциплине или междисциплинарный в рамках Research Spotlights.",
+   "note": "Официально: Chancellor's International / Chancellor's Scholarships (University of Warwick, PGR). Любое гражданство и fee status; нужен оффер на PGR-программу Warwick на октябрь, отсрочка невозможна. Проект по любой дисциплине или междисциплинарный в рамках Research Spotlights.",
    "fields": null,
    "source_url": "https://warwick.ac.uk/services/dc/schols_fund/scholarships_and_funding/",
    "verified": false,
@@ -1160,7 +1160,7 @@
   },
   {
    "id": "cam_intl",
-   "name": "Cambridge International Scholarship (Cambridge Trust)",
+   "name": "Cambridge International Scholarship",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1177,7 +1177,7 @@
    "deadline": "3 декабря (ориентировочно)",
    "deadline_md": "12-03",
    "apply_open_md": "09-01",
-   "note": "Все страны, кроме UK/Ирландии, со статусом Overseas; отдельной заявки нет — отмечаете funding в общей аппликации в Cambridge до дедлайна по курсу. Решения март–июль; если не связались до конца июля — отказ.",
+   "note": "Официально: Cambridge International Scholarship (Cambridge Trust). Все страны, кроме UK/Ирландии, со статусом Overseas; отдельной заявки нет — отмечаете funding в общей аппликации в Cambridge до дедлайна по курсу. Решения март–июль; если не связались до конца июля — отказ.",
    "fields": null,
    "source_url": "https://www.student-funding.cam.ac.uk/fund/cambridge-international-scholarship-2024",
    "verified": false,
@@ -1191,7 +1191,7 @@
   },
   {
    "id": "edinburgh_edcs",
-   "name": "Edinburgh Doctoral College Scholarships (EDCS, University of Edinburgh)",
+   "name": "Edinburgh Doctoral College (EDCS)",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1208,7 +1208,7 @@
    "deadline": "31 января (ориентировочно)",
    "deadline_md": "01-31",
    "apply_open_md": "10-01",
-   "note": "Открыто UK и overseas кандидатам на 1-й год PhD; нужен диплом уровня UK first/2:1. Сначала заявка на поступление, затем онлайн-заявка на стипендию через MyEd (Informatics и Physics рассматривают автоматически); в большинстве школ 1 стипендия.",
+   "note": "Официально: Edinburgh Doctoral College Scholarships (EDCS, University of Edinburgh). Открыто UK и overseas кандидатам на 1-й год PhD; нужен диплом уровня UK first/2:1. Сначала заявка на поступление, затем онлайн-заявка на стипендию через MyEd (Informatics и Physics рассматривают автоматически); в большинстве школ 1 стипендия.",
    "fields": null,
    "source_url": "https://registryservices.ed.ac.uk/student-funding/postgraduate/international/doctoral-college",
    "verified": false,
@@ -1222,7 +1222,7 @@
   },
   {
    "id": "standrews_ug",
-   "name": "International Excellence Scholarship (University of St Andrews, undergraduate)",
+   "name": "St Andrews International Excellence (бак.)",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1239,7 +1239,7 @@
    "deadline": "27 января",
    "deadline_md": "01-27",
    "apply_open_md": "10-01",
-   "note": "Только один победитель среди overseas-абитуриентов (кроме медицины и совместного BA с William & Mary); заявка через портал после подачи на курс, победитель обязан быть Student Ambassador. Есть и частичные International Undergraduate Scholarships.",
+   "note": "Официально: International Excellence Scholarship (University of St Andrews, undergraduate). Только один победитель среди overseas-абитуриентов (кроме медицины и совместного BA с William & Mary); заявка через портал после подачи на курс, победитель обязан быть Student Ambassador. Есть и частичные International Undergraduate Scholarships.",
    "fields": null,
    "source_url": "https://www.st-andrews.ac.uk/study/scholarships/scholarships-catalogue/undergraduate-scholarships/international-excellence-scholarship/",
    "verified": false,
@@ -1253,7 +1253,7 @@
   },
   {
    "id": "standrews_phd",
-   "name": "St Leonard's College World-Leading Doctoral Scholarships (University of St Andrews)",
+   "name": "St Andrews World-Leading PhD",
    "country": "Великобритания",
    "cc": "gb",
    "levels": [
@@ -1270,7 +1270,7 @@
    "deadline": "20 января",
    "deadline_md": "01-20",
    "apply_open_md": "10-01",
-   "note": "Для любого fee status, включая Overseas; нужна поданная заявка на PhD в St Andrews. Отбор студентом-инициированных проектов (student-led) при поддержке школы/руководителя.",
+   "note": "Официально: St Leonard's College World-Leading Doctoral Scholarships (University of St Andrews). Для любого fee status, включая Overseas; нужна поданная заявка на PhD в St Andrews. Отбор студентом-инициированных проектов (student-led) при поддержке школы/руководителя.",
    "fields": null,
    "source_url": "https://www.st-andrews.ac.uk/study/fees-and-funding/scholarships/scholarships-catalogue/postgraduate-scholarships/world-leading-scholarships-student-led/",
    "verified": false,
@@ -1284,7 +1284,7 @@
   },
   {
    "id": "ucd_global",
-   "name": "UCD Global Excellence Scholarships (University College Dublin)",
+   "name": "UCD Global Excellence (Дублин)",
    "country": "Ирландия",
    "cc": "ie",
    "levels": [
@@ -1302,7 +1302,7 @@
    "deadline": "31 марта (ориентировочно)",
    "deadline_md": "03-31",
    "apply_open_md": "10-01",
-   "note": "Только для абитуриентов со статусом non-EU fee; нужно иметь оффер на программу UCD и подать как можно раньше. Не продлевается автоматически — успеваемость проверяют каждый год.",
+   "note": "Официально: UCD Global Excellence Scholarships (University College Dublin). Только для абитуриентов со статусом non-EU fee; нужно иметь оффер на программу UCD и подать как можно раньше. Не продлевается автоматически — успеваемость проверяют каждый год.",
    "fields": null,
    "source_url": "https://www.ucd.ie/global/study-at-ucd/scholarshipsfinances/scholarships/globalexcellencescholarships/",
    "verified": false,
@@ -1316,7 +1316,7 @@
   },
   {
    "id": "x-polonista-nawa",
-   "name": "Polonista NAWA — scholarship programme for students of Polish studies (Program dla studentów polonistyki)",
+   "name": "Polonista NAWA (Польша)",
    "country": "Польша",
    "cc": "pl",
    "levels": [
@@ -1332,7 +1332,7 @@
    "deadline": "3 апреля (ориентировочно)",
    "deadline_md": "04-03",
    "apply_open_md": "02-15",
-   "note": "Только для тех, кто изучает польскую филологию/полонистику или славистику с польским; заявители со всего мира, гражданство не ограничено. Нужно самому получить согласие принимающего вуза.",
+   "note": "Официально: Polonista NAWA — scholarship programme for students of Polish studies (Program dla studentów polonistyki). Только для тех, кто изучает польскую филологию/полонистику или славистику с польским; заявители со всего мира, гражданство не ограничено. Нужно самому получить согласие принимающего вуза.",
    "fields": null,
    "source_url": "https://nawa.gov.pl/en/nawa/news/call-for-applications-for-the-polonista-nawa-2026-scholarship-programme-opens",
    "verified": false,
@@ -1346,7 +1346,7 @@
   },
   {
    "id": "x-anders-nawa",
-   "name": "Gen. Anders NAWA Scholarship Programme (Program im. gen. Andersa) — bachelor / master for Polish diaspora",
+   "name": "Gen. Anders NAWA (польская диаспора)",
    "country": "Польша",
    "cc": "pl",
    "levels": [
@@ -1361,7 +1361,7 @@
    "deadline": "9 июля",
    "deadline_md": "07-09",
    "apply_open_md": "03-31",
-   "note": "Только для лиц польского происхождения (Karta Polaka или документально подтверждённые польские корни; лица с двойным польским гражданством тоже допускаются) — в Казахстане большая польская диаспора. Обучение только на польском; часть программ (лингвистика, иностранные языки) исключена.",
+   "note": "Официально: Gen. Anders NAWA Scholarship Programme (Program im. gen. Andersa) — bachelor / master for Polish diaspora. Только для лиц польского происхождения (Karta Polaka или документально подтверждённые польские корни; лица с двойным польским гражданством тоже допускаются) — в Казахстане большая польская диаспора. Обучение только на польском; часть программ (лингвистика, иностранные языки) исключена.",
    "fields": null,
    "source_url": "https://nawa.gov.pl/en/nawa/news/anders-nawa-the-calls-for-applications-are-open",
    "verified": false,
@@ -1375,7 +1375,7 @@
   },
   {
    "id": "x-kirkland",
-   "name": "Lane Kirkland Scholarship Program (Program Stypendialny im. Lane'a Kirklanda)",
+   "name": "Lane Kirkland (Польша)",
    "country": "Польша",
    "cc": "pl",
    "levels": [
@@ -1388,7 +1388,7 @@
    "deadline": "1 марта",
    "deadline_md": "03-01",
    "apply_open_md": "12-01",
-   "note": "Казахстан в списке стран. Нужны диплом магистра, минимум 2 года опыта работы, возраст до 40 лет, польский или английский B2 (для англ. — базовый польский A1); не даёт степени, но финансирует год учёбы и стажировки.",
+   "note": "Официально: Lane Kirkland Scholarship Program (Program Stypendialny im. Lane'a Kirklanda). Казахстан в списке стран. Нужны диплом магистра, минимум 2 года опыта работы, возраст до 40 лет, польский или английский B2 (для англ. — базовый польский A1); не даёт степени, но финансирует год учёбы и стажировки.",
    "fields": null,
    "source_url": "https://kirkland.edu.pl/en/scholarship-competition/the-lane-kirkland-scholarship-program/",
    "verified": false,
@@ -1402,7 +1402,7 @@
   },
   {
    "id": "fsv_scholars",
-   "name": "FSV UK SCHOLARS Program — Faculty of Social Sciences, Charles University",
+   "name": "FSV UK Scholars (Карлов университет)",
    "country": "Чехия",
    "cc": "cz",
    "levels": [
@@ -1420,7 +1420,7 @@
    "deadline": "30 апреля",
    "deadline_md": "04-30",
    "apply_open_md": "02-01",
-   "note": "Гражданство не ограничено; отбор по мотивационному эссе, рекомендации, оценкам и финансовому положению. Действует год, продление — через повторную заявку.",
+   "note": "Официально: FSV UK SCHOLARS Program — Faculty of Social Sciences, Charles University. Гражданство не ограничено; отбор по мотивационному эссе, рекомендации, оценкам и финансовому положению. Действует год, продление — через повторную заявку.",
    "fields": [
     "hum",
     "bus"
@@ -1437,7 +1437,7 @@
   },
   {
    "id": "matfyz_tuition",
-   "name": "Computer Science / Prague Mathematics / Prague Physics Tuition Fee Scholarships — Faculty of Mathematics and Physics, Charles University (Matfyz)",
+   "name": "Matfyz Tuition Scholarships (Карлов университет)",
    "country": "Чехия",
    "cc": "cz",
    "levels": [
@@ -1455,7 +1455,7 @@
    "deadline": "30 апреля",
    "deadline_md": "04-30",
    "apply_open_md": "01-15",
-   "note": "Отдельная заявка на стипендию (CV, мотивационное письмо, 2 рекомендации) параллельно с поступлением; нельзя совмещать с другой стипендией. Мест очень мало, отбор по академическим результатам.",
+   "note": "Официально: Computer Science / Prague Mathematics / Prague Physics Tuition Fee Scholarships — Faculty of Mathematics and Physics, Charles University (Matfyz). Отдельная заявка на стипендию (CV, мотивационное письмо, 2 рекомендации) параллельно с поступлением; нельзя совмещать с другой стипендией. Мест очень мало, отбор по академическим результатам.",
    "fields": [
     "it",
     "sci"
@@ -1472,7 +1472,7 @@
   },
   {
    "id": "stars_phd",
-   "name": "STARS PhD Programme — Faculty of Science, Charles University",
+   "name": "STARS PhD (Карлов университет)",
    "country": "Чехия",
    "cc": "cz",
    "levels": [
@@ -1489,7 +1489,7 @@
    "deadline": "30 апреля (ориентировочно)",
    "deadline_md": "04-30",
    "apply_open_md": "02-19",
-   "note": "Нужен диплом магистра по естественным наукам/медицине/фармации; выбираете до 3 проектов, отбор руководителем и интервью. Открыто для всех иностранцев.",
+   "note": "Официально: STARS PhD Programme — Faculty of Science, Charles University. Нужен диплом магистра по естественным наукам/медицине/фармации; выбираете до 3 проектов, отбор руководителем и интервью. Открыто для всех иностранцев.",
    "fields": [
     "sci"
    ],
@@ -1505,7 +1505,7 @@
   },
   {
    "id": "x-jcmm-brno",
-   "name": "JCMM Scholarship for Foreign Students (South Moravian Centre for International Mobility, Brno)",
+   "name": "JCMM (Брно, Чехия)",
    "country": "Чехия",
    "cc": "cz",
    "levels": [
@@ -1519,7 +1519,7 @@
    "deadline": "31 января",
    "deadline_md": "01-31",
    "apply_open_md": "12-01",
-   "note": "Нужен очень хороший чешский; нельзя ранее учиться в чешском вузе (кроме языковых курсов) и жить в Чехии 6+ месяцев до июня года поступления. Заявка отдельно от поступления в вуз.",
+   "note": "Официально: JCMM Scholarship for Foreign Students (South Moravian Centre for International Mobility, Brno). Нужен очень хороший чешский; нельзя ранее учиться в чешском вузе (кроме языковых курсов) и жить в Чехии 6+ месяцев до июня года поступления. Заявка отдельно от поступления в вуз.",
    "fields": null,
    "source_url": "https://www.jcmm.cz/projekt/internacionalizace_en/",
    "verified": false,
@@ -1533,7 +1533,7 @@
   },
   {
    "id": "debrecen_intl",
-   "name": "University of Debrecen International Scholarship (UD International Scholarship)",
+   "name": "University of Debrecen International",
    "country": "Венгрия",
    "cc": "hu",
    "levels": [
@@ -1551,7 +1551,7 @@
    "deadline": "15 июня",
    "deadline_md": "06-15",
    "apply_open_md": "01-16",
-   "note": "Казахстан среди 100+ стран-участниц; нельзя быть уже зачисленным в венгерский вуз; только сентябрьский набор. Стипендия не покрывает проживание.",
+   "note": "Официально: University of Debrecen International Scholarship (UD International Scholarship). Казахстан среди 100+ стран-участниц; нельзя быть уже зачисленным в венгерский вуз; только сентябрьский набор. Стипендия не покрывает проживание.",
    "fields": null,
    "source_url": "https://edu.unideb.hu/page.php?id=426",
    "verified": false,
@@ -1565,7 +1565,7 @@
   },
   {
    "id": "corvinus_scholarship",
-   "name": "Corvinus Scholarship — Corvinus University of Budapest (tuition-free places on MSc Management and Leadership, MSc Finance, International MBA)",
+   "name": "Corvinus Scholarship (Будапешт)",
    "country": "Венгрия",
    "cc": "hu",
    "levels": [
@@ -1582,7 +1582,7 @@
    "deadline": "31 мая (ориентировочно)",
    "deadline_md": "05-31",
    "apply_open_md": "11-01",
-   "note": "Только для самофинансируемых студентов (не Stipendium Hungaricum); стипендия не покрывает проживание. Отбор по академическим результатам, решение принимает президентский комитет.",
+   "note": "Официально: Corvinus Scholarship — Corvinus University of Budapest (tuition-free places on MSc Management and Leadership, MSc Finance, International MBA). Только для самофинансируемых студентов (не Stipendium Hungaricum); стипендия не покрывает проживание. Отбор по академическим результатам, решение принимает президентский комитет.",
    "fields": [
     "bus"
    ],
@@ -1598,7 +1598,7 @@
   },
   {
    "id": "x-slovakia-talented",
-   "name": "Scholarships for talented students from abroad (Štipendiá pre talentovaných študentov zo zahraničia) — Slovak Ministry of Education / portalvs.sk",
+   "name": "Стипендии Словакии для талантливых",
    "country": "Словакия",
    "cc": "sk",
    "levels": [
@@ -1612,7 +1612,7 @@
    "deadline": "по объявлению (регистрация ещё не открыта; approx весна–лето)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Единственный критерий отбора — результат SAT (минимум 1100); не подходит тем, кто жил в Словакии с 2021 г. или уже учился там. PhD не финансируется; обучение на словацком в госвузах бесплатное, англоязычные программы платные.",
+   "note": "Официально: Scholarships for talented students from abroad (Štipendiá pre talentovaných študentov zo zahraničia) — Slovak Ministry of Education / portalvs.sk. Единственный критерий отбора — результат SAT (минимум 1100); не подходит тем, кто жил в Словакии с 2021 г. или уже учился там. PhD не финансируется; обучение на словацком в госвузах бесплатное, англоязычные программы платные.",
    "fields": null,
    "source_url": "https://scholarships.portalvs.sk/",
    "verified": false,
@@ -1626,7 +1626,7 @@
   },
   {
    "id": "aubg",
-   "name": "American University in Bulgaria (AUBG) — Distinguished, AUBG Funded and Donor-Funded Scholarships",
+   "name": "AUBG (Болгария)",
    "country": "Болгария",
    "cc": "bg",
    "levels": [
@@ -1643,7 +1643,7 @@
    "deadline": "15 января",
    "deadline_md": "01-15",
    "apply_open_md": "09-01",
-   "note": "Все заявители автоматически рассматриваются на merit-стипендии; полных стипендий всего 9, для них нужны высокие оценки и тесты + лидерство. Для need-based нужны финансовые документы; лучшие шансы при подаче до 15 января.",
+   "note": "Официально: American University in Bulgaria (AUBG) — Distinguished, AUBG Funded and Donor-Funded Scholarships. Все заявители автоматически рассматриваются на merit-стипендии; полных стипендий всего 9, для них нужны высокие оценки и тесты + лидерство. Для need-based нужны финансовые документы; лучшие шансы при подаче до 15 января.",
    "fields": null,
    "source_url": "https://www.aubg.edu/admissions/bachelors/cost-aid/scholarships/",
    "verified": false,
@@ -1657,7 +1657,7 @@
   },
   {
    "id": "greece_mfa_ug",
-   "name": "Hellenic Ministry of Foreign Affairs — Undergraduate Scholarships in Greece for foreign nationals",
+   "name": "МИД Греции — бакалавриат",
    "country": "Греция",
    "cc": "gr",
    "levels": [
@@ -1674,7 +1674,7 @@
    "deadline": "8 сентября (ориентировочно)",
    "deadline_md": "09-08",
    "apply_open_md": "07-01",
-   "note": "Казахстан прямо указан в списке 33 стран; подача только через посольство/консульство Греции; нужна справка о постоянном проживании за пределами Греции ≥5 лет. Обучение на греческом — сначала языковой год.",
+   "note": "Официально: Hellenic Ministry of Foreign Affairs — Undergraduate Scholarships in Greece for foreign nationals. Казахстан прямо указан в списке 33 стран; подача только через посольство/консульство Греции; нужна справка о постоянном проживании за пределами Греции ≥5 лет. Обучение на греческом — сначала языковой год.",
    "fields": null,
    "source_url": "https://www.mfa.gr/missionsabroad/en/luxembourg-en/news/undergraduate-scholarships-in-greece-offered-by-the-hellenic-ministry-of-foreign-affairs-for-the-academic-year-20252026.html",
    "verified": false,
@@ -1688,7 +1688,7 @@
   },
   {
    "id": "vu_waiver",
-   "name": "Vilnius University — Tuition fee waivers for non-EU master's applicants + Faculty of Law special scholarship",
+   "name": "Vilnius University — освобождение от платы",
    "country": "Литва",
    "cc": "lt",
    "levels": [
@@ -1706,7 +1706,7 @@
    "deadline": "1 июня (ориентировочно)",
    "deadline_md": "06-01",
    "apply_open_md": "11-01",
-   "note": "Казахстан прямо назван в списке стран для юридической стипендии. Освобождения покрывают только обучение, не проживание; количество мест минимально, отбор по академическим результатам.",
+   "note": "Официально: Vilnius University — Tuition fee waivers for non-EU master's applicants + Faculty of Law special scholarship. Казахстан прямо назван в списке стран для юридической стипендии. Освобождения покрывают только обучение, не проживание; количество мест минимально, отбор по академическим результатам.",
    "fields": null,
    "source_url": "https://admissions.vu.lt/all-news/study-without-financial-burden-vilnius-university-offers-a-variety-of-funding-opportunities-1",
    "verified": false,
@@ -1720,7 +1720,7 @@
   },
   {
    "id": "vilniustech",
-   "name": "VILNIUS TECH (Vilnius Gediminas Technical University) — Tuition-free and partial (50%/25%) scholarships for international students",
+   "name": "VILNIUS TECH (Литва)",
    "country": "Литва",
    "cc": "lt",
    "levels": [
@@ -1738,7 +1738,7 @@
    "deadline": "20 апреля",
    "deadline_md": "04-20",
    "apply_open_md": "11-01",
-   "note": "Отдельная заявка через apply.vilniustech.lt с мотивационным письмом (1 000–4 000 знаков) и 2 академическими рекомендациями; английский B2. Инженерия, IT, архитектура, бизнес.",
+   "note": "Официально: VILNIUS TECH (Vilnius Gediminas Technical University) — Tuition-free and partial (50%/25%) scholarships for international students. Отдельная заявка через apply.vilniustech.lt с мотивационным письмом (1 000–4 000 знаков) и 2 академическими рекомендациями; английский B2. Инженерия, IT, архитектура, бизнес.",
    "fields": [
     "eng",
     "it",
@@ -1756,7 +1756,7 @@
   },
   {
    "id": "ktu_waiver",
-   "name": "Kaunas University of Technology (KTU) — Full or partial tuition fee waiver for international master's applicants",
+   "name": "KTU Каунас — освобождение от платы",
    "country": "Литва",
    "cc": "lt",
    "levels": [
@@ -1773,7 +1773,7 @@
    "deadline": "1 июня",
    "deadline_md": "06-01",
    "apply_open_md": "10-15",
-   "note": "Отдельная заявка не нужна — отбор из всех поступающих; результаты в середине июля. Покрывает только обучение; для полного пакета можно параллельно подать на литовскую госстипендию.",
+   "note": "Официально: Kaunas University of Technology (KTU) — Full or partial tuition fee waiver for international master's applicants. Отдельная заявка не нужна — отбор из всех поступающих; результаты в середине июля. Покрывает только обучение; для полного пакета можно параллельно подать на литовскую госстипендию.",
    "fields": [
     "eng",
     "it",
@@ -1792,7 +1792,7 @@
   },
   {
    "id": "tlu_waiver",
-   "name": "Tallinn University — Tuition waivers for international students (School of Governance, Law and Society; Baltic Film, Media and Arts; Humanities)",
+   "name": "Tallinn University — освобождение от платы",
    "country": "Эстония",
    "cc": "ee",
    "levels": [
@@ -1810,7 +1810,7 @@
    "deadline": "15 апреля (ориентировочно)",
    "deadline_md": "04-15",
    "apply_open_md": "01-02",
-   "note": "Освобождения назначаются по результатам вступительных испытаний, отдельная заявка не нужна; проживание не покрывается. Для сохранения скидки нужен минимальный GPA и очная форма.",
+   "note": "Официально: Tallinn University — Tuition waivers for international students (School of Governance, Law and Society; Baltic Film, Media and Arts; Humanities). Освобождения назначаются по результатам вступительных испытаний, отдельная заявка не нужна; проживание не покрывается. Для сохранения скидки нужен минимальный GPA и очная форма.",
    "fields": [
     "hum",
     "law",
@@ -1828,7 +1828,7 @@
   },
   {
    "id": "x-ozyegin",
-   "name": "Özyeğin University — Scholarships for international undergraduate applicants",
+   "name": "Özyeğin University (Турция)",
    "country": "Турция",
    "cc": "tr",
    "levels": [
@@ -1841,7 +1841,7 @@
    "deadline": "rolling (несколько раундов; approx)",
    "deadline_md": null,
    "apply_open_md": "01-15",
-   "note": "Отдельная заявка не нужна; полных стипендий на этой странице нет — реалистично 40–60% платы. Общежитие и проживание не покрываются.",
+   "note": "Официально: Özyeğin University — Scholarships for international undergraduate applicants. Отдельная заявка не нужна; полных стипендий на этой странице нет — реалистично 40–60% платы. Общежитие и проживание не покрываются.",
    "fields": null,
    "source_url": "https://admissions.ozyegin.edu.tr/en/tuition-fees-and-scholarship/",
    "verified": false,
@@ -1855,7 +1855,7 @@
   },
   {
    "id": "x-ibn-haldun",
-   "name": "Ibn Haldun University — Graduate scholarships: Full Tuition Exemption (OGB), Merit Scholarship (BAB), Outstanding Achievement (ÜBB)",
+   "name": "Ibn Haldun University (Турция)",
    "country": "Турция",
    "cc": "tr",
    "levels": [
@@ -1869,7 +1869,7 @@
    "deadline": "по программам (обычно весна–лето; approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Стипендии распределяются по квотам и бюджету каждой программы; на странице нет ограничений по гражданству, но иностранным кандидатам стоит подтвердить условия у приёмной комиссии. Вуз частный, профиль — социальные науки.",
+   "note": "Официально: Ibn Haldun University — Graduate scholarships: Full Tuition Exemption (OGB), Merit Scholarship (BAB), Outstanding Achievement (ÜBB). Стипендии распределяются по квотам и бюджету каждой программы; на странице нет ограничений по гражданству, но иностранным кандидатам стоит подтвердить условия у приёмной комиссии. Вуз частный, профиль — социальные науки.",
    "fields": null,
    "source_url": "https://apply.ihu.edu.tr/en/how-do-i-get-a-tuition-fee-exemption-or-a-scholarship",
    "verified": false,
@@ -1883,7 +1883,7 @@
   },
   {
    "id": "heydar_aliyev",
-   "name": "Heydar Aliyev International Education Grant Program (Government of Azerbaijan)",
+   "name": "Грант Гейдара Алиева (Азербайджан)",
    "country": "Азербайджан",
    "cc": "az",
    "levels": [
@@ -1902,7 +1902,7 @@
    "deadline": "15 апреля",
    "deadline_md": "04-15",
    "apply_open_md": "02-16",
-   "note": "Открыт для граждан стран ОИС и Движения неприсоединения — Казахстан член ОИС. Обязательна официальная номинация госорганами своей страны; возраст до 35 (бакалавриат), 40 (магистратура), 45 (PhD); IELTS 5.0/5.5 для англоязычных программ.",
+   "note": "Официально: Heydar Aliyev International Education Grant Program (Government of Azerbaijan). Открыт для граждан стран ОИС и Движения неприсоединения — Казахстан член ОИС. Обязательна официальная номинация госорганами своей страны; возраст до 35 (бакалавриат), 40 (магистратура), 45 (PhD); IELTS 5.0/5.5 для англоязычных программ.",
    "fields": null,
    "source_url": "https://studyinazerbaijan.edu.az/heydar-aliyev-international-education-grant-program",
    "verified": false,
@@ -1916,7 +1916,7 @@
   },
   {
    "id": "x-khazar",
-   "name": "Khazar University — Merit-based scholarships for international students (25%/50%/75%) and Excellence Scholarship",
+   "name": "Khazar University (Азербайджан)",
    "country": "Азербайджан",
    "cc": "az",
    "levels": [
@@ -1931,7 +1931,7 @@
    "deadline": "rolling; Nailekhanim — до 30 июня",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Все поступающие рассматриваются автоматически, решение приходит вместе с офером; проживание не покрывается. Частный вуз в Баку, обучение на английском.",
+   "note": "Официально: Khazar University — Merit-based scholarships for international students (25%/50%/75%) and Excellence Scholarship. Все поступающие рассматриваются автоматически, решение приходит вместе с офером; проживание не покрывается. Частный вуз в Баку, обучение на английском.",
    "fields": null,
    "source_url": "https://international.khazar.org/en/page/international-scholarship-program",
    "verified": false,
@@ -1945,7 +1945,7 @@
   },
   {
    "id": "aua_armenia",
-   "name": "American University of Armenia (AUA) — International Scholarship (merit) and Need-Based Tuition Assistance",
+   "name": "American University of Armenia (AUA)",
    "country": "Армения",
    "cc": "am",
    "levels": [
@@ -1963,7 +1963,7 @@
    "deadline": "30 июня",
    "deadline_md": "06-30",
    "apply_open_md": "11-01",
-   "note": "Нужна отдельная заявка на стипендию в Office of Financial Aid; покрывает не более половины платы, проживание не входит. Аккредитован в США (WASC), обучение на английском.",
+   "note": "Официально: American University of Armenia (AUA) — International Scholarship (merit) and Need-Based Tuition Assistance. Нужна отдельная заявка на стипендию в Office of Financial Aid; покрывает не более половины платы, проживание не входит. Аккредитован в США (WASC), обучение на английском.",
    "fields": null,
    "source_url": "https://finaid.aua.am/international-scholarships/",
    "verified": false,
@@ -1977,7 +1977,7 @@
   },
   {
    "id": "x-auca",
-   "name": "American University of Central Asia (AUCA, Bishkek) — Merit- and need-based financial aid",
+   "name": "AUCA (Бишкек)",
    "country": "Кыргызстан",
    "cc": "kg",
    "levels": [
@@ -1990,7 +1990,7 @@
    "deadline": "вместе с приёмной кампанией (весна–лето; approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Финансовая помощь прямо адресована студентам из стран Центральной Азии, включая Казахстан; требуется заявка на financial aid с подтверждением доходов семьи. Диплом AUCA признан Bard College (США).",
+   "note": "Официально: American University of Central Asia (AUCA, Bishkek) — Merit- and need-based financial aid. Финансовая помощь прямо адресована студентам из стран Центральной Азии, включая Казахстан; требуется заявка на financial aid с подтверждением доходов семьи. Диплом AUCA признан Bard College (США).",
    "fields": null,
    "source_url": "https://www.auca.kg/en/soc_undergrad_admissions/",
    "verified": false,
@@ -2004,7 +2004,7 @@
   },
   {
    "id": "uca_naryn",
-   "name": "University of Central Asia (UCA, Naryn / Khorog) — Undergraduate admission with guaranteed financial aid",
+   "name": "University of Central Asia (UCA)",
    "country": "Кыргызстан",
    "cc": "kg",
    "levels": [
@@ -2021,7 +2021,7 @@
    "deadline": "14 февраля (ориентировочно)",
    "deadline_md": "02-14",
    "apply_open_md": "10-01",
-   "note": "Вуз Ага-хана для Центральной Азии (кампусы Нарын, Хорог); нужны SAT/внутренний тест и отдельная заявка на financial aid (до апреля). Полное покрытие — только при подтверждённой финансовой нужде.",
+   "note": "Официально: University of Central Asia (UCA, Naryn / Khorog) — Undergraduate admission with guaranteed financial aid. Вуз Ага-хана для Центральной Азии (кампусы Нарын, Хорог); нужны SAT/внутренний тест и отдельная заявка на financial aid (до апреля). Полное покрытие — только при подтверждённой финансовой нужде.",
    "fields": null,
    "source_url": "https://admissions.ucentralasia.org/",
    "verified": false,
@@ -2035,7 +2035,7 @@
   },
   {
    "id": "osce_academy",
-   "name": "OSCE Academy in Bishkek — MA in Politics and Security / Economic Governance and Development / Human Rights and Sustainability",
+   "name": "OSCE Academy (Бишкек)",
    "country": "Кыргызстан",
    "cc": "kg",
    "levels": [
@@ -2052,7 +2052,7 @@
    "deadline": "1 апреля (ориентировочно)",
    "deadline_md": "04-01",
    "apply_open_md": "01-15",
-   "note": "Только для граждан государств-участников ОБСЕ (Казахстан входит) и Афганистана; нужен IELTS 6.5 / TOEFL 90 или внутренний экзамен по английскому; работать полный день во время учёбы нельзя.",
+   "note": "Официально: OSCE Academy in Bishkek — MA in Politics and Security / Economic Governance and Development / Human Rights and Sustainability. Только для граждан государств-участников ОБСЕ (Казахстан входит) и Афганистана; нужен IELTS 6.5 / TOEFL 90 или внутренний экзамен по английскому; работать полный день во время учёбы нельзя.",
    "fields": [
     "hum",
     "law",
@@ -2070,7 +2070,7 @@
   },
   {
    "id": "manas_kg",
-   "name": "Kyrgyz-Turkish Manas University (Кыргызско-Турецкий университет «Манас») — tuition-free study + merit stipend",
+   "name": "Университет «Манас» (Кыргызстан)",
    "country": "Кыргызстан",
    "cc": "kg",
    "levels": [
@@ -2089,7 +2089,7 @@
    "deadline": "10 июля",
    "deadline_md": "07-10",
    "apply_open_md": "06-01",
-   "note": "Языки обучения — кыргызский и турецкий (без сертификата нужно сдать языковой экзамен или пройти подготовительный год); диплом должен быть признан в КР/Турции. Стипендия небольшая, но обучение полностью бесплатное.",
+   "note": "Официально: Kyrgyz-Turkish Manas University (Кыргызско-Турецкий университет «Манас») — tuition-free study + merit stipend. Языки обучения — кыргызский и турецкий (без сертификата нужно сдать языковой экзамен или пройти подготовительный год); диплом должен быть признан в КР/Турции. Стипендия небольшая, но обучение полностью бесплатное.",
    "fields": null,
    "source_url": "https://manas.edu.kg/en/news/7970",
    "verified": false,
@@ -2103,7 +2103,7 @@
   },
   {
    "id": "x-cau-tashkent",
-   "name": "Central Asian University (CAU, Tashkent) — Merit-Based Scholarship for students from Central Asia (25/50/100%)",
+   "name": "Central Asian University (Ташкент)",
    "country": "Узбекистан",
    "cc": "uz",
    "levels": [
@@ -2116,7 +2116,7 @@
    "deadline": "по раундам приёма (весна–лето; approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Казахстан прямо указан в списке стран для merit-стипендии; нужны сильные оценки и, как правило, SAT/IELTS. Проживание не покрывается; частный вуз в Ташкенте с обучением на английском.",
+   "note": "Официально: Central Asian University (CAU, Tashkent) — Merit-Based Scholarship for students from Central Asia (25/50/100%). Казахстан прямо указан в списке стран для merit-стипендии; нужны сильные оценки и, как правило, SAT/IELTS. Проживание не покрывается; частный вуз в Ташкенте с обучением на английском.",
    "fields": null,
    "source_url": "https://centralasian.uz/scholarshipsfor2026entry",
    "verified": false,
@@ -2130,7 +2130,7 @@
   },
   {
    "id": "x-jasso-honors",
-   "name": "Monbukagakusho Honors Scholarship for Privately-Financed International Students (JASSO)",
+   "name": "JASSO Honors (Япония)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2146,7 +2146,7 @@
    "deadline": "через вуз после зачисления (обычно апрель/октябрь); есть резервирование через…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Подаётся только через международный офис японского вуза после зачисления, квота на вуз ограничена. Нужен JLPT N2+/EJU 200+ или английский B2; доход спонсора < 5 млн JPY/год. Можно «забронировать» стипендию, сдав EJU до приезда.",
+   "note": "Официально: Monbukagakusho Honors Scholarship for Privately-Financed International Students (JASSO). Подаётся только через международный офис японского вуза после зачисления, квота на вуз ограничена. Нужен JLPT N2+/EJU 200+ или английский B2; доход спонсора < 5 млн JPY/год. Можно «забронировать» стипендию, сдав EJU до приезда.",
    "fields": null,
    "source_url": "https://www.jasso.go.jp/en/ryugaku/scholarship_j/shoreihi/about.html",
    "verified": false,
@@ -2160,7 +2160,7 @@
   },
   {
    "id": "yoneyama",
-   "name": "Rotary Yoneyama Memorial Scholarship (Overseas Candidates) / ロータリー米山記念奨学金",
+   "name": "Rotary Yoneyama (Япония)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2179,7 +2179,7 @@
    "deadline": "31 октября",
    "deadline_md": "10-31",
    "apply_open_md": "10-01",
-   "note": "Нужен JLPT N3 или выше и уже полученное (или подтверждённое) зачисление в японский вуз; research students не подходят. Стипендиат должен прибыть в Японию до начала выплат, иначе теряет право.",
+   "note": "Официально: Rotary Yoneyama Memorial Scholarship (Overseas Candidates) / ロータリー米山記念奨学金. Нужен JLPT N3 или выше и уже полученное (или подтверждённое) зачисление в японский вуз; research students не подходят. Стипендиат должен прибыть в Японию до начала выплат, иначе теряет право.",
    "fields": null,
    "source_url": "https://www.rotary-yoneyama.or.jp/english/overseas",
    "verified": false,
@@ -2193,7 +2193,7 @@
   },
   {
    "id": "honjo",
-   "name": "Honjo International Scholarship Foundation — Scholarship for Foreign Students",
+   "name": "Honjo International (Япония)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2211,7 +2211,7 @@
    "deadline": "31 октября (ориентировочно)",
    "deadline_md": "10-31",
    "apply_open_md": "09-01",
-   "note": "Всего ~5 стипендий на цикл, конкурс очень высокий. Нужно уже быть зачисленным (или иметь допуск) в магистратуру/докторантуру японского вуза; требуется 2-минутное видео о своём исследовании и очное собеседование в Токио.",
+   "note": "Официально: Honjo International Scholarship Foundation — Scholarship for Foreign Students. Всего ~5 стипендий на цикл, конкурс очень высокий. Нужно уже быть зачисленным (или иметь допуск) в магистратуру/докторантуру японского вуза; требуется 2-минутное видео о своём исследовании и очное собеседование в Токио.",
    "fields": null,
    "source_url": "https://www.hisf.or.jp/en/scholarship/foreigner/",
    "verified": false,
@@ -2225,7 +2225,7 @@
   },
   {
    "id": "kyoto_iup",
-   "name": "Kyoto University International Undergraduate Program (Kyoto iUP)",
+   "name": "Kyoto iUP (Япония)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2242,7 +2242,7 @@
    "deadline": "3 декабря",
    "deadline_md": "12-03",
    "apply_open_md": "11-02",
-   "note": "Программа 6 мес. подготовки + 4 года бакалавриата; японский учится с нуля, но лекции старших курсов на японском. Все документы на английском; предварительный скрининг соответствия требованиям; отбор по документам и собеседованию.",
+   "note": "Официально: Kyoto University International Undergraduate Program (Kyoto iUP). Программа 6 мес. подготовки + 4 года бакалавриата; японский учится с нуля, но лекции старших курсов на японском. Все документы на английском; предварительный скрининг соответствия требованиям; отбор по документам и собеседованию.",
    "fields": null,
    "source_url": "https://www.iup.kyoto-u.ac.jp/apply/",
    "verified": false,
@@ -2256,7 +2256,7 @@
   },
   {
    "id": "x-tohoku-fgl",
-   "name": "Tohoku University Future Global Leadership (FGL) Program — President Fellowship",
+   "name": "Tohoku FGL President Fellowship",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2269,7 +2269,7 @@
    "deadline": "январь (последний цикл — приём в январе, зачисление в октябре); даты 2027 не…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Три англоязычных бакалавриата: молекулярная химия (AMC), механика и аэрокосмос (IMAC-U), морская биология (AMB). Нужны стандартизированные тесты по математике/физике/химии/биологии (SAT/A-level/IB) и TOEFL iBT 79+ / IELTS 6.0+; число фелоушипов не публикуется.",
+   "note": "Официально: Tohoku University Future Global Leadership (FGL) Program — President Fellowship. Три англоязычных бакалавриата: молекулярная химия (AMC), механика и аэрокосмос (IMAC-U), морская биология (AMB). Нужны стандартизированные тесты по математике/физике/химии/биологии (SAT/A-level/IB) и TOEFL iBT 79+ / IELTS 6.0+; число фелоушипов не публикуется.",
    "fields": null,
    "source_url": "https://www.insc.tohoku.ac.jp/english/degree/undergraduate-english-future-global-leadership-program/",
    "verified": false,
@@ -2283,7 +2283,7 @@
   },
   {
    "id": "nagoya_g30",
-   "name": "Nagoya University Global 30 (G30) Undergraduate Scholarship",
+   "name": "Nagoya G30 (Япония)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2300,7 +2300,7 @@
    "deadline": "19 ноября",
    "deadline_md": "11-19",
    "apply_open_md": "11-02",
-   "note": "10 англоязычных бакалавриатов, японский не требуется при поступлении. Отдельной заявки на стипендию нет — рассматриваются все поступающие (нужно приложить форму); учитываются успеваемость, внеучебная активность и финансовая потребность.",
+   "note": "Официально: Nagoya University Global 30 (G30) Undergraduate Scholarship. 10 англоязычных бакалавриатов, японский не требуется при поступлении. Отдельной заявки на стипендию нет — рассматриваются все поступающие (нужно приложить форму); учитываются успеваемость, внеучебная активность и финансовая потребность.",
    "fields": null,
    "source_url": "https://admissions.g30.nagoya-u.ac.jp/studentlife/scholarships/",
    "verified": false,
@@ -2314,7 +2314,7 @@
   },
   {
    "id": "x-nagoya-fellowship",
-   "name": "Nagoya University Interdisciplinary Frontier Fellowship (NU Research Support Projects)",
+   "name": "Nagoya Frontier Fellowship (PhD)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2327,7 +2327,7 @@
    "deadline": "через graduate school после поступления в докторантуру; сроки по школам",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Фелоушип для докторантов, отбор проводит соответствующая graduate school Нагойского университета; открыт всем гражданствам, но конкурс внутренний. Не покрывает плату за обучение напрямую.",
+   "note": "Официально: Nagoya University Interdisciplinary Frontier Fellowship (NU Research Support Projects). Фелоушип для докторантов, отбор проводит соответствующая graduate school Нагойского университета; открыт всем гражданствам, но конкурс внутренний. Не покрывает плату за обучение напрямую.",
    "fields": null,
    "source_url": "https://admissions.g30.nagoya-u.ac.jp/studentlife/scholarships/",
    "verified": false,
@@ -2341,7 +2341,7 @@
   },
   {
    "id": "x-keio-dfa",
-   "name": "Keio University Design the Future Award for International Students",
+   "name": "Keio Design the Future Award",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2355,7 +2355,7 @@
    "deadline": "до зачисления, только по номинации факультета; дат нет",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Заявиться самому нельзя — кандидатов номинируют graduate schools Keio (например SDM) среди сильнейших поступающих, и подать могут только те, с кем связались напрямую. Ультра-выборочный, число мест не раскрывается.",
+   "note": "Официально: Keio University Design the Future Award for International Students. Заявиться самому нельзя — кандидатов номинируют graduate schools Keio (например SDM) среди сильнейших поступающих, и подать могут только те, с кем связались напрямую. Ультра-выборочный, число мест не раскрывается.",
    "fields": null,
    "source_url": "https://www.sdm.keio.ac.jp/en/admission/financialaid.html",
    "verified": false,
@@ -2369,7 +2369,7 @@
   },
   {
    "id": "x-apu-ug",
-   "name": "Ritsumeikan APU Tuition Reduction Scholarship (Undergraduate)",
+   "name": "Ritsumeikan APU (бакалавриат)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2382,7 +2382,7 @@
    "deadline": "несколько раундов в год (набор на апрель и сентябрь 2027); ранняя подача повы…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Отдельной заявки нет — отметка в заявлении на поступление; решение по документам, записанному видеоинтервью и финансовому положению семьи. Продление ежегодно при выполнении требований по GPA и кредитам.",
+   "note": "Официально: Ritsumeikan APU Tuition Reduction Scholarship (Undergraduate). Отдельной заявки нет — отметка в заявлении на поступление; решение по документам, записанному видеоинтервью и финансовому положению семьи. Продление ежегодно при выполнении требований по GPA и кредитам.",
    "fields": null,
    "source_url": "https://admissions.apu.ac.jp/costs_scholarships/before_enrollment/",
    "verified": false,
@@ -2396,7 +2396,7 @@
   },
   {
    "id": "x-apu-grad",
-   "name": "Ritsumeikan APU Tuition Reduction Scholarship (Graduate: GSA / GSM MBA)",
+   "name": "Ritsumeikan APU (магистратура)",
    "country": "Япония",
    "cc": "jp",
    "levels": [
@@ -2409,7 +2409,7 @@
    "deadline": "по расписанию набора 2027 (несколько раундов на апрель/сентябрь)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Решение принимается по документам заявки вместе с решением о приёме и не пересматривается; для MBA сильно влияет GMAT/GRE. Стипендия снимается при получении внешнего полного финансирования.",
+   "note": "Официально: Ritsumeikan APU Tuition Reduction Scholarship (Graduate: GSA / GSM MBA). Решение принимается по документам заявки вместе с решением о приёме и не пересматривается; для MBA сильно влияет GMAT/GRE. Стипендия снимается при получении внешнего полного финансирования.",
    "fields": null,
    "source_url": "https://admissions.apu.ac.jp/graduate/cost/tuition_reduction_scholarship/",
    "verified": false,
@@ -2423,7 +2423,7 @@
   },
   {
    "id": "gist_ug",
-   "name": "GIST International Undergraduate Admission — Full Scholarship",
+   "name": "GIST для иностранцев (Корея)",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2440,7 +2440,7 @@
    "deadline": "15 марта (ориентировочно)",
    "deadline_md": "03-15",
    "apply_open_md": null,
-   "note": "Только для иностранцев, оба родителя которых не корейцы. Отбор по SAT/AP/IB/ACT, аттестату и рекомендациям + опциональное телефонное интервью в мае; только STEM-направления.",
+   "note": "Официально: GIST International Undergraduate Admission — Full Scholarship. Только для иностранцев, оба родителя которых не корейцы. Отбор по SAT/AP/IB/ACT, аттестату и рекомендациям + опциональное телефонное интервью в мае; только STEM-направления.",
    "fields": [
     "sci",
     "eng",
@@ -2458,7 +2458,7 @@
   },
   {
    "id": "x-unist-ug",
-   "name": "UNIST International Undergraduate Scholarships (Tuition + Gold/Silver/Dream living scholarships)",
+   "name": "UNIST для иностранцев (Корея)",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2471,7 +2471,7 @@
    "deadline": "приём на осень 2027 по Fall 2027 Guidelines (обычно осень–зима, approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Тип стипендии на проживание (Gold/Silver/Dream) назначается UNIST при зачислении по результатам отбора; продление зависит от GPA и 12+ кредитов за семестр. STEM и бизнес-направления.",
+   "note": "Официально: UNIST International Undergraduate Scholarships (Tuition + Gold/Silver/Dream living scholarships). Тип стипендии на проживание (Gold/Silver/Dream) назначается UNIST при зачислении по результатам отбора; продление зависит от GPA и 12+ кредитов за семестр. STEM и бизнес-направления.",
    "fields": null,
    "source_url": "https://admu-intl.unist.ac.kr/admission-eng/life/scholarships.do",
    "verified": false,
@@ -2485,7 +2485,7 @@
   },
   {
    "id": "x-kdi-gas",
-   "name": "KDI School Global Ambassador Scholarship (GAS)",
+   "name": "KDI School GAS (Корея)",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2499,7 +2499,7 @@
    "deadline": "весенний набор: подача летом (скрининг документов 18 авг – 7 сент 2026); осен…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Приоритет гражданам стран-получателей ODA — Казахстан входит в список DAC, но приоритет не гарантия. Программы MPP/MDP/MPM; есть собеседование; магистратура ~1,5 года, PhD только с весеннего набора.",
+   "note": "Официально: KDI School Global Ambassador Scholarship (GAS). Приоритет гражданам стран-получателей ODA — Казахстан входит в список DAC, но приоритет не гарантия. Программы MPP/MDP/MPM; есть собеседование; магистратура ~1,5 года, PhD только с весеннего набора.",
    "fields": null,
    "source_url": "https://www.kdischool.ac.kr/menu.es?mid=a40203000000",
    "verified": false,
@@ -2513,7 +2513,7 @@
   },
   {
    "id": "korea_univ_grad",
-   "name": "Korea University Graduate School — Global Leader Scholarship (Type A) и стипендии Type B/C",
+   "name": "Korea University Global Leader",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2531,7 +2531,7 @@
    "deadline": "10 сентября (ориентировочно)",
    "deadline_md": "09-10",
    "apply_open_md": "09-01",
-   "note": "Заявка на стипендию подаётся вместе с заявлением на поступление; нужны рекомендация кафедры и согласие декана. Для Type A — GPA ≥4.0/4.5 и TOEFL iBT 90+/IELTS 7.0+/TOPIK 6; нельзя совмещать с GKS.",
+   "note": "Официально: Korea University Graduate School — Global Leader Scholarship (Type A) и стипендии Type B/C. Заявка на стипендию подаётся вместе с заявлением на поступление; нужны рекомендация кафедры и согласие декана. Для Type A — GPA ≥4.0/4.5 и TOEFL iBT 90+/IELTS 7.0+/TOPIK 6; нельзя совмещать с GKS.",
    "fields": null,
    "source_url": "https://graduate2.korea.ac.kr/scholarship/scholarships.html",
    "verified": false,
@@ -2545,7 +2545,7 @@
   },
   {
    "id": "x-hanyang-hiea",
-   "name": "Hanyang International Excellence Awards (HIEA)",
+   "name": "Hanyang HIEA (Корея)",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2559,7 +2559,7 @@
    "deadline": "5 марта",
    "deadline_md": "03-05",
    "apply_open_md": "03-01",
-   "note": "Подаётся уже после зачисления, каждый семестр заново; обязателен сертификат TOPIK, GPA ≥3.0 за прошлый семестр и медстраховка. Нельзя совмещать с другими стипендиями (кроме GKS).",
+   "note": "Официально: Hanyang International Excellence Awards (HIEA). Подаётся уже после зачисления, каждый семестр заново; обязателен сертификат TOPIK, GPA ≥3.0 за прошлый семестр и медстраховка. Нельзя совмещать с другими стипендиями (кроме GKS).",
    "fields": null,
    "source_url": "https://www.hanyang.ac.kr/web/eng/scholarships1",
    "verified": false,
@@ -2573,7 +2573,7 @@
   },
   {
    "id": "x-skku-ug",
-   "name": "Sungkyunkwan University (SKKU) — Samsung Global Sungkyun Scholarship и стипендии для иностранных первокурсников",
+   "name": "SKKU Samsung Global (Корея)",
    "country": "Корея",
    "cc": "kr",
    "levels": [
@@ -2586,7 +2586,7 @@
    "deadline": "по расписанию набора иностранцев (весна/осень 2027); даты не опубликованы",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Samsung Global Sungkyun и Global Leader Scholarship (50% на 4 года) — только по номинации вуза, нужно держать GPA 3.5+. Автоматические стипендии покрывают только 1-й семестр, дальше зависит от рейтинга.",
+   "note": "Официально: Sungkyunkwan University (SKKU) — Samsung Global Sungkyun Scholarship и стипендии для иностранных первокурсников. Samsung Global Sungkyun и Global Leader Scholarship (50% на 4 года) — только по номинации вуза, нужно держать GPA 3.5+. Автоматические стипендии покрывают только 1-й семестр, дальше зависит от рейтинга.",
    "fields": null,
    "source_url": "https://admission-global.skku.edu/eng/grad/scholarship_undergrad.html",
    "verified": false,
@@ -2600,7 +2600,7 @@
   },
   {
    "id": "sutd_rainmaker",
-   "name": "SUTD Rainmaker (International) Scholarship",
+   "name": "SUTD Rainmaker (Сингапур)",
    "country": "Сингапур",
    "cc": "sg",
    "levels": [
@@ -2617,7 +2617,7 @@
    "deadline": "2 марта (ориентировочно)",
    "deadline_md": "03-02",
    "apply_open_md": "01-02",
-   "note": "Для иностранцев и PR; нужны сильные A-level/IB/эквивалент, лидерство и общественная активность. Учтите: сама MOE Tuition Grant подразумевает обязательство отработать 3 года в сингапурской компании.",
+   "note": "Официально: SUTD Rainmaker (International) Scholarship. Для иностранцев и PR; нужны сильные A-level/IB/эквивалент, лидерство и общественная активность. Учтите: сама MOE Tuition Grant подразумевает обязательство отработать 3 года в сингапурской компании.",
    "fields": [
     "eng",
     "it"
@@ -2634,7 +2634,7 @@
   },
   {
    "id": "x-ntu-npgs",
-   "name": "Nanyang President's Graduate Scholarship (NPGS), NTU Singapore",
+   "name": "NTU NPGS PhD (Сингапур)",
    "country": "Сингапур",
    "cc": "sg",
    "levels": [
@@ -2647,7 +2647,7 @@
    "deadline": "период подачи на 2027/28 будет объявлен (обычно осень–зима, approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Нужен бакалавриат с Honours (Highest Distinction) или эквивалент; иностранцы обязаны участвовать в Graduate Assistantship Programme (преподавание/лабораторные). Ежегодное продление по прогрессу.",
+   "note": "Официально: Nanyang President's Graduate Scholarship (NPGS), NTU Singapore. Нужен бакалавриат с Honours (Highest Distinction) или эквивалент; иностранцы обязаны участвовать в Graduate Assistantship Programme (преподавание/лабораторные). Ежегодное продление по прогрессу.",
    "fields": null,
    "source_url": "https://www.ntu.edu.sg/admissions/graduate/financialmatters/scholarships/npgs",
    "verified": false,
@@ -2661,7 +2661,7 @@
   },
   {
    "id": "hku_ps",
-   "name": "HKU Presidential PhD Scholar Programme (HKU-PS)",
+   "name": "HKU Presidential PhD",
    "country": "Гонконг",
    "cc": "hk",
    "levels": [
@@ -2678,7 +2678,7 @@
    "deadline": "1 декабря",
    "deadline_md": "12-01",
    "apply_open_md": "09-01",
-   "note": "Отдельной заявки нет — рассматриваются все поступающие на full-time PhD; шорт-лист приглашают на интервью. Рекомендуется параллельно подавать на HK PhD Fellowship Scheme; конкурс очень высокий.",
+   "note": "Официально: HKU Presidential PhD Scholar Programme (HKU-PS). Отдельной заявки нет — рассматриваются все поступающие на full-time PhD; шорт-лист приглашают на интервью. Рекомендуется параллельно подавать на HK PhD Fellowship Scheme; конкурс очень высокий.",
    "fields": null,
    "source_url": "https://gradsch.hku.hk/prospective_students/fees_scholarships_and_financial_support/hku_presidential_phd_scholar_programme",
    "verified": false,
@@ -2692,7 +2692,7 @@
   },
   {
    "id": "x-anu-chancellors",
-   "name": "ANU Chancellor's International Scholarship",
+   "name": "ANU Chancellor's International",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2706,7 +2706,7 @@
    "deadline": "отдельной заявки нет — по срокам приёма ANU на 2027 (несколько раундов)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Все иностранные абитуриенты рассматриваются автоматически по рейтингу оценок, переведённых в общую шкалу; число стипендий ограничено, доля 50% — для сильнейших. Проживание и перелёт не покрываются.",
+   "note": "Официально: ANU Chancellor's International Scholarship. Все иностранные абитуриенты рассматриваются автоматически по рейтингу оценок, переведённых в общую шкалу; число стипендий ограничено, доля 50% — для сильнейших. Проживание и перелёт не покрываются.",
    "fields": null,
    "source_url": "https://study.anu.edu.au/scholarships/find-scholarship/anu-chancellors-international-scholarship",
    "verified": false,
@@ -2720,7 +2720,7 @@
   },
   {
    "id": "x-uq-excellence",
-   "name": "UQ International Excellence Scholarship",
+   "name": "UQ International Excellence",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2734,7 +2734,7 @@
    "deadline": "отдельной заявки нет — по срокам приёма UQ на 2027",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Автоматический отбор среди получивших offer по конкурсному баллу; нельзя совмещать с другой стипендией UQ или полным внешним спонсорством. Покрывает лишь четверть стоимости — остальное и проживание за свой счёт.",
+   "note": "Официально: UQ International Excellence Scholarship. Автоматический отбор среди получивших offer по конкурсному баллу; нельзя совмещать с другой стипендией UQ или полным внешним спонсорством. Покрывает лишь четверть стоимости — остальное и проживание за свой счёт.",
    "fields": null,
    "source_url": "https://scholarships.uq.edu.au/scholarship/uq-international-excellence-scholarship",
    "verified": false,
@@ -2748,7 +2748,7 @@
   },
   {
    "id": "x-adelaide-excellence",
-   "name": "Adelaide Academic Excellence Scholarship (Adelaide University, international)",
+   "name": "Adelaide Academic Excellence",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2762,7 +2762,7 @@
    "deadline": "по срокам приёма на 2027; для 50% нужна отдельная форма заявки",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "С 2026 объединённый Adelaide University (бывш. University of Adelaide + UniSA). Для 50% нужен средний балл уровня High Distinction и отдельная заявка; 25%/15% назначаются автоматически при подаче на программу.",
+   "note": "Официально: Adelaide Academic Excellence Scholarship (Adelaide University, international). С 2026 объединённый Adelaide University (бывш. University of Adelaide + UniSA). Для 50% нужен средний балл уровня High Distinction и отдельная заявка; 25%/15% назначаются автоматически при подаче на программу.",
    "fields": null,
    "source_url": "https://adelaide.edu.au/study/scholarships/international-students-scholarships/",
    "verified": false,
@@ -2776,7 +2776,7 @@
   },
   {
    "id": "x-deakin-vc",
-   "name": "Deakin Vice-Chancellor's International Scholarship",
+   "name": "Deakin Vice-Chancellor's",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2790,7 +2790,7 @@
    "deadline": "не позднее чем за 1 месяц до начала триместра (T1 ~ февраль, T2 ~ июнь, T3 ~…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Нужно ≥85% средний балл аттестата (IB 32+) или ≥80% в бакалавриате; отдельная форма, эссе 300 слов и 2 рекомендации про лидерство/общественную работу. Только coursework, не для Doctor of Medicine; реальный порог выше минимума.",
+   "note": "Официально: Deakin Vice-Chancellor's International Scholarship. Нужно ≥85% средний балл аттестата (IB 32+) или ≥80% в бакалавриате; отдельная форма, эссе 300 слов и 2 рекомендации про лидерство/общественную работу. Только coursework, не для Doctor of Medicine; реальный порог выше минимума.",
    "fields": null,
    "source_url": "https://www.deakin.edu.au/study/fees-and-scholarships/scholarships/find-a-scholarship/deakin-vice-chancellors-international-scholarship",
    "verified": false,
@@ -2804,7 +2804,7 @@
   },
   {
    "id": "griffith_vc",
-   "name": "Griffith Vice Chancellor's International Scholarship",
+   "name": "Griffith Vice Chancellor's",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2822,7 +2822,7 @@
    "deadline": "28 ноября",
    "deadline_md": "11-28",
    "apply_open_md": null,
-   "note": "Сначала нужно получить Letter of Offer, затем подать заявку на стипендию с транскриптами и мотивационным письмом; порог GPA 6.0/7 (или эквивалент). Не для граждан Австралии/НЗ.",
+   "note": "Официально: Griffith Vice Chancellor's International Scholarship. Сначала нужно получить Letter of Offer, затем подать заявку на стипендию с транскриптами и мотивационным письмом; порог GPA 6.0/7 (или эквивалент). Не для граждан Австралии/НЗ.",
    "fields": null,
    "source_url": "https://www.griffith.edu.au/international/scholarships-finance/scholarships/vice-chancellors-international-scholarship",
    "verified": false,
@@ -2836,7 +2836,7 @@
   },
   {
    "id": "x-australia-rtp",
-   "name": "Australian Government Research Training Program (RTP) Scholarship",
+   "name": "Australia RTP (PhD)",
    "country": "Австралия",
    "cc": "au",
    "levels": [
@@ -2850,7 +2850,7 @@
    "deadline": "по вузам (для старта в след. году обычно авг–окт, approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Государственная схема для PhD и research master, открыта иностранцам, но распределяется каждым университетом по своему конкурсу — подавать нужно в вуз (можно в несколько). Обычно требуется согласие научного руководителя и сильный research proposal.",
+   "note": "Официально: Australian Government Research Training Program (RTP) Scholarship. Государственная схема для PhD и research master, открыта иностранцам, но распределяется каждым университетом по своему конкурсу — подавать нужно в вуз (можно в несколько). Обычно требуется согласие научного руководителя и сильный research proposal.",
    "fields": null,
    "source_url": "https://www.education.gov.au/research-block-grants/research-training-program",
    "verified": false,
@@ -2864,7 +2864,7 @@
   },
   {
    "id": "otago_phd",
-   "name": "University of Otago Doctoral Scholarship",
+   "name": "Otago Doctoral (Новая Зеландия)",
    "country": "Новая Зеландия",
    "cc": "nz",
    "levels": [
@@ -2881,7 +2881,7 @@
    "deadline": "1 марта",
    "deadline_md": "03-01",
    "apply_open_md": null,
-   "note": "Открыта иностранцам (PhD-иностранцы в НЗ платят по домашней ставке); заявка через eVision вместе с заявлением в докторантуру и оценкой кафедры. Вуз сейчас пересматривает схему — проверяйте актуальные условия.",
+   "note": "Официально: University of Otago Doctoral Scholarship. Открыта иностранцам (PhD-иностранцы в НЗ платят по домашней ставке); заявка через eVision вместе с заявлением в докторантуру и оценкой кафедры. Вуз сейчас пересматривает схему — проверяйте актуальные условия.",
    "fields": null,
    "source_url": "https://www.otago.ac.nz/study/scholarships/database/university-of-otago-doctoral-scholarship",
    "verified": false,
@@ -2895,7 +2895,7 @@
   },
   {
    "id": "knight_hennessy",
-   "name": "Knight-Hennessy Scholars (Stanford University)",
+   "name": "Knight-Hennessy (Stanford)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -2913,7 +2913,7 @@
    "deadline": "6 октября",
    "deadline_md": "10-06",
    "apply_open_md": null,
-   "note": "Граждане всех стран. Первый бакалавр должен быть получен не ранее января 2020 (для когорты 2027). Нужно параллельно поступить в graduate-программу Stanford; крайне высокий конкурс (~1–2%).",
+   "note": "Официально: Knight-Hennessy Scholars (Stanford University). Граждане всех стран. Первый бакалавр должен быть получен не ранее января 2020 (для когорты 2027). Нужно параллельно поступить в graduate-программу Stanford; крайне высокий конкурс (~1–2%).",
    "fields": null,
    "source_url": "https://knight-hennessy.stanford.edu/admission/preparing-your-applications/application-deadlines",
    "verified": false,
@@ -2927,7 +2927,7 @@
   },
   {
    "id": "robertson",
-   "name": "Robertson Scholars Leadership Program (Duke University / UNC Chapel Hill)",
+   "name": "Robertson Scholars (Duke / UNC)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -2945,7 +2945,7 @@
    "deadline": "15 ноября",
    "deadline_md": "11-15",
    "apply_open_md": "08-15",
-   "note": "Программа прямо принимает заявки от международных абитуриентов (единая анкета для всех). Отдельная заявка в Robertson + поступление в Duke или UNC; интервью финалистов. Студент сам должен обеспечить визу.",
+   "note": "Официально: Robertson Scholars Leadership Program (Duke University / UNC Chapel Hill). Программа прямо принимает заявки от международных абитуриентов (единая анкета для всех). Отдельная заявка в Robertson + поступление в Duke или UNC; интервью финалистов. Студент сам должен обеспечить визу.",
    "fields": null,
    "source_url": "https://robertsonscholars.org/apply/high-school-students/",
    "verified": false,
@@ -2959,7 +2959,7 @@
   },
   {
    "id": "emory_scholars",
-   "name": "Emory University Scholar Programs (Woodruff, Emory Scholars и др.)",
+   "name": "Emory Scholars (США)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -2977,7 +2977,7 @@
    "deadline": "15 ноября",
    "deadline_md": "11-15",
    "apply_open_md": null,
-   "note": "«Все студенты независимо от гражданства» рассматриваются. Достаточно ответить «да» на вопрос о Scholar Programs в заявке до 15 ноября; ~175–200 финалистов из ~10 000, финалисты приезжают в кампус в марте.",
+   "note": "Официально: Emory University Scholar Programs (Woodruff, Emory Scholars и др.). «Все студенты независимо от гражданства» рассматриваются. Достаточно ответить «да» на вопрос о Scholar Programs в заявке до 15 ноября; ~175–200 финалистов из ~10 000, финалисты приезжают в кампус в марте.",
    "fields": null,
    "source_url": "https://apply.emory.edu/financial-aid/scholar-program.html",
    "verified": false,
@@ -2991,7 +2991,7 @@
   },
   {
    "id": "washu_scholars",
-   "name": "WashU Signature Scholar Programs — Annika Rodriguez Scholars / Danforth Scholars (Washington University in St. Louis)",
+   "name": "WashU Signature Scholars",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3009,7 +3009,7 @@
    "deadline": "4 января",
    "deadline_md": "01-04",
    "apply_open_md": null,
-   "note": "Иностранцы допускаются только к программам Rodriguez и Danforth (Ervin — только для граждан/резидентов США). Нужны короткие эссе через портал Pathway и рекомендации; финалисты — интервью в марте.",
+   "note": "Официально: WashU Signature Scholar Programs — Annika Rodriguez Scholars / Danforth Scholars (Washington University in St. Louis). Иностранцы допускаются только к программам Rodriguez и Danforth (Ervin — только для граждан/резидентов США). Нужны короткие эссе через портал Pathway и рекомендации; финалисты — интервью в марте.",
    "fields": null,
    "source_url": "https://scholars.washu.edu/about/scholar-program-faq/",
    "verified": false,
@@ -3023,7 +3023,7 @@
   },
   {
    "id": "vanderbilt_merit",
-   "name": "Vanderbilt Signature Merit Scholarships — Cornelius Vanderbilt / Ingram Scholars",
+   "name": "Vanderbilt Merit Scholarships",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3041,7 +3041,7 @@
    "deadline": "1 декабря (ориентировочно)",
    "deadline_md": "12-01",
    "apply_open_md": null,
-   "note": "FAQ прямо подтверждает: «international applicants are eligible to receive any of Vanderbilt's merit scholarships». Нужна отдельная заявка на стипендию через MyAppVU после подачи Common App; для Ingram — 2 рекомендации о волонтёрстве.",
+   "note": "Официально: Vanderbilt Signature Merit Scholarships — Cornelius Vanderbilt / Ingram Scholars. FAQ прямо подтверждает: «international applicants are eligible to receive any of Vanderbilt's merit scholarships». Нужна отдельная заявка на стипендию через MyAppVU после подачи Common App; для Ingram — 2 рекомендации о волонтёрстве.",
    "fields": null,
    "source_url": "https://www.vanderbilt.edu/scholarships/faq.php",
    "verified": false,
@@ -3055,7 +3055,7 @@
   },
   {
    "id": "bu_presidential",
-   "name": "Boston University Presidential Scholarship",
+   "name": "BU Presidential (Бостон)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3073,7 +3073,7 @@
    "deadline": "1 декабря",
    "deadline_md": "12-01",
    "apply_open_md": null,
-   "note": "Иностранные студенты прямо перечислены среди тех, кто может получить merit-стипендии; отдельной заявки нет — по обычной заявке, поданной до 1 декабря. Остальные ~50% tuition и проживание — за свой счёт.",
+   "note": "Официально: Boston University Presidential Scholarship. Иностранные студенты прямо перечислены среди тех, кто может получить merit-стипендии; отдельной заявки нет — по обычной заявке, поданной до 1 декабря. Остальные ~50% tuition и проживание — за свой счёт.",
    "fields": null,
    "source_url": "https://www.bu.edu/admissions/tuition-aid/scholarships-financial-aid/first-year-merit/",
    "verified": false,
@@ -3087,7 +3087,7 @@
   },
   {
    "id": "alabama_intl",
-   "name": "University of Alabama International Freshman Scholarships (Presidential / Presidential Elite)",
+   "name": "University of Alabama International",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3105,7 +3105,7 @@
    "deadline": "4 декабря",
    "deadline_md": "12-04",
    "apply_open_md": null,
-   "note": "Одна из немногих «предсказуемых» схем: стипендия начисляется автоматически по баллам SAT/ACT и GPA. Требуется сдать SAT/ACT; проживание и питание не покрываются (кроме Elite — жильё 1-й год по обычной цене).",
+   "note": "Официально: University of Alabama International Freshman Scholarships (Presidential / Presidential Elite). Одна из немногих «предсказуемых» схем: стипендия начисляется автоматически по баллам SAT/ACT и GPA. Требуется сдать SAT/ACT; проживание и питание не покрываются (кроме Elite — жильё 1-й год по обычной цене).",
    "fields": null,
    "source_url": "https://afford.ua.edu/scholarships/international/",
    "verified": false,
@@ -3119,7 +3119,7 @@
   },
   {
    "id": "iwu_intl",
-   "name": "Illinois Wesleyan University — International Student Merit Scholarships + need-based aid",
+   "name": "Illinois Wesleyan (США)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3136,7 +3136,7 @@
    "deadline": "1 марта",
    "deadline_md": "03-01",
    "apply_open_md": null,
-   "note": "Автоматическое рассмотрение всех подавших заявку; полное покрытие возможно только при комбинации merit + need-based (CSS Profile). Небольшой liberal-arts колледж, точная сумма зависит от оценок и тестов.",
+   "note": "Официально: Illinois Wesleyan University — International Student Merit Scholarships + need-based aid. Автоматическое рассмотрение всех подавших заявку; полное покрытие возможно только при комбинации merit + need-based (CSS Profile). Небольшой liberal-arts колледж, точная сумма зависит от оценок и тестов.",
    "fields": null,
    "source_url": "https://www.iwu.edu/international/scholarships.html",
    "verified": false,
@@ -3150,7 +3150,7 @@
   },
   {
    "id": "minerva",
-   "name": "Minerva University — Need-based Financial Aid for international students",
+   "name": "Minerva University (США)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3167,7 +3167,7 @@
    "deadline": "8 ноября",
    "deadline_md": "11-08",
    "apply_open_md": null,
-   "note": "Заявку на fin. aid нужно подать ДО решения о приёме, если без помощи учиться невозможно. Формат: 4 года в 7 городах мира, стоимость заметно ниже американских вузов, но не бесплатно.",
+   "note": "Официально: Minerva University — Need-based Financial Aid for international students. Заявку на fin. aid нужно подать ДО решения о приёме, если без помощи учиться невозможно. Формат: 4 года в 7 городах мира, стоимость заметно ниже американских вузов, но не бесплатно.",
    "fields": null,
    "source_url": "https://www.minerva.edu/tuition-aid/",
    "verified": false,
@@ -3181,7 +3181,7 @@
   },
   {
    "id": "x-davis-uwc",
-   "name": "Davis United World College Scholars Program",
+   "name": "Davis UWC Scholars (США)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3194,7 +3194,7 @@
    "deadline": "по дедлайнам вузов-партнёров (нояб–янв)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Только для выпускников школ UWC (казахстанцы попадают через национальный комитет UWC Kazakhstan). Отдельной заявки нет — стипендия рассматривается автоматически при поступлении в вуз-партнёр.",
+   "note": "Официально: Davis United World College Scholars Program. Только для выпускников школ UWC (казахстанцы попадают через национальный комитет UWC Kazakhstan). Отдельной заявки нет — стипендия рассматривается автоматически при поступлении в вуз-партнёр.",
    "fields": null,
    "source_url": "https://www.davisuwcscholars.org/program",
    "verified": false,
@@ -3208,7 +3208,7 @@
   },
   {
    "id": "x-humphrey",
-   "name": "Hubert H. Humphrey Fellowship Program",
+   "name": "Humphrey Fellowship (США)",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3221,7 +3221,7 @@
    "deadline": "по стране — через посольство США в РК (обычно лето; approx); номинации посоль…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Для mid-career профессионалов: бакалавр + минимум 5 лет full-time опыта, лидерство и госслужба/общественная работа, ограниченный опыт в США. Не даёт степени. Точную дату дедлайна для Казахстана публикует kz.usembassy.gov (страница не открылась автоматически — проверить вручную).",
+   "note": "Официально: Hubert H. Humphrey Fellowship Program. Для mid-career профессионалов: бакалавр + минимум 5 лет full-time опыта, лидерство и госслужба/общественная работа, ограниченный опыт в США. Не даёт степени. Точную дату дедлайна для Казахстана публикует kz.usembassy.gov (страница не открылась автоматически — проверить вручную).",
    "fields": null,
    "source_url": "https://www.humphreyfellowship.org/how-to-apply/frequently-asked-questions/",
    "verified": false,
@@ -3235,7 +3235,7 @@
   },
   {
    "id": "x-educationusa-of",
-   "name": "EducationUSA Opportunity Funds Program",
+   "name": "EducationUSA Opportunity Funds",
    "country": "США",
    "cc": "us",
    "levels": [
@@ -3249,7 +3249,7 @@
    "deadline": "по циклу советников EducationUSA в РК (обычно весна–лето; approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Отбор советником EducationUSA, региональным менеджером и Public Affairs посольства США; нужен доход семьи ниже порога и высокие академические результаты. Список стран на официальной странице не приведён — участие Казахстана подтверждать у центра EducationUSA в Астане/Алматы.",
+   "note": "Официально: EducationUSA Opportunity Funds Program. Отбор советником EducationUSA, региональным менеджером и Public Affairs посольства США; нужен доход семьи ниже порога и высокие академические результаты. Список стран на официальной странице не приведён — участие Казахстана подтверждать у центра EducationUSA в Астане/Алматы.",
    "fields": null,
    "source_url": "https://educationusa.state.gov/us-higher-education-professionals/special-programs",
    "verified": false,
@@ -3263,7 +3263,7 @@
   },
   {
    "id": "mccall_macbain",
-   "name": "McCall MacBain Scholarships (McGill University)",
+   "name": "McCall MacBain (McGill)",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3280,7 +3280,7 @@
    "deadline": "19 августа",
    "deadline_md": "08-19",
    "apply_open_md": "06-01",
-   "note": "Бакалавр должен быть получен не ранее 5 лет назад (или возраст ≤30). Много этапов: заявка, региональные интервью, финальные интервью в Монреале; отдельно нужно поступить в программу McGill.",
+   "note": "Официально: McCall MacBain Scholarships (McGill University). Бакалавр должен быть получен не ранее 5 лет назад (или возраст ≤30). Много этапов: заявка, региональные интервью, финальные интервью в Монреале; отдельно нужно поступить в программу McGill.",
    "fields": null,
    "source_url": "https://mccallmacbainscholars.org/apply/",
    "verified": false,
@@ -3294,7 +3294,7 @@
   },
   {
    "id": "x-waterloo-entrance",
-   "name": "University of Waterloo — International Student Entrance Scholarship",
+   "name": "Waterloo Entrance Scholarship",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3307,7 +3307,7 @@
    "deadline": "автоматически при поступлении (решения с апреля); факультетские — по дедлайна…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Базовая стипендия покрывает лишь ~20–25% годового tuition для иностранцев; крупные суммы — только конкурсные факультетские стипендии (математика, science) с отдельной заявкой.",
+   "note": "Официально: University of Waterloo — International Student Entrance Scholarship. Базовая стипендия покрывает лишь ~20–25% годового tuition для иностранцев; крупные суммы — только конкурсные факультетские стипендии (математика, science) с отдельной заявкой.",
    "fields": null,
    "source_url": "https://uwaterloo.ca/future-students/financing/scholarships/international-students",
    "verified": false,
@@ -3321,7 +3321,7 @@
   },
   {
    "id": "x-ucalgary-entrance",
-   "name": "University of Calgary International Entrance Scholarship",
+   "name": "Calgary International Entrance",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3334,7 +3334,7 @@
    "deadline": "через портал My UCalgary (High School Prestige Awards); дата на странице не у…",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Только для иностранцев, платящих international tuition; всего 2 стипендии в год — очень высокий конкурс; нужна отдельная заявка в портале после подачи документов.",
+   "note": "Официально: University of Calgary International Entrance Scholarship. Только для иностранцев, платящих international tuition; всего 2 стипендии в год — очень высокий конкурс; нужна отдельная заявка в портале после подачи документов.",
    "fields": null,
    "source_url": "https://www.ucalgary.ca/registrar/awards/university-calgary-international-entrance-scholarship",
    "verified": false,
@@ -3348,7 +3348,7 @@
   },
   {
    "id": "york_intl",
-   "name": "York University — President's International Scholarship of Excellence + International Scholarship of Distinction",
+   "name": "York President's International",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3365,7 +3365,7 @@
    "deadline": "27 января",
    "deadline_md": "01-27",
    "apply_open_md": null,
-   "note": "PISE требует академического превосходства, волонтёрства и лидерства + номинации/рекомендации школы; автоматические стипендии дают лишь частичное покрытие (~10–25% стоимости).",
+   "note": "Официально: York University — President's International Scholarship of Excellence + International Scholarship of Distinction. PISE требует академического превосходства, волонтёрства и лидерства + номинации/рекомендации школы; автоматические стипендии дают лишь частичное покрытие (~10–25% стоимости).",
    "fields": null,
    "source_url": "https://futurestudents.yorku.ca/financing-your-degree/international-scholarships",
    "verified": false,
@@ -3379,7 +3379,7 @@
   },
   {
    "id": "dal_entrance",
-   "name": "Dalhousie University — General Entrance Award Program",
+   "name": "Dalhousie Entrance Awards",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3396,7 +3396,7 @@
    "deadline": "15 февраля",
    "deadline_md": "02-15",
    "apply_open_md": "10-01",
-   "note": "Единая заявка на все entrance awards; крупные именные награды часто с региональными ограничениями (Карибы, Индия, Ямайка) — казахстанцу реально рассчитывать на общий пул по среднему баллу. Schulich Leader и Harrison McCain — только для канадцев.",
+   "note": "Официально: Dalhousie University — General Entrance Award Program. Единая заявка на все entrance awards; крупные именные награды часто с региональными ограничениями (Карибы, Индия, Ямайка) — казахстанцу реально рассчитывать на общий пул по среднему баллу. Schulich Leader и Harrison McCain — только для канадцев.",
    "fields": null,
    "source_url": "https://www.dal.ca/admissions/money_matters/awards-financial-aid/scholarships/prospective_students.html",
    "verified": false,
@@ -3410,7 +3410,7 @@
   },
   {
    "id": "x-western-nsp",
-   "name": "Western University — International President's Entrance Scholarship (National Scholarship Program)",
+   "name": "Western University NSP",
    "country": "Канада",
    "cc": "ca",
    "levels": [
@@ -3423,7 +3423,7 @@
    "deadline": "заявка доступна с середины ноября; дедлайн — зима (обычно февраль, approx)",
    "deadline_md": null,
    "apply_open_md": "11-15",
-   "note": "Обязательна номинация школы (школа может выдвинуть до 4 учеников + 1 дополнительно, если он иностранный) и средний балл ≥90% по Grade 12 (или эквивалент). Всего 3 награды — очень высокий конкурс.",
+   "note": "Официально: Western University — International President's Entrance Scholarship (National Scholarship Program). Обязательна номинация школы (школа может выдвинуть до 4 учеников + 1 дополнительно, если он иностранный) и средний балл ≥90% по Grade 12 (или эквивалент). Всего 3 награды — очень высокий конкурс.",
    "fields": null,
    "source_url": "https://registrar.uwo.ca/student_finances/scholarships_awards/admission/national_scholarship_program.html",
    "verified": false,
@@ -3437,7 +3437,7 @@
   },
   {
    "id": "study_in_saudi",
-   "name": "Study in Saudi Arabia — стипендии Министерства образования КСА для иностранцев (единая платформа)",
+   "name": "Study in Saudi Arabia (гос. платформа)",
    "country": "Саудовская Аравия",
    "cc": "sa",
    "levels": [
@@ -3456,7 +3456,7 @@
    "deadline": "6 октября (ориентировочно)",
    "deadline_md": "10-06",
    "apply_open_md": "09-16",
-   "note": "Единый портал МОН КСА (studyinsaudi.sa), через который подаются заявки в KSU, IUM, KAU, UQU и др. Для арабоязычных программ обязателен подготовительный год арабского; возрастные лимиты по уровням (у KAU: магистратура ≤35, PhD ≤40).",
+   "note": "Официально: Study in Saudi Arabia — стипендии Министерства образования КСА для иностранцев (единая платформа). Единый портал МОН КСА (studyinsaudi.sa), через который подаются заявки в KSU, IUM, KAU, UQU и др. Для арабоязычных программ обязателен подготовительный год арабского; возрастные лимиты по уровням (у KAU: магистратура ≤35, PhD ≤40).",
    "fields": null,
    "source_url": "https://studyinsaudi.sa/en",
    "verified": false,
@@ -3470,7 +3470,7 @@
   },
   {
    "id": "ksu_intl",
-   "name": "King Saud University — International Scholarship Program (Riyadh)",
+   "name": "King Saud University (Эр-Рияд)",
    "country": "Саудовская Аравия",
    "cc": "sa",
    "levels": [
@@ -3487,7 +3487,7 @@
    "deadline": "18 сентября (ориентировочно)",
    "deadline_md": "09-18",
    "apply_open_md": "08-18",
-   "note": "Возраст 17–25, аттестат не старше 5 лет со средним «очень хорошо», справка о несудимости, медосмотр, не получал ранее стипендию саудовского вуза. Отбор конкурсный по квотам на страну; сначала год арабского языка.",
+   "note": "Официально: King Saud University — International Scholarship Program (Riyadh). Возраст 17–25, аттестат не старше 5 лет со средним «очень хорошо», справка о несудимости, медосмотр, не получал ранее стипендию саудовского вуза. Отбор конкурсный по квотам на страну; сначала год арабского языка.",
    "fields": null,
    "source_url": "https://faculty.ksu.edu.sa/sites/default/files/KSU%20Scholarship%20Flyer%20EN.pdf",
    "verified": false,
@@ -3501,7 +3501,7 @@
   },
   {
    "id": "x-kau-jeddah",
-   "name": "King Abdulaziz University (KAU, Jeddah) — International Scholarships",
+   "name": "King Abdulaziz University (Джидда)",
    "country": "Саудовская Аравия",
    "cc": "sa",
    "levels": [
@@ -3517,7 +3517,7 @@
    "deadline": "через платформу Study in Saudi (окна по семестрам)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Магистратура — до 35 лет, PhD — до 40; средний балл «очень хорошо», 2 рекомендации, TOEFL iBT 61 / IELTS 5 (кроме арабистики и исламоведения), номинационное письмо от компетентного органа своей страны. Медицинские программы для иностранцев закрыты.",
+   "note": "Официально: King Abdulaziz University (KAU, Jeddah) — International Scholarships. Магистратура — до 35 лет, PhD — до 40; средний балл «очень хорошо», 2 рекомендации, TOEFL iBT 61 / IELTS 5 (кроме арабистики и исламоведения), номинационное письмо от компетентного органа своей страны. Медицинские программы для иностранцев закрыты.",
    "fields": null,
    "source_url": "https://graduatestudies.kau.edu.sa/content-306-EN-278671",
    "verified": false,
@@ -3531,7 +3531,7 @@
   },
   {
    "id": "x-iu-madinah",
-   "name": "Islamic University of Madinah — Undergraduate Scholarship for international students",
+   "name": "Исламский университет Медины",
    "country": "Саудовская Аравия",
    "cc": "sa",
    "levels": [
@@ -3545,7 +3545,7 @@
    "deadline": "по окнам платформы Study in Saudi (approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Традиционно много студентов из Казахстана; исламские науки, арабский, а также инженерия и естественные науки. Ограничения по возрасту и требования к аттестату — как у стипендий МОН КСА; только мужские программы на основном кампусе.",
+   "note": "Официально: Islamic University of Madinah — Undergraduate Scholarship for international students. Традиционно много студентов из Казахстана; исламские науки, арабский, а также инженерия и естественные науки. Ограничения по возрасту и требования к аттестату — как у стипендий МОН КСА; только мужские программы на основном кампусе.",
    "fields": null,
    "source_url": "https://iu.edu.sa/%D8%AA%D9%82%D8%AF%D9%8A%D9%85-%D8%B7%D9%84%D8%A8-%D8%A7%D9%84%D9%82%D8%A8%D9%88%D9%84-%D9%84%D9%84%D8%B7%D9%84%D8%A7%D8%A8-%D8%A7%D9%84%D8%AF%D9%88%D9%84%D9%8A%D9%8A%D9%86-0",
    "verified": false,
@@ -3559,7 +3559,7 @@
   },
   {
    "id": "alfaisal",
-   "name": "Alfaisal University (Riyadh) — Merit / Need-based / Distinguished Science Scholarships",
+   "name": "Alfaisal University (Эр-Рияд)",
    "country": "Саудовская Аравия",
    "cc": "sa",
    "levels": [
@@ -3576,7 +3576,7 @@
    "deadline": "28 июля",
    "deadline_md": "07-28",
    "apply_open_md": null,
-   "note": "Частный вуз, скидки нельзя суммировать (merit ИЛИ need-based); максимум 50% и только для College of Science. Подходит как «бюджетный» вариант, но не как полная стипендия.",
+   "note": "Официально: Alfaisal University (Riyadh) — Merit / Need-based / Distinguished Science Scholarships. Частный вуз, скидки нельзя суммировать (merit ИЛИ need-based); максимум 50% и только для College of Science. Подходит как «бюджетный» вариант, но не как полная стипендия.",
    "fields": null,
    "source_url": "https://admissions.alfaisal.edu/en/scholarship",
    "verified": false,
@@ -3590,7 +3590,7 @@
   },
   {
    "id": "aus_presidents",
-   "name": "American University of Sharjah — President's Scholarship",
+   "name": "AUS President's Scholarship (Шарджа)",
    "country": "ОАЭ",
    "cc": "ae",
    "levels": [
@@ -3607,7 +3607,7 @@
    "deadline": "19 марта (ориентировочно)",
    "deadline_md": "03-19",
    "apply_open_md": "01-15",
-   "note": "Только для окончивших школу ЗА ПРЕДЕЛАМИ ОАЭ (казахстанские школы подходят): средний балл 98% за 10–11 классы, IELTS 7.0 / TOEFL iBT 94. Также автоматические merit-скидки 10–20% при 95%+.",
+   "note": "Официально: American University of Sharjah — President's Scholarship. Только для окончивших школу ЗА ПРЕДЕЛАМИ ОАЭ (казахстанские школы подходят): средний балл 98% за 10–11 классы, IELTS 7.0 / TOEFL iBT 94. Также автоматические merit-скидки 10–20% при 95%+.",
    "fields": null,
    "source_url": "https://www.aus.edu/admissions/financial-grants-and-scholarships",
    "verified": false,
@@ -3621,7 +3621,7 @@
   },
   {
    "id": "x-aus-assistantships",
-   "name": "American University of Sharjah — Graduate Assistantships (Master's / PhD)",
+   "name": "AUS Graduate Assistantships (Шарджа)",
    "country": "ОАЭ",
    "cc": "ae",
    "levels": [
@@ -3635,7 +3635,7 @@
    "deadline": "по дедлайнам graduate-приёма (весна для осеннего набора; approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Требуется GPA ≥3.25 и обязательства ассистента (преподавание/исследования); количество мест ограничено бюджетом кафедр, выделяется после приёма.",
+   "note": "Официально: American University of Sharjah — Graduate Assistantships (Master's / PhD). Требуется GPA ≥3.25 и обязательства ассистента (преподавание/исследования); количество мест ограничено бюджетом кафедр, выделяется после приёма.",
    "fields": null,
    "source_url": "https://www.aus.edu/admissions/financial-grants-and-scholarships",
    "verified": false,
@@ -3649,7 +3649,7 @@
   },
   {
    "id": "x-uaeu-chancellor",
-   "name": "United Arab Emirates University (UAEU) — Chancellor's Scholarship for Elite / Talented International Students",
+   "name": "UAEU Chancellor's Scholarship",
    "country": "ОАЭ",
    "cc": "ae",
    "levels": [
@@ -3662,7 +3662,7 @@
    "deadline": "1-й семестр: май–июль; 2-й семестр: сентябрь–ноябрь",
    "deadline_md": null,
    "apply_open_md": "05-01",
-   "note": "Государственный вуз ОАЭ, принимает иностранцев с 2021 г.; для удержания 100% нужен GPA 3.8 и ≥15 кредитов в семестр. Проживание — за свой счёт.",
+   "note": "Официально: United Arab Emirates University (UAEU) — Chancellor's Scholarship for Elite / Talented International Students. Государственный вуз ОАЭ, принимает иностранцев с 2021 г.; для удержания 100% нужен GPA 3.8 и ≥15 кредитов в семестр. Проживание — за свой счёт.",
    "fields": null,
    "source_url": "https://www.uaeu.ac.ae/en/admission/undergraduate-scholarships.shtml",
    "verified": false,
@@ -3676,7 +3676,7 @@
   },
   {
    "id": "auc_excellence",
-   "name": "The American University in Cairo (AUC) — Excellence Scholarship Program",
+   "name": "AUC Excellence (Каир)",
    "country": "Египет",
    "cc": "eg",
    "levels": [
@@ -3693,7 +3693,7 @@
    "deadline": "1 июня",
    "deadline_md": "06-01",
    "apply_open_md": null,
-   "note": "Есть отдельная категория «International Diversity» для иностранцев; 100% достижимо только при сочетании нескольких категорий и ранней подаче (до 1 марта — выше процент). Донорские стипендии с жильём и стипендией имеют свои критерии.",
+   "note": "Официально: The American University in Cairo (AUC) — Excellence Scholarship Program. Есть отдельная категория «International Diversity» для иностранцев; 100% достижимо только при сочетании нескольких категорий и ранней подаче (до 1 марта — выше процент). Донорские стипендии с жильём и стипендией имеют свои критерии.",
    "fields": null,
    "source_url": "https://www.aucegypt.edu/admissions/scholarships/excellence-program",
    "verified": false,
@@ -3707,7 +3707,7 @@
   },
   {
    "id": "x-weizmann",
-   "name": "Weizmann Institute of Science — Feinberg Graduate School MSc/PhD full scholarships",
+   "name": "Weizmann Institute MSc/PhD",
    "country": "Израиль",
    "cc": "il",
    "levels": [
@@ -3721,7 +3721,7 @@
    "deadline": "rolling; приём стремятся завершить к июню (approx)",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Только естественные науки, математика, computer science и науки о жизни (research-based MSc/PhD). Приём открыт для любых национальностей; рассмотрение 4–12 недель, желательно заранее списаться с научной группой.",
+   "note": "Официально: Weizmann Institute of Science — Feinberg Graduate School MSc/PhD full scholarships. Только естественные науки, математика, computer science и науки о жизни (research-based MSc/PhD). Приём открыт для любых национальностей; рассмотрение 4–12 недель, желательно заранее списаться с научной группой.",
    "fields": null,
    "source_url": "https://www.weizmann.ac.il/feinberg/admissions/admissions-procedures",
    "verified": false,
@@ -3735,7 +3735,7 @@
   },
   {
    "id": "rotary_peace",
-   "name": "Rotary Peace Fellowship (Rotary Foundation)",
+   "name": "Rotary Peace Fellowship",
    "country": "Международные",
    "cc": null,
    "levels": [
@@ -3752,7 +3752,7 @@
    "deadline": "31 мая",
    "deadline_md": "05-31",
    "apply_open_md": "02-01",
-   "note": "Нужно ≥3 лет full-time опыта в сфере мира/развития (для сертификата — ≥5), TOEFL/IELTS, поддержка местного Rotary-дистрикта; учиться нужно вне своей страны. Члены Rotary и их дети/внуки не допускаются.",
+   "note": "Официально: Rotary Peace Fellowship (Rotary Foundation). Нужно ≥3 лет full-time опыта в сфере мира/развития (для сертификата — ≥5), TOEFL/IELTS, поддержка местного Rotary-дистрикта; учиться нужно вне своей страны. Члены Rotary и их дети/внуки не допускаются.",
    "fields": [
     "hum",
     "law"
@@ -3769,7 +3769,7 @@
   },
   {
    "id": "x-msca-doctoral-networks",
-   "name": "Marie Skłodowska-Curie Actions — Doctoral Networks (MSCA DN, Horizon Europe)",
+   "name": "MSCA Doctoral Networks (PhD)",
    "country": "ЕС",
    "cc": "eu",
    "levels": [
@@ -3782,7 +3782,7 @@
    "deadline": "вакансии круглый год на EURAXESS; конкурс консорциумов 2026: 28 мая — 24 ноября",
    "deadline_md": null,
    "apply_open_md": null,
-   "note": "Любая национальность; нельзя иметь PhD и нельзя было жить/работать в стране принимающей организации >12 месяцев за последние 36. Заявка подаётся не в ЕС, а напрямую на позицию PhD в конкретном проекте через EURAXESS.",
+   "note": "Официально: Marie Skłodowska-Curie Actions — Doctoral Networks (MSCA DN, Horizon Europe). Любая национальность; нельзя иметь PhD и нельзя было жить/работать в стране принимающей организации >12 месяцев за последние 36. Заявка подаётся не в ЕС, а напрямую на позицию PhD в конкретном проекте через EURAXESS.",
    "fields": null,
    "source_url": "https://marie-sklodowska-curie-actions.ec.europa.eu/actions/doctoral-networks/6-steps-to-prepare-your-application",
    "verified": false,
@@ -3796,7 +3796,7 @@
   },
   {
    "id": "x-mexico-amexcid",
-   "name": "Becas de Excelencia del Gobierno de México para Extranjeros (SRE / AMEXCID)",
+   "name": "Стипендии правительства Мексики",
    "country": "Мексика",
    "cc": "mx",
    "levels": [
@@ -3811,7 +3811,7 @@
    "deadline": "22 июня (ориентировочно)",
    "deadline_md": "06-22",
    "apply_open_md": null,
-   "note": "Требуется владение испанским и предварительное принятие мексиканским вузом из списка. Список стран-участниц публикуется в convocatoria на gob.mx — страница блокирует автоматический доступ, поэтому включение Казахстана нужно проверить вручную перед подачей.",
+   "note": "Официально: Becas de Excelencia del Gobierno de México para Extranjeros (SRE / AMEXCID). Требуется владение испанским и предварительное принятие мексиканским вузом из списка. Список стран-участниц публикуется в convocatoria на gob.mx — страница блокирует автоматический доступ, поэтому включение Казахстана нужно проверить вручную перед подачей.",
    "fields": null,
    "source_url": "https://www.gob.mx/amexcid/acciones-y-programas/becas-para-extranjeros-29785",
    "verified": false,
