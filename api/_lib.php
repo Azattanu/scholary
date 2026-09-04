@@ -12,9 +12,11 @@ function cfg() {
     $c = is_file($base . 'scholary-config.php') ? require $base . 'scholary-config.php' : [];
     /* Ключи эквайринга лежат отдельным файлом: их можно перевыпустить
        и залить заново, не трогая остальные секреты сервиса. */
-    if (is_file($base . 'tiptop-secrets.php')) {
-      $t = require $base . 'tiptop-secrets.php';
-      if (is_array($t)) $c = $t + $c;
+    foreach (['tiptop-secrets.php', 'apipay-secrets.php'] as $sf) {
+      if (is_file($base . $sf)) {
+        $t = require $base . $sf;
+        if (is_array($t)) $c = $t + $c;
+      }
     }
   }
   return $c;
