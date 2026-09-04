@@ -14,7 +14,7 @@ function __scholaryMain() {
   var C = window.SCHOLARY_CONFIG || {};
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
 
-  var S = { days: 30, tab: "overview", data: null, loading: false };
+  var S = { days: 30, tab: "overview", data: null, loading: false, whoami: "" };
 
   /* ---------- мелочи ---------- */
   function $(id) { return document.getElementById(id); }
@@ -137,7 +137,9 @@ function __scholaryMain() {
       $("view").innerHTML = '<div class="box"><h2>Не удалось загрузить данные</h2>' +
         '<p class="sub">' + esc(e.message) + "</p>" +
         (/forbidden|permission/i.test(e.message)
-          ? '<div class="note">Твой аккаунт ещё не в списке администраторов. Выполни в SQL-редакторе Supabase:<br><code>select seed_admin(\'почта@аккаунта\');</code></div>'
+          ? '<div class="note">Сейчас вход выполнен под <b>' + esc(S.whoami || "неизвестным аккаунтом") + '</b>, а этой почты нет в списке администраторов.<br>' +
+            'Если это не твой аккаунт (например, остался тестовый) — <button type="button" id="btnLogout2" class="btn" style="margin-top:8px">выйти и войти своим</button>.<br>' +
+            'Если аккаунт твой и доступ нужен — выполни в SQL-редакторе Supabase:<br><code>select seed_admin(\'' + esc(S.whoami || "почта@аккаунта") + '\');</code></div>'
           : '<div class="note">Проверь, что применены миграции 016–019. Если ошибка про отсутствующую функцию — накати последнюю.</div>') + "</div>";
     });
   }
@@ -664,7 +666,7 @@ function __scholaryMain() {
     }
     if (t.id === "btnReload") { loadAll(); return; }
     if (t.id === "btnReport") { downloadReport(); return; }
-    if (t.id === "btnLogout") { sb.auth.signOut().then(function () { location.reload(); }); return; }
+    if (t.id === "btnLogout" || t.id === "btnLogout2") { sb.auth.signOut().then(function () { try { Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} location.reload(); }); return; }
     if (t.id === "btnPro") { grantPro(); return; }
     if (t.id === "btnHealth") { loadHealth(false); return; }
     if (t.id === "btnMailTest") { loadHealth(true); return; }
@@ -792,6 +794,9 @@ function __scholaryMain() {
   function boot() {
     sb.auth.getSession().then(function (r) {
       var on = !!(r.data && r.data.session);
+      /* Чей это вход — видно сразу: в браузере мог остаться чужой или тестовый
+         аккаунт, и тогда «forbidden» выглядит как поломка админки. */
+      S.whoami = on ? ((r.data.session.user || {}).email || "") : "";
       $("gate").hidden = on;
       $("panel").hidden = !on;
       if (on) loadAll();
