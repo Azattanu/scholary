@@ -91,6 +91,21 @@ if ($a === 'create') {
   jout(['ok' => true, 'order' => $order, 'status' => $rec['status'], 'amount' => $sum, 'phone' => $phone, 'sandbox' => $rec['is_sandbox']]);
 }
 
+/* ---------- фоновая выдача (самозапрос из вебхука или опроса) ---------- */
+if ($a === 'fulfill') {
+  if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') jout(['error' => 'method'], 405);
+  $in = body(2000);
+  $order = (string)($in['order'] ?? ''); $sig = (string)($in['sig'] ?? '');
+  if (!preg_match('/^k[0-9a-f]{16}$/', $order)) jout(['ok' => false, 'why' => 'bad_order'], 400);
+  $want = hash_hmac('sha256', 'fulfill|' . $order, (string)($c['APIPAY_WEBHOOK_SECRET'] ?? ''));
+  if (empty($c['APIPAY_WEBHOOK_SECRET']) || !hash_equals($want, $sig)) jout(['ok' => false, 'why' => 'bad_sig'], 403);
+  ignore_user_abort(true); @set_time_limit(120);
+  $rec = kaspi_order_load($order);
+  if (!$rec) jout(['ok' => false, 'why' => 'not_found'], 404);
+  if ($rec['status'] === 'paid' && empty($rec['fulfilled'])) kaspi_fulfill($rec, (string)($in['via'] ?? 'async'));
+  jout(['ok' => true, 'fulfilled' => !empty($rec['fulfilled'])]);
+}
+
 /* ---------- статус счёта ---------- */
 if ($a === 'status') {
   $order = (string)($_GET['o'] ?? '');
@@ -109,17 +124,12 @@ if ($a === 'status') {
       kaspi_order_save($rec);
     }
   }
-  $needFulfill = ($rec['status'] === 'paid' && empty($rec['fulfilled']));
-  $resp = json_encode(['ok' => true, 'order' => $order, 'status' => $rec['status'], 'kind' => $rec['kind'], 'amount' => $rec['amount'],
+  /* Оплата найдена поллингом раньше вебхука: выдачу запускаем фоном,
+     клиенту отвечаем сразу. */
+  if ($rec['status'] === 'paid' && empty($rec['fulfilled'])) kaspi_fulfill_async($rec, 'poll');
+  jout(['ok' => true, 'order' => $order, 'status' => $rec['status'], 'kind' => $rec['kind'], 'amount' => $rec['amount'],
     'error_code' => (string)$rec['error_code'], 'error_message' => (string)$rec['error_message'],
-    'age' => time() - (int)$rec['created'], 'fulfilled' => !empty($rec['fulfilled']) || $needFulfill], JSON_UNESCAPED_UNICODE);
-  header('Content-Type: application/json; charset=utf-8');
-  if (!$needFulfill) { echo $resp; exit; }
-  /* Оплата найдена поллингом раньше вебхука: клиенту отвечаем сразу,
-     а отчёт/доступ выдаём уже после закрытия соединения (до 40 секунд). */
-  tt_finish($resp);
-  kaspi_fulfill($rec, 'poll');
-  exit;
+    'age' => time() - (int)$rec['created'], 'fulfilled' => !empty($rec['fulfilled'])]);
 }
 
 jout(['error' => 'bad_action'], 400);

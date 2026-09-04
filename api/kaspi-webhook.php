@@ -93,6 +93,7 @@ if (!$rec) {
   /* Счёт выставлен не сайтом (вручную из кабинета ApiPay). Деньги видим,
      но что куплено — не знаем: зовём владельца. */
   tt_finish('{"ok":true,"unknown":true}');
+  ignore_user_abort(true);
   if ($status === 'paid') {
     notify_owner('Kaspi: оплачен счёт не с сайта — привязать вручную', [
       'Сумма' => (string)($inv['amount'] ?? '?') . ' ₸', 'Счёт ApiPay' => (string)$invId,
@@ -105,11 +106,14 @@ if (!$rec) {
 }
 
 kaspi_apply_invoice($rec, $inv, 'webhook');
-tt_finish('{"ok":true}');
 
 if ($rec['status'] === 'paid') {
-  kaspi_fulfill($rec, 'webhook');
-} elseif ($status === 'error') {
+  /* Выдача — в фоновом самозапросе (до 1.5 с), ответ ApiPay — сразу после. */
+  kaspi_fulfill_async($rec, 'webhook');
+  echo '{"ok":true}'; exit;
+}
+tt_finish('{"ok":true}');
+if ($status === 'error') {
   /* Ошибка на стороне Kaspi (например, номер не в Kaspi) — покупатель
      увидит это на экране через поллинг; владельцу пишем один раз в день
      на случай системной проблемы. */

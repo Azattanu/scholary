@@ -98,6 +98,33 @@ function kaspi_fulfill(&$rec, $via) {
   kaspi_log($via, 'fulfilled', ['order' => $rec['order'], 'kind' => $rec['kind'], 'test' => $test, 'res' => $res]);
 }
 
+/* Выдача в фоне: вебхук ApiPay ждёт ответ не дольше 5 с, а отчёт уходит
+   на WhatsApp и почту до 40 с. Хостинг не отдаёт ответ до конца скрипта
+   (fastcgi_finish_request здесь не помогает), поэтому дёргаем сами себя
+   отдельным запросом с коротким таймаутом: этот скрипт отвечает сразу,
+   а второй процесс доделывает работу (ignore_user_abort). Если самозапрос
+   не ушёл — выдаём прямо здесь, пусть и медленно. */
+function kaspi_fulfill_async(&$rec, $via) {
+  if (!empty($rec['fulfilled'])) return;
+  $c = cfg();
+  $base = rtrim((string)($c['SELF_BASE'] ?? 'https://scholary.kz'), '/');   /* локальный стенд переопределяет */
+  $sig = hash_hmac('sha256', 'fulfill|' . $rec['order'], (string)($c['APIPAY_WEBHOOK_SECRET'] ?? ''));
+  $ch = curl_init($base . '/api/kaspi.php?a=fulfill');
+  curl_setopt_array($ch, [
+    CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_NOSIGNAL => true,
+    CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Origin: ' . rtrim((string)($c['ALLOW_ORIGIN'] ?? 'https://scholary.kz'), '/')],
+    CURLOPT_POSTFIELDS => json_encode(['order' => $rec['order'], 'sig' => $sig, 'via' => $via]),
+    CURLOPT_CONNECTTIMEOUT_MS => 1500, CURLOPT_TIMEOUT_MS => 1500,
+  ]);
+  curl_exec($ch);
+  $errno = curl_errno($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+  /* 28 = таймаут: запрос ушёл, сервер продолжает работать — это норма.
+     Любой другой сбой (нет связи, 4xx/5xx до таймаута) — делаем сами. */
+  if ($errno !== 0 && $errno !== 28) { kaspi_log($via, 'async_failed', ['order' => $rec['order'], 'errno' => $errno]); kaspi_fulfill($rec, $via); }
+  elseif ($errno === 0 && $code >= 400) { kaspi_log($via, 'async_http', ['order' => $rec['order'], 'code' => $code]); kaspi_fulfill($rec, $via); }
+}
+
 function kaspi_log($type, $what, $data) {
   $dir = kaspi_dir('');
   $line = json_encode(['t' => gmdate('c'), 'type' => $type, 'what' => $what] + $data, JSON_UNESCAPED_UNICODE);
