@@ -96,20 +96,21 @@ function client_ip() {
 function same_origin() {
   $allow = rtrim((string)(cfg()['ALLOW_ORIGIN'] ?? 'https://scholary.kz'), '/');
   $o = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
-  if ($o !== '') return (rtrim($o, '/') === $allow || $o === 'http://localhost:8123');
+  $dev = !empty(cfg()['DEV']);   /* локальный стенд: localhost разрешён только с DEV => true в конфиге */
+  if ($o !== '') return (rtrim($o, '/') === $allow || ($dev && $o === 'http://localhost:8123'));
   $r = (string)($_SERVER['HTTP_REFERER'] ?? '');
   if ($r !== '') {
     /* сравниваем именно хост: «https://scholary.kz.evil.com/» раньше проходил по префиксу */
     $h = strtolower((string)parse_url($r, PHP_URL_HOST));
     $ah = strtolower((string)parse_url($allow, PHP_URL_HOST));
-    return $h !== '' && ($h === $ah || $h === 'localhost');
+    return $h !== '' && ($h === $ah || ($dev && $h === 'localhost'));
   }
   return false;
 }
 function cors() {
   $allow = cfg()['ALLOW_ORIGIN'] ?? 'https://scholary.kz';
   $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-  if ($origin && ($origin === $allow || $origin === 'http://localhost:8123')) header('Access-Control-Allow-Origin: ' . $origin);
+  if ($origin && ($origin === $allow || (!empty(cfg()['DEV']) && $origin === 'http://localhost:8123'))) header('Access-Control-Allow-Origin: ' . $origin);
   else header('Access-Control-Allow-Origin: ' . $allow);
   header('Access-Control-Allow-Headers: Content-Type, Authorization');
   header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -291,7 +292,7 @@ function notify_owner($title, $rows) {
     $html .= '</table><p style="color:#6B7280;font-size:13px;margin-top:16px">Scholary · ' . date('d.m.Y H:i') . '</p></div>';
     $subj = $title;
     if (!empty($rows['Имя']) && $rows['Имя'] !== '—') $subj .= ' — ' . $rows['Имя'];
-    $r = http_json('https://api.resend.com/emails', 'POST', [
+    $r = http_json(rtrim((string)($c['RESEND_BASE'] ?? 'https://api.resend.com'), '/') . '/emails', 'POST', [
       'Authorization: Bearer ' . $c['RESEND_KEY'],
       'Content-Type: application/json',
     ], [
@@ -302,7 +303,7 @@ function notify_owner($title, $rows) {
   }
 
   if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && !empty($c['OWNER_WA']) && empty($GLOBALS['NOTIFY_MAIL_ONLY'])) {
-    $url = 'https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'];
+    $url = rtrim((string)($c['GREEN_BASE'] ?? 'https://api.green-api.com'), '/') . '/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'];
     $r = http_json($url, 'POST', ['Content-Type: application/json'], [
       'chatId'  => preg_replace('/\D/', '', $c['OWNER_WA']) . '@c.us',
       'message' => $plain,

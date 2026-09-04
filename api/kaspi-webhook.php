@@ -82,19 +82,20 @@ kaspi_log('webhook', 'in', ['event' => $event, 'invoice' => $invId, 'status' => 
 
 if ($event === 'invoice.qr_scanned') { echo '{"ok":true}'; exit; }
 
-/* Дедупликация по (invoice.id, status): повтор той же доставки — просто 200. */
-if (!tt_once('kaspi-wh-' . $invId . '-' . $status)) { echo '{"ok":true,"dup":true}'; exit; }
-
 $rec = null;
 if (preg_match('/^k[0-9a-f]{16}$/', $extId)) $rec = kaspi_order_load($extId);
 if (!$rec) $rec = kaspi_order_by_invoice($invId);
+
+/* Дедупликация по (invoice.id, status): повтор той же доставки — просто 200.
+   Флаг ставим только когда заказ найден, чтобы сбой чтения не «съел» событие. */
+if ($rec && !tt_once('kaspi-wh-' . $invId . '-' . $status)) { echo '{"ok":true,"dup":true}'; exit; }
 
 if (!$rec) {
   /* Счёт выставлен не сайтом (вручную из кабинета ApiPay). Деньги видим,
      но что куплено — не знаем: зовём владельца. */
   tt_finish('{"ok":true,"unknown":true}');
   ignore_user_abort(true);
-  if ($status === 'paid') {
+  if ($status === 'paid' && tt_once('kaspi-wh-unknown-' . $invId)) {
     notify_owner('Kaspi: оплачен счёт не с сайта — привязать вручную', [
       'Сумма' => (string)($inv['amount'] ?? '?') . ' ₸', 'Счёт ApiPay' => (string)$invId,
       'Kaspi-счёт' => clean_txt((string)($inv['kaspi_invoice_id'] ?? ''), 32) ?: '—',

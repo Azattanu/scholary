@@ -108,18 +108,23 @@ chk($out, 'tiptop', 'TipTop Pay — приём оплат', $hasApi && $hasRpc,
   ($hasApi && $hasRpc) ? '' : 'уведомления шлюза будут отвергаться — оплаты не отметятся');
 
 /* ---- Kaspi через ApiPay.kz ---- */
-$apKey = !empty($c['APIPAY_KEY']); $apSec = !empty($c['APIPAY_WEBHOOK_SECRET']);
+$apKey = !empty($c['APIPAY_KEY']); $apSec = !empty($c['APIPAY_WEBHOOK_SECRET']); $apOn = !empty($c['APIPAY_ENABLED']);
 if ($apKey) {
   $ah = http_json(rtrim((string)($c['APIPAY_BASE'] ?? 'https://api.apipay.kz/api/v1'), '/') . '/account/health', 'GET', ['X-API-Key: ' . $c['APIPAY_KEY'], 'Accept: application/json'], null, 15);
   $aj = is_array($ah['json']) ? $ah['json'] : [];
   $conn = $aj['connection'] ?? []; $tar = $aj['tariff'] ?? [];
   $kOk = $ah['code'] === 200 && !empty($conn['kaspi_connected']) && empty($conn['needs_reauth']) && in_array((string)($tar['status'] ?? ''), ['active', 'trial'], true);
-  chk($out, 'kaspi', 'Kaspi — оплата через ApiPay', $kOk && $apSec,
+  require_once __DIR__ . '/_kaspi.php';
+  $stuck = kaspi_unfulfilled();            /* оплачено, но не выдано дольше 10 минут */
+  $dirOk = is_writable(kaspi_dir('orders'));
+  $allOk = $kOk && $apSec && $apOn && $dirOk && $stuck === 0;
+  chk($out, 'kaspi', 'Kaspi — оплата через ApiPay', $allOk,
     $ah['code'] !== 200 ? 'ApiPay не отвечает (HTTP ' . $ah['code'] . ')'
-      : ('кассир ' . (!empty($conn['kaspi_connected']) ? 'подключён' : 'НЕ подключён') . (!empty($conn['needs_reauth']) ? ', нужна переавторизация' : '')
+      : (($apOn ? 'включена' : 'ВЫКЛЮЧЕНА (APIPAY_ENABLED)') . ' · кассир ' . (!empty($conn['kaspi_connected']) ? 'подключён' : 'НЕ подключён') . (!empty($conn['needs_reauth']) ? ', нужна переавторизация' : '')
         . ' · тариф ' . (string)($tar['status'] ?? '?') . (isset($tar['days_remaining']) ? ', осталось дней: ' . (int)$tar['days_remaining'] : '')
-        . ($apSec ? '' : ' · НЕТ секрета вебхука')),
-    $kOk && $apSec ? '' : 'кнопка Kaspi на сайте не выставит счёт — проверить кабинет apipay.kz (кассир, тариф) и /private/apipay-secrets.php');
+        . ($apSec ? '' : ' · НЕТ секрета вебхука') . ($dirOk ? '' : ' · папка заказов не пишется') . ($stuck ? ' · ОПЛАЧЕНО, НО НЕ ВЫДАНО: ' . $stuck : '')),
+    $stuck ? 'есть оплаченные заказы без выдачи — смотреть письма «разобрать вручную» и /private/kaspi/orders'
+           : ($allOk ? '' : 'кнопка Kaspi на сайте не выставит счёт — проверить кабинет apipay.kz (кассир, тариф) и /private/apipay-secrets.php'));
 } else {
   chk($out, 'kaspi', 'Kaspi — оплата через ApiPay', false, 'ключ API не прописан', "добавить /private/apipay-secrets.php с APIPAY_KEY и APIPAY_WEBHOOK_SECRET");
 }

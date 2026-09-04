@@ -13,6 +13,9 @@ require_once __DIR__ . '/_lib.php';
 function pay_prices() {
   return [4000 => 'report', 15000 => 'consult', 35000 => 'package', 4990 => 'pro_month', 14900 => 'pro_season'];
 }
+/* Адреса мессенджера и почты: локальный стенд подменяет их моками. */
+function pay_wa_base()   { return rtrim((string)(cfg()['GREEN_BASE']  ?? 'https://api.green-api.com'), '/'); }
+function pay_mail_base() { return rtrim((string)(cfg()['RESEND_BASE'] ?? 'https://api.resend.com'), '/'); }
 function pay_price_of($kind) {
   foreach (pay_prices() as $sum => $k) if ($k === $kind) return (int)$sum;
   return 0;
@@ -24,7 +27,7 @@ function pay_price_of($kind) {
    $account — почта аккаунта для Pro; $email — почта покупателя;
    $lead — ID заявки квиза (для отчёта); $test — тестовый/песочница.
    Возвращает массив для журнала. */
-function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $test, $extra = []) {
+function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $test, $extra = [], $buyer = []) {
   $c = cfg();
   $out = ['kind' => $kind, 'txn' => $txn];
   $leadOk = ($lead !== '' && strlen($lead) >= 8 && strlen($lead) <= 64);
@@ -52,8 +55,10 @@ function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $tes
     return $out;
   }
 
-  /* разовые покупки: отчёт, консультация, пакет */
-  $res = $leadOk ? tt_mark($lead, $txn, $sum, $email, $kind, 'success', $test) : null;
+  /* разовые покупки: отчёт, консультация, пакет. leads.paid ставим только за
+     отчёт — иначе консультация без отчёта попадает в срочный список
+     «оплатил, а отчёта нет». Услуги идут в журнал платежей с привязкой к лиду. */
+  $res = ($leadOk && $kind === 'report') ? tt_mark($lead, $txn, $sum, $email, $kind, 'success', $test) : null;
   tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $leadOk ? $lead : null, 'p_email' => $email,
     'p_amount' => $sum, 'p_kind' => $kind, 'p_status' => 'success', 'p_test' => $test]);
   $out['marked'] = $res;
@@ -90,17 +95,83 @@ function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $tes
     $repNote = 'НЕ ВЫДАН — оплата без ID заявки, привязать вручную';
   }
 
+  /* Консультация и пакет: оплатил — сразу получает подтверждение на WhatsApp
+     и почту («профориентолог напишет и назначит дату»), а владельцу уходят
+     контакты, чтобы связаться. В песочнице подтверждение уходит только владельцу. */
+  $svcNote = null;
+  if ($kind === 'consult' || $kind === 'package') {
+    $bName  = clean_txt((string)($buyer['name'] ?? ''), 60);
+    $bPhone = (string)($buyer['phone'] ?? '');
+    $sentS  = ['whatsapp' => false, 'email' => false];
+    if (tt_once('svc-' . $txn)) {
+      $toWa   = $test ? (string)($c['OWNER_WA'] ?? '') : $bPhone;
+      $toMail = $test ? (string)($c['MAIL_TO'] ?? '')  : $email;
+      $sentS  = pay_send_service_confirm($kind, $sum, $bName, $toWa, $toMail, $test);
+      tt_log('pay', 'service_confirm', ['kind' => $kind, 'txn' => $txn, 'via' => $provider, 'wa' => $sentS['whatsapp'], 'mail' => $sentS['email']]);
+    }
+    $out['confirm'] = $sentS;
+    $svcNote = 'WhatsApp: ' . ($sentS['whatsapp'] ? 'ушло' : 'НЕ УШЛО') . ' · почта: ' . ($sentS['email'] ? 'ушла' : 'НЕ УШЛА');
+    $extra = ['Имя' => $bName ?: '—', 'WhatsApp' => $bPhone !== '' ? '+' . clean_txt($bPhone, 16) : '—',
+              'Что делать' => 'написать клиенту в WhatsApp и назначить дату онлайн-консультации'] + $extra;
+  }
+
   if (tt_once('paid-' . $txn)) {
-    if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $email, 'external_id' => (string)$txn, 'url' => 'https://scholary.kz/quiz/'], 'pay_' . $txn);
+    if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $email, 'phone' => (string)($buyer['phone'] ?? ''), 'external_id' => (string)$txn, 'url' => $svcNote !== null ? 'https://scholary.kz/tariffs/' : 'https://scholary.kz/quiz/'], 'pay_' . $txn);
     notify_owner(($test ? 'Оплата прошла (ТЕСТ)' : 'Оплата прошла') . ' · ' . $label, [
       'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
       'За что'     => tt_kind_ru($kind),
       'Почта'      => clean_txt($email, 120) ?: '—',
-      'ID лида'    => $leadOk ? clean_txt($lead, 64) : 'нет — привязать вручную',
+      'ID лида'    => $leadOk ? clean_txt($lead, 64) : ($svcNote !== null ? 'нет (покупка со страницы тарифов)' : 'нет — привязать вручную'),
       'Транзакция' => clean_txt($txn, 40) ?: '—',
       'Режим'      => $test ? 'тестовый' : 'боевой',
       'В базе'     => $res === null ? 'записано в журнал платежей' : ($res ? 'отмечено' : 'НЕ ОТМЕЧЕНО — проверить вручную'),
-    ] + ($repNote !== null ? ['Отчёт' => $repNote] : []) + $extra);
+    ] + ($repNote !== null ? ['Отчёт' => $repNote] : []) + ($svcNote !== null ? ['Подтверждение клиенту' => $svcNote] : []) + $extra);
+  }
+  return $out;
+}
+
+/* Подтверждение оплаты консультации / пакета покупателю: WhatsApp + почта.
+   В логи — только флаги «ушло/не ушло». */
+function pay_send_service_confirm($kind, $sum, $name, $wa, $mail, $test) {
+  $c = cfg();
+  $first = trim(mb_substr(preg_replace('/[^\p{L}\p{M}\s\-]/u', '', (string)$name), 0, 30));
+  $hi = $first !== '' ? $first . ', спасибо!' : 'Спасибо!';
+  $what = $kind === 'package' ? 'пакет «Документы и подача»' : '«Разбор со специалистом»';
+  $next = $kind === 'package'
+    ? 'назначить дату первого созвона (30 минут) и собрать список твоих программ'
+    : 'назначить дату и время онлайн-консультации (90 минут, Zoom / Google Meet)';
+  $sumTxt = number_format((int)$sum, 0, '.', ' ') . ' ₸';
+  $out = ['whatsapp' => false, 'email' => false];
+
+  $digits = wa_digits($wa);
+  if (!empty($c['GREEN_ID']) && !empty($c['GREEN_TOKEN']) && $digits !== null) {
+    $msg = $hi . " Оплата " . $sumTxt . " за " . $what . " получена ✅\n\n"
+         . "Профориентолог Scholary скоро напишет тебе сюда, в WhatsApp, и на почту"
+         . (filter_var($mail, FILTER_VALIDATE_EMAIL) ? " " . $mail : "") . ", чтобы " . $next . ".\n\n"
+         . "Если удобнее написать первым — просто ответь на это сообщение.";
+    if ($test) $msg = "[ТЕСТОВЫЙ ПЛАТЁЖ]\n" . $msg;
+    $r = http_json(pay_wa_base() . '/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
+      'POST', ['Content-Type: application/json'],
+      ['chatId' => $digits . '@c.us', 'message' => $msg], 20);
+    $out['whatsapp'] = ($r['code'] >= 200 && $r['code'] < 300);
+  }
+
+  if (!empty($c['RESEND_KEY']) && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+    $subj = ($test ? '[ТЕСТ] ' : '') . 'Оплата получена — Scholary';
+    $html = '<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#1D1D1F;max-width:520px">'
+          . '<h2 style="margin:0 0 12px;font-size:20px">' . htmlspecialchars($hi) . '</h2>'
+          . '<p>Оплата <b>' . htmlspecialchars($sumTxt) . '</b> за ' . htmlspecialchars($what) . ' получена.</p>'
+          . '<p>Профориентолог Scholary скоро напишет тебе в WhatsApp' . ($digits !== null ? ' на +' . htmlspecialchars($digits) : '')
+          . ' и на эту почту, чтобы ' . htmlspecialchars($next) . '.</p>'
+          . '<p style="color:#6B7280;font-size:13px">Если удобнее написать первым — ответь на это письмо или напиши нам в WhatsApp: +7 702 466 68 52.</p></div>';
+    $text = $hi . "\n\nОплата " . $sumTxt . " за " . $what . " получена. Профориентолог Scholary скоро напишет тебе в WhatsApp и на почту, чтобы " . $next . ".";
+    $r = http_json(pay_mail_base() . '/emails', 'POST', [
+      'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
+    ], array_filter([
+        'from' => mail_from(), 'to' => [$mail], 'subject' => $subj,
+        'reply_to' => mail_reply_to(),
+        'html' => $html, 'text' => $text], function ($v) { return $v !== null; }), 20);
+    $out['email'] = ($r['code'] >= 200 && $r['code'] < 300);
   }
   return $out;
 }
@@ -132,7 +203,7 @@ function tt_send_report($name, $wa, $mail, $token, $test) {
          . "Вопросы по отчёту? Просто ответь на это сообщение.";
     if ($test) $msg = "[ТЕСТОВЫЙ ПЛАТЁЖ]
 " . $msg;
-    $r = http_json('https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
+    $r = http_json(pay_wa_base() . '/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
       'POST', ['Content-Type: application/json'],
       ['chatId' => $digits . '@c.us', 'message' => $msg], 20);
     $out['whatsapp'] = ($r['code'] >= 200 && $r['code'] < 300);
@@ -150,7 +221,7 @@ function tt_send_report($name, $wa, $mail, $token, $test) {
           . '<p style="color:#6B7280;font-size:13px">Ссылка личная и не сгорает. '
           . 'Не открывается — напиши нам в WhatsApp, поможем.</p></div>';
     $text = $hi . "\n\nТвой отчёт Scholary готов: " . $link;
-    $r = http_json('https://api.resend.com/emails', 'POST', [
+    $r = http_json(pay_mail_base() . '/emails', 'POST', [
       'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
     ], array_filter([
         'from' => mail_from(), 'to' => [$mail], 'subject' => $subj,
