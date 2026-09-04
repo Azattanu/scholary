@@ -37,7 +37,7 @@
     .demo-kpi div { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px; }
     .demo-kpi b { display: block; font-size: 20px; letter-spacing: -.02em; }
     .demo-kpi b.bad { color: #B42318; } .demo-kpi b.warn { color: var(--yellow); }
-    .demo-kpi small { font-size: 11px; color: var(--muted); font-weight: 700; }
+    .demo-kpi small { font-size: 11px; color: var(--muted); font-weight: 700; white-space: nowrap; }
     .demo-row { display: grid; grid-template-columns: 1.4fr auto; gap: var(--s3); align-items: center; padding: 9px 0; border-top: 1px solid rgba(91,75,255,.10); font-size: 13px; }
     .demo-row .n { font-weight: 700; }
     .demo-row .c { font-size: 11.5px; color: var(--muted); font-weight: 600; }
@@ -159,7 +159,7 @@
 
     <a class="demo-cab card-glow" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo_card')">
       <div class="dh"><b>Сегодня · 14 учеников</b><span>Практика · до 50</span></div>
-      <div class="demo-kpi"><div><b class="bad">6</b><small>дедлайнов в 45 дней</small></div><div><b class="warn">7</b><small>открытых задач</small></div><div><b>5</b><small>без документов</small></div></div>
+      <div class="demo-kpi"><div><b class="bad">6</b><small>дедлайнов · 45 дней</small></div><div><b class="warn">7</b><small>открытых задач</small></div><div><b>5</b><small>без документов</small></div></div>
       <div class="demo-row"><div><div class="n">Данияр К. · Türkiye Bursları</div><div class="c">Турция · готовим · апостиль не подан</div></div><span class="p bad">12 дней</span></div>
       <div class="demo-row"><div><div class="n">Нурсултан А. · University of Amsterdam</div><div class="c">Нидерланды · мотивационное в работе</div></div><span class="p bad">18 дней</span></div>
       <div class="demo-row"><div><div class="n">Ерасыл М. · GKS Korea</div><div class="c">Корея · паспорт в работе</div></div><span class="p warn">21 день</span></div>
