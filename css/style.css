@@ -750,3 +750,44 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
 .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 999px; animation: spin .8s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+/* Покупка консультации / пакета через Kaspi: окно поверх страницы (тарифы, главная, пример отчёта).
+   На телефоне — лист снизу, на десктопе — карточка по центру. Кнопки — в одну строку. */
+.tariff-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+.tariff .tariff-actions .btn { margin-top: 0; }
+body.kpay-open { overflow: hidden; }
+.kpay-bg { position: fixed; inset: 0; z-index: 1000; background: rgba(29,29,31,.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; padding: 0; animation: kpayFade .18s ease; }
+.kpay { position: relative; width: 100%; max-width: 480px; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow: auto; background: var(--surface); border-radius: 22px 22px 0 0; padding: 22px 20px calc(20px + env(safe-area-inset-bottom)); box-sizing: border-box; box-shadow: 0 -10px 40px -10px rgba(0,0,0,.35); animation: kpayUp .22s ease; }
+.kpay-x { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: none; border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; }
+.kpay-x:hover { color: var(--ink); }
+.kpay-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-right: 40px; }
+.kpay-kicker { font-size: 11.5px; font-weight: 800; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.kpay-title { font-size: 19px; font-weight: 800; letter-spacing: -.3px; line-height: 1.2; margin-top: 3px; }
+.kpay-price { font-size: 20px; font-weight: 800; white-space: nowrap; flex-shrink: 0; }
+.kpay-sub { margin: 12px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--muted); }
+.kpay-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.kpay-form .input { width: 100%; box-sizing: border-box; }
+.kpay-form .btn { width: 100%; margin-top: 4px; }
+.kpay-fine { font-size: 12px; line-height: 1.5; color: var(--faint); font-weight: 600; margin-top: 12px; }
+.kpay-fine a { color: var(--accent); }
+.kpay-center { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; margin-top: 18px; }
+.kpay-center .btn { width: 100%; }
+.kpay-ico { display: flex; justify-content: center; align-items: center; width: 64px; height: 64px; border-radius: 999px; }
+.kpay-ico-kaspi { background: #FFE9E6; }
+.kpay-ico-ok { background: var(--green-soft); }
+.kpay-ico-warn { background: var(--yellow-soft); }
+.kpay-h { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+.kpay-p { font-size: 14px; line-height: 1.55; color: var(--muted); }
+.kpay-p b { color: var(--ink); }
+.kpay-phone { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--bg); border-radius: 12px; padding: 12px 14px; width: 100%; box-sizing: border-box; text-align: left; }
+.kpay-phone > div { min-width: 0; }
+.kpay-num { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpay-phone .btn { width: auto; min-height: 40px; padding: 0 12px; flex-shrink: 0; font-size: 14px; }
+.kpay-status { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
+@keyframes kpayFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes kpayUp { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+@media (min-width: 641px) {
+  .kpay-bg { align-items: center; padding: 24px; }
+  .kpay { border-radius: 22px; padding: 26px 26px 24px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.5); }
+}
+@media (prefers-reduced-motion: reduce) { .kpay-bg, .kpay { animation: none; } }
