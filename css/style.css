@@ -745,3 +745,8 @@ a.fineprint{min-height:44px;display:inline-flex;align-items:center}
   .btn { font-size: 15px; padding-inline: 16px; }
   .chip { font-size: 12.5px; }
 }
+
+/* Ожидание оплаты Kaspi: маленький спиннер в строке статуса */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 999px; animation: spin .8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
