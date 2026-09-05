@@ -152,6 +152,7 @@ function __scholaryMain() {
     else if (S.tab === "money") v.innerHTML = viewMoney();
     else if (S.tab === "funnel") v.innerHTML = viewFunnel();
     else if (S.tab === "channels") v.innerHTML = viewChannels();
+    else if (S.tab === "ads") { v.innerHTML = viewAds(); loadAds(); }
     else if (S.tab === "people") v.innerHTML = viewPeople();
     else if (S.tab === "schools") v.innerHTML = viewSchools();
     else if (S.tab === "reports") v.innerHTML = viewReports();
@@ -279,6 +280,179 @@ function __scholaryMain() {
         '<div class="fnum">' + num(f.poshli_v_kabinet) + " <small>" + pct(f.poshli_v_kabinet, f.uvideli_paywall) + "%</small></div></div>" +
       '<div class="note">Ушедшие в кабинет не потеряны: они видят каталог и дедлайны, а платят позже — за отчёт, Pro или пакет документов.</div></div>';
   }
+
+
+  /* ---------- Реклама: расход площадок × наша воронка ----------
+     Расход TikTok/Meta/Google сюда не приходит сам: у площадок для этого
+     нужен отдельный «developer app» и токен Marketing API. Поэтому расход
+     заносится руками (10 секунд в день) или импортом CSV-выгрузки Ads
+     Manager. Всё остальное — визиты, квизы, заявки, оплаты — уже наше:
+     сайт кладёт ttclid/fbclid/gclid и utm_source в каждое событие, и база
+     считает, кто именно пришёл с рекламы. Отсюда CPM, CPC, CPV, цена
+     квиза, CPL, CAC и ROAS без выдуманных чисел. */
+  var ADS_PLATFORMS = { tiktok: "TikTok Ads", meta: "Instagram / Meta", google: "Google Ads" };
+  S.adsPlatform = S.adsPlatform || "tiktok";
+  function per(spend, n) { return n > 0 ? money(spend / n) : "—"; }
+  function loadAds() {
+    var pf = S.adsPlatform;
+    Promise.all([rpc("admin_ads", { p_days: S.days, p_platform: pf }), rpc("admin_ad_spend_list", { p_days: S.days })])
+      .then(function (r) {
+        S.ads = { sum: r[0] || {}, rows: r[1] || [], platform: pf, days: S.days };
+        if (S.tab === "ads") $("view").innerHTML = viewAds();
+      }, function (e) {
+        var box = $("adsBody");
+        if (box) box.innerHTML = '<div class="err">Не удалось загрузить метрики рекламы: ' + esc(e.message) +
+          '</div><div class="note">Если ошибка про отсутствующую функцию admin_ads — накати миграцию 041_ad_metrics.sql в Supabase.</div>';
+      });
+  }
+  function viewAds() {
+    var pf = S.adsPlatform, pfName = ADS_PLATFORMS[pf] || pf;
+    var head = '<div class="box"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">' +
+      '<div><h2 style="margin:0">Реклама · ' + esc(pfName) + '</h2><p class="sub" style="margin:4px 0 0">Расход площадки против нашей воронки за ' + S.days + " " + plural(S.days, "день", "дня", "дней") + '. Кто «с рекламы» — по меткам ttclid / fbclid / gclid и utm_source в ссылке.</p></div>' +
+      '<div class="seg" id="adsSeg">' + Object.keys(ADS_PLATFORMS).map(function (k) { return '<button data-pf="' + k + '"' + (k === pf ? ' class="on"' : "") + ">" + esc(ADS_PLATFORMS[k]) + "</button>"; }).join("") + "</div></div></div>";
+    if (!S.ads || S.ads.platform !== pf || S.ads.days !== S.days) return head + '<div id="adsBody" class="muted">Загружаю…</div>';
+    var a = S.ads.sum, spend = Number(a.spend) || 0;
+    var kp = kpi([
+      ["Расход за период", money(spend), true, (Number(a.days_with_spend) || 0) + " " + plural(Number(a.days_with_spend) || 0, "день", "дня", "дней") + " с расходом" + (a.last_spend_day ? ", последний " + day(a.last_spend_day) : "")],
+      ["Цена просмотра (CPV)", per(spend, Number(a.views)), false, num(a.views) + " просмотров видео по данным площадки"],
+      ["Цена 1000 показов (CPM)", Number(a.impressions) > 0 ? money(spend / Number(a.impressions) * 1000) : "—", false, num(a.impressions) + " показов"],
+      ["Цена клика (CPC)", per(spend, Number(a.clicks)), false, num(a.clicks) + " кликов по данным площадки"],
+      ["Цена визита на сайт", per(spend, Number(a.visitors)), false, num(a.visitors) + " устройств с рекламы — по нашим меткам"],
+      ["Цена прохождения квиза", per(spend, Number(a.quiz_done)), true, num(a.quiz_done) + " дошли до результата · начали " + num(a.quiz_start)],
+      ["Цена заявки (CPL)", per(spend, Number(a.leads)), true, num(a.leads) + " заявок с контактом"],
+      ["Цена покупки (CAC)", per(spend, Number(a.payments)), true, num(a.payments) + " оплат · нажали «Оплатить» " + num(a.pay_clicks)],
+      ["Выручка с рекламы", money(a.revenue), false, spend > 0 ? "ROAS " + (Math.round(Number(a.revenue) / spend * 100) / 100) + " · окупаемость " + pct(a.revenue, spend) + "%" : "ROAS появится, когда внесёшь расход"],
+      ["Результаты по данным площадки", num(a.results), false, "как считает сам кабинет рекламы (пиксель); цена " + per(spend, Number(a.results))]
+    ]);
+    var daily = (a.daily || []).filter(function (r) { return Number(r.spend) || Number(r.visitors) || Number(r.leads) || Number(r.payments); });
+    var dailyBox = '<div class="grid2"><div class="box"><h2>Расход и заявки по дням</h2><p class="sub">Столбцы: расход (₸) и заявки с рекламы.</p>' +
+      barChart(a.daily || [], "day", [{ key: "spend", name: "Расход, ₸", color: "#5B4BFF", money: true }], { money: true }) +
+      barChart(a.daily || [], "day", [{ key: "visitors", name: "Визиты", color: "#C7C2FF" }, { key: "quiz_done", name: "Прошли квиз", color: "#8F84FF" }, { key: "leads", name: "Заявки", color: "#1E874B" }, { key: "payments", name: "Оплаты", color: "#E0A800" }]) + "</div>" +
+      '<div class="box"><h2>По дням</h2><p class="sub">Только дни, где что-то было.</p>' +
+      table([["День"], ["Расход", 1], ["Показы", 1], ["Клики", 1], ["Визиты", 1], ["Квиз", 1], ["Заявки", 1], ["CPL", 1], ["Оплаты", 1], ["CAC", 1], ["Выручка", 1]], daily.slice().reverse(), function (r) {
+        var sp = Number(r.spend) || 0;
+        return "<td>" + esc(day(r.day)) + '</td><td class="num">' + money(sp) + '</td><td class="num">' + num(r.impressions) + '</td><td class="num">' + num(r.clicks) +
+          '</td><td class="num">' + num(r.visitors) + '</td><td class="num">' + num(r.quiz_done) + '</td><td class="num">' + num(r.leads) + '</td><td class="num">' + per(sp, Number(r.leads)) +
+          '</td><td class="num">' + num(r.payments) + '</td><td class="num">' + per(sp, Number(r.payments)) + '</td><td class="num">' + money(r.revenue) + "</td>";
+      }) + "</div></div>";
+    var today = new Date().toISOString().slice(0, 10);
+    var form = '<div class="box"><h2>Внести расход</h2><p class="sub">Цифры из кабинета ' + esc(pfName) + ' за день: расход, показы, клики, просмотры видео, результаты. Повторный ввод за тот же день и кампанию перезаписывает строку.</p>' +
+      '<div class="adsform">' +
+      '<div><label>День</label><input id="adDay" type="date" value="' + today + '" max="' + today + '"></div>' +
+      '<div><label>Кампания (необязательно)</label><input id="adCamp" type="text" placeholder="напр. Школьники сентябрь" maxlength="120"></div>' +
+      '<div><label>Расход, ₸</label><input id="adSpend" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>' +
+      '<div><label>Показы</label><input id="adImp" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>' +
+      '<div><label>Клики</label><input id="adClicks" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>' +
+      '<div><label>Просмотры видео</label><input id="adViews" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>' +
+      '<div><label>Результаты (по площадке)</label><input id="adRes" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>' +
+      '<div><button class="btn-adm" id="btnAdSave" type="button">Сохранить</button></div>' +
+      '</div><div id="adMsg" class="muted" style="margin-top:8px"></div>' +
+      '<div class="note"><b>Импорт из Ads Manager:</b> Отчёты → «Создать отчёт» → разбивка по дням → Экспорт CSV, затем ' +
+      '<label class="btn-adm btn-ghost" style="cursor:pointer;min-height:34px;padding:0 12px;font-size:13px">выбрать файл<input id="adCsv" type="file" accept=".csv,text/csv" hidden></label>. ' +
+      'Нужны колонки с датой и расходом (Cost / Spend / Расход); показы, клики, просмотры и результаты подхватятся, если есть. Валюта — как в кабинете (₸).</div></div>';
+    var rows = (S.ads.rows || []).filter(function (r) { return r.platform === pf; });
+    var list = '<div class="box"><h2>Внесённые строки</h2><p class="sub">' + (rows.length ? rows.length + " " + plural(rows.length, "строка", "строки", "строк") + " за период" : "Пока ничего не внесено — метрики выше считаются с нулевым расходом.") + "</p>" +
+      table([["День"], ["Кампания"], ["Расход", 1], ["Показы", 1], ["Клики", 1], ["Просмотры", 1], ["Результаты", 1], [""]], rows, function (r) {
+        return "<td>" + esc(day(r.day)) + "</td><td>" + esc(r.campaign || "—") + '</td><td class="num">' + money(r.spend) + '</td><td class="num">' + num(r.impressions) + '</td><td class="num">' + num(r.clicks) +
+          '</td><td class="num">' + num(r.views) + '</td><td class="num">' + num(r.results) + '</td><td class="num"><a href="#" data-act="ad-del" data-day="' + esc(r.day) + '" data-camp="' + esc(r.campaign || "") + '">удалить</a></td>';
+      }) + "</div>";
+    var how = '<div class="box"><h2>Как это считается</h2><p class="sub">Честно и без магии: расход — из кабинета площадки, всё остальное — из нашей базы.</p>' +
+      '<div class="metric-help"><b>Визиты, квизы, заявки, оплаты</b> — только устройства, у которых в ссылке была метка площадки: TikTok добавляет <code>ttclid</code> к ссылке из объявления автоматически (в настройках кампании «Отслеживание» должно быть включено), а в ссылке лучше ещё держать <code>utm_source=tiktok</code>. ' +
+      'Meta — <code>fbclid</code>, Google — <code>gclid</code>. Заявка — устройство, оставившее WhatsApp или почту. Оплата — боевой платёж по заявке с меткой (по id заявки или её почте). ' +
+      '<b>CPL</b> = расход / заявки, <b>CAC</b> = расход / оплаты, <b>ROAS</b> = выручка / расход. Просмотры, показы, клики и «результаты» берутся из кабинета, поэтому CPV/CPM/CPC — по данным площадки.</div></div>';
+    return head + '<div id="adsBody">' + kp + dailyBox + form + list + how + "</div>";
+  }
+  function adNum(id) { var v = Number(($(id) || {}).value || 0); return isFinite(v) && v > 0 ? v : 0; }
+  function saveAdRow() {
+    var d = ($("adDay") || {}).value;
+    var msg = $("adMsg");
+    if (!d) { if (msg) { msg.textContent = "Укажи день."; msg.style.color = "#C0392B"; } return; }
+    if (!adNum("adSpend") && !adNum("adImp") && !adNum("adClicks") && !adNum("adViews")) { if (msg) { msg.textContent = "Внеси хотя бы расход."; msg.style.color = "#C0392B"; } return; }
+    var row = { day: d, platform: S.adsPlatform, campaign: (($("adCamp") || {}).value || "").trim(), spend: adNum("adSpend"), impressions: adNum("adImp"), clicks: adNum("adClicks"), views: adNum("adViews"), results: adNum("adRes") };
+    var b = $("btnAdSave"); if (b) b.disabled = true;
+    rpc("admin_ad_spend_upsert", { p_rows: [row] }).then(function () {
+      if (msg) { msg.textContent = "Сохранено: " + day(d) + " · " + money(row.spend); msg.style.color = "#1E874B"; }
+      S.ads = null; loadAds();
+    }, function (e) { if (b) b.disabled = false; if (msg) { msg.textContent = "Не сохранилось: " + e.message; msg.style.color = "#C0392B"; } });
+  }
+  function deleteAdRow(el) {
+    var d = el.getAttribute("data-day"), c = el.getAttribute("data-camp") || "";
+    if (!confirm("Удалить расход за " + day(d) + (c ? " (" + c + ")" : "") + "?")) return;
+    rpc("admin_ad_spend_delete", { p_day: d, p_platform: S.adsPlatform, p_campaign: c }).then(function () { S.ads = null; loadAds(); },
+      function (e) { alert("Не удалилось: " + e.message); });
+  }
+  /* CSV из Ads Manager: разделитель , или ; или таб; заголовки на английском
+     или русском; дата в любом из обычных форматов; числа с пробелами и запятой. */
+  function parseAdsCsv(text) {
+    text = String(text || "").replace(/^﻿/, "");
+    var lines = text.split(/\r?\n/).filter(function (l) { return l.trim(); });
+    if (lines.length < 2) return { error: "в файле нет строк с данными" };
+    var sep = [",", ";", "\t"].map(function (c) { return [c, (lines[0].match(new RegExp(c === "\t" ? "\t" : "\\" + c, "g")) || []).length]; }).sort(function (a, b) { return b[1] - a[1]; })[0][0];
+    function split(l) {
+      var out = [], cur = "", q = false;
+      for (var i = 0; i < l.length; i++) {
+        var ch = l[i];
+        if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
+        else if (ch === sep && !q) { out.push(cur); cur = ""; }
+        else cur += ch;
+      }
+      out.push(cur); return out.map(function (x) { return x.trim(); });
+    }
+    var head = split(lines[0]).map(function (h) { return h.toLowerCase(); });
+    // колонки «cost per …», «rate», «cpc/cpm/ctr» — производные, их не берём
+    function col(re, not) { for (var i = 0; i < head.length; i++) if (re.test(head[i]) && !(not && not.test(head[i]))) return i; return -1; }
+    var DERIV = /(cost per|per 1,?000|cpc|cpm|cpv|ctr|rate|%|цена за|средн|стоимость за)/;
+    var cDay = col(/^(date|day|день|дата|by day|stat_time_day|время)/), cSpend = col(/(^cost$|^spend|total cost|amount spent|расход|затрат|^стоимость$)/, /(cost per|per )/),
+        cImp = col(/(impression|показ)/, DERIV), cClk = col(/(click|клик)/, DERIV), cViews = col(/(video views|video play|2-second|2 s|6-second|просмотр)/, DERIV),
+        cRes = col(/(^results?$|^conversions?$|результат|конверси)/, DERIV), cCamp = col(/(campaign name|кампани)/);
+    if (cDay < 0 || cSpend < 0) return { error: "не нашёл колонки даты и расхода. Заголовки: " + head.join(" | ") };
+    // «12,500.50», «23,000», «15 000,00», «1.234,5» — разделители в выгрузках гуляют
+    function n(v) {
+      v = String(v == null ? "" : v).replace(/[\s\u00a0₸$€]/g, "");
+      var hasC = v.indexOf(",") !== -1, hasD = v.indexOf(".") !== -1;
+      if (hasC && hasD) { if (v.lastIndexOf(",") > v.lastIndexOf(".")) v = v.replace(/\./g, "").replace(",", "."); else v = v.replace(/,/g, ""); }
+      else if (hasC) { var parts = v.split(","); v = (parts.length === 2 && parts[1].length !== 3) ? parts[0] + "." + parts[1] : parts.join(""); }
+      else if (hasD) { var pd = v.split("."); if (pd.length > 2) v = pd.join(""); }
+      var x = parseFloat(v); return isFinite(x) && x > 0 ? x : 0;
+    }
+    function d(v) {
+      v = String(v || "").trim();
+      var m = v.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[1] + "-" + m[2] + "-" + m[3];
+      m = v.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/); if (m) return m[3] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[1]).slice(-2);
+      m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (m) return m[3] + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2);
+      var t = Date.parse(v); return isNaN(t) ? null : new Date(t).toISOString().slice(0, 10);
+    }
+    var rows = {}, skipped = 0;
+    lines.slice(1).forEach(function (l) {
+      var c = split(l); var dd = d(c[cDay]);
+      if (!dd || /total|итог|всего/i.test(c[cDay])) { skipped++; return; }
+      var camp = cCamp >= 0 ? (c[cCamp] || "") : "";
+      var k = dd + "|" + camp;
+      var r = rows[k] || (rows[k] = { day: dd, campaign: camp, spend: 0, impressions: 0, clicks: 0, views: 0, results: 0 });
+      r.spend += n(c[cSpend]); if (cImp >= 0) r.impressions += n(c[cImp]); if (cClk >= 0) r.clicks += n(c[cClk]);
+      if (cViews >= 0) r.views += n(c[cViews]); if (cRes >= 0) r.results += n(c[cRes]);
+    });
+    var out = Object.keys(rows).map(function (k) { var r = rows[k]; r.spend = Math.round(r.spend); return r; });
+    return { rows: out, skipped: skipped };
+  }
+  function importAdsCsv(file) {
+    var msg = $("adMsg");
+    var rd = new FileReader();
+    rd.onload = function () {
+      var p = parseAdsCsv(rd.result);
+      if (p.error) { if (msg) { msg.textContent = "CSV не разобран: " + p.error; msg.style.color = "#C0392B"; } return; }
+      if (!p.rows.length) { if (msg) { msg.textContent = "В файле не нашлось строк с датой и расходом."; msg.style.color = "#C0392B"; } return; }
+      var total = p.rows.reduce(function (a, r) { return a + r.spend; }, 0);
+      if (!confirm("Загрузить " + p.rows.length + " " + plural(p.rows.length, "строку", "строки", "строк") + " в " + ADS_PLATFORMS[S.adsPlatform] + " на сумму " + money(total) + "?")) return;
+      var rows = p.rows.map(function (r) { r.platform = S.adsPlatform; return r; });
+      rpc("admin_ad_spend_upsert", { p_rows: rows }).then(function (j) {
+        if (msg) { msg.textContent = "Импортировано строк: " + ((j && j.saved) || rows.length) + " · " + money(total); msg.style.color = "#1E874B"; }
+        S.ads = null; loadAds();
+      }, function (e) { if (msg) { msg.textContent = "Импорт не прошёл: " + e.message; msg.style.color = "#C0392B"; } });
+    };
+    rd.readAsText(file);
+  }
+  window.__parseAdsCsv = parseAdsCsv;   // для автотестов
 
   function viewChannels() {
     var rows = S.data.sources;
@@ -669,6 +843,9 @@ function __scholaryMain() {
     if (t.id === "btnLogout" || t.id === "btnLogout2") { sb.auth.signOut().then(function () { try { Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} location.reload(); }); return; }
     if (t.id === "btnPro") { grantPro(); return; }
     if (t.id === "btnHealth") { loadHealth(false); return; }
+    if (t.id === "btnAdSave") { saveAdRow(); return; }
+    var pfb = t.closest("#adsSeg button");
+    if (pfb) { S.adsPlatform = pfb.getAttribute("data-pf") || "tiktok"; S.ads = null; draw(); return; }
     if (t.id === "btnMailTest") { loadHealth(true); return; }
     var act = t.closest("[data-act]");
     if (act) {
@@ -676,6 +853,7 @@ function __scholaryMain() {
       if (a === "issue")  { ev.preventDefault(); issueReport(act); return; }
       if (a === "resend") { ev.preventDefault(); resendReport(act); return; }
       if (a === "copy")   { ev.preventDefault(); copyLink(act); return; }
+      if (a === "ad-del") { ev.preventDefault(); deleteAdRow(act); return; }
       if (/^sch-/.test(a)) { ev.preventDefault(); schoolAction(a, act.getAttribute("data-id"), act); return; }
     }
     var seg = t.closest("#periodSeg button");
@@ -693,6 +871,9 @@ function __scholaryMain() {
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && $("gate") && !$("gate").hidden) login();
+  });
+  document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "adCsv" && e.target.files && e.target.files[0]) { importAdsCsv(e.target.files[0]); e.target.value = ""; }
   });
 
   /* ---------- восстановление отчёта ----------

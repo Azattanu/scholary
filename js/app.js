@@ -49,7 +49,11 @@
     try {
       const p = new URLSearchParams(location.search);
       const u = {};
-      ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid"].forEach(k => { if (p.get(k)) u[k] = p.get(k); });
+      // click-id рекламных площадок (ttclid — TikTok, fbclid — Meta, gclid — Google):
+      // по ним панель владельца считает цену заявки и покупки по каналу,
+      // а сервер отдаёт ttclid в TikTok Events API для сшивки конверсий.
+      ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "ttclid", "gclid"].forEach(k => { if (p.get(k)) u[k] = p.get(k).slice(0, 200); });
+      if (u.ttclid) { try { document.cookie = "ttclid=" + encodeURIComponent(u.ttclid) + "; Max-Age=2592000; Path=/; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : ""); } catch (e) {} }
       if (Object.keys(u).length) sessionStorage.setItem("scholary_utm", JSON.stringify(u));
       return JSON.parse(sessionStorage.getItem("scholary_utm") || "{}");
     } catch (e) { return {}; }
