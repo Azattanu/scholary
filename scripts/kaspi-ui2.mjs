@@ -51,7 +51,7 @@ for (const [w, h, tag] of [[390, 844, "m"], [1440, 900, "d"]]) {
   {
     const p = await b.newPage({ viewport: { width: w, height: h } }); const errors = []; p.on("pageerror", e => errors.push(e.message)); const calls = [];
     await mockKaspi(p, { create: { ok: true, order: "k0123456789abcdef", status: "pending", amount: 4000, phone: "77753831836" },
-      statuses: [{ status: "paid", fulfilled: false }, { status: "paid", fulfilled: false }, { status: "paid", fulfilled: true, report_url: "https://scholary.kz/report/?t=tok123", delivered: { wa: true, mail: true } }] }, calls);
+      statuses: [{ status: "paid", fulfilled: false, txn: "kaspi_314999" }, { status: "paid", fulfilled: false, txn: "kaspi_314999" }, { status: "paid", fulfilled: true, txn: "kaspi_314999", report_url: "https://scholary.kz/report/?t=tok123", delivered: { wa: true, mail: true } }] }, calls);
     await toPayment(p); await p.click("#payKaspi");
     await p.waitForFunction(() => /Оплата прошла/.test(document.querySelector("#screen").textContent), null, { timeout: 9000 }).catch(() => {});
     let t = await p.locator("#screen").textContent();
@@ -64,6 +64,10 @@ for (const [w, h, tag] of [[390, 844, "m"], [1440, 900, "d"]]) {
     ok(calls.filter(c => c.a === "status").length === n, tag + ": после выдачи опрос остановлен");
     ok(await p.locator("#phase2box .field").count() >= 5, tag + ": анкета фазы 2 на месте, не перерисована");
     await p.screenshot({ path: `/tmp/claude-0/shots/kaspi72-link-${tag}.png` });
+    /* Пиксель TikTok заблокирован роутом, но очередь window.ttq хранит вызовы: CompletePayment ровно один
+       и с event_id = pay_<txn с сервера> — тот же id, что у серверного события, TikTok не посчитает дважды. */
+    const tt = await p.evaluate(() => (window.ttq || []).filter(x => x[0] === "track" && x[1] === "CompletePayment").map(x => ({ id: x[3] && x[3].event_id, value: x[2] && x[2].value })));
+    ok(tt.length === 1 && tt[0].id === "pay_kaspi_314999" && tt[0].value === 4000, tag + ": браузерный CompletePayment один, event_id = pay_kaspi_<счёт> (дедуп с сервером) " + JSON.stringify(tt));
     ok(errors.length === 0, tag + ": без JS-ошибок " + JSON.stringify(errors));
     await p.close();
   }
