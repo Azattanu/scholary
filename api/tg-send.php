@@ -39,6 +39,53 @@ if (!$j || empty($j['ok'])) { http_response_code(502); echo json_encode(['ok' =>
 
 $items = is_array($j['items'] ?? null) ? $j['items'] : [];
 
+/* web-74 · недельный ритм. Понедельник — дайджест недели (план, документы,
+   ближайший дедлайн), четверг — «неделя ещё не засчитана» тем, у кого на
+   этой неделе не было ни одного действия. Обещание «не больше одного
+   сообщения в день» держим: если человеку сегодня уходит письмо о дедлайне,
+   недельная часть приклеивается к нему, а не идёт отдельным сообщением.
+   ?kind=digest|nudge — принудительно (для проверки), ?dry=1 — не отправлять. */
+$dowKz = (int)gmdate('N', time() + 5 * 3600);   // 1 = понедельник
+$forceKind = (string)($_GET['kind'] ?? '');
+$weekKind = $forceKind === 'digest' || $forceKind === 'nudge' ? $forceKind : ($dowKz === 1 ? 'digest' : ($dowKz === 4 ? 'nudge' : ''));
+$dry = !empty($_GET['dry']);
+$weekItems = []; $weekMs = 0; $weekStart = '';
+if ($weekKind !== '') {
+  $rw = tgs_rpc($c, 'tg_week_due', ['p_secret' => $c['TIPTOP_RPC_SECRET'], 'p_kind' => $weekKind]);
+  $jw = is_array($rw['json']) ? $rw['json'] : null;
+  if ($jw && !empty($jw['ok'])) {
+    $weekItems = is_array($jw['items'] ?? null) ? $jw['items'] : [];
+    $weekMs = (int)($jw['milestone'] ?? 0); $weekStart = (string)($jw['week_start'] ?? '');
+  }
+}
+$weekByChat = [];
+foreach ($weekItems as $it) { $chat = (string)($it['chat_id'] ?? ''); if ($chat !== '') $weekByChat[$chat] = $it; }
+
+/* $short — часть письма, которое уже начинается с обращения и ссылки на кабинет:
+   без повторного имени и без второй ссылки. */
+function week_text($it, $kind, $short = false) {
+  $name = trim((string)($it['name'] ?? '')); $name = $name !== '' ? explode(' ', $name)[0] : 'друг';
+  $week = (int)($it['week'] ?? 0); $open = (int)($it['apps_open'] ?? 0); $dr = (int)($it['docs_ready'] ?? 0); $dt = (int)($it['docs_total'] ?? 0);
+  $np = trim((string)($it['next_program'] ?? '')); $nd = $it['next_days'] ?? null; $done = (int)($it['tasks_done'] ?? 0); $prev = (int)($it['tasks_done_prev'] ?? 0);
+  $link = 'https://scholary.kz/cabinet/?tab=today&from=tg';
+  if ($kind === 'nudge') {
+    return ($short ? 'На этой неделе' : $name . ', на этой неделе') . ' в кабинете пока тихо — а неделя засчитывается за одну закрытую задачу.'
+      . ($np !== '' && $nd !== null && !$short ? "\n\nБлижайший дедлайн: <b>" . htmlspecialchars($np, ENT_QUOTES, 'UTF-8') . '</b> — через ' . (int)$nd . ' ' . plural_ru((int)$nd, 'день', 'дня', 'дней') . '.' : '')
+      . ($short ? "\n\nВ плане недели есть задача на 10 минут — этого достаточно." : "\n\nОткрой план недели — там одна задача на 10 минут: " . $link)
+      . "\n\nОтключить: Профиль → «Моя неделя» или /stop";
+  }
+  $lines = [];
+  $lines[] = ($short ? 'План на неделю ' : $name . ', план на неделю ') . ($week ?: '?') . ' сезона готов.';
+  $lines[] = '';
+  $lines[] = '• Открытых подач: <b>' . $open . '</b>' . ($dt ? ' · документов готово: <b>' . $dr . ' из ' . $dt . '</b>' : '');
+  if ($np !== '' && $nd !== null) $lines[] = '• Ближайший дедлайн: <b>' . htmlspecialchars($np, ENT_QUOTES, 'UTF-8') . '</b> — через ' . (int)$nd . ' ' . plural_ru((int)$nd, 'день', 'дня', 'дней');
+  $lines[] = '• Прошлая неделя: ' . ($prev ? 'закрыто ' . $prev . ' ' . plural_ru($prev, 'задача', 'задачи', 'задач') . ' 👍' : 'задачи не закрывались — на этой неделе достаточно одной');
+  if (!$short) { $lines[] = ''; $lines[] = 'Открыть план недели: ' . $link; }
+  $lines[] = '';
+  $lines[] = 'Отключить дайджест: Профиль → «Моя неделя» или /stop';
+  return implode("\n", $lines);
+}
+
 /* Не больше одного сообщения в день на человека — так обещано в боте.
    Если у человека сегодня несколько рубежей, собираем их в одно письмо. */
 $byChat = [];
@@ -53,39 +100,56 @@ function plural_ru($n, $a, $b, $c) {
   $x = $n % 10;  return $x === 1 ? $a : ($x > 1 && $x < 5 ? $b : $c);
 }
 
-$sent = 0; $failed = 0;
-foreach ($byChat as $chat => $list) {
-  usort($list, function ($a, $b) { return (int)$a['milestone'] - (int)$b['milestone']; });
-  $first = $list[0];
-  $name  = trim((string)($first['name'] ?? ''));
-  $name  = $name !== '' ? explode(' ', $name)[0] : 'друг';
+$sent = 0; $failed = 0; $weekSent = 0; $preview = null;
+$chats = array_values(array_unique(array_merge(array_keys($byChat), array_keys($weekByChat))));
+foreach ($chats as $chat) {
+  $list = $byChat[$chat] ?? [];
+  $msg = '';
+  if ($list) {
+    usort($list, function ($a, $b) { return (int)$a['milestone'] - (int)$b['milestone']; });
+    $first = $list[0];
+    $name  = trim((string)($first['name'] ?? ''));
+    $name  = $name !== '' ? explode(' ', $name)[0] : 'друг';
 
-  $lines = [];
-  foreach (array_slice($list, 0, 5) as $it) {
-    $d = (int)$it['milestone'];
-    $lines[] = '• <b>' . htmlspecialchars((string)$it['program'], ENT_QUOTES, 'UTF-8') . '</b> — через '
-      . $d . ' ' . plural_ru($d, 'день', 'дня', 'дней')
-      . ' (' . htmlspecialchars((string)$it['deadline'], ENT_QUOTES, 'UTF-8') . ')';
+    $lines = [];
+    foreach (array_slice($list, 0, 5) as $it) {
+      $d = (int)$it['milestone'];
+      $lines[] = '• <b>' . htmlspecialchars((string)$it['program'], ENT_QUOTES, 'UTF-8') . '</b> — через '
+        . $d . ' ' . plural_ru($d, 'день', 'дня', 'дней')
+        . ' (' . htmlspecialchars((string)$it['deadline'], ENT_QUOTES, 'UTF-8') . ')';
+    }
+    $n = count($list);
+    $head = $n === 1
+      ? $name . ', напоминаю про дедлайн:'
+      : $name . ', ' . $n . ' ' . plural_ru($n, 'дедлайн приближается', 'дедлайна приближаются', 'дедлайнов приближаются') . ':';
+
+    $tail = ((int)$first['milestone'] <= 3)
+      ? "\n\nЭто последние дни. Если чего-то не хватает — открой кабинет и посмотри, что ещё можно успеть."
+      : "\n\nОткрой кабинет: там видно, какие документы по этим подачам ещё не собраны и что делается дольше всего.";
+
+    $msg = $head . "\n\n" . implode("\n", $lines) . $tail
+      . "\n\nhttps://scholary.kz/cabinet/?tab=today&from=tg";
   }
-  $n = count($list);
-  $head = $n === 1
-    ? $name . ', напоминаю про дедлайн:'
-    : $name . ', ' . $n . ' ' . plural_ru($n, 'дедлайн приближается', 'дедлайна приближаются', 'дедлайнов приближаются') . ':';
-
-  $tail = ((int)$first['milestone'] <= 3)
-    ? "\n\nЭто последние дни. Если чего-то не хватает — открой кабинет и посмотри, что ещё можно успеть."
-    : "\n\nОткрой кабинет: там видно, какие документы по этим подачам ещё не собраны и что делается дольше всего.";
-
-  $msg = $head . "\n\n" . implode("\n", $lines) . $tail
-    . "\n\nhttps://scholary.kz/cabinet/\n\nОтключить напоминания: /stop";
+  $wi = $weekByChat[$chat] ?? null;
+  if ($wi) {
+    /* к письму о дедлайне добавляем короткую недельную часть: без повтора имени и ссылки */
+    $msg = $msg === '' ? week_text($wi, $weekKind) : $msg . "\n\n— — —\n\n" . week_text($wi, $weekKind, true);
+  }
+  if ($msg === '') continue;
+  if (strpos($msg, '/stop') === false) $msg .= "\n\nОтключить напоминания: /stop";
+  if ($preview === null) $preview = $msg;
+  if ($dry) { $sent++; continue; }
 
   $res = http_json('https://api.telegram.org/bot' . $c['TELEGRAM_TOKEN'] . '/sendMessage', 'POST',
     ['Content-Type: application/json'],
     ['chat_id' => $chat, 'text' => $msg, 'parse_mode' => 'HTML', 'disable_web_page_preview' => true], 15);
 
   $okSend = ($res['code'] >= 200 && $res['code'] < 300);
-  if ($okSend) {
-    $sent++;
+  /* 403 от Telegram = человек заблокировал бота. Это не наша ошибка,
+     но и слать ему больше нечего — помечаем, чтобы не долбиться каждый день. */
+  $mark = $okSend || (int)$res['code'] === 403;
+  if ($okSend) $sent++; else $failed++;
+  if ($mark) {
     /* Отмечаем ВСЕ рубежи этого письма, а не только первый: иначе завтра
        человек получит то же самое ещё раз. */
     foreach ($list as $it) {
@@ -96,21 +160,18 @@ foreach ($byChat as $chat => $list) {
         'p_milestone' => (int)$it['milestone'],
       ]);
     }
-  } else {
-    $failed++;
-    /* 403 от Telegram = человек заблокировал бота. Это не наша ошибка,
-       но и слать ему больше нечего — помечаем, чтобы не долбиться каждый день. */
-    if ((int)$res['code'] === 403) {
-      foreach ($list as $it) {
-        tgs_rpc($c, 'tg_mark_sent', [
-          'p_secret' => $c['TIPTOP_RPC_SECRET'], 'p_user' => $it['user_id'],
-          'p_program' => $it['program_id'], 'p_milestone' => (int)$it['milestone'],
-        ]);
-      }
+    if ($wi) {
+      $weekSent++;
+      tgs_rpc($c, 'tg_mark_sent', [
+        'p_secret' => $c['TIPTOP_RPC_SECRET'], 'p_user' => $wi['user_id'],
+        'p_program' => 'week:' . $weekStart, 'p_milestone' => $weekMs,
+      ]);
     }
   }
   usleep(120000);   // ~8 сообщений в секунду: лимит Telegram — 30
 }
 
 header('Content-Type: application/json; charset=utf-8');
-echo json_encode(['ok' => true, 'people' => count($byChat), 'sent' => $sent, 'failed' => $failed, 'items' => count($items)], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'people' => count($chats), 'sent' => $sent, 'failed' => $failed, 'items' => count($items),
+  'week' => ['kind' => $weekKind, 'people' => count($weekByChat), 'sent' => $weekSent, 'dry' => $dry],
+  'preview' => $dry ? $preview : null], JSON_UNESCAPED_UNICODE);
