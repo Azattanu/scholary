@@ -10,6 +10,10 @@
       { day: new Date(Date.now()-864e5).toISOString().slice(0,10), platform: "tiktok", campaign: "", spend: 15000, impressions: 21000, clicks: 300, views: 6500, results: 2, note: null },
       { day: new Date().toISOString().slice(0,10), platform: "meta", campaign: "", spend: 5000, impressions: 9000, clicks: 100, views: 0, results: 0, note: null } ],
     admin_ad_spend_upsert: { ok: true, saved: 1 }, admin_ad_spend_delete: { ok: true, deleted: 1 },
+    admin_retention: { period_days: 30, active_7d: 14, active_30d: 31, active_this_week: 12, active_this_week_2plus: 5, cohort_users: 27, d1_pct: 22, w1_pct: 41, w2_pct: 30, w3_pct: 26, w4_pct: 19, d30_pct: 33, avg_active_days: 2.4, tasks_done: 63, tasks_done_this_week: 17, avg_weeks_progress: 1.8, users_4plus_weeks: 2, badges: 40, tg_linked: 6, pro_payments: 3, pro_renewals: 1, deeplink_returns: 9,
+      weekly: [{ w: "2026-08-24", wau: 6, wau2: 1, wau_progress: 3, tasks_done: 0 }, { w: "2026-08-31", wau: 11, wau2: 4, wau_progress: 7, tasks_done: 21 }, { w: "2026-09-07", wau: 12, wau2: 5, wau_progress: 8, tasks_done: 17 }] },
+    admin_cab_content_list: [{ id: 1, kind: "guide", title: "Как попросить рекомендацию у учителя", url: "https://scholary.kz/", author: "Scholary", level: null, week_from: 1, week_to: 12, active: true, sort: 10 }],
+    admin_cab_content_upsert: { ok: true, id: 2 }, admin_cab_content_delete: { ok: true, deleted: 1 },
     admin_dash_summary: { revenue_all: 187000, revenue_period: 121000, payments_all: 24, payments_period: 15,
       refunds_all: 2, refunded_sum: 8000, users_total: 27, users_period: 11, users_with_answers: 17, pro_active: 3,
       leads_total: 49, leads_period: 22, leads_paid: 12, leads_with_contact: 31, applications_total: 153,
@@ -53,7 +57,7 @@
       { shag: 7, vopros: "contact", doshli: 158 } ]
   };
   window.supabase = { createClient: function () { return {
-    rpc: function (fn) { return res(FIX[fn] !== undefined ? FIX[fn] : []); },
+    rpc: function (fn, args) { (window.__RPC_LOG = window.__RPC_LOG || []).push({ fn: fn, args: args || {} }); return res(FIX[fn] !== undefined ? FIX[fn] : []); },
     auth: { getSession: function () { return res({ session: { access_token: "stub-token-1234567890abcdef", user: { email: "azattanu@gmail.com" } } }); },
             signOut: function () { return res(null); },
             signInWithPassword: function () { return res(null); } }
