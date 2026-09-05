@@ -166,7 +166,7 @@ if ($apKey) {
 $ttTok = !empty($c['TIKTOK_ACCESS_TOKEN']);
 chk($out, 'tiktok', 'TikTok — Events API', $ttTok,
   $ttTok ? 'токен доступа на месте, пиксель ' . (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG') : 'токен не прописан — уходят только события браузера',
-  $ttTok ? '' : "добавьте 'TIKTOK_ACCESS_TOKEN' => '…' в /private/scholary-config.php");
+  $ttTok ? '' : "вставить токен из TikTok Events Manager (пиксель → Настройки → Generate Access Token) в /private/tiktok-secrets.php между кавычками");
 
 /* ---- Дневные лимиты ИИ ---- */
 $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/usage/' . gmdate('Y-m-d') . '.json';
