@@ -3,6 +3,13 @@
   function res(data) { return Promise.resolve({ data: data, error: null }); }
   function days(n, f) { var a = [], d = new Date(); for (var i = n - 1; i >= 0; i--) { var x = new Date(d); x.setDate(d.getDate() - i); a.push(f(x.toISOString().slice(0,10), n - i)); } return a; }
   var FIX = {
+    admin_ads: { platform: "tiktok", period_days: 30, spend: 152000, impressions: 210000, clicks: 3100, views: 64000, results: 27, days_with_spend: 9, last_spend_day: new Date().toISOString().slice(0,10),
+      visitors: 1240, quiz_start: 410, quiz_done: 236, pay_clicks: 41, leads: 118, payments: 9, revenue: 44000,
+      daily: days(30, function (d, i) { return { day: d, spend: i > 20 ? 15000 + (i % 3) * 2000 : 0, impressions: i > 20 ? 23000 : 0, clicks: i > 20 ? 340 : 0, views: i > 20 ? 7000 : 0, visitors: i > 20 ? 130 + i : 3, quiz_done: i > 20 ? 25 : 0, leads: i > 20 ? 13 : 0, payments: i > 24 ? 2 : 0, revenue: i > 24 ? 8000 : 0 }; }) },
+    admin_ad_spend_list: [ { day: new Date().toISOString().slice(0,10), platform: "tiktok", campaign: "Школьники", spend: 17000, impressions: 23000, clicks: 340, views: 7000, results: 3, note: null },
+      { day: new Date(Date.now()-864e5).toISOString().slice(0,10), platform: "tiktok", campaign: "", spend: 15000, impressions: 21000, clicks: 300, views: 6500, results: 2, note: null },
+      { day: new Date().toISOString().slice(0,10), platform: "meta", campaign: "", spend: 5000, impressions: 9000, clicks: 100, views: 0, results: 0, note: null } ],
+    admin_ad_spend_upsert: { ok: true, saved: 1 }, admin_ad_spend_delete: { ok: true, deleted: 1 },
     admin_dash_summary: { revenue_all: 187000, revenue_period: 121000, payments_all: 24, payments_period: 15,
       refunds_all: 2, refunded_sum: 8000, users_total: 27, users_period: 11, users_with_answers: 17, pro_active: 3,
       leads_total: 49, leads_period: 22, leads_paid: 12, leads_with_contact: 31, applications_total: 153,
