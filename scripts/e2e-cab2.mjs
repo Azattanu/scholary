@@ -81,6 +81,13 @@ async function run(vn, w, h) {
   ok('задачи недели', (await p.locator('#tab-today .task').count()) >= 2);
   ok('прогресс пути', /Пройдено \d+% пути/.test(today));
   ok('календарь', (await p.locator('#tab-today .cal-d, #side-widget .cal-d').count()) >= 28);
+  /* отметка задачи должна уйти в базу (cab_task_state), а не только в localStorage */
+  const tkey = await p.locator('#tab-today .task').first().getAttribute('data-key');
+  const tresp = p.waitForResponse(r => /cab_task_state/.test(r.url()) && r.request().method() === 'POST', { timeout: 15000 }).catch(() => null);
+  await p.locator(`#tab-today .task[data-key="${tkey}"] [data-act="task-done"]`).click();
+  const tr = await tresp; ok(`отметка задачи записана в базу (${tr ? tr.status() : 'нет ответа'})`, !!tr && tr.status() < 300);
+  await p.waitForTimeout(600);
+  ok('«Неделя засчитана» после первой задачи', /Неделя засчитана/.test(await p.locator('#tab-today').innerText()));
 
   const tabs = ['apps','unis','docs','profile'];
   for (const t of tabs) {
@@ -88,6 +95,9 @@ async function run(vn, w, h) {
     await p.waitForTimeout(1200);
     const txt = await p.locator(`#tab-${t}`).innerText().catch(()=> '');
     ok(`вкладка ${t} (${txt.length} симв.)`, txt.length > 40);
+    if (t === 'unis') ok(`Discover: ${await p.locator('#tab-unis .disc-row').count()} подборок, без «новое» на всём каталоге`, (await p.locator('#tab-unis .disc-row').count()) >= 4 && !/🆕 новое/.test(txt));
+    if (t === 'docs') ok(`сетка документов (${await p.locator('#tab-docs .dcard').count()} карточек) + общая картина`, (await p.locator('#tab-docs .dcard').count()) >= 4 && /Собрано \d+ из \d+/.test(txt));
+    if (t === 'profile') ok('настройки «Моя неделя» в профиле', /Моя неделя/.test(txt));
     await shot('4-' + t);
   }
 
