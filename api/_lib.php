@@ -29,9 +29,12 @@ function cfg() {
    блокировщиком. Идентификатор пикселя — общий с браузерным кодом;
    токен доступа лежит в /private (TIKTOK_ACCESS_TOKEN) и в репозиторий
    не попадает. Почта/телефон — только SHA-256. Нет токена — тихо выходим. */
-function tt_api_event($event, $props = [], $user = [], $event_id = null) {
+/* $test_code — код из Events Manager → «Тестовые события»: с ним событие
+   попадает только на вкладку тестов и в отчётах не считается. Так админка
+   проверяет, что токен живой, ничего не подмешивая в реальную статистику. */
+function tt_api_event($event, $props = [], $user = [], $event_id = null, $test_code = null) {
   $c = cfg();
-  $tok = (string)($c['TIKTOK_ACCESS_TOKEN'] ?? '');
+  $tok = trim((string)($c['TIKTOK_ACCESS_TOKEN'] ?? ''));
   $pix = (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG');
   if ($tok === '' || $pix === '') return null;
   $h = function ($v) { $v = trim((string)$v); return $v === '' ? null : hash('sha256', $v); };
@@ -58,9 +61,38 @@ function tt_api_event($event, $props = [], $user = [], $event_id = null) {
     'page'       => ['url' => (string)($user['url'] ?? ('https://scholary.kz' . ($_SERVER['REQUEST_URI'] ?? '/'))), 'referrer' => (string)($_SERVER['HTTP_REFERER'] ?? '')],
     'properties' => (object)$props,
   ]]];
-  $r = http_json('https://business-api.tiktok.com/open_api/v1.3/event/track/', 'POST',
+  if ($test_code !== null && trim((string)$test_code) !== '') $body['test_event_code'] = trim((string)$test_code);
+  /* TIKTOK_API_BASE — только для локального стенда с моком. */
+  $base = rtrim((string)($c['TIKTOK_API_BASE'] ?? 'https://business-api.tiktok.com'), '/');
+  $r = http_json($base . '/open_api/v1.3/event/track/', 'POST',
     ['Access-Token: ' . $tok, 'Content-Type: application/json'], $body, 8);
+  /* Журнал без персональных данных: что ушло и что ответил TikTok. Иначе
+     «дошла ли покупка до TikTok» не узнать — в Events Manager она видна
+     с задержкой до получаса, а ошибку токена там не видно вовсе. */
+  tt_api_log([
+    'at' => gmdate('c'), 'event' => $event, 'event_id' => $body['data'][0]['event_id'],
+    'test' => $test_code ? 1 : 0, 'ttclid' => !empty($u['ttclid']) ? 1 : 0,
+    'ids' => (int)!empty($u['email']) + (int)!empty($u['phone']) + (int)!empty($u['external_id']),
+    'http' => (int)$r['code'], 'code' => $r['json']['code'] ?? null,
+    'msg'  => mb_substr((string)($r['json']['message'] ?? ($r['err'] ?: '')), 0, 80),
+  ]);
   return $r;
+}
+function tt_api_log($row) {
+  $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiktok';
+  if (!is_dir($dir)) @mkdir($dir, 0700, true);
+  @file_put_contents($dir . '/events-' . gmdate('Y-m') . '.log', json_encode($row, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
+}
+/* Последние записи журнала Events API (для админки). */
+function tt_api_log_tail($n = 8) {
+  $f = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiktok/events-' . gmdate('Y-m') . '.log';
+  if (!is_file($f)) return ['total' => 0, 'ok' => 0, 'fail' => 0, 'last' => []];
+  $lines = array_values(array_filter(array_map('trim', (array)file($f))));
+  $ok = 0; $fail = 0; $real = 0;
+  foreach ($lines as $l) { $j = json_decode($l, true); if (!is_array($j)) continue; if (empty($j['test'])) $real++; if ((int)($j['code'] ?? -1) === 0) $ok++; else $fail++; }
+  $last = [];
+  foreach (array_slice($lines, -$n) as $l) { $j = json_decode($l, true); if (is_array($j)) $last[] = $j; }
+  return ['total' => count($lines), 'real' => $real, 'ok' => $ok, 'fail' => $fail, 'last' => $last];
 }
 function jout($data, $code = 200) {
   http_response_code($code);

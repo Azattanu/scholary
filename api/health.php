@@ -163,10 +163,39 @@ if ($apKey) {
 }
 
 /* ---- TikTok Events API (серверные события: заявки, оплаты) ---- */
-$ttTok = !empty($c['TIKTOK_ACCESS_TOKEN']);
-chk($out, 'tiktok', 'TikTok — Events API', $ttTok,
-  $ttTok ? 'токен доступа на месте, пиксель ' . (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG') : 'токен не прописан — уходят только события браузера',
-  $ttTok ? '' : "вставить токен из TikTok Events Manager (пиксель → Настройки → Generate Access Token) в /private/tiktok-secrets.php между кавычками");
+$ttTok = trim((string)($c['TIKTOK_ACCESS_TOKEN'] ?? '')) !== '';
+$ttPix = (string)($c['TIKTOK_PIXEL_ID'] ?? 'DACVEIRC77UCRCTVA5DG');
+if (!$ttTok) {
+  chk($out, 'tiktok', 'TikTok — Events API', false, 'токен не прописан — уходят только события браузера',
+    "вставить токен из TikTok Events Manager (пиксель → Настройки → Generate Access Token) в /private/tiktok-secrets.php между кавычками");
+} else {
+  /* «Есть токен» — мало: он может быть просроченным или от чужого пикселя.
+     Поэтому шлём настоящее событие, но с test_event_code — оно видно только
+     на вкладке «Тестовые события» и в статистику кампании не попадает. */
+  $ttCode = (string)($c['TIKTOK_TEST_EVENT_CODE'] ?? 'TEST67376');
+  /* Параметры — в том же формате, что у настоящих покупок (contents с
+     content_id, value > 0): иначе Events Manager помечает тестовое событие
+     предупреждениями «нет content_id / неверная ценность». */
+  $ttR = tt_api_event('ViewContent', ['value' => 1, 'currency' => 'KZT',
+      'contents' => [['content_id' => 'health-check', 'content_type' => 'product', 'content_name' => 'Проверка подключения', 'price' => 1, 'quantity' => 1]]],
+    ['url' => 'https://scholary.kz/admin', 'user_agent' => 'ScholaryHealth/1.0', 'external_id' => 'health-' . $u['id']],
+    'health_' . gmdate('YmdHis'), $ttCode);
+  $ttOk  = is_array($ttR) && (int)($ttR['json']['code'] ?? -1) === 0;
+  $ttMsg = is_array($ttR) ? (string)($ttR['json']['message'] ?? ($ttR['err'] ?: ('HTTP ' . $ttR['code']))) : 'нет ответа';
+  /* Журнал серверных событий за месяц: видно, дошли ли настоящие покупки. */
+  $tl = tt_api_log_tail(6);
+  $tlLast = [];
+  foreach ($tl['last'] as $e) {
+    if (!empty($e['test'])) continue;
+    $tlLast[] = substr((string)$e['at'], 5, 11) . ' ' . $e['event'] . ((int)($e['code'] ?? -1) === 0 ? ' ✓' : ' ✗ ' . ($e['msg'] ?? '')) . (!empty($e['ttclid']) ? ' ttclid' : '');
+  }
+  $tlNote = $tl['total'] ? ' · за месяц: боевых ' . (int)$tl['real'] . ', принято ' . (int)$tl['ok'] . ', ошибок ' . (int)$tl['fail'] .
+    ($tlLast ? ' · последние: ' . implode('; ', $tlLast) : '') : '';
+  chk($out, 'tiktok', 'TikTok — Events API', $ttOk,
+    ($ttOk ? 'токен рабочий: тестовое событие принято (пиксель ' . $ttPix . ', код ' . $ttCode . ')'
+           : 'токен есть, но TikTok событие не принял: ' . $ttMsg) . $tlNote,
+    $ttOk ? '' : 'сгенерировать новый токен в Events Manager (пиксель → Настройки → Generate Access Token) и заменить в /private/tiktok-secrets.php');
+}
 
 /* ---- Дневные лимиты ИИ ---- */
 $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/usage/' . gmdate('Y-m-d') . '.json';
