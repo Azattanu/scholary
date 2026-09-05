@@ -163,6 +163,9 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
             <input class="f" id="cl-letter" placeholder="А, Б, В…" maxlength="4" autocapitalize="characters">
           </div>
         </div>
+        <label class="fl" for="cl-parent" style="margin-top:12px">Телефон родителя <span class="mut" style="font-weight:500">(необязательно)</span></label>
+        <input class="f" id="cl-parent" type="tel" inputmode="tel" placeholder="+7 701 000 00 00" autocomplete="off">
+        <div class="xs mut" style="margin-top:4px">Профориентолог школы сможет присылать родителям короткий статус «где мы сейчас» — без него тоже можно.</div>
         <label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:var(--ink-soft);cursor:pointer">
           <input type="checkbox" id="cl-consent" style="width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex-shrink:0">
           <span>Регистрируюсь с ведома родителей (если мне нет 18). <span class="who-sees">Школа</span> увидит моё имя, класс, направление и прогресс — не пароль и не переписку.</span>
@@ -194,8 +197,8 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   document.head.appendChild(s);
 })();
 </script>
-<script src="/js/config.js?v=75"></script>
-<script src="/js/telemetry.js?v=75"></script>
-<script src="/js/school-join.js?v=75"></script>
+<script src="/js/config.js?v=76"></script>
+<script src="/js/telemetry.js?v=76"></script>
+<script src="/js/school-join.js?v=76"></script>
 </body>
 </html>

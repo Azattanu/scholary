@@ -10,10 +10,10 @@
   <link rel="canonical" href="https://scholary.kz/schools/">
   <title>Scholary для школ — поступление за рубеж для всего 9–11 класса</title>
   <meta name="description" content="Школа подключает Scholary один раз — и каждый ученик 9–11 класса получает вероятность поступления, план документов и дедлайны, а профориентолог видит весь класс в одном кабинете. Пилот бесплатно.">
-  <link rel="stylesheet" href="/css/style.css?v=75">
-  <script src="/js/config.js?v=75"></script>
-  <script src="/js/telemetry.js?v=75"></script>
-  <script src="/js/app.js?v=75" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=76">
+  <script src="/js/config.js?v=76"></script>
+  <script src="/js/telemetry.js?v=76"></script>
+  <script src="/js/app.js?v=76" defer></script>
   <style>
     /* Страница для школ: всё, что нужно сверх общего стиля, лежит здесь,
        чтобы не трогать style.css и не рисковать главной. */
@@ -101,6 +101,73 @@
       .apply .plans { grid-template-columns: 1fr; }
       .demo-row { grid-template-columns: 1.2fr 1fr .7fr; }
     }
+
+    /* ---- web-76: новые блоки ---- */
+    .mk4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:6px}
+    .mk4 > div{background:#fff;border:1px solid var(--accent-border);border-radius:12px;padding:8px 10px;min-width:0}
+    .mk4 b{display:block;font-size:20px;font-weight:800;color:var(--accent-dark);letter-spacing:-.02em;line-height:1.1} .mk4 span{display:block;font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px;line-height:1.25}
+    .mfun{margin-top:12px;display:grid;gap:7px} .mfun > div{display:grid;grid-template-columns:110px 1fr 28px;gap:8px;align-items:center;font-size:12px}
+    .mfun span{color:var(--ink-soft);font-weight:600} .mfun i{display:block;height:10px;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--green-bright));animation:barIn 1.1s cubic-bezier(.2,.8,.2,1) both;transform-origin:left} .mfun b{text-align:right;font-weight:800}
+    .stats-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    /* схема */
+    .scheme{border-radius:var(--radius-lg);padding:clamp(14px,3vw,28px);background:linear-gradient(135deg,#F6F5FF,#F2FBF6);overflow:hidden}
+    .scheme-svg{width:100%;height:auto;display:block;font-family:inherit}
+    .scheme-svg .sn rect{fill:#fff;stroke:#E4E1FF;stroke-width:1.5;filter:drop-shadow(0 6px 14px rgba(91,75,255,.10))}
+    .scheme-svg .sn-g rect{stroke:#CDEBD9}
+    .scheme-svg .sh rect{fill:url(#hub);fill:#5B4BFF}
+    .scheme-svg text{text-anchor:middle;fill:var(--ink)}
+    .scheme-svg .t0{font-size:22px;font-weight:800;fill:#fff;letter-spacing:-.02em} .scheme-svg .t2w{font-size:12px;fill:#E9E6FF;font-weight:600}
+    .scheme-svg .t1{font-size:16px;font-weight:800} .scheme-svg .t2{font-size:12.5px;fill:var(--accent-dark);font-weight:700} .scheme-svg .t3{font-size:11.5px;fill:var(--muted);font-weight:600}
+    .scheme-svg .sl path{fill:none;stroke:#5B4BFF;stroke-width:2.5;stroke-dasharray:7 6;marker-end:url(#arr);animation:dash 1.6s linear infinite;opacity:.8}
+    @keyframes dash{to{stroke-dashoffset:-26}}
+    .scheme-m{display:none} .sm-row{background:#fff;border:1px solid var(--accent-border);border-radius:14px;padding:12px 14px} .sm-row b{display:block;font-size:15px} .sm-row span{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-top:3px;line-height:1.4} .sm-row.g{border-color:#CDEBD9} .sm-arr{text-align:center;font-size:12.5px;color:var(--accent-dark);font-weight:700;padding:6px 0}
+    .scheme-legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:12px;font-size:13px;color:var(--ink-soft);font-weight:600}
+    .scheme-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle} .scheme-legend i.g{background:var(--green)} .scheme-legend i.p{background:#F59E0B}
+    /* роли */
+    .roles > input{position:absolute;opacity:0;pointer-events:none}
+    .role-tabs{display:flex;gap:6px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px;margin-bottom:var(--s5);width:max-content;max-width:100%}
+    .role-tabs label{padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;color:var(--muted);cursor:pointer;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center}
+    .role-pane{display:none;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(20px,4vw,48px);align-items:center}
+    #r-dir:checked ~ .role-tabs label[for=r-dir], #r-prof:checked ~ .role-tabs label[for=r-prof], #r-par:checked ~ .role-tabs label[for=r-par], #r-stu:checked ~ .role-tabs label[for=r-stu]{background:var(--accent);color:#fff}
+    #r-dir:checked ~ #p-dir, #r-prof:checked ~ #p-prof, #r-par:checked ~ #p-par, #r-stu:checked ~ #p-stu{display:grid}
+    .role-text h3{font-size:clamp(22px,1.2rem+1vw,30px);margin:10px 0 12px;letter-spacing:-.02em;line-height:1.15}
+    .role-text ul{margin:0 0 18px;padding-left:20px;font-size:16px;line-height:1.6;color:var(--ink-soft)} .role-text li+li{margin-top:8px}
+    .role-mock{padding:18px;border-radius:var(--radius-lg)} .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px} .mh b{font-size:15px} .mh span{font-size:12px;font-weight:700;color:var(--accent-dark);background:var(--accent-soft);border-radius:999px;padding:4px 10px}
+    .mcls{display:grid;gap:8px;margin-top:12px} .mcls > div{display:grid;grid-template-columns:36px 1fr 36px;gap:8px;align-items:center;font-size:13px} .mcls i{display:block;height:8px;border-radius:99px;background:var(--track);overflow:hidden} .mcls i b{display:block;height:100%;background:var(--accent);border-radius:99px} .mcls span{text-align:right;color:var(--muted);font-weight:700}
+    .mbtn{margin-top:12px;font-size:13px;font-weight:800;color:var(--accent)}
+    .mprio{display:flex;align-items:center;gap:8px;background:#FDEEEC;color:#B42318;border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:10px} .mprio i{width:8px;height:8px;border-radius:50%;background:#C0392B}
+    .mlist{display:grid;gap:8px} .mlist > div{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:12px;padding:8px 10px;background:#fff}
+    .mlist > div > b{font-size:20px;font-weight:800;color:var(--accent-dark);min-width:26px;line-height:1.1} .mlist b.bad{color:#C0392B} .mlist span{display:block;font-size:13px;font-weight:700} .mlist em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+    .mtasks > div > b{font-size:16px;min-width:20px}
+    .mbubble{background:#E7F8EE;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.5;color:var(--ink);margin-top:6px}
+    /* подключение */
+    .flow4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);position:relative}
+    .fs{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative}
+    .fs .fn{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+    .fs h3{font-size:17px;margin:12px 0 6px} .fs p{margin:0;font-size:14.5px;color:var(--ink-soft);line-height:1.55} .fs .ft{display:inline-block;margin-top:12px;font-size:12px;font-weight:800;color:var(--accent-dark);background:var(--accent-soft);border-radius:999px;padding:4px 10px}
+    .fs:not(:last-child)::after{content:"→";position:absolute;right:-19px;top:24px;color:var(--accent);font-weight:800;font-size:20px}
+    /* год */
+    .year{border-radius:var(--radius-lg);padding:clamp(16px,3vw,28px);background:linear-gradient(135deg,#F6F5FF,#F2FBF6)}
+    .yrow{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px}
+    .ym{background:#fff;border:1px solid var(--accent-border);border-radius:14px;padding:10px 10px;min-width:0} .ym b{display:block;font-size:13.5px} .ym span{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.35}
+    .ym.hot{border-color:#F9C9C4;background:#FFF6F5} .ym.hot b{color:#B42318}
+    .ybar{position:relative;height:10px;border-radius:99px;background:linear-gradient(90deg,#DAD6FF,#5B4BFF 55%,#2E9E68);margin:16px 4px 6px}
+    .ybar i{position:absolute;top:-4px;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translateX(-50%)} .ybar i.hot{border-color:#C0392B}
+    .yhint{margin-top:14px;background:#fff;border-radius:14px;padding:12px 14px;display:grid;gap:4px} .yhint .k{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-dark)} .yhint b{font-size:15px} .yhint .mut{font-size:12.5px}
+    /* сравнение */
+    .cmp{padding:0;overflow:hidden} .cmp-h,.cmp-r{display:grid;grid-template-columns:1.1fr 1fr 1.4fr;gap:12px;padding:12px 18px;font-size:14.5px;align-items:center}
+    .cmp-h{background:#F7F7FA;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)} .cmp-r{border-top:1px solid var(--border)} .cmp-r > span:first-child{font-weight:700} .cmp-r > span:nth-child(2){color:var(--muted)} .cmp .acc{color:var(--accent-dark);font-weight:700}
+    /* калькулятор */
+    .calc{border-radius:var(--radius-lg);padding:clamp(18px,3vw,30px);background:var(--surface);border:1px solid var(--border);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(18px,3vw,36px)}
+    .calc-in label{display:block;font-weight:700;font-size:17px;margin-bottom:12px} .calc-in label b{color:var(--accent-dark);font-size:22px}
+    .calc-in input[type=range]{width:100%;accent-color:var(--accent);height:40px} .calc-marks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}
+    .calc-out{display:grid;gap:8px} .co{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:10px 12px;border-radius:12px;background:#F7F7FA;font-size:14.5px} .co span{color:var(--muted);font-weight:600} .co b{font-weight:800;white-space:nowrap} .co.acc{background:var(--accent-soft)} .co.acc b{color:var(--accent-dark);font-size:20px}
+    .calc-note{grid-column:1 / -1;font-size:12.5px;color:var(--muted);line-height:1.5}
+    /* основания */
+    .proof2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)} .proof2 .card{padding:24px} .proof2 .anti{background:#F6FBF8}
+    .proof2 .pl{margin:12px 0 0;padding-left:20px;font-size:15px;line-height:1.6;color:var(--ink-soft)} .proof2 li+li{margin-top:8px}
+    @media (max-width: 960px){ .stats-4{grid-template-columns:repeat(2,minmax(0,1fr))} .flow4{grid-template-columns:repeat(2,minmax(0,1fr))} .fs:not(:last-child)::after{display:none} .yrow{grid-template-columns:repeat(3,minmax(0,1fr))} .ybar{display:none} .role-pane{grid-template-columns:1fr} .calc{grid-template-columns:1fr} .proof2{grid-template-columns:1fr} }
+    @media (max-width: 640px){ .stats-4{grid-template-columns:1fr} .mk4{grid-template-columns:repeat(2,minmax(0,1fr))} .flow4{grid-template-columns:1fr} .yrow{grid-template-columns:1fr} .cmp-h{display:none} .cmp-r{grid-template-columns:1fr;gap:4px;padding:12px 14px} .cmp-r > span:nth-child(2)::before{content:"сейчас: ";font-weight:700} .cmp-r > .acc::before{content:"со Scholary: "} .role-tabs{width:100%;border-radius:18px} .role-tabs label{flex:1 1 45%;justify-content:center;padding:10px 8px;font-size:14px} .scheme-svg{display:none} .scheme-m{display:block} .scheme-legend{display:none} .mfun > div{grid-template-columns:90px 1fr 26px} }
   </style>
 </head>
 <body>
@@ -134,23 +201,21 @@
 <section class="sch-hero">
   <div class="container sch-grid">
     <div>
-      <span class="badge-pill">Для школ и профориентологов · 9–11 классы</span>
-      <h1>Поступление за рубеж — для всего класса, а не для двух отличников</h1>
-      <p class="sub">Школа подключается один раз. Каждый ученик получает свою вероятность поступления, план документов и дедлайны. Профориентолог видит весь класс в одном кабинете — кто куда целится и что горит.</p>
+      <span class="badge-pill">Для школ · 9–11 классы · директору, профориентологу, родителям</span>
+      <h1>Вся параллель 9–11 — с&nbsp;планом поступления, а&nbsp;не два отличника с&nbsp;агентством</h1>
+      <p class="sub">Школа подключается один раз. Каждый ученик получает свои шансы, план и документы, профориентолог — списки «кто отстал» на неделю, директор — сводку и отчёт года, родители — статус «где мы сейчас». Один профориентолог реально ведёт параллель, а не двух-трёх «сильных».</p>
       <div class="sch-cta">
         <a class="btn btn-primary" href="#apply" onclick="track('cta_school_hero')">Подключить школу</a>
-        <a class="btn btn-outline" href="/schools/cabinet/?demo=1" onclick="track('cta_school_demo')">Посмотреть демо-кабинет</a>
+        <a class="btn btn-outline" href="/schools/cabinet/?demo=1" onclick="track('cta_school_demo')">Открыть демо-кабинет</a>
       </div>
-      <div class="sch-mini">Бесплатный пилот на 30 дней · договор, счёт и акт · оплата из внебюджета школы или родительского комитета</div>
+      <div class="sch-mini">Пилот 30 дней бесплатно · договор, счёт и акт · оплата из внебюджета или родительского комитета</div>
     </div>
 
-    <a class="demo-cab card-glow" href="/schools/cabinet/?demo=1" onclick="track('cta_school_demo_card')" style="display:block;color:inherit">
-      <div class="dh"><b>Кабинет школы · 11 «Б»</b><span>24 из 30 мест</span></div>
-      <div class="demo-row"><div><div class="n">Айгерим С.</div><div class="c">Венгрия · IT</div></div><div class="demo-bar"><i style="width:74%"></i></div><div class="p">74%</div></div>
-      <div class="demo-row"><div><div class="n">Данияр К.</div><div class="c">Италия · инженерия</div></div><div class="demo-bar"><i style="width:61%"></i></div><div class="p">61%</div></div>
-      <div class="demo-row"><div><div class="n">Томирис Ж.</div><div class="c">Турция · медицина</div></div><div class="demo-bar"><i style="width:38%"></i></div><div class="p warn">38%</div></div>
-      <div class="demo-row"><div><div class="n">Алихан Б.</div><div class="c">Китай · бизнес</div></div><div class="demo-bar"><i style="width:56%"></i></div><div class="p">56%</div></div>
-      <div class="demo-foot"><span class="bad">3 дедлайна ближе 30 дней</span><span class="ok">17 документов готово</span><span>4 не заходили неделю</span></div>
+    <a class="demo-cab card-glow" href="/schools/cabinet/?demo=1#/summary" onclick="track('cta_school_demo_card')" style="display:block;color:inherit">
+      <div class="dh"><b>Сводка · Школа-лицей №39</b><span>сезон 2026/27</span></div>
+      <div class="mk4"><div><b>48</b><span>подключено · из 500 мест</span></div><div><b>81%</b><span>с расчётом шансов</span></div><div><b>65%</b><span>с планом поступления</span></div><div><b>7</b><span>подали · 3 оффера</span></div></div>
+      <div class="mfun"><div><span>Прошли расчёт</span><i style="width:81%"></i><b>39</b></div><div><span>Есть план</span><i style="width:65%"></i><b>31</b></div><div><span>Документы ≥ 50 %</span><i style="width:33%"></i><b>16</b></div><div><span>Подали</span><i style="width:15%"></i><b>7</b></div></div>
+      <div class="demo-foot"><span class="bad">2 срочно</span><span>23 отстают</span><span class="ok">19 в порядке</span><span>9 без расчёта</span></div>
       <div class="xs" style="margin-top:12px;font-weight:700;color:var(--accent)">Открыть демо-кабинет →</div>
     </a>
   </div>
@@ -160,67 +225,182 @@
 <section class="section section-tight">
   <div class="container">
     <div class="stats4">
-      <div class="stat-big"><div class="num" data-count="215000" data-fmt="space">215 000</div><div class="cap">выпускников 11 класса в Казахстане в 2026 году</div></div>
-      <div class="stat-big"><div class="num" data-count="91000" data-fmt="space">91 000</div><div class="cap">казахстанцев учатся за рубежом — 9-е место в мире по данным ЮНЕСКО</div></div>
-      <div class="stat-big"><div class="num" data-count="80" data-prefix="~" data-suffix="%">~80%</div><div class="cap">из них поступали сами, за свой счёт или на стипендию, а не по «Болашаку»</div></div>
-      <div class="stat-big"><div class="num">1 : 500</div><div class="cap">один профориентолог на 9–11 классы — вручную довести всех до подачи невозможно</div></div>
+      <div class="stat-big"><div class="num" data-count="216900" data-fmt="space">216 900</div><div class="cap">выпускников школ в 2025 году — и 71 844 государственных гранта на 2025/26 (МП РК, МНВО)</div></div>
+      <div class="stat-big"><div class="num" data-count="75396" data-fmt="space">75 396</div><div class="cap">казахстанцев учатся за рубежом — официальная оценка UNESCO UIS за 2023 год</div></div>
+      <div class="stat-big"><div class="num">1 : 300–500</div><div class="cap">один педагог-профориентатор на параллель 9–11 — должность введена приказом МП РК № 47 (2025), норматива нагрузки нет</div></div>
+      <div class="stat-big"><div class="num" data-count="236">236</div><div class="cap">программ в 56 странах с суммой стипендии и дедлайном — в каждом ученическом кабинете</div></div>
     </div>
+    <p class="xs mut" style="margin-top:14px;max-width:70ch">Источники: Министерство просвещения РК, МНВО РК, UNESCO UIS, приказ МП РК № 47 от 26.03.2025. Мы не считаем «две трети не поступят»: гранты получают и выпускники прошлых лет. Мы считаем, что у каждого из 216 900 должен быть план.</p>
   </div>
 </section>
 
-<!-- ПРОБЛЕМА → РЕШЕНИЕ -->
-<section class="section" id="why">
+<!-- ОДНА ПЛАТФОРМА — ТРИ КАБИНЕТА -->
+<section class="section" id="scheme">
   <div class="container">
-    <h2>Почему это нужно именно школе</h2>
-    <p class="lead">С 2025 года в каждой государственной школе есть педагог-профориентатор, и в его обязанности входит выстраивать образовательную траекторию ученика. Но один человек на 500 старшеклассников физически не может посчитать шансы каждому, собрать документы и следить за дедлайнами в 56 странах.</p>
-    <div class="steps3">
-      <div class="card"><div class="step-num">1</div><h3>Сейчас</h3><p>Зарубежные вузы — тема для «сильных» детей и семей с агентством за 400&nbsp;000&nbsp;– 1&nbsp;000&nbsp;000&nbsp;₸. Остальные даже не пробуют, хотя половина молодёжи хотела бы учиться за границей.</p></div>
-      <div class="card"><div class="step-num">2</div><h3>Со Scholary</h3><p>Каждый ученик за 2 минуты видит реальную вероятность по 236 программам в 56 странах — с суммой стипендии и дедлайном. Дальше кабинет ведёт его по документам шаг за шагом.</p></div>
-      <div class="card"><div class="step-num">3</div><h3>Для школы</h3><p>Профориентолог получает готовую картину класса: кто куда целится, у кого шансы выше, у кого горит дедлайн. Это и есть «индивидуальная траектория» — без ручной работы.</p></div>
+    <h2>Одна платформа — три кабинета и родители</h2>
+    <p class="lead">Школа покупает одно подключение. Данные ученика появляются у профориентолога и в сводке директора сами — без таблиц и опросов. Родители получают статус, а не «позвоните завтра».</p>
+    <div class="scheme card-glow">
+      <svg viewBox="0 0 960 420" class="scheme-svg" role="img" aria-label="Схема: ученик → Scholary → профориентолог и директор → родители">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5B4BFF"/></marker></defs>
+        <g class="sl"><path d="M250 210 H 400" /><path d="M560 210 H 700" /><path d="M480 150 V 90" /><path d="M480 270 V 330" /><path d="M700 210 C 780 210, 820 150, 860 100" /><path d="M700 210 C 780 210, 820 270, 860 320" /></g>
+        <g class="sn"><rect x="60" y="150" width="190" height="120" rx="20"/><text x="155" y="192" class="t1">Ученик</text><text x="155" y="216" class="t2">кабинет Scholary Pro</text><text x="155" y="236" class="t3">шансы · план · документы · Telegram</text></g>
+        <g class="sh"><rect x="400" y="150" width="160" height="120" rx="24"/><text x="480" y="203" class="t0">Scholary</text><text x="480" y="228" class="t2w">одна база на школу</text></g>
+        <g class="sn"><rect x="380" y="20" width="200" height="70" rx="18"/><text x="480" y="49" class="t1">Ссылка школы</text><text x="480" y="70" class="t3">регистрация с классом · 2 минуты</text></g>
+        <g class="sn"><rect x="380" y="330" width="200" height="70" rx="18"/><text x="480" y="359" class="t1">Каталог 236 программ</text><text x="480" y="380" class="t3">стипендии · дедлайны · страны</text></g>
+        <g class="sn"><rect x="700" y="150" width="190" height="120" rx="20"/><text x="795" y="192" class="t1">Профориентолог</text><text x="795" y="216" class="t2">неделя · списки «кто отстал»</text><text x="795" y="236" class="t3">записи · шаг с датой · статусы</text></g>
+        <g class="sn"><rect x="770" y="40" width="180" height="70" rx="18"/><text x="860" y="70" class="t1">Директор</text><text x="860" y="90" class="t3">сводка · отчёт года</text></g>
+        <g class="sn sn-g"><rect x="770" y="310" width="180" height="70" rx="18"/><text x="860" y="340" class="t1">Родители</text><text x="860" y="360" class="t3">статус в WhatsApp</text></g>
+      </svg>
+      <div class="scheme-m">
+        <div class="sm-row"><b>Ученик</b><span>регистрируется по ссылке школы с классом → кабинет Scholary Pro: шансы, план, документы, Telegram</span></div>
+        <div class="sm-arr">↓ данные читает школа — сводка, не файлы</div>
+        <div class="sm-row"><b>Профориентолог</b><span>неделя · списки «кто отстал» · записи · следующий шаг · статусы семьям</span></div>
+        <div class="sm-arr">↓ те же данные, другой экран</div>
+        <div class="sm-row"><b>Директор</b><span>сводка по классам · воронка · отчёт года одной кнопкой</span></div>
+        <div class="sm-arr">↓ одной кнопкой из карточки</div>
+        <div class="sm-row g"><b>Родители</b><span>статус «где мы сейчас» в WhatsApp · лист класса в чате</span></div>
+      </div>
+      <div class="scheme-legend"><span><i></i>ученик действует в своём кабинете</span><span><i class="g"></i>школа видит сводку, не файлы</span><span><i class="p"></i>родители получают статус одной кнопкой</span></div>
     </div>
   </div>
 </section>
 
-<!-- КАК РАБОТАЕТ -->
-<section class="section" id="how">
-  <div class="container">
-    <h2>Как это работает</h2>
-    <p class="lead">От заявки до первого расчёта у учеников — один день. Ничего устанавливать не нужно.</p>
-    <div class="steps3 steps4" id="howGrid">
-      <div class="card"><div class="step-num">1</div><h3>Заявка</h3><p>Профориентолог, завуч или директор заполняет форму ниже. Мы перезваниваем в течение рабочего дня, согласуем тариф и присылаем договор.</p></div>
-      <div class="card"><div class="step-num">2</div><h3>Ссылка школы</h3><p>После активации школа получает письмо с закрытой ссылкой и кодом. Ссылку можно разослать в чат класса, в дневник или дать на классном часе.</p></div>
-      <div class="card"><div class="step-num">3</div><h3>Ученики регистрируются</h3><p>Ученик открывает ссылку, создаёт аккаунт, указывает класс — и сразу получает Scholary Pro на весь срок. Место занимает только тот, кто зарегистрировался.</p></div>
-      <div class="card"><div class="step-num">4</div><h3>Кабинет школы</h3><p>Профориентолог видит список учеников с направлением, вероятностью, готовностью документов и ближайшим дедлайном. Выгрузка в таблицу — одной кнопкой.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ЧТО ПОЛУЧАЮТ -->
-<section class="section" id="what">
+<!-- РОЛИ -->
+<section class="section" id="roles">
   <div class="container">
     <h2>Что получает каждый</h2>
-    <p class="lead">Ученикам открываем полный Pro-доступ, а не урезанную «школьную версию»: школа покупает места оптом, и экономить на детях здесь не на чем.</p>
-    <div class="two">
+    <p class="lead">Четыре роли — четыре разных экрана. Переключите и посмотрите, что видит именно вы.</p>
+    <div class="roles">
+      <input type="radio" name="role" id="r-dir" checked><input type="radio" name="role" id="r-prof"><input type="radio" name="role" id="r-par"><input type="radio" name="role" id="r-stu">
+      <div class="role-tabs"><label for="r-dir">Директор · завуч</label><label for="r-prof">Профориентолог</label><label for="r-par">Родитель</label><label for="r-stu">Ученик</label></div>
+      <div class="role-pane" id="p-dir">
+        <div class="role-text"><span class="who"><i></i>Директор · завуч</span><h3>Одна картина параллели — за 5 секунд</h3>
+          <ul><li><b>Сводка:</b> подключено, с расчётом, с планом, подали, офферы — по школе и по каждому классу.</li><li><b>Воронка сезона</b> и «требует внимания школы»: сколько срочных, сколько отстают, сколько без расчёта.</li><li><b>Отчёт года одной кнопкой</b> — для попечительского совета, родительского собрания и управления образования. В рейтинге директоров с 2025 года есть критерий «выпускники на грантах» и «партнёры за рубежом» — отчёт закрывает оба.</li><li><b>Год к году</b>: сравнение сезонов после архивации, без выдуманной истории.</li></ul>
+          <a class="btn btn-outline btn-sm" href="/schools/cabinet/?demo=1#/summary">Посмотреть сводку в демо</a></div>
+        <div class="role-mock card"><div class="mh"><b>Сводка</b><span>сезон 2026/27</span></div><div class="mk4"><div><b>48</b><span>подключено</span></div><div><b>81%</b><span>расчёт</span></div><div><b>65%</b><span>план</span></div><div><b>7</b><span>подали</span></div></div><div class="mcls"><div><b>11А</b><i><b style="width:100%"></b></i><span>7/7</span></div><div><b>11Б</b><i><b style="width:100%"></b></i><span>6/6</span></div><div><b>10А</b><i><b style="width:75%"></b></i><span>6/8</span></div><div><b>9Б</b><i><b style="width:70%"></b></i><span>5/7</span></div></div><div class="mbtn">Отчёт года →</div></div>
+      </div>
+      <div class="role-pane" id="p-prof">
+        <div class="role-text"><span class="who"><i></i>Профориентолог</span><h3>Списки вместо 300 встреч</h3>
+          <ul><li><b>Неделя:</b> «без расчёта», «без плана», «дедлайн ≤ 14 дней — документы не готовы», «не заходили 14+», «семья без статуса» — с именами и классами.</li><li><b>Очередь «Сейчас»:</b> просроченное, дедлайны ≤ 7 дней, встречи, следующие шаги — в порядке срочности.</li><li><b>Карточка ученика:</b> что он делает в кабинете, записи школы (звонок, родители, задача), следующий шаг с датой.</li><li><b>Статус семье одной кнопкой</b> и лист для родительского чата класса.</li><li><b>Календарь сезона РК:</b> ЕНТ, Stipendium Hungaricum 15.01, CSC 14.02, Türkiye 20.02, Болашак 16.03–16.10.</li></ul>
+          <a class="btn btn-outline btn-sm" href="/schools/cabinet/?demo=1#/week">Посмотреть неделю в демо</a></div>
+        <div class="role-mock card"><div class="mh"><b>Неделя</b><span>неделя 1 сезона</span></div><div class="mprio"><i></i><b>3 срочных</b> · 10 списков</div><div class="mlist"><div><b>9</b><div><span>Без расчёта</span><em>Томирис Ж. · 10А, Нурай Б. · 10А, Али С. · 10Б…</em></div></div><div><b class="bad">1</b><div><span>Дедлайн ≤ 14 дней, документы не готовы</span><em>Данияр К. · 11Б</em></div></div><div><b>7</b><div><span>Без следующего шага (11 класс)</span><em>Нурсултан А., Мадина С., Ислам Т.…</em></div></div><div><b>18</b><div><span>Семья без статуса 21+ дней</span><em>статус в WhatsApp одной кнопкой</em></div></div></div></div>
+      </div>
+      <div class="role-pane" id="p-par">
+        <div class="role-text"><span class="who g"><i></i>Родитель</span><h3>«Где мы сейчас» — раз в две недели, без звонков</h3>
+          <ul><li><b>Статус от школы:</b> этап, что сделано за две недели, ближайший дедлайн, следующий шаг, кто отвечает — в WhatsApp.</li><li><b>Лист класса</b> в родительском чате: сколько подключилось, что происходит в сезоне, что нужно от семьи.</li><li><b>Честная картина:</b> «Болашак» на бакалавриат практически недоступен без олимпиадной медали, а 236 программ со стипендиями — реальны. Ребёнок видит свои шансы сам.</li><li><b>Школа знает ребёнка четыре года</b>, агентство — сорок минут. Сопровождение одного ученика в агентстве стоит от 400 000 ₸.</li></ul>
+          <a class="btn btn-outline btn-sm" href="/schools/cabinet/?demo=1#/s/u1/family">Посмотреть статус семье в демо</a></div>
+        <div class="role-mock card"><div class="mh"><b>Статус для семьи</b><span>Айгерим · 11А</span></div><div class="mbubble">Здравствуйте! Коротко, где мы с Айгерим на 5 сент.<br><br>Сейчас: в плане 4 программы, подано 1, офферов 1.<br>Документы: готово 5 из 6.<br>Ближайший дедлайн: 14 нояб. (через 70 дней).<br>Следующий шаг: финал мотивационного письма для SH — до 9 сент.<br><br>Айгуль Сериковна, Школа-лицей №39</div><div class="mbtn">В WhatsApp родителю →</div></div>
+      </div>
+      <div class="role-pane" id="p-stu">
+        <div class="role-text"><span class="who g"><i></i>Ученик</span><h3>Scholary Pro на весь срок — за счёт школы</h3>
+          <ul><li><b>Шансы поступления и стипендии</b> по 236 программам в 56 странах после 7 вопросов.</li><li><b>Путь сезона по неделям:</b> план на неделю из 3–6 задач, документы с «начать до», три кольца готовности.</li><li><b>Документы и письма:</b> чек-лист, разбор мотивационных и рекомендательных писем ИИ, критический путь к дедлайну.</li><li><b>Telegram-напоминания</b> о дедлайнах и дайджест недели. Школа видит сводку — не файлы и не письма.</li></ul>
+          <a class="btn btn-outline btn-sm" href="/demo/">Посмотреть кабинет ученика</a></div>
+        <div class="role-mock card"><div class="mh"><b>Сегодня</b><span>неделя 2 из 44</span></div><div class="mk4"><div><b>74%</b><span>шанс поступления</span></div><div><b>3</b><span>задачи недели</span></div><div><b>5/6</b><span>документов</span></div><div><b>24%</b><span>пути пройдено</span></div></div><div class="mlist mtasks"><div><b>☐</b><div><span>Заказать апостиль — до пятницы</span><em>ЦОН, до 20 рабочих дней</em></div></div><div><b>☐</b><div><span>Черновик мотивационного письма</span><em>разбор ИИ в кабинете</em></div></div><div><b>☑</b><div><span>Добавить 3 программы в портфель</span><em>сделано в понедельник</em></div></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ПОДКЛЮЧЕНИЕ -->
+<section class="section" id="how">
+  <div class="container">
+    <h2>Подключение — один день, без установки</h2>
+    <p class="lead">Ничего не ставится, учителей не обучаем. Четыре шага глазами школы.</p>
+    <div class="flow4">
+      <div class="fs"><div class="fn">1</div><h3>Заявка</h3><p>Директор, завуч или профориентолог заполняет форму ниже. Перезваниваем в течение рабочего дня, согласуем тариф и договор.</p><span class="ft">15 минут</span></div>
+      <div class="fs"><div class="fn">2</div><h3>Активация и приглашения</h3><p>Школа получает письмо с закрытой ссылкой и кодом. Владелец приглашает директора и профориентолога — без доплаты за сотрудников.</p><span class="ft">1 день</span></div>
+      <div class="fs"><div class="fn">3</div><h3>Классный час 10 минут</h3><p>Ссылка уходит в чаты классов. Ученики регистрируются с телефона, указывают класс, отвечают на 7 вопросов — и видят свои шансы.</p><span class="ft">1 неделя</span></div>
+      <div class="fs"><div class="fn">4</div><h3>Первая сводка</h3><p>Профориентолог открывает «Неделю»: списки «без расчёта» и «без плана» тают. Директор через две недели видит первую сводку по классам.</p><span class="ft">2 недели</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ГОД ШКОЛЫ -->
+<section class="section" id="season">
+  <div class="container">
+    <h2>Год школы — по неделям, а не «как получится»</h2>
+    <p class="lead">Кабинет знает, какая сейчас неделя сезона в Казахстане, и подсказывает профориентологу, что горит: не американский ноябрь, а январь–февраль — ЕНТ, Венгрия, Китай, Турция.</p>
+    <div class="year card-glow">
+      <div class="yrow">
+        <div class="ym"><b>Сентябрь</b><span>классные часы · регистрация · расчёт шансов</span></div>
+        <div class="ym"><b>Октябрь</b><span>DAAD · GKS · родительские собрания 11-х</span></div>
+        <div class="ym"><b>Ноябрь</b><span>апостиль · переводы · регистрация на январское ЕНТ</span></div>
+        <div class="ym"><b>Декабрь</b><span>мотивационные письма · рекомендации</span></div>
+        <div class="ym hot"><b>Январь</b><span>ЕНТ 10.01–10.02 · Stipendium Hungaricum 15.01</span></div>
+        <div class="ym hot"><b>Февраль</b><span>CSC 14.02 · Türkiye 20.02 · мартовское ЕНТ</span></div>
+        <div class="ym"><b>Март</b><span>Болашак с 16.03 · Италия · ответы вузов</span></div>
+        <div class="ym"><b>Апрель–май</b><span>офферы · основное ЕНТ с 10.05 · статусы семьям</span></div>
+        <div class="ym"><b>Июнь</b><span>выпуск · отчёт года · архив сезона</span></div>
+      </div>
+      <div class="ybar"><i style="left:3%"></i><i style="left:14%"></i><i style="left:17%"></i><i style="left:47%" class="hot"></i><i style="left:52%" class="hot"></i><i style="left:58%" class="hot"></i><i style="left:66%"></i><i style="left:78%"></i><i style="left:94%"></i></div>
+      <div class="yhint"><span class="k">Подсказка недели в кабинете · пример</span><b>Неделя 8 сезона · первые окна: DAAD, GKS — 4 дедлайна в 30 дней, 2 без документов</b><span class="mut">числа считаются по вашей параллели, не по общему календарю</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- СЕЙЧАС → СО SCHOLARY -->
+<section class="section" id="why">
+  <div class="container">
+    <h2>Сейчас в школе → со Scholary</h2>
+    <p class="lead">Сравниваем не с конкурентами, а с тем, как это устроено сегодня.</p>
+    <div class="cmp card">
+      <div class="cmp-h"><span></span><span>Сейчас</span><span class="acc">Со Scholary</span></div>
+      <div class="cmp-r"><span>Кто из параллели вообще думает о зарубежном вузе</span><span>двое-трое, кто сам пришёл</span><span class="acc">вся параллель проходит расчёт на классном часе — школа видит, кому это реально</span></div>
+      <div class="cmp-r"><span>Шансы ученика</span><span>«наверное, сложно» / агентство за 400 000 ₸</span><span class="acc">вероятность по 236 программам за 2 минуты, у каждого</span></div>
+      <div class="cmp-r"><span>Работа профориентолога</span><span>тетрадь, WhatsApp, 300 учеников по очереди</span><span class="acc">списки «кто отстал», очередь на неделю, следующий шаг у каждого</span></div>
+      <div class="cmp-r"><span>Документы и дедлайны</span><span>вспомнили за три дня</span><span class="acc">календарь сезона РК и «начать до» у каждого документа</span></div>
+      <div class="cmp-r"><span>Родители</span><span>звонят, когда тревожно</span><span class="acc">статус «где мы сейчас» раз в 2–3 недели, лист класса в чате</span></div>
+      <div class="cmp-r"><span>Отчёт для попечительского совета</span><span>«выпускник поступил в X» — по памяти</span><span class="acc">отчёт года одной кнопкой: воронка, классы, офферы, стипендии</span></div>
+      <div class="cmp-r"><span>Следующий год</span><span>с нуля</span><span class="acc">архив сезона → сравнение год к году</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- КАЛЬКУЛЯТОР -->
+<section class="section" id="calc">
+  <div class="container">
+    <h2>Сколько это стоит на одного ученика</h2>
+    <p class="lead">Честный калькулятор: только ваш ввод и наш прайс. Проценты «роста поступлений» не считаем — их никто не может обещать.</p>
+    <div class="calc card-glow">
+      <div class="calc-in">
+        <label for="calcN">Учеников в 9–11 классах: <b id="calcNv">300</b></label>
+        <input type="range" id="calcN" min="20" max="1000" step="10" value="300">
+        <div class="calc-marks"><span>20</span><span>250</span><span>500</span><span>1000</span></div>
+      </div>
+      <div class="calc-out">
+        <div class="co"><span>Подходящий тариф</span><b id="calcPlan">Школа · до 500</b></div>
+        <div class="co"><span>В год за школу</span><b id="calcYear">990 000 ₸</b></div>
+        <div class="co acc"><span>На одного ученика в год</span><b id="calcPer">3 300 ₸</b></div>
+        <div class="co"><span>Сопровождение одного ученика в агентстве</span><b>от 400 000 ₸</b></div>
+        <div class="co"><span>Столько же стоит в Scholary</span><b id="calcEq">121 ученик на год</b></div>
+      </div>
+      <div class="calc-note">Формула: цена тарифа ÷ число учеников. Тарифы: до 100 — 300 000 ₸, до 500 — 990 000 ₸, до 1000 — 1 500 000 ₸ в год. Цена агентства — нижняя граница публичных прайсов сопровождения в Алматы. Место занимает только зарегистрировавшийся ученик.</div>
+    </div>
+  </div>
+</section>
+
+<!-- НА ЧЁМ ОСНОВАНО -->
+<section class="section" id="proof">
+  <div class="container">
+    <div class="proof2">
       <div class="card">
-        <span class="who g"><i></i>Ученик 9–11 класса</span>
-        <h3>Scholary Pro на весь срок подключения</h3>
-        <ul>
-          <li>Две вероятности — поступления и стипендии — по 236 программам в 56 странах, с суммой финансирования и дедлайном каждой.</li>
-          <li>Личный кабинет: портфель подач, план документов с критическим путём (что делать первым, чтобы успеть к дедлайну), проверка загруженных документов.</li>
-          <li>Разбор мотивационных и рекомендательных писем ИИ — до 60 разборов в день, симулятор «что если подтянуть IELTS».</li>
-          <li>Напоминания о дедлайнах в Telegram за 30, 14, 7, 3 и 1 день.</li>
-          <li>Контакт своего профориентолога прямо в кабинете.</li>
+        <span class="who"><i></i>На чём основано</span>
+        <ul class="pl">
+          <li><b>Приказ МП РК № 47 от 26.03.2025</b> — должность педагога-профориентатора в перечне должностей педагогов; Концепция профориентации (2022) требует портфолио на каждого ученика и мониторинг поступлений.</li>
+          <li><b>Методика рейтинга директоров</b> (в силе с 16.09.2025): критерии «% выпускников на госгрантах» и «организации-партнёры в стране и за рубежом».</li>
+          <li><b>Данные:</b> 236 программ с суммами и дедлайнами по официальным страницам стипендий; шансы считаются шестиосевой моделью по анкете ученика.</li>
+          <li><b>Практика консультантов:</b> списки-действия и «следующий шаг с датой» — так устроены школьные системы Scoir, Cialfo, Unifrog; при 300–500 учениках это единственный масштабируемый режим.</li>
+          <li><b>Рынок:</b> тарифы Scholary — $3–6,5 на ученика в год, внутри мирового коридора школьных платформ ($4,80–8).</li>
         </ul>
       </div>
-      <div class="card">
-        <span class="who"><i></i>Профориентолог / школа</span>
-        <h3>Кабинет школы</h3>
-        <ul>
-          <li>Ссылка и код школы; сколько мест занято и сколько свободно; срок действия.</li>
-          <li>Список учеников по классам: направление, страны, вероятность, сколько подач и документов готово, ближайший дедлайн, когда заходил последний раз.</li>
-          <li>Фильтр «кто в зоне риска»: дедлайн ближе 30 дней и документы не собраны.</li>
-          <li>Печатная сводка и выгрузка в CSV — для отчёта завучу и управлению образования: сколько учеников с расчётом, сколько подач, сколько офферов.</li>
-          <li>Новая ссылка одной кнопкой, если старая ушла не тем; удаление посторонних.</li>
+      <div class="card anti">
+        <span class="who g"><i></i>Чего мы не обещаем</span>
+        <ul class="pl">
+          <li>Не обещаем «+X % поступлений»: ни одна школьная платформа в мире не даёт таких цифр, и мы не будем.</li>
+          <li>Не заменяем профориентолога — даём ему списки, календарь и записи, чтобы вести параллель, а не двух-трёх учеников.</li>
+          <li>Не открываем школе файлы, письма и ответы анкеты ученика — только сводку: шансы, число программ и документов, активность.</li>
+          <li>Не показываем «Болашак» как план для всех: на бакалавриат он практически недоступен без медали международной олимпиады.</li>
+          <li>Не рисуем историю: «год к году» появляется только после реального архива сезона.</li>
         </ul>
       </div>
     </div>
@@ -288,6 +468,9 @@
       <details class="faq-item"><summary>Что школа сможет показать управлению образования?</summary><p>Печатную сводку из кабинета: сколько учеников 9–11 классов получили расчёт, какие страны и направления выбрали, сколько подач отправлено и сколько офферов получено, а также список учеников с ближайшими дедлайнами. Это и есть отчёт о «сопровождении индивидуальной образовательной траектории» — в терминах приказа о педагоге-профориентаторе.</p></details>
       <details class="faq-item"><summary>Нужно ли согласие родителей?</summary><p>Да, для учеников младше 18 лет. При регистрации ученик подтверждает, что регистрируется с ведома родителей, а школа рассылает ссылку через классный чат — то есть родители видят её первыми. Мы не звоним детям и не пишем им без запроса: все уведомления — только по дедлайнам, которые ученик сам добавил.</p></details>
       <details class="faq-item"><summary>Есть ли казахская версия?</summary><p>Сейчас интерфейс на русском языке. Казахскую версию сделаем по запросу школ с казахским языком обучения — напишите об этом в заявке, это влияет на нашу очередь.</p></details>
+      <details class="faq-item"><summary>У нас уже есть Күнделік / другая система — зачем ещё одна?</summary><p>Күнделік — про оценки и текущую успеваемость. Scholary — про траекторию после школы: шансы, программы, документы, дедлайны и работу профориентолога. Это разные контуры, они не пересекаются и не мешают друг другу.</p></details>
+      <details class="faq-item"><summary>Что видит директор, а что — профориентолог?</summary><p>Директор — сводку по параллели и классам, воронку сезона, «требует внимания» и отчёт года. Профориентолог — списки «кто отстал», очередь на неделю, карточки учеников с записями и статус семье. Роли раздаются приглашением из настроек, без доплаты.</p></details>
+      <details class="faq-item"><summary>Как считаются «шансы» и можно ли им верить?</summary><p>Шестиосевая модель по анкете ученика (профиль, экзамены, язык, бюджет, страна, направление) против требований каждой из 236 программ. Это ориентир для планирования, а не приговор: цель — показать, где шансы реальны, и что именно их поднимает. Мы не обещаем поступление.</p></details>
       <details class="faq-item"><summary>Это заменяет профориентолога?</summary><p>Нет — усиливает. Scholary считает и напоминает, а решения, разговоры с родителями и мотивацию даёт человек. Кабинет показывает, к кому подойти первым: у кого горит дедлайн, кто неделю не заходил, у кого шансы низкие и стоит сменить цель.</p></details>
     </div>
   </div>
@@ -438,6 +621,20 @@ document.addEventListener("DOMContentLoaded", function () {
       if (r) r.checked = true;
     });
   });
+
+
+  /* --- калькулятор: только ввод + прайс --- */
+  var cN = $("calcN");
+  if (cN) {
+    var fmtT = function (n) { return n.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₸"; };
+    var upd = function () {
+      var n = +cN.value, plan = n <= 100 ? ["Класс · до 100", 300000] : n <= 500 ? ["Школа · до 500", 990000] : ["Сеть · до 1000", 1500000];
+      var per = Math.round(plan[1] / n), eq = Math.floor(400000 / per);
+      $("calcNv").textContent = n; $("calcPlan").textContent = plan[0]; $("calcYear").textContent = fmtT(plan[1]); $("calcPer").textContent = fmtT(per);
+      $("calcEq").textContent = eq + " " + (eq % 10 === 1 && eq % 100 !== 11 ? "ученик" : (eq % 10 >= 2 && eq % 10 <= 4 && (eq % 100 < 10 || eq % 100 >= 20)) ? "ученика" : "учеников") + " на год";
+    };
+    cN.addEventListener("input", upd); cN.addEventListener("change", function () { track("school_calc", { n: +cN.value }); }); upd();
+  }
 
   /* --- маска телефона, та же, что в квизе --- */
   var PH = window.ScholaryPhone;
