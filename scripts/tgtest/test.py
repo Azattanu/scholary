@@ -52,4 +52,12 @@ pv=get(P+"?key=cronkey&kind=digest&dry=1")["preview"]; ok("через 21 ден�
 wi3=dict(week_items[0]); wi3["next_program"]="A <b>&</b> B"
 post("/__set",{"week":{"digest":{"ok":True,"items":[wi3],"milestone":100,"week_start":"2026-09-07"}}})
 pv=get(P+"?key=cronkey&kind=digest&dry=1")["preview"]; ok("A &lt;b&gt;&amp;&lt;/b&gt; B" in pv, "экранирование HTML в названии программы")
+# 8. ws digest (профориентолог) — отдельно и склейка с дайджестом ученика на том же чате
+post("/__reset",{}); post("/__set",{"ws":{"ok":True,"items":[{"chat_id":"2001","user_id":"33333333-3333-3333-3333-333333333333","name":"Айгуль Сериковна","students":14,"deadlines_7":2,"deadlines_45":6,"overdue":1,"meetings":2,"no_step":3,"idle":1}],"milestone":110,"week_start":"2026-09-07"}})
+j=get(P+"?key=cronkey&kind=ws&dry=1"); pv=j["preview"]; print("----\n"+pv+"\n----")
+ok(j["ws"]["on"] and j["ws"]["people"]==1 and j["people"]==1, "ws digest: 1 профориентолог")
+ok(pv.startswith("Айгуль, план недели по workspace (14 учеников):") and "Дедлайнов на этой неделе: <b>2</b> · в 45 дней: 6" in pv and "Просроченных задач: <b>1</b>" in pv and "Без следующего шага: <b>3</b>" in pv and "prof/cabinet/?from=tg#/week" in pv and pv.count("/stop")==1, "ws digest: состав")
+post("/__set",{"week":{"digest":{"ok":True,"items":[dict(week_items[0],chat_id="2001",user_id="33333333-3333-3333-3333-333333333333")],"milestone":100,"week_start":"2026-09-07"}}})
+j=get(P+"?key=cronkey&kind=ws&dry=1"); ok(j["people"]==1 and "— — —" not in (j["preview"] or "") , "ws: kind=ws не тянет ученический дайджест")
+st=get(M+"/__state"); ok(not any(r[0]=="tg_mark_sent" for r in st["rpc"]), "ws dry: без tg_mark_sent")
 print("FAILED %d"%fails if fails else "ALL OK"); sys.exit(1 if fails else 0)
