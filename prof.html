@@ -10,10 +10,10 @@
   <link rel="canonical" href="https://scholary.kz/prof/">
   <title>Scholary для профориентологов — workspace для ведения учеников к поступлению за рубеж</title>
   <meta name="description" content="Рабочее место профориентолога и образовательного консультанта: все ученики, программы с точными ссылками на подачу, дедлайны, документы с файлами, заметки о звонках родителям — в одном кабинете. Каждому ученику — Scholary Pro. 14 дней бесплатно.">
-  <link rel="stylesheet" href="/css/style.css?v=74">
-  <script src="/js/config.js?v=74"></script>
-  <script src="/js/telemetry.js?v=74"></script>
-  <script src="/js/app.js?v=74" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=75">
+  <script src="/js/config.js?v=75"></script>
+  <script src="/js/telemetry.js?v=75"></script>
+  <script src="/js/app.js?v=75" defer></script>
   <style>
     /* Страница для профориентологов: всё сверх общего стиля лежит здесь. */
     .sch-hero { background: var(--surface); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; padding-block: clamp(40px, 3rem + 2vw, 72px) clamp(40px, 3rem + 2vw, 64px); }
@@ -100,6 +100,56 @@
     #applyOk { display: none; }
     #applyOk.on { display: block; }
 
+
+    /* web-75: макеты экранов */
+    .mprio { display: flex; align-items: center; gap: 8px; background: #FFF4F3; color: #7A1F14; border-radius: 12px; padding: 9px 12px; font-size: 13.5px; margin-bottom: 8px; }
+    .mprio i { width: 8px; height: 8px; border-radius: 50%; background: #C0392B; flex-shrink: 0; }
+    .mprog { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+    .mprog b { color: var(--ink); }
+    .matt { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(91,75,255,.10); }
+    .mdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #B8B8C6; margin-right: 2px; vertical-align: middle; }
+    .mdot.bad { background: #C0392B; } .mdot.warn { background: #E0A100; } .mdot.ok { background: #16A35C; }
+    .demo-row .n { font-size: 13px; }
+    .mcard { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin: 6px 0 8px; }
+    .mh { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; }
+    .mstage { font-size: 11.5px; font-weight: 800; color: var(--accent-dark); background: var(--accent-soft); border-radius: 999px; padding: 3px 9px; }
+    .mstep { background: linear-gradient(135deg,#F4F2FF,#EDF9F3); border: 1px solid #E3DFFF; border-radius: 12px; padding: 8px 12px; margin: 8px 0; font-size: 13px; }
+    .mstep span { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-dark); }
+    .mkv { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12.5px; }
+    .mkv span { color: var(--muted); font-weight: 600; }
+    .mbubble { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25); border-radius: 16px 16px 16px 4px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #fff; margin: 8px 0 10px; }
+    .pain4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ba { display: grid; gap: 6px; font-size: 13.5px; }
+    .ba .was { color: var(--muted); text-decoration: line-through; }
+    .ba .now { color: var(--ink); font-weight: 650; padding-left: 12px; border-left: 3px solid var(--accent); }
+    .season { border-radius: var(--radius-lg); padding: clamp(16px, 3vw, 28px); background: var(--surface); }
+    .srow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .srow .sm { border-radius: 12px; background: var(--accent-soft); padding: 10px 10px; text-align: center; }
+    .srow .sm b { display: block; font-size: 14px; } .srow .sm span { display: block; font-size: 11.5px; color: var(--ink-soft); font-weight: 600; margin-top: 2px; }
+    .sbar { position: relative; height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), #16A35C); margin: 16px 0 14px; opacity: .9; }
+    .sbar i { position: absolute; top: -4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 4px solid var(--accent); transform: translateX(-50%); }
+    .shint { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; font-size: 14px; }
+    .shint .k { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-dark); }
+    .screens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+    .scr-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; } .scr-h b { font-size: 17px; } .scr-h span { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+    .scr p { font-size: 14px; color: var(--ink-soft); margin: 12px 0 0; line-height: 1.55; }
+    .mline { font-size: 13px; padding: 6px 0; border-bottom: 1px solid #F0F0F4; }
+    .mkan { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 4px 0 8px; }
+    .mkan div { background: #EEEEF3; border-radius: 10px; padding: 8px 6px; text-align: center; } .mkan i { display: block; font-style: normal; font-size: 10.5px; color: var(--muted); font-weight: 700; } .mkan em { font-style: normal; font-size: 16px; font-weight: 800; }
+    .mweek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 4px 0 8px; }
+    .mweek div { border-radius: 10px; padding: 6px 0; text-align: center; background: var(--bg); } .mweek i { display: block; font-style: normal; font-size: 10px; text-transform: uppercase; color: var(--muted); font-weight: 700; } .mweek b { font-size: 14px; }
+    .mweek div.t { background: var(--accent); color: #fff; } .mweek div.t i { color: #fff; }
+    .cmp { padding: 0; overflow: hidden; }
+    .cmp-h, .cmp-r { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 12px; padding: 12px 18px; font-size: 14px; border-top: 1px solid var(--border); align-items: center; }
+    .cmp-h { border-top: 0; background: var(--bg); font-size: 12.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .cmp-r > span:first-child { font-weight: 700; } .cmp-r > span:nth-child(2) { color: var(--muted); }
+    .cmp .acc { color: var(--accent-dark); font-weight: 650; }
+    @media (max-width: 960px) { .pain4, .screens { grid-template-columns: repeat(2, minmax(0, 1fr)); } .srow { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 640px) {
+      .pain4, .screens { grid-template-columns: 1fr; } .srow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cmp-h { display: none; } .cmp-r { grid-template-columns: 1fr; gap: 4px; } .cmp-r > span:nth-child(2)::before { content: "было: "; } .cmp-r .acc::before { content: "стало: "; color: var(--muted); font-weight: 600; }
+      .demo-cab .dh b { font-size: 14px; } .matt { font-size: 11.5px; }
+    }
     @media (max-width: 960px) {
       .sch-grid { grid-template-columns: 1fr; gap: var(--s7); }
       .sch-tariffs, .feat, .pain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -134,7 +184,8 @@
   <a href="#apply">Открыть workspace</a>
   <a href="/prof/cabinet/">Войти в workspace</a>
   <a href="/prof/cabinet/?demo=1">Демо workspace</a>
-  <a href="#how">Как это работает</a>
+  <a href="#how">Один день с workspace</a>
+  <a href="#what">Экраны</a>
   <a href="#tariffs">Тарифы</a>
   <a href="#faq">Частые вопросы</a>
   <div class="site-menu-sep"></div>
@@ -148,8 +199,8 @@
   <div class="container sch-grid">
     <div>
       <span class="badge-pill">Для профориентологов и консультантов</span>
-      <h1>Все ученики, дедлайны и&nbsp;документы&nbsp;— в&nbsp;одном месте</h1>
-      <p class="sub">Вы ведёте 15, 50 или 100 учеников — в&nbsp;WhatsApp, Excel и&nbsp;в&nbsp;голове. Workspace собирает всё в&nbsp;одну систему: карточка ученика, программы с&nbsp;точной ссылкой на подачу, чек‑лист документов, заметки о&nbsp;звонках — и&nbsp;экран «Сегодня», который показывает, что горит.</p>
+      <h1>50 учеников — и&nbsp;ни&nbsp;одного пропущенного дедлайна</h1>
+      <p class="sub">Утро начинается с одной строки: что срочно. У каждого ученика — следующий шаг с датой. Родители получают статус в WhatsApp одной кнопкой. Сезон — по неделям, с календарём всех дедлайнов.</p>
       <div class="sch-cta">
         <a class="btn btn-primary" href="#apply" onclick="track('cta_counselor_hero')">Открыть workspace бесплатно</a>
         <a class="btn btn-outline" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo')">Посмотреть демо</a>
@@ -158,12 +209,14 @@
     </div>
 
     <a class="demo-cab card-glow" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo_card')">
-      <div class="dh"><b>Сегодня · 14 учеников</b><span>Практика · до 50</span></div>
-      <div class="demo-kpi"><div><b class="bad">6</b><small>дедлайнов · 45 дней</small></div><div><b class="warn">7</b><small>открытых задач</small></div><div><b>5</b><small>без документов</small></div></div>
-      <div class="demo-row"><div><div class="n">Данияр К. · Türkiye Bursları</div><div class="c">Турция · готовим · апостиль не подан</div></div><span class="p bad">12 дней</span></div>
-      <div class="demo-row"><div><div class="n">Нурсултан А. · University of Amsterdam</div><div class="c">Нидерланды · мотивационное в работе</div></div><span class="p bad">18 дней</span></div>
-      <div class="demo-row"><div><div class="n">Ерасыл М. · GKS Korea</div><div class="c">Корея · паспорт в работе</div></div><span class="p warn">21 день</span></div>
-      <div class="demo-row"><div><div class="n">Санжар О. · Stipendium Hungaricum</div><div class="c">Венгрия · семья выбрала, помочь с визой</div></div><span class="p ok">оффер</span></div>
+      <div class="dh"><b>Сегодня · 14 учеников</b><span>неделя 6 сезона</span></div>
+      <div class="mprio"><i></i><b>3 срочных</b> · 9 на этой неделе</div>
+      <div class="mprog">На неделе: <b>6 учеников продвинулись</b> · 4 задачи закрыты · 2 статуса семьям</div>
+      <div class="demo-row"><div><div class="n">☑ Напомнить про апостиль — ЦОН 20 дней</div><div class="c">Данияр К. · просрочено вчера</div></div><span class="p bad">сейчас</span></div>
+      <div class="demo-row"><div><div class="n">⏰ Türkiye Bursları — Engineering</div><div class="c">Данияр К. · документы 60 %</div></div><span class="p bad">6 дней</span></div>
+      <div class="demo-row"><div><div class="n">🗓 Созвон с мамой Аружан</div><div class="c">бюджет и запасной вариант</div></div><span class="p warn">завтра 16:00</span></div>
+      <div class="demo-row"><div><div class="n">→ Финал письма для SH</div><div class="c">Айгерим С. · следующий шаг</div></div><span class="p ok">до пт</span></div>
+      <div class="matt"><span class="mdot bad"></span>Бекзат Т. · просрочен шаг <span class="mdot warn"></span>Томирис Ж. · нет шага <span class="mdot warn"></span>Ерасыл М. · семья без статуса</div>
       <div class="xs" style="margin-top:12px;font-weight:700;color:var(--accent)">Открыть демо workspace →</div>
     </a>
   </div>
@@ -173,10 +226,47 @@
 <section class="section section-tight">
   <div class="container">
     <div class="stats4">
-      <div class="stat-big"><div class="num" data-count="91000" data-fmt="space">91 000</div><div class="cap">казахстанцев учатся за рубежом — почти каждого кто-то вёл к подаче</div></div>
-      <div class="stat-big"><div class="num">до 1,5&nbsp;млн&nbsp;₸</div><div class="cap">стоит сопровождение одного ученика у агентств Казахстана — а учёт ведут в Excel</div></div>
-      <div class="stat-big"><div class="num" data-count="236">236</div><div class="cap">программ в 56 странах с проверенными ссылками на подачу и дедлайнами — уже внутри</div></div>
-      <div class="stat-big"><div class="num" data-count="2" data-suffix=" мин">2 мин</div><div class="cap">занимает регистрация ученика по вашей ссылке — он сразу получает Pro</div></div>
+      <div class="stat-big"><div class="num" data-count="500" data-prefix="~">~500</div><div class="cap">учеников приходится на одну ставку школьного профориентатора в Казахстане — вести всех «в голове» невозможно</div></div>
+      <div class="stat-big"><div class="num">до 1,5&nbsp;млн&nbsp;₸</div><div class="cap">стоит сопровождение одного ученика у агентств — а учёт ведут в WhatsApp и Excel</div></div>
+      <div class="stat-big"><div class="num" data-count="236">236</div><div class="cap">программ в 56 странах с дедлайнами и ссылками на подачу — уже внутри, добавляются одним тапом</div></div>
+      <div class="stat-big"><div class="num">15–25</div><div class="cap">активных учеников — типичная частная практика; workspace рассчитан на 5, 15, 50 и 150</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ОДИН ДЕНЬ -->
+<section class="section" id="how">
+  <div class="container">
+    <h2>Один день с workspace</h2>
+    <p class="lead">Не «CRM вообще», а три момента дня профориентолога: утро, созвон с семьёй, вечер. В каждом — одно действие, а не раскопки в чатах.</p>
+    <div class="report-peek">
+      <div class="peek peek-glow card-glow">
+        <div class="p-label">Утро · 2 минуты</div>
+        <div class="mprio" style="margin-top:8px"><i></i><b>3 срочных</b> · 9 на неделе</div>
+        <div style="margin:8px 0 4px">
+          <div class="mrow"><span class="m-n">Апостиль <em>· Данияр</em></span><span class="chip-warn">просрочено</span></div>
+          <div class="mrow"><span class="m-n">Türkiye <em>· дедлайн</em></span><span class="chip-warn">6 дней</span></div>
+          <div class="mrow"><span class="m-n">Созвон <em>· Аружан</em></span><span class="chip-ok">завтра 16:00</span></div>
+        </div>
+        <div class="p-text" style="color:var(--muted)">очередь «Сейчас» уже отсортирована: просроченное → дедлайн ≤ 7 дней → сегодня → встречи. Закрываете прямо из списка</div>
+      </div>
+      <div class="peek peek-light">
+        <div class="p-label">Созвон с родителями · 10 секунд на ответ</div>
+        <div class="mcard">
+          <div class="mh"><b>Айгерим Сериккызы</b><span class="mstage">Подача</span></div>
+          <div class="mstep"><span>Следующий шаг</span><b>Финал письма для SH · до 9 сент.</b></div>
+          <div class="mkv"><span>Дедлайн</span><b>SH · 4 ноя · 60 дней</b><span>Документы</span><b>4 из 8</b><span>История</span><b>звонок · статус · этап</b></div>
+        </div>
+        <div class="p-text" style="color:var(--muted)">открыли карточку — этап, шаг, дедлайн, документы и вся история разговоров с этой семьёй</div>
+      </div>
+      <div class="peek peek-accent">
+        <div class="p-label" style="color:#ECE8FF; opacity:1">Вечер · статус семье одной кнопкой</div>
+        <div class="mbubble">Здравствуйте, Гульнара! Коротко, где мы с Айгерим на 5 сент.<br>Этап: Подача. За две недели: Türkiye подано; IELTS готов.<br>Следующий шаг: финал письма — до 9 сент.<br>Документы: 4 из 8.</div>
+        <div class="p-text" style="color:#EDEBFF">текст собран из карточки, отправляется в WhatsApp родителю и остаётся в истории. Вопрос «а что у нас?» отпадает</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px">
+      <a class="btn btn-primary" href="/prof/cabinet/?demo=1" onclick="track('cta_counselor_demo_day')">Пройти этот день в демо</a>
     </div>
   </div>
 </section>
@@ -185,73 +275,114 @@
 <section class="section" id="why">
   <div class="container">
     <h2>Знакомо?</h2>
-    <p class="lead">Мы поговорили с профориентологами и консультантами, которые ведут от 15 до 100 учеников. Проблемы у всех одинаковые — и ни одна из них не про знания.</p>
-    <div class="pain">
-      <div class="card"><p class="q">«Дедлайн вспомнили за три дня»</p><p class="a">Программы — в закладках, даты — в заметках телефона, а у каждого ученика свой набор. <b>Workspace держит дедлайны всех учеников в одном списке</b> и поднимает наверх то, что ближе 45 дней.</p></div>
-      <div class="card"><p class="q">«Родители звонят: а что там у нас?»</p><p class="a">Ответ нужен сразу, а вспоминать по чату — 10 минут. <b>Открываете карточку — видите этап, программы, документы и последний разговор</b> с этой семьёй.</p></div>
-      <div class="card"><p class="q">«Файлы — в WhatsApp, версии — три»</p><p class="a">Паспорт в одном чате, транскрипт в другом, мотивационное в третьем. <b>Чек-лист документов с файлами</b> у каждого ученика: что готово, что в работе, что вообще не начато.</p></div>
+    <p class="lead">Четыре ситуации, из-за которых семьи меняют консультанта. У каждой — конкретный экран, который её закрывает.</p>
+    <div class="pain pain4">
+      <div class="card"><p class="q">«Дедлайн вспомнили за три дня»</p><div class="ba"><span class="was">даты в заметках телефона</span><span class="now">календарь всех учеников · очередь дня · «дедлайн ≤ 7 дней» краснеет само</span></div></div>
+      <div class="card"><p class="q">«Родители звонят: а что там у нас?»</p><div class="ba"><span class="was">10 минут листать чат</span><span class="now">карточка ученика: этап, шаг, история — и статус семье одной кнопкой</span></div></div>
+      <div class="card"><p class="q">«Файлы — в трёх чатах, версий — пять»</p><div class="ba"><span class="was">паспорт в одном чате, эссе в другом</span><span class="now">чек-лист документов с файлами и «начать до» по сроку изготовления</span></div></div>
+      <div class="card"><p class="q">«Консультант пропал»</p><div class="ba"><span class="was">главная жалоба родителей в отзывах</span><span class="now">«семья без статуса 21+ дней» — жёлтая метка, пока не отправите</span></div></div>
     </div>
   </div>
 </section>
 
-<!-- КАК РАБОТАЕТ -->
-<section class="section" id="how">
+<!-- СЕЗОН -->
+<section class="section" id="season">
   <div class="container">
-    <h2>Как это работает</h2>
-    <p class="lead">От заявки до первой карточки ученика — один день. Ничего устанавливать не нужно: браузер на телефоне или компьютере.</p>
-    <div class="steps3 steps4" id="howGrid">
-      <div class="card"><div class="step-num">1</div><h3>Заявка</h3><p>Заполняете форму ниже — имя, почта, сколько учеников ведёте. Мы открываем workspace в течение рабочего дня, на пробный период договор не нужен.</p></div>
-      <div class="card"><div class="step-num">2</div><h3>Письмо «доступ открыт»</h3><p>В письме — кнопка входа в workspace и ваша персональная ссылка для учеников. Входите Google-аккаунтом или по почте.</p></div>
-      <div class="card"><div class="step-num">3</div><h3>Ученики</h3><p>Заводите карточки сами (имя, класс, почта) или отправляете ученикам ссылку — они регистрируются, получают Pro и привязываются к своей карточке по почте.</p></div>
-      <div class="card"><div class="step-num">4</div><h3>Работа из «Сегодня»</h3><p>Открываете workspace утром: дедлайны ближе 45 дней, открытые задачи, у кого не собраны документы, кого давно не касались. Дальше — по карточкам.</p></div>
+    <h2>Сезон — по неделям, а не «как получится»</h2>
+    <p class="lead">Workspace знает, какая сейчас неделя сезона и что обычно горит: подсказка недели считается по вашим ученикам, а не по общему календарю.</p>
+    <div class="season card-glow">
+      <div class="srow">
+        <div class="sm"><b>Сентябрь</b><span>портфель · IELTS</span></div>
+        <div class="sm"><b>Октябрь</b><span>DAAD 15.10 · GKS 17.10</span></div>
+        <div class="sm"><b>Ноябрь</b><span>апостиль · пакеты</span></div>
+        <div class="sm"><b>Декабрь</b><span>письма · окна 1.12 и 15.12</span></div>
+        <div class="sm"><b>Январь</b><span>SH 15.01 · ЕНТ</span></div>
+        <div class="sm"><b>Февраль</b><span>CSC 15.02 · Türkiye 20.02</span></div>
+      </div>
+      <div class="sbar"><i style="left:4%"></i><i style="left:21%"></i><i style="left:24%"></i><i style="left:54%"></i><i style="left:60%"></i><i style="left:74%"></i><i style="left:90%"></i><i style="left:95%"></i></div>
+      <div class="shint"><span class="k">Неделя 8 сезона · первые жёсткие окна</span><b>4 дедлайна в 30 дней · 2 из них без документов</b><span class="mut">— так выглядит подсказка недели на вашем экране «Сегодня»</span></div>
     </div>
   </div>
 </section>
 
-<!-- ЧТО ВНУТРИ -->
+<!-- ЭКРАНЫ -->
 <section class="section" id="what">
   <div class="container">
-    <h2>Что внутри workspace</h2>
-    <p class="lead">Мы не делали «CRM вообще». Каждый экран собран под то, что профориентолог делает с учеником на пути к подаче.</p>
-    <div class="feat">
-      <div class="card"><div class="ic">☀️</div><h3>Экран «Сегодня»</h3><p>Дедлайны в ближайшие 45 дней с кнопкой «Подать», открытые задачи с чекбоксом, ученики без документов, ученики без касания две недели. Утренняя планёрка за 30 секунд.</p></div>
-      <div class="card"><div class="ic">🗂</div><h3>Карточка ученика</h3><p>Класс, уровень, цель, телефоны ученика и родителя, этап (знакомство → документы → подача → отправлено → поступил), закреплённая заметка «что важно помнить об этой семье».</p></div>
-      <div class="card"><div class="ic">🎯</div><h3>Программы с точной ссылкой</h3><p>Добавляете из каталога Scholary — 236 программ в 56 странах с проверенными ссылками на подачу и дедлайнами — или любую свою. Статус: изучаем, готовим, подано, оффер, отказ.</p></div>
-      <div class="card"><div class="ic">📎</div><h3>Документы с файлами</h3><p>Стандартный набор одной кнопкой: паспорт, аттестат, перевод, апостиль, язык, мотивационное, рекомендации, CV. Статус, заметка, файл — прямо в карточке, в вашем защищённом хранилище.</p></div>
-      <div class="card"><div class="ic">📝</div><h3>Заметки, звонки, задачи</h3><p>Записали разговор с мамой — через месяц не нужно вспоминать. Задача со сроком попадает в «Сегодня». Типы: заметка, звонок, родители, встреча, задача.</p></div>
-      <div class="card"><div class="ic">👀</div><h3>Кабинет ученика — у вас перед глазами</h3><p>Если ученик зарегистрирован по вашей ссылке, вы видите его шансы поступить и получить стипендию, программы, которые он выбрал сам, и статусы его документов. Без его файлов и переписки.</p></div>
+    <h2>Пять экранов вместо Excel</h2>
+    <p class="lead">Каждый экран собран под одно действие профориентолога. Ничего лишнего — и ничего, что нужно «держать в голове».</p>
+    <div class="screens">
+      <div class="card scr">
+        <div class="scr-h"><b>Сегодня</b><span>очередь и внимание</span></div>
+        <div class="mprio"><i></i><b>3 срочных</b> · 9 на неделе</div>
+        <div class="mline"><span class="mdot bad"></span>Данияр К. · просроченная задача</div>
+        <div class="mline"><span class="mdot warn"></span>Томирис Ж. · нет следующего шага</div>
+        <div class="mline"><span class="mdot ok"></span>Камила Е. · всё по плану</div>
+        <p>Строка приоритета, прогресс недели, очередь «Сейчас», «Требует внимания» — не больше пяти, встречи недели, подсказка сезона.</p>
+      </div>
+      <div class="card scr">
+        <div class="scr-h"><b>Ученики</b><span>список и этапы</span></div>
+        <div class="mkan"><div><i>Знакомство</i><em>4</em></div><div><i>Документы</i><em>4</em></div><div><i>Подача</i><em>3</em></div><div><i>Отправлено</i><em>1</em></div><div><i>Поступил</i><em>1</em></div></div>
+        <div class="mline"><span class="mdot bad"></span>Здоровье ученика: 🔴 просрочка · 🟡 без касания · 🟢 в порядке</div>
+        <p>Канбан по этапам или таблица; фильтры-исключения: без шага, дедлайн ≤ 14, без касания 14+, семья без статуса. Импорт из Excel, экспорт в CSV.</p>
+      </div>
+      <div class="card scr">
+        <div class="scr-h"><b>Карточка</b><span>шаг и история</span></div>
+        <div class="mstep"><span>Следующий шаг</span><b>Заказать апостиль · до 12 сент.</b></div>
+        <div class="mline">📞 Созвон: решили подавать в 3 страны</div>
+        <div class="mline">💬 Статус семье: этап «Подача», письмо в работе</div>
+        <div class="mline">🚩 Этап: Документы → Подача</div>
+        <p>Обзор с таймлайном, быстрые записи (звонок · родители · задача · встреча), подачи с точной ссылкой, документы с файлами, вкладка «Семья».</p>
+      </div>
+      <div class="card scr">
+        <div class="scr-h"><b>Неделя и календарь</b><span>план и обзор</span></div>
+        <div class="mweek"><div><i>пн</i><b>2</b></div><div><i>вт</i><b>·</b></div><div><i>ср</i><b>1</b></div><div class="t"><i>чт</i><b>3</b></div><div><i>пт</i><b>1</b></div><div><i>сб</i><b>·</b></div><div><i>вс</i><b>·</b></div></div>
+        <div class="mline">Обзор недели: что застряло · назначить шаги всем без шага · «неделя спланирована»</div>
+        <p>Семь дней с задачами, встречами и дедлайнами; месяц с дедлайнами всех учеников и окнами сезона — ЕНТ, каникулы, ключевые стипендии.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ЧТО ПОЛУЧАЕТ УЧЕНИК -->
+<!-- УЧЕНИК И РОДИТЕЛИ -->
 <section class="section">
   <div class="container">
-    <h2>Ученик тоже выигрывает</h2>
-    <p class="lead">Ваш тариф включает Scholary Pro для каждого ученика — то, что в рознице стоит 14&nbsp;900&nbsp;₸ за&nbsp;сезон. Это ваш аргумент для родителей: «в сопровождение входит сервис, который считает шансы и ведёт по документам».</p>
+    <h2>Ученик и родители тоже выигрывают</h2>
+    <p class="lead">Ваш тариф включает Scholary Pro для каждого ученика (в рознице — 14&nbsp;900&nbsp;₸ за сезон). Это ваш аргумент для семьи: сопровождение системное, и это видно.</p>
     <div class="two">
       <div class="card">
         <span class="who g"><i></i>Ученик</span>
-        <h3>Scholary Pro на весь срок вашего тарифа</h3>
+        <h3>Свой кабинет с недельным планом</h3>
         <ul>
-          <li>Две вероятности — поступления и стипендии — по 236 программам, с суммой финансирования и дедлайном каждой.</li>
-          <li>Личный кабинет: портфель подач, план документов с критическим путём, проверка загруженных документов.</li>
-          <li>Разбор мотивационных и рекомендательных писем ИИ, симулятор «что если подтянуть IELTS».</li>
-          <li>Напоминания о дедлайнах в Telegram за 30, 14, 7, 3 и 1 день.</li>
-          <li>Имя и контакт своего профориентолога — прямо в кабинете.</li>
+          <li>Две вероятности — поступления и стипендии — по 236 программам, с суммой и дедлайном.</li>
+          <li>План на неделю, документы с критическим путём, разбор писем ИИ, напоминания в Telegram.</li>
+          <li>Имя и контакт профориентолога — прямо в кабинете. Вы видите его шансы, программы и статусы документов.</li>
         </ul>
       </div>
       <div class="card">
-        <span class="who"><i></i>Вы</span>
-        <h3>Меньше рутины — больше учеников</h3>
+        <span class="who"><i></i>Родители</span>
+        <h3>Понимают, где мы, без звонков</h3>
         <ul>
-          <li>Одна ссылка на всех учеников: отправили в WhatsApp — ученик зарегистрировался и привязался к карточке сам.</li>
-          <li>Ничего не потеряется между чатами: программы, дедлайны, файлы, договорённости — в одном месте.</li>
-          <li>Выгрузка в CSV — для отчёта родителям, партнёрской школе или для себя в конце сезона.</li>
-          <li>Работает с телефона: карточку ученика удобно открыть прямо на созвоне с родителями.</li>
-          <li>Место = карточка ученика. Закрыли сезон, удалили карточку — место освободилось.</li>
+          <li>Статус раз в 2–3 недели: этап, что сделано, следующий шаг, дедлайн, документы — из карточки, в WhatsApp.</li>
+          <li>Напоминание о встрече за день с текстом, который уже составлен.</li>
+          <li>Прозрачность — то, чего не хватает рынку: родители рассказывают о вас другим родителям.</li>
         </ul>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- СРАВНЕНИЕ -->
+<section class="section section-tight">
+  <div class="container">
+    <h2>WhatsApp + Excel → Workspace</h2>
+    <div class="cmp card">
+      <div class="cmp-h"><span></span><span>WhatsApp + Excel</span><span class="acc">Workspace Scholary</span></div>
+      <div class="cmp-r"><span>Что делать сегодня</span><span>вспомнить</span><span class="acc">очередь «Сейчас», одна строка приоритета</span></div>
+      <div class="cmp-r"><span>Кто застрял</span><span>заметить случайно</span><span class="acc">🔴🟡 здоровье ученика, «Требует внимания»</span></div>
+      <div class="cmp-r"><span>Дедлайны 50 учеников</span><span>таблица, которую забывают обновлять</span><span class="acc">календарь + краснеет за 7 дней + дайджест в понедельник</span></div>
+      <div class="cmp-r"><span>Ответ родителям</span><span>10 минут в чате</span><span class="acc">карточка + статус семье одной кнопкой</span></div>
+      <div class="cmp-r"><span>Документы</span><span>файлы в трёх чатах</span><span class="acc">чек-лист с файлами и «начать до»</span></div>
+      <div class="cmp-r"><span>Ученик</span><span>ничего</span><span class="acc">Scholary Pro: шансы, план, документы, Telegram</span></div>
     </div>
   </div>
 </section>
@@ -319,6 +450,9 @@
       <details class="faq-item"><summary>Где хранятся файлы учеников и кто их видит?</summary><p>В защищённом хранилище Scholary, в папке вашего аккаунта. Доступ к файлу — только у вас, по временной ссылке. Мы не запрашиваем ИИН и не просим сканы удостоверений — для работы достаточно имени, класса и почты; остальное вы прикладываете по необходимости. Подробнее — в <a href="/privacy/">политике конфиденциальности</a>.</p></details>
       <details class="faq-item"><summary>Можно ли работать вдвоём с одного workspace?</summary><p>Workspace привязан к одному аккаунту — так безопаснее для данных детей. Для команды берите «Агентство»: мы открываем отдельный workspace каждому консультанту, а расширить лимит по общему числу учеников можно допсоглашением.</p></details>
       <details class="faq-item"><summary>Что после 14 пробных дней?</summary><p>Мы напишем и спросим, как прошло. Если продолжаете — выставляем счёт или присылаете оплату через Kaspi, и workspace продолжает работать с теми же карточками. Если нет — доступ просто закрывается, никаких списаний и «автопродлений».</p></details>
+      <details class="faq-item"><summary>Чем это лучше amoCRM, Битрикс24 или своей таблицы?</summary><p>CRM для продаж считает лиды и сделки, а не дедлайны GKS и апостили. Здесь всё вокруг одного пути ученика: этапы поступления, каталог программ с проверенными дедлайнами, чек-лист документов со сроками изготовления, «следующий шаг» и статус для семьи. Таблица тоже работает — пока учеников меньше десяти и никто не звонит спросить «а что у нас».</p></details>
+      <details class="faq-item"><summary>Как выглядит отчёт родителям?</summary><p>Это короткое сообщение, которое workspace собирает из карточки: этап, что сделано за две недели, следующий шаг с датой, ближайший дедлайн, документы «готово N из M». Вы правите текст, нажимаете «В WhatsApp родителю» — и он остаётся в истории ученика. Рекомендуем раз в 2–3 недели: workspace сам подсветит семьи, которые не получали статус больше 21 дня.</p></details>
+      <details class="faq-item"><summary>Как перенести учеников из Excel?</summary><p>Скопируйте таблицу (имя, класс, телефон, почта, родитель, телефон родителя, цель) и вставьте в «Настройки → Импорт из Excel» — или загрузите CSV. Дубли по имени и почте пропустим, лимит мест по тарифу соблюдается.</p></details>
       <details class="faq-item"><summary>Работает с телефона?</summary><p>Да, полностью: список учеников, карточки, документы и заметки адаптированы под экран телефона. Файлы можно прикладывать прямо из галереи или из WhatsApp через «Поделиться».</p></details>
       <details class="faq-item"><summary>Есть ли казахская версия?</summary><p>Сейчас интерфейс на русском языке. Казахскую версию сделаем по запросу — напишите об этом в заявке, это влияет на нашу очередь.</p></details>
     </div>

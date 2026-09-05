@@ -122,17 +122,91 @@ select.stage-sel{border:1px solid var(--border);border-radius:999px;padding:5px 
 @media (max-width: 900px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .cols{grid-template-columns:1fr} }
 @media (max-width: 640px){
   .top{padding-inline:14px;flex-wrap:wrap} .wrap{padding-inline:14px} .h1{font-size:22px}
-  .tabs{width:100%;justify-content:space-between} .tabs a{padding:8px 10px;font-size:13px;flex:1;text-align:center}
+  .tabs{width:100%;justify-content:space-between;order:3} .tabs a{padding:8px 8px;font-size:13px;flex:1;text-align:center}
+  #btn-out{display:none}
   .grid2{grid-template-columns:1fr} .kv{grid-template-columns:1fr} .kv b{margin-top:6px}
   table.r, table.r tbody{display:block;width:100%}
   table.r tr:first-child{display:none}
-  table.r tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"name stage" "meta meta";gap:4px 10px;padding:10px 0;border-bottom:1px solid #F0F0F4;align-items:center}
+  table.r tr{display:grid;gap:4px 10px;padding:10px 0;border-bottom:1px solid #F0F0F4;align-items:center}
   table.r td{display:block;padding:0;border:0}
-  table.r td:nth-child(1){grid-area:name} table.r td:nth-child(2){grid-area:stage;justify-self:end}
-  table.r td:nth-child(3){grid-area:meta} table.r td:nth-child(4),table.r td:nth-child(5){display:none}
   .doc{grid-template-columns:1fr auto} .doc > :last-child{grid-column:1 / -1}
   .lst{flex-wrap:wrap} .lst .t{flex:1 1 200px}
 }
+/* ---- web-75: workspace 2.0 ---- */
+.h-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lnk{background:none;border:none;color:var(--accent-dark);font-weight:700;cursor:pointer;padding:6px 0;min-height:32px;font-family:inherit;font-size:13.5px}
+.iconbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);display:inline-flex;align-items:center;justify-content:center}
+.prio{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;font-size:16px;margin-top:12px}
+.prio.bad{background:var(--bad-soft);color:#7A1F14} .prio.ok{background:var(--ok-soft);color:#0B5A2E}
+.prio::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor;flex-shrink:0}
+.hdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#B8B8C6;flex-shrink:0;vertical-align:middle}
+.hdot.bad{background:var(--bad)} .hdot.warn{background:#E0A100} .hdot.ok{background:#16A35C} .hdot.mut{background:#C9C9D2}
+.q{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0F0F4}
+.q:last-child{border-bottom:0}
+.q .t{flex:1;min-width:0} .q .t b{display:block;font-size:14.5px;line-height:1.3} .q .t .xs{display:block}
+.q.urgent .t b{color:#7A1F14}
+.qk{width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--bg)}
+.qk.deadline{background:var(--warn-soft)} .qk.task{background:var(--accent-soft)} .qk.meeting{background:#E0F2FE} .qk.step{background:var(--ok-soft)}
+.q.urgent .qk{background:var(--bad-soft)}
+.qa{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.qdone{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;cursor:pointer}
+.qdone input{width:22px;height:22px;cursor:pointer}
+.wstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.wd{display:flex;flex-direction:column;align-items:center;padding:6px 0;border-radius:12px;color:var(--ink);font-size:12px}
+.wd span{color:var(--muted);font-size:10.5px;text-transform:uppercase;font-weight:700} .wd b{font-size:15px} .wd i{font-style:normal;font-size:11px;color:var(--accent-dark);font-weight:800;min-height:14px}
+.wd.today{background:var(--accent);color:#fff} .wd.today span,.wd.today i{color:#fff}
+.fun{display:grid;grid-template-columns:110px 1fr 28px;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--ink)}
+.fun i{display:block;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--accent),#16A35C);min-width:4px} .fun b{text-align:right}
+.wgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wday{background:#fff;border:1px solid var(--border);border-radius:16px;padding:8px;min-height:120px}
+.wday.today{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.wdh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px} .wdh span{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700} .wdh b{font-size:16px}
+.wday.today .wdh b{color:var(--accent)}
+.wi{display:flex;gap:6px;align-items:flex-start;padding:6px 8px;border-radius:10px;margin-top:4px;font-size:12.5px;color:var(--ink);cursor:pointer;background:var(--bg)}
+.wi span{min-width:0} .wi b{display:block;font-weight:650;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical} .wi i{display:block;font-style:normal;color:var(--muted);font-size:11px}
+.wi.deadline{background:var(--warn-soft)} .wi.meeting{background:#E0F2FE} .wi.step{background:var(--ok-soft)} .wi.task{background:var(--accent-soft)}
+.wi input{width:18px;height:18px;margin:2px 0 0;flex-shrink:0}
+.stepline{padding:8px 0;border-bottom:1px solid #F0F0F4} .stepline:last-child{border-bottom:0}
+.steprow{display:grid;grid-template-columns:1fr 150px auto;gap:6px;margin-top:6px} .steprow input.f{padding:9px 12px;font-size:14px}
+.stepbox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;padding:12px 16px;border-radius:16px;background:linear-gradient(135deg,#F4F2FF,#EDF9F3);border:1px solid #E3DFFF}
+.stepbox.late{background:var(--bad-soft);border-color:#F3C9C4}
+.stepbox .k{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-dark)} .stepbox b{font-size:15.5px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px}
+.seg button{border:none;background:none;border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:650;color:var(--muted);cursor:pointer;min-height:32px}
+.seg button.on{background:var(--ink);color:#fff}
+.chip-sep{width:1px;height:24px;background:var(--border);align-self:center}
+.kanban{display:grid;grid-template-columns:repeat(6,minmax(180px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}
+.kcol{background:#EEEEF3;border-radius:16px;padding:8px;min-height:120px}
+.kh{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 8px}
+.kcard{background:#fff;border-radius:14px;padding:10px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;font-size:13.5px}
+.kcard b{display:block;margin-top:4px} .kcard .hdot{float:right;margin-top:6px}
+.tl{margin-top:6px} .tli{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #F0F0F4;font-size:14px} .tli:last-child{border-bottom:0}
+.tli .ic{width:30px;height:30px;border-radius:10px;background:var(--bg);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.tli.status .ic{background:var(--ok-soft)} .tli.task .ic{background:var(--accent-soft)} .tli.meeting .ic{background:#E0F2FE} .tli.stage .ic{background:var(--warn-soft)}
+.tli .tb{flex:1;min-width:0}
+.cal{margin-top:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px} .cal-head b{font-size:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-wd{font-size:10.5px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase;padding:2px 0 4px}
+.cal-d{position:relative;aspect-ratio:1/1;min-height:34px;border:none;background:none;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;padding:0}
+.cal-d.empty{cursor:default} .cal-d.today{background:var(--accent);color:#fff} .cal-d.has{font-weight:800}
+.cal-d i{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#B8B8C6}
+.cal-d i.mine{background:var(--accent);box-shadow:0 0 0 1.5px #fff} .cal-d.today i.mine{background:#fff}
+.cal-lg{display:inline-block;width:8px;height:8px;border-radius:50%;background:#B8B8C6;vertical-align:middle} .cal-lg.mine{background:var(--accent)}
+.cal-sel{margin-top:8px;border-top:1px solid var(--border);padding-top:4px}
+.cal-cols{grid-template-columns:.9fr 1.1fr}
+@media (max-width: 1100px){ .wgrid{grid-template-columns:repeat(7,minmax(150px,1fr));overflow-x:auto} .cal-cols{grid-template-columns:1fr} }
+@media (max-width: 640px){
+  .tabs a{padding:8px 4px;font-size:12px}
+  .wgrid{display:flex;flex-direction:column;overflow:visible} .wday{min-height:0}
+  .steprow{grid-template-columns:1fr} .kanban{grid-template-columns:repeat(6,82vw)}
+  .q{flex-wrap:wrap} .q .t{flex:1 1 180px} .qa{width:100%;justify-content:flex-end}
+  table.r tr{grid-template-columns:18px 1fr auto;grid-template-areas:"dot name stage" "meta meta meta" "step step step"}
+  table.r td:nth-child(1){grid-area:dot} table.r td:nth-child(2){grid-area:name} table.r td:nth-child(3){grid-area:stage;justify-self:end}
+  table.r td:nth-child(4){grid-area:step;display:block} table.r td:nth-child(5){grid-area:meta;display:block} table.r td:nth-child(6){display:none}
+  .prio{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){ .spin{animation:none} }
 @media print{ .top,.tabs,.tools,.chips,.btn,.demo-bar,#toast-root{display:none!important} body{background:#fff} .card{border:0;padding:0} }
 </style>
 </head>
@@ -205,8 +279,10 @@ select.stage-sel{border:1px solid var(--border);border-radius:999px;padding:5px 
     <a class="logo" href="/prof/">Scholary<span>.</span> <span class="mut" style="font-weight:600;font-size:14px">workspace</span></a>
     <nav class="tabs" id="tabs">
       <a href="#/today" data-t="today">Сегодня</a>
+      <a href="#/week" data-t="week">Неделя</a>
+      <a href="#/calendar" data-t="calendar">Календарь</a>
       <a href="#/students" data-t="students">Ученики</a>
-      <a href="#/settings" data-t="settings">Ссылка и тариф</a>
+      <a href="#/settings" data-t="settings">Настройки</a>
     </nav>
     <button class="btn btn-ghost btn-sm" id="btn-out">Выйти</button>
   </div>
@@ -223,8 +299,9 @@ select.stage-sel{border:1px solid var(--border);border-radius:999px;padding:5px 
   document.head.appendChild(s);
 })();
 </script>
-<script src="/js/config.js?v=74"></script>
-<script src="/js/telemetry.js?v=74"></script>
-<script src="/js/counselor.js?v=74"></script>
+<script src="/js/config.js?v=75"></script>
+<script src="/js/telemetry.js?v=75"></script>
+<script src="/js/cabinet-path.js?v=75"></script>
+<script src="/js/counselor.js?v=75"></script>
 </body>
 </html>
