@@ -10,11 +10,11 @@
 <link rel="canonical" href="https://scholary.kz/quiz/">
   <title>Квиз — рассчитай вероятность | Scholary</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/css/style.css?v=71">
-  <script src="/js/config.js?v=71"></script>
-<script src="/js/telemetry.js?v=71"></script>
-  <script src="/js/report-engine.js?v=71"></script>
-  <script src="/js/app.js?v=71" defer></script>
+  <link rel="stylesheet" href="/css/style.css?v=72">
+  <script src="/js/config.js?v=72"></script>
+<script src="/js/telemetry.js?v=72"></script>
+  <script src="/js/report-engine.js?v=72"></script>
+  <script src="/js/app.js?v=72" defer></script>
   <!-- Виджет TipTop Pay: грузить только с widget.tiptoppay.kz (требование провайдера) -->
   <script src="https://widget.tiptoppay.kz/bundles/widget.js" defer></script>
 </head>
@@ -721,23 +721,39 @@ function startTipTop(email) {
    показываем словами и даём поменять номер или попробовать снова. */
 let kaspiCtl = null;
 function stopKaspi() { if (kaspiCtl) { try { kaspiCtl.stop(); } catch (e) {} kaspiCtl = null; } }
-function startKaspi(phone, email) {
+let kaspiOrder = "";   /* номер выставленного счёта — чтобы после обрыва связи продолжить опрос, а не выставлять новый */
+function startKaspi(phone, email, resumeOrder) {
   const snap = engineSnapshot();
   if (snap.result) saveLead(snap);
-  renderKaspiWait(phone, "creating");
+  renderKaspiWait(phone, resumeOrder ? "pending" : "creating");
   stopKaspi();
   kaspiCtl = window.scholaryKaspi({
-    kind: "report", amount: C.PRICE_REPORT, phone: phone, email: email || "", lead: window.scholaryLeadId(),
-    onCreated: function (j) { renderKaspiWait(phone, j.status === "pending" ? "pending" : "processing", j); },
+    kind: "report", amount: C.PRICE_REPORT, phone: phone, email: email || "", lead: window.scholaryLeadId(), order: resumeOrder || "",
+    onCreated: function (j) { kaspiOrder = j.order || ""; renderKaspiWait(phone, j.status === "pending" ? "pending" : "processing", j); },
     onStatus: function (st, j) {
-      if (st === "paid") { stopKaspi(); renderSuccess(); return; }
+      if (st === "paid") { renderSuccess(j); return; }   /* опрос продолжается до выдачи отчёта — тогда придёт ссылка */
       if (st === "error") { stopKaspi(); renderKaspiError(phone, j); return; }
       if (st === "expired" || st === "cancelled") { stopKaspi(); renderKaspiError(phone, j); return; }
       const box = $("kaspiStatus");
       if (box) box.textContent = st === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…";
     },
-    onError: function (why, msg) { stopKaspi(); renderKaspiError(phone, { status: "create_failed", error_code: why, error_message: msg }); }
+    onFulfilled: function (j) { stopKaspi(); showReportLink(j); },
+    onError: function (why, msg, order) { stopKaspi(); if (order) kaspiOrder = order; renderKaspiError(phone, { status: "create_failed", error_code: why, error_message: msg }); }
   });
+}
+/* Отчёт выдан: показать кнопку «Открыть отчёт» на экране «оплачено».
+   Это страховка на случай, если WhatsApp и почта не дошли, — и просто удобно. */
+function showReportLink(j) {
+  const box = $("reportLinkBox"); if (!box) return;
+  if (j && j.report_url) {
+    const d = j.delivered || {};
+    const lost = d && d.wa === false && d.mail === false;
+    box.innerHTML = '<a class="btn btn-primary" href="' + esc(j.report_url) + '" target="_blank" rel="noopener" onclick="track(\'report_open_from_success\')">Открыть отчёт</a>' +
+      '<div style="font-size:12.5px; color:var(--muted); margin-top:8px">' + (lost ? '<b>Не смогли отправить ссылку на WhatsApp и почту</b> — открой отчёт по кнопке и сохрани ссылку в закладки, она личная и не сгорает.' : 'Та же ссылка ушла на WhatsApp и почту. Она личная и не сгорает — можно сохранить в закладки.') + '</div>';
+    track("report_link_shown", { lost: !!lost });
+  } else {
+    box.innerHTML = '<div style="font-size:12.5px; color:var(--muted)">Ссылка на отчёт придёт на WhatsApp и почту в течение пары минут. Если её нет через 10 минут — напиши нам, отправим вручную.</div>';
+  }
 }
 function kaspiPhoneBox(phone) {
   return '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--bg); border-radius:12px; padding:12px 14px; width:100%; box-sizing:border-box">' +
@@ -772,6 +788,7 @@ function renderKaspiError(phone, j) {
   else if (st === "expired") { title = "Срок счёта истёк"; text = "Счёт в Kaspi действовал 24 часа. Ничего страшного — выставим новый, ответы сохранены."; }
   else if (st === "cancelled") { title = "Счёт отменён"; text = "Оплата не подтверждена в Kaspi. Деньги не списаны — можно выставить счёт заново."; }
   else if (code === "rate") { title = "Слишком много попыток"; text = "Мы выставили несколько счетов подряд. Открой Kaspi → Платежи → Счета: оплатить можно любой из них, или напиши нам."; }
+  else if (code === "poll_lost") { title = "Связь с сервером прервалась"; text = "Счёт в Kaspi уже выставлен. Если ты его оплатил — всё в порядке: отчёт придёт на WhatsApp и почту, а деньги второй раз не спишутся. Нажми «Проверить статус», чтобы обновить экран."; }
   else if (code === "kaspi_off" || code === "kaspi_session_expired" || code === "tariff_inactive" || code === "network" || /^http/.test(code)) { title = "Kaspi временно недоступен"; text = "Не получилось выставить счёт. Попробуй через минуту или напиши нам в WhatsApp — оформим вручную."; }
   else if (j && j.error_message) { text = esc(j.error_message); }
   screen.innerHTML = "";
@@ -782,13 +799,14 @@ function renderKaspiError(phone, j) {
         '<div style="font-size:21px; font-weight:800">' + title + '</div>' +
         '<div style="font-size:14px; color:var(--muted); line-height:1.55">' + text + '</div>' +
       "</div>" +
-      '<button type="button" class="btn btn-kaspi" id="kaspiRetry">' + (code === "client_not_found" ? "Указать другой номер" : "Попробовать ещё раз") + '</button>' +
+      '<button type="button" class="btn btn-kaspi" id="kaspiRetry">' + (code === "client_not_found" ? "Указать другой номер" : (code === "poll_lost" ? "Проверить статус" : "Попробовать ещё раз")) + '</button>' +
       '<a class="btn btn-ghost" id="kaspiErrWa" href="#" target="_blank" rel="noopener">Написать нам в WhatsApp</a>' +
       '<a class="btn btn-ghost" href="/cabinet/" onclick="track(\'free_cabinet_click\')">Пока открыть бесплатный кабинет</a>' +
     "</div>"));
   $("kaspiErrWa").href = "https://wa.me/" + C.WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Здравствуйте! Не проходит оплата Kaspi за отчёт Scholary (" + (code || st) + "). Заявка: " + window.scholaryLeadId());
   $("kaspiRetry").addEventListener("click", () => {
-    track("pay_retry", { via: "kaspi" });
+    track("pay_retry", { via: "kaspi", code: code });
+    if (code === "poll_lost" && kaspiOrder) { startKaspi(phone, phase2.email, kaspiOrder); return; }   /* продолжаем тот же счёт */
     renderPayment();
     if (code === "client_not_found") setTimeout(() => { const b = $("waEditBtn"); if (b) b.click(); }, 50);
   });
@@ -856,7 +874,8 @@ const PHASE2 = [
   { key: "decision_maker", label: "Кто принимает решение об оплате обучения?", type: "chips", options: ["Я сам(а)", "Родители", "Вместе"] }
 ];
 
-function renderSuccess() {
+function renderSuccess(j) {
+  if ($("reportLinkBox")) { if (j && j.report_url) showReportLink(j); return; }   /* уже показан — не перерисовываем анкету фазы 2 */
   track("pay_success_screen");
   /* Отчёт по этому лиду выдан и заморожен. Следующий квиз на этом устройстве
      (второй ребёнок, пересдал IELTS) обязан идти НОВЫМ лидом — иначе
@@ -869,6 +888,7 @@ function renderSuccess() {
         '<span style="display:flex; justify-content:center; align-items:center; width:64px; height:64px; background:var(--green-soft); border-radius:999px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#187E54" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
         '<div style="font-size:21px; font-weight:800">Оплата прошла</div>' +
         '<div style="font-size:14px; color:var(--muted)">Ссылка на отчёт уже летит на WhatsApp ' + esc(PH.format(answers.whatsapp || "")) + (phase2.email ? ' и на почту ' + esc(phase2.email) : '') + ' — обычно это меньше минуты</div>' +
+        '<div id="reportLinkBox" style="width:100%"><div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; color:var(--muted)"><span class="spin"></span>Готовим отчёт…</div></div>' +
       "</div>" +
       '<div class="card" style="display:flex; flex-direction:column; gap:6px">' +
         '<div style="font-size:15.5px; font-weight:800">Сделай отчёт точнее — 7 коротких уточнений</div>' +
@@ -889,6 +909,10 @@ function renderSuccess() {
       '<div class="fineprint">Не пришло за 10 минут? <a href="https://wa.me/' + C.WHATSAPP_NUMBER + '">Напиши нам в WhatsApp</a> — отправим вручную или вернём деньги</div>' +
     "</div>"));
   renderPhase2();
+  /* Kaspi: ссылка придёт из опроса (onFulfilled). Карта: отчёт выдаёт вебхук
+     TipTop без обратной связи в браузер — сразу говорим, где искать. */
+  if (j && j.report_url) showReportLink(j);
+  else if (!kaspiCtl) showReportLink({});
 }
 
 function renderPhase2() {
