@@ -17,7 +17,7 @@
  *
  * Режим admin: тот же эндпоинт с токеном админа переотправляет отчёт по lead_id.
  */
-require __DIR__ . '/_lib.php';
+require __DIR__ . '/_pay.php';   /* pay_wa_base / pay_mail_base — один адрес мессенджера и почты для всех отправителей */
 cors();
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') jout(['error' => 'method'], 405);
 
@@ -38,7 +38,7 @@ function rr_send($name, $wa, $mail, $token) {
     $msg = $hi . " Вот твой отчёт Scholary 🎓\n\n" . $link . "\n\n"
          . "Ссылка личная и не сгорает — сохрани её или добавь в закладки.\n"
          . "Если отчёт не открывается, просто ответь на это сообщение.";
-    $r = http_json('https://api.green-api.com/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
+    $r = http_json(pay_wa_base() . '/waInstance' . $c['GREEN_ID'] . '/sendMessage/' . $c['GREEN_TOKEN'],
       'POST', ['Content-Type: application/json'],
       ['chatId' => $digits . '@c.us', 'message' => $msg], 20);
     $out['whatsapp'] = ($r['code'] >= 200 && $r['code'] < 300);
@@ -52,7 +52,7 @@ function rr_send($name, $wa, $mail, $token) {
           . 'style="background:#4F46E5;color:#fff;text-decoration:none;font-weight:700;'
           . 'padding:13px 22px;border-radius:10px;display:inline-block">Открыть отчёт</a></p>'
           . '<p style="color:#6B7280;font-size:13px">Не открывается — напиши нам в WhatsApp, поможем за пару минут.</p></div>';
-    $r = http_json('https://api.resend.com/emails', 'POST', [
+    $r = http_json(pay_mail_base() . '/emails', 'POST', [
       'Authorization: Bearer ' . $c['RESEND_KEY'], 'Content-Type: application/json',
     ], array_filter([
         'from' => mail_from(), 'to' => [$mail], 'subject' => 'Твой отчёт Scholary — ссылка',

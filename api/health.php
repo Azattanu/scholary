@@ -117,14 +117,47 @@ if ($apKey) {
   require_once __DIR__ . '/_kaspi.php';
   $stuck = kaspi_unfulfilled();            /* оплачено, но не выдано дольше 10 минут */
   $dirOk = is_writable(kaspi_dir('orders'));
-  $allOk = $kOk && $apSec && $apOn && $dirOk && $stuck === 0;
+  /* Тариф ApiPay кончается — счета перестанут выставляться в один день. Предупреждаем за две недели. */
+  $daysLeft = isset($tar['days_remaining']) ? (int)$tar['days_remaining'] : null;
+  $soon = $daysLeft !== null && $daysLeft <= 14;
+  $allOk = $kOk && $apSec && $apOn && $dirOk && $stuck === 0 && !$soon;
   chk($out, 'kaspi', 'Kaspi — оплата через ApiPay', $allOk,
     $ah['code'] !== 200 ? 'ApiPay не отвечает (HTTP ' . $ah['code'] . ')'
       : (($apOn ? 'включена' : 'ВЫКЛЮЧЕНА (APIPAY_ENABLED)') . ' · кассир ' . (!empty($conn['kaspi_connected']) ? 'подключён' : 'НЕ подключён') . (!empty($conn['needs_reauth']) ? ', нужна переавторизация' : '')
-        . ' · тариф ' . (string)($tar['status'] ?? '?') . (isset($tar['days_remaining']) ? ', осталось дней: ' . (int)$tar['days_remaining'] : '')
+        . ' · тариф ' . (string)($tar['status'] ?? '?') . ($daysLeft !== null ? ', осталось дней: ' . $daysLeft : '') . (!empty($tar['expires_at']) ? ' (до ' . substr((string)$tar['expires_at'], 0, 10) . ')' : '')
         . ($apSec ? '' : ' · НЕТ секрета вебхука') . ($dirOk ? '' : ' · папка заказов не пишется') . ($stuck ? ' · ОПЛАЧЕНО, НО НЕ ВЫДАНО: ' . $stuck : '')),
     $stuck ? 'есть оплаченные заказы без выдачи — смотреть письма «разобрать вручную» и /private/kaspi/orders'
-           : ($allOk ? '' : 'кнопка Kaspi на сайте не выставит счёт — проверить кабинет apipay.kz (кассир, тариф) и /private/apipay-secrets.php'));
+           : ($soon ? 'тариф ApiPay кончается через ' . $daysLeft . ' дн. — продлить в кабинете apipay.kz, иначе кнопка Kaspi перестанет выставлять счета'
+           : ($allOk ? '' : 'кнопка Kaspi на сайте не выставит счёт — проверить кабинет apipay.kz (кассир, тариф) и /private/apipay-secrets.php')));
+
+  /* ---- Заказы Kaspi за 30 дней и журнал: что реально происходило ---- */
+  $ks = kaspi_orders_summary(30);
+  $klog = kaspi_dir('') . '/log-' . gmdate('Y-m') . '.jsonl';
+  $klines = is_file($klog) ? @file($klog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
+  $kc = []; $ktail = [];
+  foreach ((array)$klines as $l) { $j = json_decode($l, true); if (!is_array($j)) continue; $k = ($j['type'] ?? '?') . '/' . ($j['what'] ?? '?'); $kc[$k] = ($kc[$k] ?? 0) + 1; }
+  foreach (array_slice((array)$klines, -8) as $l) { $j = json_decode($l, true); if (!is_array($j)) continue;
+    $ktail[] = substr((string)($j['t'] ?? ''), 5, 11) . ' ' . ($j['type'] ?? '') . '/' . ($j['what'] ?? '') . (isset($j['kind']) ? ' ' . $j['kind'] : '') . (isset($j['to']) ? ' →' . $j['to'] : '') . (isset($j['why']) ? ' ' . clean_txt((string)$j['why'], 30) : '') . (isset($j['code']) ? ' http' . (int)$j['code'] : ''); }
+  arsort($kc);
+  $kbad = ($ks['undelivered'] ?? 0) + ($ks['retrying'] ?? 0);
+  chk($out, 'kaspi_orders', 'Kaspi — заказы за 30 дней', $kbad === 0,
+    'счетов ' . $ks['total'] . ' · оплачено ' . $ks['paid'] . ' на ' . number_format($ks['sum_paid'], 0, '.', ' ') . ' ₸ · выдано ' . $ks['fulfilled']
+      . ' · ждут оплаты ' . $ks['pending'] . ' · ошибка номера/Kaspi ' . $ks['error'] . ' · истекло ' . $ks['expired'] . ' · отменено ' . $ks['cancelled']
+      . ($ks['sandbox'] ? ' · песочница ' . $ks['sandbox'] : '') . ($ks['undelivered'] ? ' · НЕ ДОСТАВЛЕНО (ни WhatsApp, ни почта): ' . $ks['undelivered'] : '') . ($ks['retrying'] ? ' · ждут повтора выдачи (база молчала): ' . $ks['retrying'] : '')
+      . ' · журнал за месяц: ' . implode(', ', array_map(function ($k, $v) { return $k . ' ' . $v; }, array_keys(array_slice($kc, 0, 8, true)), array_slice($kc, 0, 8, true)))
+      . ($ktail ? ' · последние: ' . implode('; ', $ktail) : ''),
+    $kbad ? 'открыть вкладку «Отчёты» → «Отправить ещё раз» для недоставленных; если база молчит — смотреть Supabase' : '');
+
+  /* ---- Цены: сайт (js/config.js) и сервер (pay_prices) обязаны совпадать ---- */
+  $cfgJs = (string)@file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/js/config.js');
+  $map = ['PRICE_REPORT' => 'report', 'PRICE_CONSULT' => 'consult', 'PRICE_PACKAGE' => 'package', 'PRICE_PRO_MONTH' => 'pro_month', 'PRICE_PRO_SEASON' => 'pro_season'];
+  $diff = []; $seen = 0;
+  foreach ($map as $jsKey => $kind) {
+    if (preg_match('/' . $jsKey . '\s*:\s*(\d+)/', $cfgJs, $m)) { $seen++; if ((int)$m[1] !== pay_price_of($kind)) $diff[] = $jsKey . ' ' . $m[1] . ' ≠ ' . pay_price_of($kind); }
+  }
+  chk($out, 'prices', 'Цены — сайт и сервер', !$diff && $seen >= 3,
+    $seen ? ($diff ? 'РАСХОДЯТСЯ: ' . implode(', ', $diff) : 'совпадают (' . $seen . ' позиций): ' . implode(', ', array_map(function ($s, $k) { return $k . ' ' . $s; }, array_keys(pay_prices()), pay_prices()))) : 'js/config.js не прочитан',
+    $diff ? 'сервер берёт цену из pay_prices() в api/_pay.php — счёт выставится по серверной цене, а кнопка на сайте обещает другую' : '');
 } else {
   chk($out, 'kaspi', 'Kaspi — оплата через ApiPay', false, 'ключ API не прописан', "добавить /private/apipay-secrets.php с APIPAY_KEY и APIPAY_WEBHOOK_SECRET");
 }
@@ -164,10 +197,14 @@ foreach ((array)$lines as $l) {
   if ($w === 'mismatch' || $w === 'declined') $mismatch++;
   $last = $j['t'] ?? $last;
 }
+$susp = [];
+foreach ((array)$lines as $l) { $j = json_decode($l, true); if (!is_array($j)) continue; $w = $j['what'] ?? '';
+  if (in_array($w, ['bad_signature', 'mismatch', 'declined', 'db_failed', 'failed', 'report_not_issued'], true)) $susp[] = substr((string)($j['t'] ?? ''), 5, 11) . ' ' . ($j['type'] ?? '') . '/' . $w . (isset($j['ip']) ? ' ip ' . $j['ip'] : '') . (isset($j['fn']) ? ' ' . $j['fn'] : '') . (isset($j['amount']) ? ' ' . $j['amount'] : ''); }
+$susp = array_slice($susp, -8);
 chk($out, 'tiptop_log', 'Журнал уведомлений шлюза', $forged === 0,
   count($lines) . ' записей за месяц' . ($last ? ', последняя ' . $last : '') .
     ($forged ? '; с чужой подписью: ' . $forged : '') . ($mismatch ? '; отклонено по сумме: ' . $mismatch : '') .
-    ($selfTests ? '; из них наших самопроверок: ' . $selfTests : ''),
+    ($selfTests ? '; из них наших самопроверок: ' . $selfTests : '') . ($susp ? ' · последние отклонения: ' . implode('; ', $susp) : ''),
   $forged ? 'кто-то шлёт уведомления с чужой подписью — посмотреть private/tiptop/'
           : ($mismatch ? 'были отказы по сумме: сверить цены в js/config.js и в списке $PRICES в api/tiptop.php' : ''));
 

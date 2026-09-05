@@ -40,8 +40,11 @@ function tt_api_event($event, $props = [], $user = [], $event_id = null) {
     'email'        => $h(strtolower((string)($user['email'] ?? ''))),
     'phone'        => $phone !== '' ? $h('+' . $phone) : null,
     'external_id'  => $h((string)($user['external_id'] ?? '')),
-    'ip'           => function_exists('client_ip') ? client_ip() : null,
-    'user_agent'   => (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+    /* Оплата приходит вебхуком от ApiPay: IP, браузер и ttclid покупателя
+       в этом запросе не наши. Поэтому их можно передать явно — заказ Kaspi
+       запоминает их в момент выставления счёта. */
+    'ip'           => (string)($user['ip'] ?? '') !== '' ? (string)$user['ip'] : (function_exists('client_ip') ? client_ip() : null),
+    'user_agent'   => (string)($user['user_agent'] ?? '') !== '' ? (string)$user['user_agent'] : (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
     'ttclid'       => (string)($user['ttclid'] ?? ($_COOKIE['ttclid'] ?? '')),
     'ttp'          => (string)($_COOKIE['_ttp'] ?? ''),
   ], function ($v) { return $v !== null && $v !== ''; });

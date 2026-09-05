@@ -89,22 +89,35 @@ function kaspi_apply_invoice(&$rec, $inv, $via) {
 }
 
 /* Счёт оплачен — выдать покупку ровно один раз (вебхук и поллинг могут
-   прийти одновременно; замок — атомарный файл). */
+   прийти одновременно; замок — атомарный файл).
+   Три исхода, кроме «выдано»:
+     · база не ответила (db_failed) — замок снимаем, через 30 с следующий опрос
+       или вебхук повторит выдачу; после 6 неудач зовём владельца;
+     · процесс упал на середине (замок стоит >10 мин, fulfilled нет) — зовём
+       владельца и снимаем замок, чтобы следующий опрос довыдал сам
+       (все шаги внутри идемпотентны по txn — второго отчёта не будет);
+     · отчёт выдан, но ни WhatsApp, ни почта не ушли — заказ помечается
+       deliver_pending, доставку повторяет kaspi_deliver_retry, а ссылка на отчёт
+       уходит на экран «оплачено» через ?a=status. */
 function kaspi_fulfill(&$rec, $via) {
   if (!empty($rec['fulfilled'])) return;
+  if (!empty($rec['fulfill_retry_after']) && time() < (int)$rec['fulfill_retry_after']) return;   /* ждём паузу между попытками */
   if (!tt_once('kaspi-fulfill-' . $rec['order'])) {
-    /* Кто-то уже выдаёт. Если «выдаёт» дольше 10 минут — процесс упал на
-       середине: зовём владельца один раз, деньги не должны потеряться молча. */
     $st = (int)($rec['fulfill_started'] ?? 0);
-    if ($st > 0 && time() - $st > 600 && tt_once('kaspi-stuck-' . $rec['order'])) {
-      kaspi_log($via, 'stuck', ['order' => $rec['order']]);
-      notify_owner('Kaspi: оплата есть, выдача зависла — разобрать вручную', ['Заказ' => $rec['order'], 'За что' => tt_kind_ru((string)$rec['kind']),
-        'Сумма' => (int)$rec['amount'] . ' ₸', 'Телефон' => '+' . clean_txt((string)$rec['phone'], 16), 'Почта' => clean_txt((string)$rec['email'], 120) ?: '—',
-        'Что' => 'выдача началась ' . date('d.m H:i', $st) . ' и не завершилась — выдать покупку руками']);
-    }
-    return;
+    if ($st > 0 && time() - $st > 600) {
+      if (tt_once('kaspi-stuck-' . $rec['order'] . '-' . (int)($rec['fulfill_attempts'] ?? 0))) {
+        kaspi_log($via, 'stuck', ['order' => $rec['order']]);
+        notify_owner('Kaspi: оплата есть, выдача зависла — проверить', ['Заказ' => $rec['order'], 'За что' => tt_kind_ru((string)$rec['kind']),
+          'Сумма' => (int)$rec['amount'] . ' ₸', 'Телефон' => '+' . clean_txt((string)$rec['phone'], 16), 'Почта' => clean_txt((string)$rec['email'], 120) ?: '—',
+          'Что' => 'выдача началась ' . date('d.m H:i', $st) . ' и не завершилась — сайт сейчас повторит её сам; если письма «оплата прошла» так и не будет, выдать руками']);
+      }
+      /* даём выдаче второй шанс: снимаем замок и идём дальше как обычно */
+      if ((int)($rec['fulfill_attempts'] ?? 0) < 6) { tt_forget('kaspi-fulfill-' . $rec['order']); if (!tt_once('kaspi-fulfill-' . $rec['order'])) return; }
+      else return;
+    } else return;
   }
   $rec['fulfill_started'] = time();
+  $rec['fulfill_attempts'] = (int)($rec['fulfill_attempts'] ?? 0) + 1;
   $rec = kaspi_order_save($rec);
   $sum  = (int)$rec['amount'];
   $paid = (int)($rec['paid_amount'] ?? $sum);
@@ -121,10 +134,60 @@ function kaspi_fulfill(&$rec, $via) {
   }
   $res = pay_fulfill('kaspi', $rec['kind'], $sum, $txn, (string)$rec['lead'], (string)$rec['email'], (string)$rec['account'], $test,
     ['Kaspi-счёт' => (string)($rec['kaspi_invoice_id'] ?: $rec['invoice_id']), 'Телефон' => '+' . clean_txt((string)$rec['phone'], 16)],
-    ['name' => (string)($rec['name'] ?? ''), 'phone' => (string)$rec['phone']]);
-  $rec['fulfilled'] = true; $rec['fulfilled_at'] = time(); $rec['fulfill_via'] = $via;
+    ['name' => (string)($rec['name'] ?? ''), 'phone' => (string)$rec['phone'], 'ttclid' => (string)($rec['ttclid'] ?? ''), 'ip' => (string)($rec['ip'] ?? ''), 'ua' => (string)($rec['ua'] ?? '')]);
+  if (is_array($res) && !empty($res['db_failed'])) {
+    $n = (int)$rec['fulfill_attempts'];
+    kaspi_log($via, 'db_failed', ['order' => $rec['order'], 'attempt' => $n]);
+    if ($n < 6) {
+      /* база молчит — не «выдано», а «повторить»: снимаем замок, пауза 30 с */
+      $rec['fulfill_started'] = 0; $rec['fulfill_retry_after'] = time() + 30; $rec['fulfill_note'] = 'db_failed';
+      $rec = kaspi_order_save($rec);
+      tt_forget('kaspi-fulfill-' . $rec['order']);
+      return;
+    }
+    if (tt_once('kaspi-dbfail-' . $rec['order'])) notify_owner('Kaspi: оплата есть, база не отвечает — выдать вручную', ['Заказ' => $rec['order'],
+      'За что' => tt_kind_ru((string)$rec['kind']), 'Сумма' => $sum . ' ₸', 'Телефон' => '+' . clean_txt((string)$rec['phone'], 16),
+      'Почта' => clean_txt((string)$rec['email'], 120) ?: '—', 'ID лида' => clean_txt((string)$rec['lead'], 64) ?: '—', 'Транзакция' => $txn,
+      'Что' => 'шесть попыток за три минуты — Supabase не отвечает; когда оживёт — «Выдать отчёт» в админке или select … в SQL']);
+    $rec['fulfilled'] = true; $rec['fulfill_note'] = 'db_failed_gave_up';
+    $rec = kaspi_order_save($rec);
+    return;
+  }
+  $rec['fulfilled'] = true; $rec['fulfilled_at'] = time(); $rec['fulfill_via'] = $via; $rec['fulfill_retry_after'] = 0;
+  if (is_array($res) && !empty($res['report_token'])) {
+    $rec['report_token'] = (string)$res['report_token'];
+    $rec['report_to'] = is_array($res['report_to'] ?? null) ? $res['report_to'] : [];
+    $d = is_array($res['report'] ?? null) ? $res['report'] : ['whatsapp' => false, 'email' => false];
+    $rec['deliver'] = ['wa' => !empty($d['whatsapp']), 'mail' => !empty($d['email']), 'at' => time(), 'attempts' => 1];
+    $rec['deliver_pending'] = !($rec['deliver']['wa'] || $rec['deliver']['mail']);
+    if ($rec['deliver_pending']) kaspi_log($via, 'deliver_failed', ['order' => $rec['order'], 'attempt' => 1]);
+  }
   $rec = kaspi_order_save($rec);
   kaspi_log($via, 'fulfilled', ['order' => $rec['order'], 'kind' => $rec['kind'], 'test' => $test, 'res' => $res]);
+}
+
+/* Отчёт выдан, но ни один канал доставки не ответил — пробуем ещё раз,
+   не чаще раза в минуту и не больше трёх раз. Ссылка на отчёт при этом
+   уже видна покупателю на экране «оплачено» (report_url в ?a=status). */
+function kaspi_deliver_retry(&$rec, $via) {
+  if (empty($rec['fulfilled']) || empty($rec['deliver_pending']) || empty($rec['report_token'])) return;
+  $d = is_array($rec['deliver'] ?? null) ? $rec['deliver'] : ['wa' => false, 'mail' => false, 'at' => 0, 'attempts' => 1];
+  if ((int)$d['attempts'] >= 4 || time() - (int)$d['at'] < 60) return;
+  if (!tt_once('kaspi-deliver-' . $rec['order'] . '-' . (int)$d['attempts'])) return;
+  $to = is_array($rec['report_to'] ?? null) ? $rec['report_to'] : [];
+  $sent = tt_send_report((string)($to['name'] ?? ''), (string)($to['wa'] ?? ''), (string)($to['mail'] ?? ''), (string)$rec['report_token'], !empty($rec['is_sandbox']));
+  $d['wa'] = $d['wa'] || !empty($sent['whatsapp']); $d['mail'] = $d['mail'] || !empty($sent['email']);
+  $d['at'] = time(); $d['attempts'] = (int)$d['attempts'] + 1;
+  $rec['deliver'] = $d; $rec['deliver_pending'] = !($d['wa'] || $d['mail']);
+  $rec = kaspi_order_save($rec);
+  kaspi_log($via, 'deliver_retry', ['order' => $rec['order'], 'attempt' => $d['attempts'], 'wa' => $d['wa'], 'mail' => $d['mail']]);
+  if (!$rec['deliver_pending'] && (string)$rec['lead'] !== '') tt_rpc('tiptop_mark_report_sent', ['p_lead' => (string)$rec['lead'],
+    'p_wa' => $d['wa'] ? 'sent' : 'failed', 'p_email' => $d['mail'] ? 'sent' : 'failed']);
+  if ($rec['deliver_pending'] && $d['attempts'] >= 4 && tt_once('kaspi-undelivered-' . $rec['order'])) {
+    notify_owner('Kaspi: отчёт выдан, но не доставлен ни на WhatsApp, ни на почту', ['Заказ' => $rec['order'],
+      'Телефон' => '+' . clean_txt((string)($to['wa'] ?? $rec['phone']), 16), 'Почта' => clean_txt((string)($to['mail'] ?? ''), 120) ?: '—',
+      'Что' => 'четыре попытки за 3 минуты — проверить GREEN-API и Resend в разделе «Система»; клиент видит ссылку на экране оплаты, но лучше отправить «ещё раз» из вкладки «Отчёты»']);
+  }
 }
 
 /* Выдача в фоне: вебхук ApiPay ждёт ответ не дольше 5 с, а отчёт уходит
@@ -161,9 +224,28 @@ function kaspi_unfulfilled($minAge = 600) {
   $n = 0;
   foreach ((array)@glob(kaspi_dir('orders') . '/*.json') as $f) {
     $j = json_decode((string)@file_get_contents($f), true);
-    if (is_array($j) && ($j['status'] ?? '') === 'paid' && empty($j['fulfilled']) && time() - (int)($j['updated'] ?? 0) > $minAge) $n++;
+    if (!is_array($j) || !in_array($j['status'] ?? '', ['paid', 'partially_refunded'], true)) continue;
+    if (empty($j['fulfilled']) && time() - (int)($j['updated'] ?? 0) > $minAge) $n++;
+    elseif (($j['fulfill_note'] ?? '') === 'db_failed_gave_up') $n++;
   }
   return $n;
+}
+/* Сводка по заказам за N дней — для раздела «Система» в админке. */
+function kaspi_orders_summary($days = 30) {
+  $s = ['total' => 0, 'paid' => 0, 'fulfilled' => 0, 'undelivered' => 0, 'error' => 0, 'expired' => 0, 'cancelled' => 0, 'pending' => 0, 'sandbox' => 0, 'sum_paid' => 0, 'retrying' => 0];
+  foreach ((array)@glob(kaspi_dir('orders') . '/*.json') as $f) {
+    $j = json_decode((string)@file_get_contents($f), true);
+    if (!is_array($j) || (int)($j['created'] ?? 0) < time() - $days * 86400) continue;
+    $s['total']++;
+    $st = (string)($j['status'] ?? '');
+    if ($st === 'paid' || $st === 'partially_refunded') { $s['paid']++; $s['sum_paid'] += (int)($j['amount'] ?? 0); if (!empty($j['fulfilled'])) $s['fulfilled']++; if (!empty($j['deliver_pending'])) $s['undelivered']++; if (($j['fulfill_note'] ?? '') === 'db_failed') $s['retrying']++; }
+    elseif ($st === 'error') $s['error']++;
+    elseif ($st === 'expired') $s['expired']++;
+    elseif ($st === 'cancelled') $s['cancelled']++;
+    else $s['pending']++;
+    if (!empty($j['is_sandbox'])) $s['sandbox']++;
+  }
+  return $s;
 }
 
 function kaspi_log($type, $what, $data) {

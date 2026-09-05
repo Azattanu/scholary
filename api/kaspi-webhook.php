@@ -108,7 +108,7 @@ if (!$rec) {
 
 kaspi_apply_invoice($rec, $inv, 'webhook');
 
-if ($rec['status'] === 'paid') {
+if (in_array($rec['status'], ['paid', 'partially_refunded'], true) && empty($rec['fulfilled'])) {
   /* Выдача — в фоновом самозапросе (до 1.5 с), ответ ApiPay — сразу после. */
   kaspi_fulfill_async($rec, 'webhook');
   echo '{"ok":true}'; exit;

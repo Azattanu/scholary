@@ -63,6 +63,16 @@ if ($a === 'create') {
     kaspi_log('create', 'reuse', ['order' => $prev['order'], 'kind' => $kind]);
     jout(['ok' => true, 'order' => $prev['order'], 'status' => $prev['status'], 'reused' => true, 'amount' => $sum, 'phone' => $phone]);
   }
+  /* Уже оплачено за последние сутки (отчёт по этой заявке или Pro на этот
+     аккаунт): человек перезагрузил страницу до экрана «оплачено» и нажал
+     снова. Второй счёт выставлять нельзя — отдаём оплаченный заказ, экран
+     сразу покажет результат и ссылку на отчёт. Консультация и пакет —
+     отдельные покупки, для них правило не действует. */
+  if ($prev && in_array($prev['status'], ['paid', 'partially_refunded'], true) && ($kind === 'report' || $isPro) && time() - (int)$prev['created'] < 24 * 3600) {
+    kaspi_log('create', 'reuse_paid', ['order' => $prev['order'], 'kind' => $kind]);
+    jout(['ok' => true, 'order' => $prev['order'], 'status' => 'paid', 'reused' => true, 'paid_before' => true, 'amount' => $sum, 'phone' => $phone,
+      'fulfilled' => !empty($prev['fulfilled']), 'report_url' => !empty($prev['report_token']) ? 'https://scholary.kz/report/?t=' . rawurlencode((string)$prev['report_token']) : null]);
+  }
   /* Защита от перебора и спама счетами: 6 счетов в сутки на (IP, номер) —
      и 40 на IP, потому что мобильные операторы сажают тысячи людей на один адрес. */
   $rl = rate_check('kaspi:' . client_ip() . '|' . $phone, 6);
@@ -105,6 +115,9 @@ if ($a === 'create') {
     'created' => time(), 'updated' => time(), 'checked' => 0, 'fulfilled' => false,
     'kaspi_invoice_id' => (string)($j['kaspi_invoice_id'] ?? ''), 'error_code' => '', 'error_message' => '',
     'dupkey' => $dupKey, 'ip' => client_ip(),
+    /* для события CompletePayment в TikTok: оплата придёт вебхуком без браузера */
+    'ua' => substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200),
+    'ttclid' => substr(preg_replace('/[^A-Za-z0-9._\-]/', '', (string)($in['ttclid'] ?? ($_COOKIE['ttclid'] ?? ''))), 0, 200),
   ];
   kaspi_order_save($rec);
   kaspi_log('create', 'ok', ['order' => $order, 'invoice' => $rec['invoice_id'], 'kind' => $kind, 'sum' => $sum, 'sandbox' => $rec['is_sandbox']]);
@@ -122,7 +135,8 @@ if ($a === 'fulfill') {
   ignore_user_abort(true); @set_time_limit(240);
   $rec = kaspi_order_load($order);
   if (!$rec) jout(['ok' => false, 'why' => 'not_found'], 404);
-  if ($rec['status'] === 'paid' && empty($rec['fulfilled'])) kaspi_fulfill($rec, (string)($in['via'] ?? 'async'));
+  if (in_array($rec['status'], ['paid', 'partially_refunded'], true) && empty($rec['fulfilled'])) kaspi_fulfill($rec, (string)($in['via'] ?? 'async'));
+  if (!empty($rec['deliver_pending'])) kaspi_deliver_retry($rec, (string)($in['via'] ?? 'async'));
   jout(['ok' => true, 'fulfilled' => !empty($rec['fulfilled'])]);
 }
 
@@ -145,11 +159,19 @@ if ($a === 'status') {
     }
   }
   /* Оплата найдена поллингом раньше вебхука: выдачу запускаем фоном,
-     клиенту отвечаем сразу. */
-  if ($rec['status'] === 'paid' && empty($rec['fulfilled'])) kaspi_fulfill_async($rec, 'poll');
+     клиенту отвечаем сразу. Пока идёт пауза между повторами (база молчала) —
+     самозапрос не дёргаем. */
+  $isPaid = in_array($rec['status'], ['paid', 'partially_refunded'], true);
+  if ($isPaid && empty($rec['fulfilled']) && (empty($rec['fulfill_retry_after']) || time() >= (int)$rec['fulfill_retry_after'])) kaspi_fulfill_async($rec, 'poll');
+  if (!empty($rec['deliver_pending'])) kaspi_deliver_retry($rec, 'poll');
+  /* Ссылку на отчёт видит только тот, кто знает номер заказа (случайные 16 hex,
+     известны лишь браузеру, выставившему счёт) — это его же покупка. */
+  $reportUrl = ($isPaid && !empty($rec['fulfilled']) && !empty($rec['report_token'])) ? 'https://scholary.kz/report/?t=' . rawurlencode((string)$rec['report_token']) : null;
+  $dl = is_array($rec['deliver'] ?? null) ? ['wa' => !empty($rec['deliver']['wa']), 'mail' => !empty($rec['deliver']['mail'])] : null;
   jout(['ok' => true, 'order' => $order, 'status' => $rec['status'], 'kind' => $rec['kind'], 'amount' => $rec['amount'],
     'error_code' => (string)$rec['error_code'], 'error_message' => (string)$rec['error_message'],
-    'age' => time() - (int)$rec['created'], 'fulfilled' => !empty($rec['fulfilled'])]);
+    'age' => time() - (int)$rec['created'], 'fulfilled' => !empty($rec['fulfilled']),
+    'report_url' => $reportUrl, 'delivered' => $dl, 'retrying' => ($isPaid && empty($rec['fulfilled']) && ($rec['fulfill_note'] ?? '') === 'db_failed')]);
 }
 
 jout(['error' => 'bad_action'], 400);

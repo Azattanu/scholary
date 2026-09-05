@@ -40,8 +40,11 @@ function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $tes
              'p_amount' => $sum, 'p_plan' => $plan, 'p_test' => $test]);
     $granted = is_array($r) && !empty($r['ok']);
     $out['granted'] = $granted;
+    /* База не ответила (null) — это не «аккаунта нет», а сбой: вызывающий код
+       повторит выдачу позже, владельцу пока не пишем, чтобы не звать выдавать руками зря. */
+    if ($r === null) { $out['db_failed'] = true; tt_log('pay', 'db_failed', ['kind' => $kind, 'txn' => $txn, 'via' => $provider]); return $out; }
     if (tt_once('pro-' . $txn)) {
-      if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $who, 'external_id' => (string)$txn, 'url' => 'https://scholary.kz/cabinet/'], 'pay_' . $txn);
+      if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $who, 'external_id' => (string)$txn, 'url' => 'https://scholary.kz/cabinet/', 'ttclid' => (string)($buyer['ttclid'] ?? ''), 'ip' => (string)($buyer['ip'] ?? ''), 'user_agent' => (string)($buyer['ua'] ?? '')], 'pay_' . $txn);
       notify_owner(($test ? 'Оплачена подписка Pro (ТЕСТ)' : 'Оплачена подписка Pro') . ' · ' . $label, [
         'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
         'План'       => $plan === 'season' ? 'сезон (183 дня)' : 'месяц (31 день)',
@@ -59,15 +62,35 @@ function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $tes
      отчёт — иначе консультация без отчёта попадает в срочный список
      «оплатил, а отчёта нет». Услуги идут в журнал платежей с привязкой к лиду. */
   $res = ($leadOk && $kind === 'report') ? tt_mark($lead, $txn, $sum, $email, $kind, 'success', $test) : null;
-  tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $leadOk ? $lead : null, 'p_email' => $email,
+  $logRes = tt_rpc('tiptop_log_payment', ['p_txn' => (string)$txn, 'p_lead' => $leadOk ? $lead : null, 'p_email' => $email,
     'p_amount' => $sum, 'p_kind' => $kind, 'p_status' => 'success', 'p_test' => $test]);
   $out['marked'] = $res;
+  /* База не ответила: ни отметки оплаты, ни журнала. Выдавать «вслепую» нельзя —
+     отчёт не создать, а покупка потеряется из витрин. Возвращаем db_failed,
+     вызывающий код повторит выдачу через полминуты (все RPC идемпотентны по txn). */
+  if ($logRes === null && ($res === false || $res === null)) {
+    $out['db_failed'] = true;
+    tt_log('pay', 'db_failed', ['kind' => $kind, 'txn' => $txn, 'via' => $provider]);
+    return $out;
+  }
 
   $repNote = null;
   if ($kind === 'report' && $leadOk) {
     $rep = tt_rpc('tiptop_issue_report', ['p_lead' => $lead]);
+    if ($rep === null) {
+      /* сама отметка прошла, а выпуск отчёта не ответил — тоже повторим позже */
+      $out['db_failed'] = true;
+      tt_log('pay', 'db_failed', ['kind' => $kind, 'txn' => $txn, 'via' => $provider, 'step' => 'issue_report']);
+      return $out;
+    }
     if (is_array($rep) && !empty($rep['ok']) && !empty($rep['token'])) {
       $sentR = ['whatsapp' => false, 'email' => false];
+      /* кому и по какой ссылке ушёл отчёт — чтобы заказ мог повторить доставку
+         и показать ссылку на экране «оплачено», если оба канала молчат */
+      $out['report_token'] = (string)$rep['token'];
+      $out['report_to'] = ['name' => (string)($rep['name'] ?? ''),
+        'wa' => $test ? (string)($c['OWNER_WA'] ?? '') : (string)($rep['whatsapp'] ?? ''),
+        'mail' => $test ? (string)($c['MAIL_TO'] ?? '') : (string)($rep['email'] ?? ($email ?: ''))];
       if (tt_once('report-' . $txn)) {
         /* Тестовый платёж не должен выдавать бесплатный отчёт клиенту:
            ссылка уходит только владельцу. */
@@ -116,7 +139,7 @@ function pay_fulfill($provider, $kind, $sum, $txn, $lead, $email, $account, $tes
   }
 
   if (tt_once('paid-' . $txn)) {
-    if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $email, 'phone' => (string)($buyer['phone'] ?? ''), 'external_id' => (string)$txn, 'url' => $svcNote !== null ? 'https://scholary.kz/tariffs/' : 'https://scholary.kz/quiz/'], 'pay_' . $txn);
+    if (!$test) tt_api_event('CompletePayment', ['value' => $sum, 'currency' => 'KZT', 'contents' => [['content_id' => $kind, 'content_type' => 'product', 'price' => $sum, 'quantity' => 1]]], ['email' => $email, 'phone' => (string)($buyer['phone'] ?? ''), 'external_id' => (string)$txn, 'url' => $svcNote !== null ? 'https://scholary.kz/tariffs/' : 'https://scholary.kz/quiz/', 'ttclid' => (string)($buyer['ttclid'] ?? ''), 'ip' => (string)($buyer['ip'] ?? ''), 'user_agent' => (string)($buyer['ua'] ?? '')], 'pay_' . $txn);
     notify_owner(($test ? 'Оплата прошла (ТЕСТ)' : 'Оплата прошла') . ' · ' . $label, [
       'Сумма'      => number_format($sum, 0, '.', ' ') . ' ₸',
       'За что'     => tt_kind_ru($kind),
@@ -288,6 +311,12 @@ function tt_once($key) {
     if (@filemtime($old) < time() - 30 * 86400) @unlink($old);
   }
   return true;
+}
+
+/* Снять замок tt_once — для повторной выдачи, когда первая попытка упала. */
+function tt_forget($key) {
+  $f = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiptop/seen-' . substr(hash('sha256', $key), 0, 32) . '.flag';
+  return @unlink($f);
 }
 
 function tt_log($type, $what, $data) {
