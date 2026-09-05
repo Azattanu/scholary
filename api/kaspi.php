@@ -168,9 +168,13 @@ if ($a === 'status') {
      известны лишь браузеру, выставившему счёт) — это его же покупка. */
   $reportUrl = ($isPaid && !empty($rec['fulfilled']) && !empty($rec['report_token'])) ? 'https://scholary.kz/report/?t=' . rawurlencode((string)$rec['report_token']) : null;
   $dl = is_array($rec['deliver'] ?? null) ? ['wa' => !empty($rec['deliver']['wa']), 'mail' => !empty($rec['deliver']['mail'])] : null;
+  /* txn — тот же идентификатор платежа, что в payments и в серверном событии
+     TikTok (pay_<txn>): браузерный пиксель шлёт CompletePayment с тем же
+     event_id, и TikTok считает покупку один раз, а не дважды. */
   jout(['ok' => true, 'order' => $order, 'status' => $rec['status'], 'kind' => $rec['kind'], 'amount' => $rec['amount'],
     'error_code' => (string)$rec['error_code'], 'error_message' => (string)$rec['error_message'],
     'age' => time() - (int)$rec['created'], 'fulfilled' => !empty($rec['fulfilled']),
+    'txn' => ((int)$rec['invoice_id'] > 0 ? 'kaspi_' . (int)$rec['invoice_id'] : null),
     'report_url' => $reportUrl, 'delivered' => $dl, 'retrying' => ($isPaid && empty($rec['fulfilled']) && ($rec['fulfill_note'] ?? '') === 'db_failed')]);
 }
 
