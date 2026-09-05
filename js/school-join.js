@@ -135,7 +135,7 @@ function __schoolJoinMain() {
     var grade = $("cl-grade").value, letter = $("cl-letter").value.trim().toUpperCase().replace(/[ABCEHKMOPTXY]/g, function (ch) { return LAT[ch]; });
     var cls = grade === "other" ? letter : (grade + letter);
     var btn = $("joinBtn"); btn.disabled = true; btn.textContent = "Открываю доступ…";
-    sb.rpc("school_join", { p_code: S.code, p_grade: grade, p_class: cls, p_name: name }).then(function (r) {
+    sb.rpc("school_join", { p_code: S.code, p_grade: grade, p_class: cls, p_name: name, p_parent_phone: ($("cl-parent") && $("cl-parent").value.trim()) || null }).then(function (r) {
       btn.disabled = false; btn.textContent = "Получить доступ";
       var j = r.data;
       if (r.error || !j || !j.ok) {
