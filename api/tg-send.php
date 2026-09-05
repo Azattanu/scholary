@@ -44,7 +44,7 @@ $items = is_array($j['items'] ?? null) ? $j['items'] : [];
    этой неделе не было ни одного действия. Обещание «не больше одного
    сообщения в день» держим: если человеку сегодня уходит письмо о дедлайне,
    недельная часть приклеивается к нему, а не идёт отдельным сообщением.
-   ?kind=digest|nudge — принудительно (для проверки), ?dry=1 — не отправлять. */
+   ?kind=digest|nudge|ws — принудительно (для проверки), ?dry=1 — не отправлять. */
 $dowKz = (int)gmdate('N', time() + 5 * 3600);   // 1 = понедельник
 $forceKind = (string)($_GET['kind'] ?? '');
 $weekKind = $forceKind === 'digest' || $forceKind === 'nudge' ? $forceKind : ($dowKz === 1 ? 'digest' : ($dowKz === 4 ? 'nudge' : ''));
@@ -60,6 +60,35 @@ if ($weekKind !== '') {
 }
 $weekByChat = [];
 foreach ($weekItems as $it) { $chat = (string)($it['chat_id'] ?? ''); if ($chat !== '') $weekByChat[$chat] = $it; }
+
+/* web-75 · дайджест профориентологу по понедельникам (workspace): дедлайны недели,
+   встречи, просроченное, кто без следующего шага. Тот же лимит «одно сообщение в день». */
+$wsKind = $forceKind === 'ws' || ($forceKind === '' && $dowKz === 1);
+$wsItems = []; $wsMs = 0; $wsStart = '';
+if ($wsKind) {
+  $rws = tgs_rpc($c, 'ws_digest_due', ['p_secret' => $c['TIPTOP_RPC_SECRET']]);
+  $jws = is_array($rws['json']) ? $rws['json'] : null;
+  if ($jws && !empty($jws['ok'])) { $wsItems = is_array($jws['items'] ?? null) ? $jws['items'] : []; $wsMs = (int)($jws['milestone'] ?? 110); $wsStart = (string)($jws['week_start'] ?? ''); }
+}
+$wsByChat = [];
+foreach ($wsItems as $it) { $chat = (string)($it['chat_id'] ?? ''); if ($chat !== '') $wsByChat[$chat] = $it; }
+
+function ws_text($it) {
+  $name = trim((string)($it['name'] ?? '')); $name = $name !== '' ? explode(' ', $name)[0] : 'Коллега';
+  $n = (int)($it['students'] ?? 0); $dl7 = (int)($it['deadlines_7'] ?? 0); $dl45 = (int)($it['deadlines_45'] ?? 0); $od = (int)($it['overdue'] ?? 0); $mt = (int)($it['meetings'] ?? 0); $ns = (int)($it['no_step'] ?? 0); $idle = (int)($it['idle'] ?? 0);
+  $lines = [$name . ', план недели по workspace (' . $n . ' ' . plural_ru($n, 'ученик', 'ученика', 'учеников') . '):', ''];
+  $lines[] = '• Дедлайнов на этой неделе: <b>' . $dl7 . '</b>' . ($dl45 ? ' · в 45 дней: ' . $dl45 : '');
+  if ($od) $lines[] = '• Просроченных задач: <b>' . $od . '</b>';
+  if ($mt) $lines[] = '• Встреч с семьями: <b>' . $mt . '</b>';
+  if ($ns) $lines[] = '• Без следующего шага: <b>' . $ns . '</b> — назначьте по одному в «Неделе»';
+  if ($idle) $lines[] = '• Без касания 14+ дней: <b>' . $idle . '</b>';
+  if (!$od && !$ns && !$dl7) $lines[] = '• Срочного нет — хорошее время для статусов семьям';
+  $lines[] = '';
+  $lines[] = 'Открыть неделю: https://scholary.kz/prof/cabinet/?from=tg#/week';
+  $lines[] = '';
+  $lines[] = 'Отключить: Настройки → «Мой ритм» или /stop';
+  return implode("\n", $lines);
+}
 
 /* $short — часть письма, которое уже начинается с обращения и ссылки на кабинет:
    без повторного имени и без второй ссылки. */
@@ -100,8 +129,8 @@ function plural_ru($n, $a, $b, $c) {
   $x = $n % 10;  return $x === 1 ? $a : ($x > 1 && $x < 5 ? $b : $c);
 }
 
-$sent = 0; $failed = 0; $weekSent = 0; $preview = null;
-$chats = array_values(array_unique(array_merge(array_keys($byChat), array_keys($weekByChat))));
+$sent = 0; $failed = 0; $weekSent = 0; $wsSent = 0; $preview = null;
+$chats = array_values(array_unique(array_merge(array_keys($byChat), array_keys($weekByChat), array_keys($wsByChat))));
 foreach ($chats as $chat) {
   $list = $byChat[$chat] ?? [];
   $msg = '';
@@ -135,6 +164,8 @@ foreach ($chats as $chat) {
     /* к письму о дедлайне добавляем короткую недельную часть: без повтора имени и ссылки */
     $msg = $msg === '' ? week_text($wi, $weekKind) : $msg . "\n\n— — —\n\n" . week_text($wi, $weekKind, true);
   }
+  $wsi = $wsByChat[$chat] ?? null;
+  if ($wsi) { $wt2 = ws_text($wsi); $msg = $msg === '' ? $wt2 : $msg . "\n\n— — —\n\n" . preg_replace('~\n\nОтключить: [^\n]+$~u', '', $wt2); }
   if ($msg === '') continue;
   if (strpos($msg, '/stop') === false) $msg .= "\n\nОтключить напоминания: /stop";
   if ($preview === null) $preview = $msg;
@@ -167,6 +198,13 @@ foreach ($chats as $chat) {
         'p_program' => 'week:' . $weekStart, 'p_milestone' => $weekMs,
       ]);
     }
+    if ($wsi) {
+      $wsSent++;
+      tgs_rpc($c, 'tg_mark_sent', [
+        'p_secret' => $c['TIPTOP_RPC_SECRET'], 'p_user' => $wsi['user_id'],
+        'p_program' => 'ws:' . $wsStart, 'p_milestone' => $wsMs,
+      ]);
+    }
   }
   usleep(120000);   // ~8 сообщений в секунду: лимит Telegram — 30
 }
@@ -174,4 +212,5 @@ foreach ($chats as $chat) {
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['ok' => true, 'people' => count($chats), 'sent' => $sent, 'failed' => $failed, 'items' => count($items),
   'week' => ['kind' => $weekKind, 'people' => count($weekByChat), 'sent' => $weekSent, 'dry' => $dry],
+  'ws' => ['on' => $wsKind, 'people' => count($wsByChat), 'sent' => $wsSent],
   'preview' => $dry ? $preview : null], JSON_UNESCAPED_UNICODE);
