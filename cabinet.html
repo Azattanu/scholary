@@ -212,7 +212,9 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .lst:last-child{border-bottom:none}
 .lst.wide{border:none;padding:10px;border-radius:12px;cursor:pointer}
 .lst.wide:hover{background:var(--bg)}
-.cbox{width:24px;height:24px;border-radius:8px;border:1.5px solid #C9C9D2;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:#fff}
+.cbox{width:24px;height:24px;border-radius:8px;border:1.5px solid #C9C9D2;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:#fff;position:relative}
+/* тап-зона ≥44px у мелких контролов задач: сам квадрат маленький, зона нажатия — нет */
+.cbox::after,.when::after,.task .lnk::after{content:"";position:absolute;inset:-6px}.cbox::after{inset:-10px}.when,.task .lnk{position:relative}
 .cbox.on{background:var(--ok);border-color:var(--ok)}
 .okmark,.warnmark{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff}
 .okmark{background:var(--ok)} .warnmark{background:var(--warn)}
@@ -243,6 +245,79 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
 .xs{font-size:12px} .sm{font-size:13.5px}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid #E5E5EA;border-top-color:var(--accent);border-radius:999px;animation:spin .8s linear infinite;flex-shrink:0}@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== web-74: неделя сезона, задачи, путь, кольца, календарь, сетка документов, discover ===== */
+.wk-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px}
+.task-list{padding:6px 14px}
+.task{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
+.task:last-child{border-bottom:none}
+.task .cbox{margin-top:2px}
+.task-b{flex:1;min-width:0}
+.task-t b{display:block;font-size:15px;line-height:1.3}
+.task-k{display:block;letter-spacing:.04em;text-transform:uppercase;font-weight:700;font-size:10.5px;margin-bottom:2px}
+.task-a{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.task.done .task-t b{text-decoration:line-through;color:var(--muted)}
+.task.done .task-t .xs{display:none}
+.task.skipped .task-t b{color:var(--muted)}
+.task.hl{background:var(--accent-soft);margin:0 -14px;padding-left:14px;padding-right:14px;border-radius:12px}
+.when{display:inline-flex;align-items:center;min-height:32px;padding:0 11px;border-radius:999px;border:1px dashed #C9C9D2;font-size:12.5px;font-weight:650;color:var(--muted);cursor:pointer;white-space:nowrap}
+.when.on{border-style:solid;border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft)}
+.lnk{background:none;border:none;color:var(--accent-dark);font-weight:700;cursor:pointer;padding:6px 8px;min-height:32px;font-family:inherit;white-space:nowrap}
+.path-parts{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:12px;color:var(--muted);font-weight:600}
+.path-parts .ok{color:var(--ok)}
+.rings{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}
+.ring3{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 6px;font-family:inherit;color:var(--ink)}
+.ring3 b{white-space:nowrap}
+.ach-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.ach{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;background:var(--ok-soft);color:var(--ok);font-size:12.5px;font-weight:700;white-space:nowrap}
+.cont{margin-bottom:12px;background:linear-gradient(135deg,#FFFFFF,#F3F1FF);border-color:var(--accent-border)}
+/* календарь */
+.cal{margin-top:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-head b{font-size:14px}
+.cal-head .iconbtn{width:34px;height:34px;font-size:18px;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-wd{font-size:10.5px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase;padding:2px 0 4px}
+.cal-d{position:relative;aspect-ratio:1/1;min-height:34px;border:none;background:none;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;padding:0}
+.cal-d.empty{cursor:default}
+.cal-d.today{background:var(--accent);color:#fff}
+.cal-d.has{font-weight:800}
+.cal-d i{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#B8B8C6}
+.cal-d i.mine{background:var(--accent);box-shadow:0 0 0 1.5px #fff}
+.cal-d.today i.mine{background:#fff}
+.cal-d i.cat:not(.mine){background:#B8B8C6}
+.cal-lg{display:inline-block;width:8px;height:8px;border-radius:50%;background:#B8B8C6;vertical-align:middle}
+.cal-lg.mine{background:var(--accent)}
+.cal-sel{margin-top:8px;border-top:1px solid var(--border);padding-top:4px}
+/* документы: сетка */
+.dstats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.dstats span{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);font-weight:600}
+.dstats b{font-size:18px;color:var(--ink);letter-spacing:-0.02em;line-height:1.1}
+.dgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:700px){.dgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1240px){.dgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.dcard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;min-height:150px;font-family:inherit;color:var(--ink);cursor:pointer}
+.dcard:active{transform:scale(.99)}
+.dcard-top{display:flex;justify-content:space-between;align-items:center;width:100%;gap:6px;margin-bottom:4px}
+.dic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.dcard-t{font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dcard-m,.dcard-l{line-height:1.3}
+.dcard-l .bad{color:var(--bad);font-weight:700}
+/* discover */
+.scrollx{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.scrollx::-webkit-scrollbar{display:none}
+.scrollx .chip{flex-shrink:0}
+.chip .mut{color:var(--muted);font-weight:600}
+.disc-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.disc-scroll::-webkit-scrollbar{display:none}
+.disc-card{flex:0 0 250px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 14px}
+.badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;background:var(--bg);color:var(--ink-soft);font-size:11.5px;font-weight:650;white-space:nowrap}
+.badge.warn{background:var(--warn-soft);color:var(--warn)} .badge.bad{background:var(--bad-soft);color:var(--bad)}
+.fund{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(min-width:1100px){.disc-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.disc-card{flex:auto}.disc-scroll .disc-card:nth-child(n+5){display:none}}
+@media(min-width:1240px){.topbar,.screen{max-width:640px}}
+@media(prefers-reduced-motion:reduce){.task,.dcard,.ring3{transition:none}}
 </style>
 </head>
 <body>
@@ -427,12 +502,13 @@ label.fl{display:block;font-size:13px;font-weight:650;color:var(--ink-soft);marg
   setTimeout(fail, 6000);   // молчаливый таймаут: сеть может просто зависнуть
 })();
 </script>
-<script src="/js/config.js?v=73"></script>
-<script src="/js/telemetry.js?v=73"></script>
-<script src="/js/report-engine.js?v=73"></script>
-<script src="/js/app.js?v=73"></script>
-<script src="/js/doc-rules.js?v=73"></script>
-<script src="/js/cabinet2.js?v=73"></script>
+<script src="/js/config.js?v=74"></script>
+<script src="/js/telemetry.js?v=74"></script>
+<script src="/js/report-engine.js?v=74"></script>
+<script src="/js/app.js?v=74"></script>
+<script src="/js/doc-rules.js?v=74"></script>
+<script src="/js/cabinet-path.js?v=74"></script>
+<script src="/js/cabinet2.js?v=74"></script>
 <!-- Счётчик Яндекс.Метрики для посетителей без JavaScript.
      Сам счётчик подключается в js/telemetry.js. -->
 <noscript><div><img src="https://mc.yandex.ru/watch/111376927" style="position:absolute; left:-9999px;" alt=""></div></noscript>
