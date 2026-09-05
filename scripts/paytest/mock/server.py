@@ -38,6 +38,10 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/green/waInstance"):
             if STATE.get("fail_wa"): STATE.setdefault("wa_failed", []).append(b); return self._json(500, {"error":"wa down"})
             STATE.setdefault("wa", []).append(b); return self._json(200, {"idMessage": "m1"})
+        if self.path == "/tiktok/open_api/v1.3/event/track/":
+            if self.headers.get("Access-Token") != "tt-test-token": return self._json(401, {"code": 40105, "message": "Access token is incorrect"})
+            if STATE.get("fail_tt"): return self._json(500, {"code": 50000, "message": "tiktok down"})
+            STATE.setdefault("tt", []).append(b); return self._json(200, {"code": 0, "message": "OK", "request_id": "r1"})
         if self.path == "/resend/emails":
             if STATE.get("fail_mail"): STATE.setdefault("mail_failed", []).append(b); return self._json(500, {"error":"mail down"})
             STATE.setdefault("mail", []).append(b); return self._json(200, {"id": "e1"})
@@ -45,6 +49,6 @@ class H(http.server.BaseHTTPRequestHandler):
             if "invoices" in b: b["invoices"] = {int(k): v for k, v in b["invoices"].items()}
             STATE.update(b); return self._json(200, {"ok": True})
         if self.path == "/__reset":
-            STATE["invoices"].clear(); STATE["rpc"].clear(); LOG.clear(); STATE["fail_create"]=None; STATE["fail_rpc"]=False; STATE["fail_wa"]=False; STATE["fail_mail"]=False; STATE["rpc_failed"]=[]; STATE["wa_failed"]=[]; STATE["mail_failed"]=[]; STATE["invoice_get_fail"]=False; STATE["wa"]=[]; STATE["mail"]=[]; STATE["no_id"]=False; return self._json(200, {"ok": True})
+            STATE["invoices"].clear(); STATE["rpc"].clear(); LOG.clear(); STATE["fail_create"]=None; STATE["fail_rpc"]=False; STATE["fail_wa"]=False; STATE["fail_mail"]=False; STATE["rpc_failed"]=[]; STATE["wa_failed"]=[]; STATE["mail_failed"]=[]; STATE["invoice_get_fail"]=False; STATE["wa"]=[]; STATE["mail"]=[]; STATE["no_id"]=False; STATE["tt"]=[]; STATE["fail_tt"]=False; return self._json(200, {"ok": True})
         return self._json(404, {})
 http.server.ThreadingHTTPServer(("127.0.0.1", 8131), H).serve_forever()
