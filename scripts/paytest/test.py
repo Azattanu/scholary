@@ -323,6 +323,32 @@ of = order_file(j["order"]); ok(of.get("ttclid") == "E.C.P.abc-123" and of.get("
 c, j = req(API + "/kaspi.php?a=create", "POST", {"kind": "report", "phone": "+7 705 100 20 35", "email": "", "lead": "lead_ttclid000002"}, headers={"Cookie": "ttclid=E.C.P.cookie"})
 ok(order_file(j["order"]).get("ttclid") == "E.C.P.cookie", "без ttclid в теле берётся cookie")
 
+
+# ---------- 20. серверное событие TikTok CompletePayment: уходит с ttclid, ответ пишется в журнал ----------
+mock_reset()
+c, j = req(API + "/kaspi.php?a=create", "POST", {"kind": "report", "phone": "+7 705 100 20 36", "email": "tt@example.com", "lead": "lead_ttclid000003", "ttclid": "E.C.P.live-777"}, headers={"User-Agent": "BuyerPhone/2.0"})
+o20 = j["order"]; i20 = order_file(o20)["invoice_id"]
+c, w = webhook(inv_event(i20, "paid", o20)); time.sleep(1.5)
+tt = mock_state()["state"].get("tt", [])
+ok(len(tt) == 1 and tt[0]["data"][0]["event"] == "CompletePayment" and tt[0]["event_source_id"] and "test_event_code" not in tt[0], "после оплаты в TikTok ушло одно CompletePayment без test_event_code")
+u = tt[0]["data"][0]["user"] if tt else {}
+ok(u.get("ttclid") == "E.C.P.live-777" and u.get("user_agent") == "BuyerPhone/2.0" and len(u.get("email", "")) == 64 and len(u.get("phone", "")) == 64 and "tt@example.com" not in json.dumps(tt), "в событии ttclid и браузер покупателя, почта/телефон только SHA-256")
+pr = tt[0]["data"][0]["properties"] if tt else {}
+ok(pr.get("value") == 4000 and pr.get("currency") == "KZT" and pr.get("contents", [{}])[0].get("content_id") == "report", "value 4000 KZT, contents.content_id=report")
+ok(tt[0]["data"][0]["event_id"] == "pay_kaspi_" + str(i20), "event_id = pay_<txn> — дедуп с браузерным событием")
+logs = glob.glob(PRIV + "/tiktok/events-*.log")
+rows = [json.loads(l) for l in open(logs[0])] if logs else []
+last = rows[-1] if rows else {}
+ok(bool(rows) and last.get("event") == "CompletePayment" and last.get("code") == 0 and last.get("ttclid") == 1 and last.get("test") == 0 and "tt@example.com" not in open(logs[0]).read(), "журнал /private/tiktok: CompletePayment code 0, ttclid=1, без персональных данных")
+c, w = webhook(inv_event(i20, "paid", o20)); time.sleep(1.0)
+ok(len(mock_state()["state"].get("tt", [])) == 1, "повтор вебхука → второго события в TikTok нет")
+mock_set(fail_tt=True)
+c, j = create(phone="+7 705 100 20 37", lead="lead_ttclid000004"); o21 = j["order"]; i21 = order_file(o21)["invoice_id"]
+c, w = webhook(inv_event(i21, "paid", o21)); time.sleep(1.5)
+of21 = order_file(o21); rows = [json.loads(l) for l in open(glob.glob(PRIV + "/tiktok/events-*.log")[0])]
+ok(of21["fulfilled"] and rows[-1].get("code") == 50000 and rows[-1].get("http") == 500, "TikTok упал → отчёт всё равно выдан, в журнале ошибка 50000")
+mock_set(fail_tt=False)
+
 # ---------- 11. чистота: ключ API не утекает ----------
 c, s = status(o9); ok("testkey" not in json.dumps(s) and "whsecret" not in json.dumps(s), "в ответах нет ключей")
 print("\n" + ("FAILS: %d" % fails if fails else "ALL PASSED"))
