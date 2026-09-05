@@ -1501,7 +1501,7 @@ function __scholaryMain() {
      аккаунта — иначе непонятно, кому продлевать. */
   function payPro(plan, method) {
     var season = plan === "season";
-    var amount = season ? 14900 : 4990;
+    var amount = season ? (C.PRICE_PRO_SEASON || 14900) : (C.PRICE_PRO_MONTH || 4990);
     var email = (S.session && S.session.user && S.session.user.email) || "";
     var cardOk = !!(window.scholaryTerminalReady && window.scholaryTerminalReady());
     var kaspiOk = !!(window.scholaryKaspiReady && window.scholaryKaspiReady());
@@ -1571,7 +1571,7 @@ function __scholaryMain() {
   function stopKaspiPro() { if (kaspiProCtl) { try { kaspiProCtl.stop(); } catch (e) {} kaspiProCtl = null; } }
   function openKaspiPro(plan) {
     var season = plan === "season";
-    var amount = season ? 14900 : 4990;
+    var amount = season ? (C.PRICE_PRO_SEASON || 14900) : (C.PRICE_PRO_MONTH || 4990);
     var email = (S.session && S.session.user && S.session.user.email) || "";
     var phone0 = (S.profile && S.profile.whatsapp) || "";
     var st = { phase: "ask", status: "", code: "", msg: "", phone: phone0 };
@@ -1599,6 +1599,7 @@ function __scholaryMain() {
         else if (st.status === "expired") { t = "Срок счёта истёк"; d = "Счёт действовал 24 часа. Выставим новый."; }
         else if (st.status === "cancelled") { t = "Счёт отменён"; d = "Оплата не подтверждена в Kaspi. Деньги не списаны."; }
         else if (st.code === "rate") { t = "Слишком много попыток"; d = "Открой Kaspi → Платежи → Счета: оплатить можно любой из них."; }
+        else if (st.code === "poll_lost") { t = "Связь с сервером прервалась"; d = "Счёт уже выставлен. Если ты его оплатил — Pro включится сам в течение минуты: обнови страницу. Повторное нажатие новый счёт не выставит."; }
         else if (!st.msg) { t = "Kaspi временно недоступен"; d = "Попробуй через минуту или напиши нам в WhatsApp."; }
         body = '<div class="card"><b>' + esc(t) + '</b><p class="xs mut" style="margin:4px 0 10px">' + esc(d) + '</p>' +
           '<button class="btn btn-block" style="background:#E5442F;color:#fff" data-act="kaspi-pro-change">' + (st.code === "client_not_found" ? "Указать другой номер" : "Попробовать ещё раз") + '</button>' +

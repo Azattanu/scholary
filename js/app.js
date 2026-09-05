@@ -337,13 +337,16 @@
   window.scholaryKaspiReady = function () { return !!(window.SCHOLARY_CONFIG || {}).KASPI_ON; };
   window.scholaryKaspi = function (o) {
     o = o || {};
-    var stopped = false, timer = null, started = Date.now(), bad = 0;
+    var stopped = false, timer = null, started = Date.now(), bad = 0, created = !!o.order, curOrder = o.order || "", paidAt = 0, doneFired = false;
     var api = (window.SCHOLARY_CONFIG || {}).KASPI_URL || "/api/kaspi.php";
     function stop() { stopped = true; if (timer) clearTimeout(timer); }
     /* Сервер молчит или отвечает ошибкой 8 раз подряд — не крутим спиннер
-       вечно, показываем «временно недоступен». Счёт живёт сутки: после
-       этого тоже останавливаемся. */
-    function failed(why) { bad++; if (bad >= 8) { stop(); if (o.onError) o.onError(why, ""); return true; } return false; }
+       вечно. Если счёт уже выставлен, это «связь прервалась», а не «Kaspi
+       недоступен»: человек мог уже оплатить, и экран не должен пугать. */
+    function failed(why) { bad++; if (bad >= 8) { stop(); if (o.onError) o.onError(created ? "poll_lost" : why, "", curOrder); return true; } return false; }
+    /* Оплата видна, но отчёт ещё выдаётся в фоне (1–20 с): ждём fulfilled,
+       чтобы отдать экрану ссылку на отчёт. Не дольше двух минут. */
+    function finish(j) { if (doneFired) return; doneFired = true; stop(); if (o.onFulfilled) o.onFulfilled(j || {}); }
     function poll(order, delay) {
       if (stopped) return;
       timer = setTimeout(function () {
@@ -357,10 +360,18 @@
             bad = 0;
             var st = j.status;
             if (st === "partially_refunded") st = "paid";   /* деньги были — покупка выдана; частичный возврат доступ не снимает */
+            if (st === "paid") {
+              if (!paidAt) {
+                paidAt = Date.now();
+                if (window.track) window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: "kaspi_" + order });
+                if (o.onStatus) o.onStatus(st, j);
+              }
+              if (j.fulfilled || Date.now() - paidAt > 120000) { finish(j); return; }
+              poll(order, 3000); return;
+            }
             if (o.onStatus) o.onStatus(st, j);
-            if (st === "paid" || st === "cancelled" || st === "expired" || st === "error" || st === "partially_refunded") {
-              if (window.track && st === "paid") window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: "kaspi_" + order });
-              if (window.track && st !== "paid") window.track("pay_result", { type: "kaspi", status: st, kind: o.kind || "" });
+            if (st === "cancelled" || st === "expired" || st === "error") {
+              if (window.track) window.track("pay_result", { type: "kaspi", status: st, kind: o.kind || "" });
               stop(); return;
             }
             /* первые 10 минут — каждые 3 с, дальше реже: счёт живёт сутки */
@@ -369,23 +380,35 @@
           .catch(function () { if (!failed("network")) poll(order, 6000); });
       }, delay);
     }
+    if (o.order) {
+      /* продолжить опрос уже выставленного счёта (связь прерывалась, страница перезагружена) */
+      poll(o.order, 300);
+      return { stop: stop, order: function () { return curOrder; } };
+    }
     if (window.track) window.track("pay_widget_open", { kind: o.kind || "report", amount: o.amount, via: "kaspi" });
     fetch(api + "?a=create", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: o.kind || "report", phone: o.phone || "", email: o.email || "", lead: o.lead || "", account: o.account || "", name: o.name || "" })
+      body: JSON.stringify({ kind: o.kind || "report", phone: o.phone || "", email: o.email || "", lead: o.lead || "", account: o.account || "", name: o.name || "", ttclid: (utm() || {}).ttclid || "" })
     }).then(function (r) { return r.json().then(function (j) { j._http = r.status; return j; }); })
       .then(function (j) {
         if (stopped) return;
         if (!j || !j.ok) {
           if (window.track) window.track("pay_widget_error", { why: "kaspi_" + ((j && j.why) || "http"), via: "kaspi" });
-          if (o.onError) o.onError((j && j.why) || "http", (j && j.message) || "");
+          if (o.onError) o.onError((j && j.why) || "http", (j && j.message) || "", "");
           return;
         }
+        created = true; curOrder = j.order;
         if (o.onCreated) o.onCreated(j);
-        poll(j.order, 2500);
+        if (j.paid_before) {
+          /* сервер узнал оплаченный за сутки счёт по этой же покупке — второй не выставляем */
+          paidAt = Date.now();
+          if (o.onStatus) o.onStatus("paid", j);
+          if (j.fulfilled) { finish(j); return; }
+        }
+        poll(j.order, j.paid_before ? 1500 : 2500);
       })
-      .catch(function () { if (o.onError) o.onError("network", ""); });
-    return { stop: stop };
+      .catch(function () { if (o.onError) o.onError("network", "", ""); });
+    return { stop: stop, order: function () { return curOrder; } };
   };
 
   /* ---------- Покупка консультации / пакета через Kaspi ----------
@@ -463,18 +486,20 @@
       kpSave(ctx);
       start();
     }
-    function start() {
-      renderWait("creating");
+    var kpOrder = "";
+    function start(resumeOrder) {
+      renderWait(resumeOrder ? "pending" : "creating");
       kpStop();
       kpCtl = window.scholaryKaspi({
         kind: kind, amount: amount, phone: "+" + ctx.phone, email: ctx.email, name: ctx.name, lead: (window.scholaryLeadId ? window.scholaryLeadId() : ""),
-        onCreated: function (j) { renderWait(j.status === "pending" ? "pending" : "processing"); },
+        order: resumeOrder || "",
+        onCreated: function (j) { kpOrder = j.order || ""; renderWait(j.status === "pending" ? "pending" : "processing"); },
         onStatus: function (st, j) {
           if (st === "paid") { kpStop(); renderDone(); return; }
           if (st === "error" || st === "expired" || st === "cancelled") { kpStop(); renderError(j); return; }
           var s = body.querySelector("#kpStatus"); if (s) s.lastChild.textContent = st === "pending" ? "Счёт выставлен — ждём оплату в Kaspi" : "Отправляем счёт в Kaspi…";
         },
-        onError: function (why, msg) { kpStop(); renderError({ status: "create_failed", error_code: why, error_message: msg }); }
+        onError: function (why, msg, order) { kpStop(); if (order) kpOrder = order; renderError({ status: "create_failed", error_code: why, error_message: msg }); }
       });
     }
     function renderWait(state) {
@@ -505,6 +530,7 @@
       else if (st === "expired") { title = "Срок счёта истёк"; text = "Счёт в Kaspi действовал 24 часа. Ничего страшного — выставим новый."; }
       else if (st === "cancelled") { title = "Счёт отменён"; text = "Оплата не подтверждена в Kaspi. Деньги не списаны — можно выставить счёт заново."; }
       else if (code === "rate") { title = "Слишком много попыток"; text = "Мы выставили несколько счетов подряд. Открой Kaspi → Платежи → Счета: оплатить можно любой из них, или напиши нам."; }
+      else if (code === "poll_lost") { title = "Связь с сервером прервалась"; text = "Счёт в Kaspi уже выставлен. Если ты его оплатил — всё в порядке: подтверждение придёт в WhatsApp и на почту, а профориентолог напишет. Нажми «Проверить статус», чтобы обновить экран."; btn = "Проверить статус"; }
       else if (code === "kaspi_off" || code === "kaspi_session_expired" || code === "tariff_inactive" || code === "network" || /^http/.test(code)) { title = "Kaspi временно недоступен"; text = "Не получилось выставить счёт. Попробуй через минуту или напиши нам в WhatsApp — оформим вручную."; }
       else if (j && j.error_message) { text = kpEsc(j.error_message); }
       if (window.track) window.track("kaspi_error_screen", { status: st, code: code, kind: kind });
@@ -514,7 +540,11 @@
           '<button type="button" class="btn btn-kaspi" data-kp="retry">' + btn + '</button>' +
           '<a class="btn btn-ghost" href="' + kpWaLink("Здравствуйте! Не проходит оплата Kaspi за " + P.what + " Scholary (" + (code || st) + ")") + '" target="_blank" rel="noopener">Написать нам в WhatsApp</a>' +
         "</div>";
-      body.querySelector('[data-kp="retry"]').addEventListener("click", function () { if (window.track) window.track("pay_retry", { via: "kaspi", kind: kind }); renderForm(code === "client_not_found" || code === "bad_phone"); });
+      body.querySelector('[data-kp="retry"]').addEventListener("click", function () {
+        if (window.track) window.track("pay_retry", { via: "kaspi", kind: kind, code: code });
+        if (code === "poll_lost" && kpOrder) { start(kpOrder); return; }   /* тот же счёт, без нового */
+        renderForm(code === "client_not_found" || code === "bad_phone");
+      });
     }
     renderForm(false);
   };

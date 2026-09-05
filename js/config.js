@@ -18,6 +18,8 @@ window.SCHOLARY_CONFIG = {
   PRICE_REPORT: 4000,
   PRICE_CONSULT: 15000,
   PRICE_PACKAGE: 35000,
+  PRICE_PRO_MONTH: 4990,        /* Scholary Pro на месяц — те же числа, что в api/_pay.php pay_prices() */
+  PRICE_PRO_SEASON: 14900,      /* Scholary Pro на сезон */
 
   // --- Контакты ---
   WHATSAPP_NUMBER: "77024666852", // без «+», для ссылок wa.me
@@ -37,7 +39,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-71",
+  RELEASE:      "web-72",
 
   // --- Яндекс.Метрика ---
   // Номер счётчика из metrika.yandex.ru (только цифры). Пустая строка = выключено.
