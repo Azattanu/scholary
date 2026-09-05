@@ -363,7 +363,8 @@
             if (st === "paid") {
               if (!paidAt) {
                 paidAt = Date.now();
-                if (window.track) window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: "kaspi_" + order });
+                /* txn с сервера = kaspi_<номер счёта> — тот же, что у серверного события TikTok (дедуп) */
+                if (window.track) window.track("pay_result", { type: "kaspi", status: "success", kind: o.kind || "", txn: j.txn || ("kaspi_" + order) });
                 if (o.onStatus) o.onStatus(st, j);
               }
               if (j.fulfilled || Date.now() - paidAt > 120000) { finish(j); return; }
