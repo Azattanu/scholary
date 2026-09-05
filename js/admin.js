@@ -156,7 +156,7 @@ function __scholaryMain() {
     else if (S.tab === "people") v.innerHTML = viewPeople();
     else if (S.tab === "schools") v.innerHTML = viewSchools();
     else if (S.tab === "reports") v.innerHTML = viewReports();
-    else if (S.tab === "product") v.innerHTML = viewProduct();
+    else if (S.tab === "product") { v.innerHTML = viewProduct(); loadRetention(); }
     else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(false); }
   }
 
@@ -605,8 +605,80 @@ function __scholaryMain() {
     }
   }
 
+  /* ---------- возвращаемость кабинета (web-74) ----------
+     Считается по аккаунтам (cab_activity), а не по устройствам, как events:
+     иначе один человек с телефона и ноутбука выглядел бы как двое, а «вернулся» — как «новый». */
+  function loadRetention() {
+    Promise.all([rpc("admin_retention", { p_days: S.days }), rpc("admin_cab_content_list")]).then(function (r) {
+      S.ret = r[0] || {}; S.content = r[1] || [];
+      if (S.tab === "product") { var b = $("retBody"); if (b) b.innerHTML = retentionHTML(); var c = $("contentBody"); if (c) c.innerHTML = contentHTML(); }
+    }, function (e) {
+      var b = $("retBody");
+      if (b) b.innerHTML = '<div class="err">Не удалось загрузить возвращаемость: ' + esc(e.message) + '</div><div class="note">Если ошибка про отсутствующую функцию admin_retention — накати миграцию 042_cabinet_retention.sql.</div>';
+    });
+  }
+  function pctTxt(v) { return v == null ? "—" : num(v) + "%"; }
+  function retentionHTML() {
+    var r = S.ret || {};
+    if (!r.period_days) return '<div class="muted">Загружаю…</div>';
+    var w = r.weekly || [];
+    var maxW = w.reduce(function (a, x) { return Math.max(a, Number(x.wau) || 0); }, 1);
+    return kpi([
+      ["Активных за 7 дней", num(r.active_7d), true, "аккаунтов, открывших кабинет"],
+      ["Активных за 30 дней", num(r.active_30d), false, "по аккаунтам, тестовые исключены"],
+      ["≥ 2 дней на этой неделе", num(r.active_this_week_2plus) + " из " + num(r.active_this_week), Number(r.active_this_week_2plus) > 0, "цель Азата: 2–3 захода в неделю"],
+      ["Задач закрыто на неделе", num(r.tasks_done_this_week), false, "всего за период: " + num(r.tasks_done)],
+      ["Недель с прогрессом", (r.avg_weeks_progress == null ? "—" : Number(r.avg_weeks_progress).toFixed(1)), false, "в среднем на активного · 4+ недель: " + num(r.users_4plus_weeks)],
+      ["Продления Pro", num(r.pro_renewals), Number(r.pro_renewals) > 0, "аккаунтов с ≥ 2 оплатами · оплат за период: " + num(r.pro_payments)]
+    ]) +
+    '<div class="grid2"><div class="box"><h2>Когорты по первой активности</h2><p class="sub">Доля вернувшихся: на следующий день, на 1–4-й неделе, за 30 дней. Когорта — ' + num(r.cohort_users) + ' аккаунтов за ' + r.period_days + ' дней.</p>' +
+      '<div class="scroll"><table class="adm"><tr><th>D1</th><th>Неделя 1</th><th>Неделя 2</th><th>Неделя 3</th><th>Неделя 4</th><th>D30</th><th>Активных дней</th></tr>' +
+      '<tr><td class="num">' + pctTxt(r.d1_pct) + '</td><td class="num">' + pctTxt(r.w1_pct) + '</td><td class="num">' + pctTxt(r.w2_pct) + '</td><td class="num">' + pctTxt(r.w3_pct) + '</td><td class="num">' + pctTxt(r.w4_pct) + '</td><td class="num">' + pctTxt(r.d30_pct) + '</td><td class="num">' + (r.avg_active_days == null ? "—" : Number(r.avg_active_days).toFixed(2)) + "</td></tr></table></div>" +
+      '<p class="sub" style="margin-top:8px">Ориентир для education-приложений: D1 ≈ 18 %, D7 ≈ 8–10 %, D30 ≈ 4 % (Adjust). Для сезонного кабинета важнее недельные когорты и доля с ≥ 2 заходами в неделю.</p></div>' +
+    '<div class="box"><h2>По неделям</h2><p class="sub">Активных аккаунтов, из них с ≥ 2 днями и с прогрессом; закрытых задач.</p>' +
+      (w.length ? '<div class="scroll"><table class="adm"><tr><th>Неделя</th><th class="num">Активных</th><th class="num">≥ 2 дней</th><th class="num">С прогрессом</th><th class="num">Задач</th><th></th></tr>' +
+        w.map(function (x) { return "<tr><td>" + esc(String(x.w).slice(5)) + '</td><td class="num">' + num(x.wau) + '</td><td class="num">' + num(x.wau2) + '</td><td class="num">' + num(x.wau_progress) + '</td><td class="num">' + num(x.tasks_done) +
+          '</td><td><div style="height:8px;border-radius:6px;background:#5B4BFF;width:' + Math.round(100 * (Number(x.wau) || 0) / maxW) + '%;min-width:2px"></div></td></tr>'; }).join("") + "</table></div>" : '<div class="muted">Пока нет активности — блок наполнится после релиза web-74.</div>') +
+      '<p class="sub" style="margin-top:8px">Вехи выдано: ' + num(r.badges) + ' · Telegram привязан: ' + num(r.tg_linked) + ' · возвратов по ссылке из Telegram: ' + num(r.deeplink_returns) + '</p></div></div>';
+  }
+  /* ---------- материалы для кабинета: заполняет владелец ----------
+     Без выдуманных авторов: пока таблица пуста, блока в кабинете нет. */
+  var CONTENT_KIND = { tip: "совет", article: "статья", video: "видео", story: "история", guide: "гайд" };
+  function contentHTML() {
+    var rows = S.content || [];
+    return '<p class="sub">Показываются на «Сегодня» (блок «Материалы недели»), до 3 штук по уровню и неделе сезона. Только реальные ссылки и авторы.</p>' +
+      '<div class="adsform">' +
+      '<div><label>Заголовок</label><input id="ctTitle" type="text" placeholder="обязательно" maxlength="140"></div>' +
+      '<div><label>Ссылка</label><input id="ctUrl" type="url" placeholder="https://…"></div>' +
+      '<div><label>Автор (реальный)</label><input id="ctAuthor" type="text" maxlength="80" placeholder="напр. Диас Асанов"></div>' +
+      '<div><label>Тип</label><select id="ctKind">' + Object.keys(CONTENT_KIND).map(function (k) { return '<option value="' + k + '">' + CONTENT_KIND[k] + "</option>"; }).join("") + "</select></div>" +
+      '<div><label>Уровень</label><select id="ctLevel"><option value="">всем</option><option value="bachelor">бакалавр</option><option value="master">магистр</option><option value="phd">PhD</option></select></div>' +
+      '<div><label>Недели сезона</label><input id="ctWeeks" type="text" placeholder="напр. 1-6 · пусто = всегда"></div>' +
+      '<div><label>Описание в одну строку</label><input id="ctBody" type="text" maxlength="200" placeholder="о чём материал"></div>' +
+      '<div><button class="btn-adm" id="btnContentSave" type="button">Добавить</button></div></div>' +
+      (rows.length ? table([["Заголовок"], ["Тип"], ["Уровень"], ["Недели"], ["Автор"], ["Активен"], [""]], rows, function (r) {
+        return "<td><b>" + esc(r.title) + "</b>" + (r.url ? ' <a href="' + esc(r.url) + '" target="_blank" rel="noopener">↗</a>' : "") + "</td><td>" + esc(CONTENT_KIND[r.kind] || r.kind) + "</td><td>" + esc(r.level || "всем") +
+          "</td><td>" + (r.week_from || r.week_to ? esc((r.week_from || 1) + "–" + (r.week_to || 44)) : "всегда") + "</td><td>" + esc(r.author || "—") + "</td><td>" + (r.active ? "да" : "нет") +
+          '</td><td><a href="#" data-act="ct-toggle" data-id="' + r.id + '" data-on="' + (r.active ? 1 : 0) + '">' + (r.active ? "выключить" : "включить") + '</a> · <a href="#" data-act="ct-del" data-id="' + r.id + '">удалить</a></td>';
+      }) : '<div class="muted">Материалов пока нет — в кабинете блок скрыт.</div>');
+  }
+  function saveContent() {
+    var t = $("ctTitle").value.trim(); if (!t) { $("ctTitle").focus(); return; }
+    var wk = ($("ctWeeks").value || "").match(/(\d+)\s*[-–]\s*(\d+)/);
+    var row = { title: t, url: $("ctUrl").value.trim(), author: $("ctAuthor").value.trim(), kind: $("ctKind").value, level: $("ctLevel").value, body: $("ctBody").value.trim(),
+                week_from: wk ? +wk[1] : null, week_to: wk ? +wk[2] : null, active: true };
+    rpc("admin_cab_content_upsert", { p: row }).then(function () { loadRetention(); }, function (e) { alert("Не сохранилось: " + e.message); });
+  }
+  function contentAction(a, el) {
+    var id = +el.getAttribute("data-id");
+    if (a === "ct-del") { if (!confirm("Удалить материал?")) return; rpc("admin_cab_content_delete", { p_id: id }).then(function () { loadRetention(); }); }
+    if (a === "ct-toggle") { rpc("admin_cab_content_upsert", { p: { id: id, title: (S.content.filter(function (r) { return r.id === id; })[0] || {}).title, active: el.getAttribute("data-on") !== "1" } }).then(function () { loadRetention(); }); }
+  }
+
   function viewProduct() {
-    return '<div class="grid2">' +
+    return '<div class="box"><h2>Возвращаемость кабинета</h2><p class="sub">Заходят ли люди в кабинет снова — по аккаунтам, за ' + S.days + ' ' + plural(S.days, "день", "дня", "дней") + '.</p><div id="retBody">' + retentionHTML() + '</div></div>' +
+      '<div class="box"><h2>Материалы для кабинета</h2><div id="contentBody">' + contentHTML() + '</div></div>' +
+      '<div class="grid2">' +
       '<div class="box"><h2>Топ программ</h2><p class="sub">Что чаще всего берут в портфель.</p>' +
         table([["Программа"], ["Страна"], ["Ведут", 1], ["Отправлено", 1], ["Готовность", 1]], S.data.programs, function (r) {
           return "<td><b>" + esc(r.name) + "</b></td><td>" + esc(r.country) + '</td><td class="num">' + num(r.picks) +
@@ -844,6 +916,7 @@ function __scholaryMain() {
     if (t.id === "btnPro") { grantPro(); return; }
     if (t.id === "btnHealth") { loadHealth(false); return; }
     if (t.id === "btnAdSave") { saveAdRow(); return; }
+    if (t.id === "btnContentSave") { saveContent(); return; }
     var pfb = t.closest("#adsSeg button");
     if (pfb) { S.adsPlatform = pfb.getAttribute("data-pf") || "tiktok"; S.ads = null; draw(); return; }
     if (t.id === "btnMailTest") { loadHealth(true); return; }
@@ -854,6 +927,7 @@ function __scholaryMain() {
       if (a === "resend") { ev.preventDefault(); resendReport(act); return; }
       if (a === "copy")   { ev.preventDefault(); copyLink(act); return; }
       if (a === "ad-del") { ev.preventDefault(); deleteAdRow(act); return; }
+      if (a === "ct-del" || a === "ct-toggle") { ev.preventDefault(); contentAction(a, act); return; }
       if (/^sch-/.test(a)) { ev.preventDefault(); schoolAction(a, act.getAttribute("data-id"), act); return; }
     }
     var seg = t.closest("#periodSeg button");

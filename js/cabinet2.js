@@ -18,7 +18,9 @@ function __scholaryMain() {
   var D = window.ScholaryDocs;
 
   var S = { session: null, profile: null, ans: null, evalR: null, apps: [], docs: [], programs: [],
-            reports: null, hist: [], tab: "today", stack: [] };
+            reports: null, hist: [], tab: "today", stack: [],
+            /* web-74: состояние задач недели, активность по дням, вехи, материалы */
+            cab: { state: {}, activity: [], ach: {}, content: [] }, plan: null, calMonth: null, calSel: null, deep: null };
 
   /* ================= утилиты ================= */
   function $(id) { return document.getElementById(id); }
@@ -95,7 +97,8 @@ function __scholaryMain() {
     var prog = progById(a.program_id) || (a.custom ? Object.assign({ id: a.program_id }, a.custom) : null);
     if (!prog) return null;
     var p = S.evalR ? probFor(S.evalR.profile, prog) : null;
-    var date = parseDeadline(prog.deadline);
+    /* В каталоге типовой день цикла лежит как 'MM-DD' — он точнее русского текста */
+    var date = (window.ScholaryPath && window.ScholaryPath.nextFromMD(prog.deadline_md, todayDate())) || parseDeadline(prog.deadline);
     var rd = D.readiness(a, S.docs, S.ans, prog);
     return { a: a, prog: prog, p: p, date: date, days: daysTo(date), rd: rd,
              title: prog.name, cc: prog.cc, country: prog.country };
@@ -230,7 +233,8 @@ function __scholaryMain() {
       AI.busy["l" + d.id] = false;
       if (e) { AI.err["l" + d.id] = aiErrText(e); drawSub(); return; }
       saveDoc(d, { score: j.score, verdicts: { score: j.score, criteria: j.criteria || [], verdicts: j.verdicts || [] },
-                   checked_at: new Date().toISOString() }, function () { drawSub(); });
+                   checked_at: new Date().toISOString() }, function () { drawSub(); awardCheck(); });
+      touch(true);
       if (window.track) track("ai_letter_check", {});
     });
   }
@@ -291,27 +295,27 @@ function __scholaryMain() {
   var TABS = ["today", "apps", "unis", "docs", "profile"];
   function renderWidget() {
     var el = $("side-widget"); if (!el) return;
-    var vs = appViews(), o = overall(), ns = nextStep();
+    var vs = appViews(), o = overall();
+    var plan = S.plan || weekPlan();
     var burning = vs.filter(function (v) { return !v.a.submitted_at && v.days != null; }).slice(0, 3);
-    var docsLeft = docTypesForUser().filter(function (t) { var d = docsOfType(t)[0]; return !d || d.status !== "ready"; }).length;
+    /* Правая колонка на широком экране: раньше здесь были четыре карточки-заглушки.
+       Теперь — то, что не влезло в основную колонку: кольца, календарь,
+       стипендия недели, совет недели, материалы, шанс, помощь. */
     el.innerHTML =
+      '<div class="card w-card"><div class="h-row"><b class="sm">Готовность</b><span class="xs mut">неделя ' + plan.week.n + "</span></div>" + ringsHTML() + "</div>" +
+      calendarBlockHTML().replace('style="margin-top:14px"', 'style="margin-bottom:12px"') +
+      programOfWeekHTML().replace('style="margin-top:14px;', 'style="margin-bottom:12px;') +
       '<div class="card w-card"><div class="h-row"><b class="sm">Мой шанс</b><span class="pill pill-mut">→</span></div>' +
         duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) +
         '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:10px" data-act="chance">Динамика и «что если»</button></div>' +
-      (ns ? '<div class="card w-card" style="background:var(--accent-soft);border-color:var(--accent-border)">' +
-        '<div class="xs b" style="letter-spacing:.1em;color:var(--accent-dark)">СЛЕДУЮЩИЙ ШАГ</div>' +
-        '<div class="sm b" style="margin:6px 0 8px;line-height:1.35">' + esc(ns.title) + "</div>" +
-        '<button class="btn btn-primary btn-sm btn-block" data-act="step-go" data-app="' + ns.v.a.id + '" data-doc="' + (ns.t || "") + '">' + (ns.check ? "Проверить пакет" : "Заняться") + "</button></div>" : "") +
-      '<div class="card w-card"><b class="sm">Ближайшие дедлайны</b>' +
-        (burning.length ? burning.map(function (v) {
+      (burning.length ? '<div class="card w-card"><b class="sm">Ближайшие дедлайны</b>' + burning.map(function (v) {
           return '<div class="lst tappable" data-act="app" data-app="' + v.a.id + '" style="padding:9px 0"><div style="flex:1;min-width:0"><b class="xs">' + esc(v.title) + '</b>' +
             '<div class="xs mut">' + fmtDL(v.date) + " · " + v.rd.pct + "%</div></div>" +
             '<span class="pill ' + dlClass(v.days) + '">' + v.days + " дн</span></div>";
-        }).join("") : '<p class="xs mut" style="margin:6px 0 0">Дедлайнов пока нет — добавь программы.</p>') + "</div>" +
-      '<div class="card w-card"><b class="sm">Документы</b><div class="xs mut" style="margin:4px 0 8px">' +
-        (docsLeft ? "осталось собрать " + docsLeft : "всё собрано") + "</div>" +
-        '<button class="btn btn-ghost btn-sm btn-block" data-act="tab-docs">Открыть документы</button></div>' +
-      '<div class="card w-card"><b class="sm">Нужна помощь?</b><div class="xs mut" style="margin:4px 0 8px">Ответим в WhatsApp в рабочее время</div>' +
+        }).join("") + "</div>" : "") +
+      tipOfWeekHTML(plan).replace('style="margin-top:14px"', 'style="margin-bottom:12px"') +
+      contentHTML(plan) +
+      '<div class="card w-card" style="margin-top:12px"><b class="sm">Нужна помощь?</b><div class="xs mut" style="margin:4px 0 8px">Ответим в WhatsApp в рабочее время</div>' +
         '<button class="btn btn-ghost btn-sm btn-block" data-act="help">Написать нам</button></div>';
   }
 
@@ -404,40 +408,215 @@ function __scholaryMain() {
     if (v0) return { title: "Проверь пакет «" + v0.title + "» перед отправкой", why: "Все документы на месте. Прогоним финальную проверку — это последняя точка, где ошибку ещё можно поймать.", t: null, v: v0, check: true };
     return null;
   }
+  /* ================= 1 · СЕГОДНЯ (web-74: неделя сезона) =================
+     Экран отвечает на один вопрос: «что делать на этой неделе и успеваю ли я».
+     Порядок блоков = приоритет решения: неделя → продолжить → следующий шаг →
+     задачи недели → путь и кольца → горит → шанс → календарь → стипендия недели →
+     совет недели → материалы → Pro → консультант. */
+  var Path = window.ScholaryPath;
+  function todayDate() { return window.__SCHOLARY_NOW ? new Date(window.__SCHOLARY_NOW) : new Date(); }
+  function cabPrefs() { return (S.profile && S.profile.cab) || {}; }
+  function weekGoal() { var g = +(cabPrefs().goal || 3); return g >= 2 && g <= 5 ? g : 3; }
+  function pathCtx() {
+    var vs = appViews();
+    return { today: todayDate(), level: (S.ans && S.ans.level) || "bachelor", ans: S.ans || {}, apps: vs, plan: docPlanNow(),
+             docs: S.docs, programs: S.programs, state: S.cab.state, TYPES: D.TYPES, tgLinked: !!(S.tg && S.tg.chat_id),
+             matchOf: function (p) { var pr = probFor(S.evalR && S.evalR.profile, p); return pr ? Math.round((pr.adm * 0.6 + (pr.sch || pr.adm) * 0.4) * 100) : 0; } };
+  }
+  function weekPlan() { return Path.buildTasks(pathCtx()); }
+  function weeksNow() { return Path.weeksProgress(S.cab.activity, cabPrefs().quiet || [], todayDate()); }
+
+  /* ---- задачи недели: состояние ---- */
+  function taskSave(key, patch, cb) {
+    var wk = Path.weekInfo(todayDate());
+    var row = Object.assign({ user_id: S.session.user.id, task_key: key, week_start: wk.key, updated_at: new Date().toISOString() }, S.cab.state[key] || {}, patch);
+    if (row.title) row.title = String(row.title).slice(0, 200); else delete row.title;
+    S.cab.state[key] = Object.assign({}, S.cab.state[key] || {}, patch);
+    try { localStorage.setItem("scholary_cab_state", JSON.stringify(S.cab.state)); } catch (e) {}
+    sb.from("cab_task_state").upsert(row, { onConflict: "user_id,task_key" }).then(function (r) {
+      /* базы может не быть (старый кабинет) — состояние живёт в localStorage до следующего захода */
+      if (r && r.error && window.console) console.warn("cab_task_state", r.error.message);
+      if (cb) cb();
+    });
+  }
+  function touch(progress) {
+    sb.rpc("cab_touch", { p_progress: !!progress }).then(function (r) {
+      if (r && r.data && r.data.day) {
+        var d = String(r.data.day), row = S.cab.activity.filter(function (a) { return a.day === d; })[0];
+        if (row) { row.progress = row.progress || !!progress; } else S.cab.activity.push({ day: d, progress: !!progress });
+      }
+    });
+  }
+  /* ---- вехи: только за реальные события ---- */
+  function awardCheck(silent) {
+    var ctx = pathCtx(); ctx.weeks = weeksNow();
+    var fresh = Path.checkAchievements(ctx, S.cab.ach);
+    if (!fresh.length) return;
+    fresh.forEach(function (k) {
+      S.cab.ach[k] = new Date().toISOString();
+      sb.from("cab_achievements").insert({ user_id: S.session.user.id, key: k }).then(function () {});
+      if (window.track) track("cab_badge", { key: k });
+    });
+    if (!silent) { var A = Path.ACH[fresh[0]]; if (A) toast(A.ic + " Веха: " + A.title, "ok"); }
+  }
+
+  /* ---- разметка блоков ---- */
+  function taskHTML(t, i) {
+    var done = t.status === "done", skipped = t.status === "skipped", moved = t.status === "moved";
+    var when = t.when ? '<span class="when on" data-act="task-when" data-key="' + esc(t.key) + '">' + Path.WD_SHORT[t.when - 1] + "</span>"
+                      : '<span class="when" data-act="task-when" data-key="' + esc(t.key) + '">когда?</span>';
+    return '<div class="task' + (done ? " done" : "") + (skipped ? " skipped" : "") + (moved ? " skipped moved" : "") + '" data-key="' + esc(t.key) + '">' +
+      '<button class="cbox ' + (done ? "on" : "") + '" data-act="task-done" data-key="' + esc(t.key) + '" aria-label="' + (done ? "Снять отметку" : "Отметить сделанной") + '">' + (done ? "✓" : "") + "</button>" +
+      '<div class="task-b"><div class="task-t"><span class="xs mut task-k">' + (t.carried ? "с прошлой недели" : esc(Path.TASK_KIND[t.kind] || "")) + (t.minutes ? " · ~" + t.minutes + " мин" : "") + "</span>" +
+        '<b>' + esc(t.title) + "</b>" + (t.why ? '<div class="xs mut">' + esc(t.why) + "</div>" : "") + "</div>" +
+        (skipped || moved ? '<div class="xs mut" style="margin-top:4px">' + (moved ? "перенесено на следующую неделю" : "не актуально") + ' · <a href="#" data-act="task-undo" data-key="' + esc(t.key) + '">вернуть</a></div>'
+          : '<div class="task-a">' + when +
+            (done ? "" : '<button class="btn btn-soft btn-sm" data-act="task-go" data-key="' + esc(t.key) + '" data-v="' + esc(t.act || "") + '">Открыть</button>') +
+            (done ? "" : '<button class="lnk xs" data-act="task-menu" data-key="' + esc(t.key) + '">…</button>') + "</div>") +
+      "</div></div>";
+  }
+  function weekTasksHTML(plan) {
+    var goal = weekGoal(), done = plan.tasks.filter(function (t) { return t.status === "done"; }).length;
+    var wp = weeksNow();
+    var head = '<div class="h-row" style="margin:16px 0 6px"><div class="sub-h" style="margin:0">Задачи недели</div>' +
+      '<span class="pill ' + (done >= goal ? "pill-ok" : "pill-mut") + '">' + done + " из " + goal + "</span></div>";
+    var status = wp.thisWeek || done >= 1
+      ? '<p class="xs mut" style="margin:0 0 8px">Неделя засчитана' + (done >= goal ? " · цель закрыта" : " · до цели ещё " + (goal - done) + " " + plural(goal - done, "задача", "задачи", "задач")) + "</p>"
+      : '<p class="xs mut" style="margin:0 0 8px">Одна закрытая задача — и неделя засчитана</p>';
+    return head + status + '<div class="card task-list">' + plan.tasks.map(taskHTML).join("") +
+      (plan.tasks.length ? "" : '<p class="sm mut" style="margin:0">План пуст: добавь программы — и задачи появятся.</p>') + "</div>";
+  }
+  function pathHTML(plan) {
+    var pr = Path.progress(pathCtx()), wp = weeksNow(), goal = weekGoal();
+    var left = Math.max(0, Math.round((new Date((S.ans && S.ans.year) === "2028" ? "2028-09-01" : "2027-09-01") - todayDate()) / 864e5));
+    var target = (S.ans && S.ans.year) === "2028" ? "сентябрь 2028" : "сентябрь 2027";
+    var series = wp.streak
+      ? '<b>' + wp.streak + "</b> " + plural(wp.streak, "неделя", "недели", "недель") + " с прогрессом подряд"
+      : (wp.total ? "недель с прогрессом: <b>" + wp.total + "</b>" : "первая неделя с прогрессом — впереди");
+    return '<div class="pointb" style="margin:14px 0"><div class="h-row"><div class="lbl">Путь к Точке Б · ' + target.toUpperCase() + '</div><span class="xs mut">осталось ' + left + " " + plural(left, "день", "дня", "дней") + "</span></div>" +
+      '<div class="big" style="margin:4px 0 8px">Пройдено <span style="color:var(--accent)">' + pr.pct + "%</span> пути</div>" +
+      '<div class="pbar"><i style="width:' + Math.max(3, pr.pct) + '%"></i></div>' +
+      '<div class="path-parts">' + pr.parts.map(function (p) { return '<span' + (p.v >= 1 ? ' class="ok"' : "") + '>' + esc(p.label) + " " + Math.round(p.v * 100) + "%</span>"; }).join("") + "</div>" +
+      '<div class="h-row" style="margin-top:10px;flex-wrap:wrap;gap:6px"><span class="sm">🔥 ' + series + "</span>" +
+        (wp.freezeUsedThisMonth ? '<span class="xs mut">заморозка месяца использована</span>' : '<span class="xs mut">пропуск раз в месяц не рвёт серию</span>') + "</div>" +
+      '<div class="xs mut" style="margin-top:6px">' + (wp.quietThisWeek ? "Тихая неделя: план на паузе · " : "") +
+        '<a href="#" data-act="quiet-week">' + (wp.quietThisWeek ? "снять паузу" : "поставить неделю на паузу") + "</a> · цель недели: " + goal + ' <a href="#" data-act="week-goal">изменить</a></div></div>';
+  }
+  function ringsHTML() {
+    var pr = Path.progress(pathCtx()), r = pr.rings;
+    function ring(k, label, o, act) {
+      return '<button class="ring3 tappable" data-act="' + act + '">' + ringHTML(o.total ? o.pct : 0, 58) + '<b class="sm">' + label + '</b><span class="xs mut">' + (o.total ? o.done + " из " + o.total : "—") + "</span></button>";
+    }
+    return '<div class="rings">' + ring("docs", "Документы", r.docs, "tab-docs") + ring("letters", "Письма", r.letters, "tab-apps") + ring("apps", "Подачи", r.apps, "tab-apps") + "</div>";
+  }
+  function continueHTML() {
+    var recent = S.docs.filter(function (d) { return d.status !== "ready" && d.updated_at && Path.daysBetween(todayDate(), new Date(d.updated_at)) <= 7 && (d.content || d.file_path); })
+      .sort(function (a, b) { return new Date(b.updated_at) - new Date(a.updated_at); })[0];
+    if (!recent) return "";
+    var T = D.TYPES[recent.doc_type] || { title: recent.doc_type, ic: "📄" };
+    var prog = recent.program_ids && recent.program_ids.length ? progById(recent.program_ids[0]) : null;
+    return '<div class="card tappable cont" data-act="doc" data-id="' + recent.id + '"><div class="h-row"><div style="min-width:0;padding-right:10px"><span class="xs mut">Продолжить с места остановки</span>' +
+      '<b class="sm" style="display:block">' + T.ic + " " + esc(T.title) + (prog ? " · " + esc(prog.name) : "") + "</b>" +
+      '<span class="xs mut">' + (recent.doc_type === "motivation" ? "версия " + (recent.version || 1) + (recent.score != null ? " · " + Number(recent.score).toFixed(1) + "/10" : "") : "в работе") + '</span></div><span class="pill pill-acc">→</span></div></div>';
+  }
+  function cooldownHTML(vs) {
+    var just = vs.filter(function (v) { return v.a.submitted_at && Path.daysBetween(todayDate(), new Date(v.a.submitted_at)) <= 3; })[0];
+    if (!just) return "";
+    var next = vs.filter(function (v) { return !v.a.submitted_at && v.days != null && v.days >= 0; }).sort(function (a, b) { return a.days - b.days; })[0];
+    return '<div class="card" style="margin-bottom:12px;background:var(--ok-soft);border-color:#BFE8CF"><b class="sm">🎉 «' + esc(just.title) + "» отправлена</b>" +
+      '<p class="sm" style="margin:4px 0 0">' + (next ? "Следующий дедлайн — «" + esc(next.title) + "» через " + next.days + " " + plural(next.days, "день", "дня", "дней") + ". План на неё уже в задачах." : "Больше открытых подач нет. Отметь ответ вуза, когда придёт.") + "</p></div>";
+  }
+  function achievementsHTML() {
+    var keys = Object.keys(S.cab.ach);
+    if (!keys.length) return "";
+    keys.sort(function (a, b) { return new Date(S.cab.ach[b]) - new Date(S.cab.ach[a]); });
+    return '<div class="sub-h">Вехи</div><div class="ach-row">' + keys.slice(0, 8).map(function (k) {
+      var A = Path.ACH[k]; if (!A) return "";
+      return '<span class="ach" title="' + esc(A.desc) + '">' + A.ic + " " + esc(A.title) + "</span>";
+    }).join("") + "</div>";
+  }
+  function calendarBlockHTML() {
+    var m = S.calMonth || (function () { var t = todayDate(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
+    var marks = Path.deadlineMarks(S.programs, appViews(), (S.ans && S.ans.level) || "bachelor", todayDate(), m);
+    var sel = S.calSel && marks[S.calSel] ? marks[S.calSel] : null;
+    return '<div class="card" style="margin-top:14px"><div class="h-row"><b class="sm">Календарь</b><span class="xs mut" style="white-space:nowrap"><i class="cal-lg mine"></i> мои · <i class="cal-lg cat"></i> каталог</span></div>' +
+      Path.calendarHTML(m, marks, todayDate()) +
+      (sel ? '<div class="cal-sel">' + sel.slice(0, 6).map(function (x) {
+        return '<div class="lst tappable" data-act="' + (x.mine ? "app" : "prog") + '" ' + (x.mine ? 'data-app="' + x.id + '"' : 'data-id="' + esc(x.id) + '"') + ' style="padding:8px 0"><span>' + (x.mine ? "🎯" : flag(x.cc)) + '</span><div style="flex:1;min-width:0"><b class="xs">' + esc(x.title) + "</b></div><span class=\"xs mut\">→</span></div>";
+      }).join("") + "</div>" : '<p class="xs mut" style="margin:8px 0 0">Тап по дню — список программ с дедлайном в этот день.</p>') + "</div>";
+  }
+  function programOfWeekHTML() {
+    var mine = {}; S.apps.forEach(function (a) { mine[a.program_id] = 1; });
+    var pw = Path.programOfWeek(S.programs, pathCtx(), mine);
+    if (!pw) return "";
+    var p = pw.prog, pr = probFor(S.evalR && S.evalR.profile, p);
+    var b = Path.badges(p, pathCtx());
+    return '<div class="card tappable" data-act="prog" data-id="' + esc(p.id) + '" style="margin-top:14px;border-color:var(--accent-border);background:linear-gradient(135deg,#FFFFFF,#F5F3FF)">' +
+      '<div class="xs" style="font-weight:800;letter-spacing:.08em;color:var(--accent-dark);text-transform:uppercase">Стипендия недели · ' + esc(pw.reason) + "</div>" +
+      '<b style="display:block;margin-top:4px">' + flag(p.cc) + " " + esc(p.name) + "</b>" +
+      '<div class="xs mut">' + esc(p.country || "") + (p.funding ? " · " + esc(String(p.funding).slice(0, 90)) : "") + "</div>" +
+      '<div class="badges">' + b.slice(0, 4).map(function (x) { return '<span class="badge ' + (x.cls || "") + '">' + x.ic + " " + esc(x.t) + "</span>"; }).join("") + "</div>" +
+      (pr ? '<div class="duo mini" style="margin-top:8px"><span><b style="color:var(--accent)">' + pct(pr.adm) + "%</b>поступл.</span>" + (pr.sch != null ? '<span><b style="color:var(--ok)">' + pct(pr.sch) + "%</b>стип.</span>" : "") + "</div>" : "") +
+      "</div>";
+  }
+  var THEME_HOWTO = { "9-2": "ielts", "11-1": "apostille", "11-2": "translation", "12-2": "recommendation", "10-2": "medical" };
+  function tipOfWeekHTML(plan) {
+    var key = THEME_HOWTO[plan.theme.key] || (plan.theme.act === "doc:recommendation" ? "recommendation" : null);
+    var how = key && D.HOWTO[key];
+    if (!how) return aiTipHTML(appViews());
+    return '<div class="aicard" style="margin-top:14px"><div class="who"><i></i>Совет недели · ' + esc(how.title) + "</div>" +
+      how.steps.slice(0, 3).map(function (s, i) { return '<div class="feat"><span class="pill pill-acc">' + (i + 1) + '</span><span><b class="sm">' + esc(s.t) + "</b> <span class=\"xs mut\">" + esc(s.d) + "</span></span></div>"; }).join("") +
+      '<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-act="task-go" data-v="doc:' + key + '">Открыть документ</button></div>';
+  }
+  function contentHTML(plan) {
+    var rows = Path.contentFor(S.cab.content, (S.ans && S.ans.level) || "bachelor", plan.week.n);
+    if (!rows.length) return "";
+    var KIND = { tip: "совет", article: "статья", video: "видео", story: "история", guide: "гайд" };
+    return '<div class="sub-h">Материалы недели</div>' + rows.map(function (r) {
+      var inner = '<div style="flex:1;min-width:0"><span class="xs mut">' + (KIND[r.kind] || r.kind) + (r.author ? " · " + esc(r.author) : "") + '</span><b class="sm" style="display:block">' + esc(r.title) + "</b>" + (r.body ? '<div class="xs mut">' + esc(String(r.body).slice(0, 140)) + "</div>" : "") + "</div><span class=\"xs mut\">→</span>";
+      return r.url ? '<a class="lst" href="' + esc(r.url) + '" target="_blank" rel="noopener" data-act="content-open" data-id="' + r.id + '">' + inner + "</a>" : '<div class="lst">' + inner + "</div>";
+    }).join("");
+  }
+
   function renderToday() {
     var name = firstName(S.profile && S.profile.name) || "друг";
     var vs = appViews(), o = overall(), ns = nextStep();
-    var pb = S.evalR && S.evalR.verdict ? "" : "";
-    var target = (S.ans && S.ans.year) === "2028" ? "сентябрь 2028" : "сентябрь 2027";
-    var left = Math.max(0, Math.round((new Date((S.ans && S.ans.year) === "2028" ? "2028-09-01" : "2027-09-01") - new Date()) / 864e5));
+    var plan = weekPlan(); S.plan = plan;
     var burning = vs.filter(function (v) { return !v.a.submitted_at && v.days != null; }).slice(0, 3);
     var last = S.hist.length > 1 ? S.hist[S.hist.length - 2] : null;
     var delta = last && last.p_adm != null ? Math.round((o.adm - last.p_adm) * 100) : null;
+    var wide = window.matchMedia && window.matchMedia("(min-width:1240px)").matches;   // на широком экране часть блоков живёт справа
 
     $("tab-today").innerHTML =
-      '<div class="h2" style="margin-top:10px">Салем, ' + esc(name) + "!</div>" +
-      '<div class="pointb"><div class="lbl">ТОЧКА Б · ' + target.toUpperCase() + '</div><div class="big">Осталось <span style="color:var(--accent)">' + left + "</span> " + plural(left, "день", "дня", "дней") + "</div>" +
-        '<div class="pbar"><i style="width:' + Math.max(3, Math.min(100, Math.round((1 - left / 400) * 100))) + '%"></i></div></div>' +
+      '<div class="wk-head"><div><div class="h2" style="margin:10px 0 0">Салем, ' + esc(name) + "!</div>" +
+        '<div class="sm mut">Неделя <b>' + plan.week.n + "</b> из " + plan.week.total + " · " + esc(plan.week.label) + " · " + esc(plan.theme.title) + "</div></div></div>" +
+      cooldownHTML(vs) +
+      continueHTML() +
       (ns ? '<div class="nextstep"><div class="tag">СЛЕДУЮЩИЙ ШАГ</div><h3>' + esc(ns.title) + "</h3>" +
         '<p class="sm mut" style="margin:2px 0 10px">' + esc(ns.why) + "</p>" +
         '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
           '<button class="btn btn-primary btn-sm" data-act="step-go" data-app="' + ns.v.a.id + '" data-doc="' + (ns.t || "") + '">' + (ns.check ? "Проверить пакет" : "Заняться сейчас") + "</button>" +
           (ns.t ? '<button class="btn btn-ghost btn-sm" data-act="step-done" data-app="' + ns.v.a.id + '" data-doc="' + ns.t + '">Уже готово</button>' : "") +
-        "</div></div>"
-        : '<div class="card" style="margin-bottom:14px"><b>Всё под контролем</b><p class="sm mut" style="margin:4px 0 0">Активных подач нет. Добавь программу — и здесь появится следующий шаг.</p></div>') +
-      '<div class="card tappable" data-act="chance" style="margin-bottom:14px">' +
-        '<div class="h-row"><b class="sm">Мой шанс</b>' + (delta != null && delta !== 0 ? '<span class="pill ' + (delta > 0 ? "pill-ok" : "pill-warn") + '">' + (delta > 0 ? "▲ +" : "▼ ") + delta + " за неделю</span>" : '<span class="pill pill-mut">динамика →</span>') + "</div>" +
-        duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) + '<div class="xs mut">по ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + " · тап — динамика и «что если»</div></div>" +
+        "</div></div>" : "") +
+      weekTasksHTML(plan) +
+      pathHTML(plan) +
+      (wide ? "" : ringsHTML()) +
+      achievementsHTML() +
       (burning.length ? '<div class="sub-h">Горит первым</div>' + burning.map(function (v) {
-        return '<div class="dl tappable" data-act="app" data-app="' + v.a.id + '"><span class="dot" style="background:' + (v.days < 30 ? "#C0392B" : v.days < 75 ? "#A05F00" : "#0B7A3E") + '"></span>' +
-          '<div style="flex:1"><b>' + esc(v.title) + '</b><span class="xs mut">' + fmtDL(v.date) + " · готовность " + v.rd.pct + "%</span></div>" +
+        var light = v.days < 14 && v.rd.pct < 70 ? "bad" : v.days < 30 && v.rd.pct < 90 ? "warn" : "ok";
+        return '<div class="dl tappable" data-act="app" data-app="' + v.a.id + '"><span class="dot" style="background:' + (light === "bad" ? "#C0392B" : light === "warn" ? "#A05F00" : "#0B7A3E") + '"></span>' +
+          '<div style="flex:1"><b>' + esc(v.title) + '</b><span class="xs mut">' + fmtDL(v.date) + " · готовность " + v.rd.pct + "% · " + (light === "bad" ? "не успеваешь без рывка" : light === "warn" ? "риск" : "успеваешь") + "</span></div>" +
           '<span class="pill ' + dlClass(v.days) + '">' + (v.days != null ? v.days + " дн" : "—") + "</span></div>";
       }).join("") : "") +
-      aiTipHTML(vs) +
+      (vs.length ? '<div class="card tappable" data-act="chance" style="margin:14px 0">' : '<div class="card tappable" data-act="tab-unis" style="margin:14px 0"><b class="sm">Мой шанс</b><p class="xs mut" style="margin:4px 0 0">Считается по подачам: добавь первые программы во «Вузах» — и здесь появятся два процента: «хотя бы один оффер» и «хотя бы одна стипендия».</p></div><div hidden>') +
+        '<div class="h-row"><b class="sm">Мой шанс</b>' + (delta != null && delta !== 0 ? '<span class="pill ' + (delta > 0 ? "pill-ok" : "pill-warn") + '">' + (delta > 0 ? "▲ +" : "▼ ") + delta + " за неделю</span>" : '<span class="pill pill-mut">динамика →</span>') + "</div>" +
+        duoHTML(o, ["хотя бы один оффер", "хотя бы одна стипендия"]) + '<div class="xs mut">по ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + " · тап — динамика и «что если»</div></div>" +
+      (wide ? "" : calendarBlockHTML() + programOfWeekHTML() + tipOfWeekHTML(plan) + contentHTML(plan)) +
       proCardHTML() +
       '<div class="card" style="margin-top:14px;background:var(--bg);border-style:dashed">' +
         '<div class="h-row"><div style="padding-right:10px"><b class="sm">Нужен живой человек?</b><div class="xs mut">Консультант проверит пакет и доведёт до подачи — 35 000 ₸</div></div>' +
         '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/' + (C.WHATSAPP_NUMBER || "") + '?text=' + encodeURIComponent("Здравствуйте! Хочу пакет «Документы и подача» за 35 000 ₸") + '">Написать</a></div></div>';
+    if (window.track) track("cab_week_view", { week: plan.week.n, tasks: plan.tasks.length, done: plan.tasks.filter(function (t) { return t.status === "done"; }).length });
   }
 
   /* ---------- Scholary Pro на виду ----------
@@ -720,63 +899,153 @@ function __scholaryMain() {
       list.map(docCardHTML).join("");
   }
 
+  /* ---- сетка документов (web-74) ----
+     Раньше — длинный список длинных блоков. Теперь: общая картина сверху и
+     компактные квадратные карточки, в которых видно всё нужное сразу:
+     статус, для скольких подач, срок изготовления, «начать до», цепочка,
+     замечания. Группы прежние — по критическому пути. */
+  function docGridCard(p) {
+    var d = p.doc, warn = docWarned(d);
+    var requested = d && (d.fields || {}).requested_at;
+    var st = p.status === "ready" ? (warn ? '<span class="pill pill-warn">замечания</span>' : '<span class="pill pill-ok">готов</span>')
+           : p.status === "progress" ? (requested && p.t === "recommendation" ? '<span class="pill pill-acc">запрошено</span>' : '<span class="pill pill-acc">в работе</span>')
+           : '<span class="pill pill-mut">нет</span>';
+    var line = "";
+    if (p.status !== "ready") {
+      if (p.daysToStart != null && p.daysToStart < 0) line = '<span class="bad">старт просрочен на ' + (-p.daysToStart) + " " + plural(-p.daysToStart, "день", "дня", "дней") + "</span>";
+      else if (p.daysToStart === 0) line = '<span class="bad">начать сегодня</span>';
+      else if (p.startBy) line = "начать до " + fmtD(p.startBy);
+      else line = "срок не горит";
+    } else line = "закрыт";
+    var exp = d && d.expires_on ? new Date(d.expires_on) : null;
+    var expBad = exp && p.nearest && exp < p.nearest;
+    return '<button class="dcard tappable" data-act="' + (d ? "doc" : "doc-new") + '" data-id="' + (d ? d.id : "") + '" data-doc="' + p.t + '">' +
+      '<div class="dcard-top"><span class="dic" style="background:' + (p.status === "ready" ? "var(--ok-soft)" : p.status === "progress" ? "var(--accent-soft)" : "var(--bg)") + '">' + p.T.ic + "</span>" + st + "</div>" +
+      '<b class="dcard-t">' + esc(p.T.title) + "</b>" +
+      '<div class="xs mut dcard-m">' + (p.required ? "для " + p.usesCount + " " + plural(p.usesCount, "подачи", "подач", "подач") : "дополнительно") + " · ≈" + p.chainLead + " " + plural(p.chainLead, "день", "дня", "дней") + "</div>" +
+      '<div class="xs dcard-l">' + line + "</div>" +
+      (p.blockedBy ? '<div class="xs" style="color:var(--accent-dark)">⛓ после: ' + esc((D.TYPES[p.blockedBy] || {}).title || p.blockedBy).split(" ")[0].toLowerCase() + "</div>" : "") +
+      (expBad ? '<div class="xs" style="color:var(--bad)">истекает до дедлайна</div>' : "") +
+      (d && d.file_path ? '<div class="xs mut">📎 файл</div>' : "") +
+      "</button>";
+  }
+  function docGridGroup(title, note, list) {
+    if (!list.length) return "";
+    return '<div class="sub-h">' + title + (note ? ' <span class="xs mut" style="text-transform:none;letter-spacing:0;font-weight:600">· ' + note + "</span>" : "") + "</div>" +
+      '<div class="dgrid">' + list.map(docGridCard).join("") + "</div>";
+  }
+  /* Критический путь: самая длинная цепочка и ближайший старт. */
+  function docOverviewHTML(plan, s, vs) {
+    var req = plan.filter(function (p) { return p.required; });
+    var longest = req.slice().sort(function (a, b) { return b.chainLead - a.chainLead; })[0];
+    var nextStart = req.filter(function (p) { return p.status !== "ready" && p.startBy; }).sort(function (a, b) { return a.startBy - b.startBy; })[0];
+    var nearest = vs.filter(function (v) { return !v.a.submitted_at && v.date; }).sort(function (a, b) { return a.date - b.date; })[0];
+    return '<div class="card" style="margin-bottom:14px">' +
+      '<div class="h-row"><div style="padding-right:12px"><b class="sm">Собрано ' + s.ready + " из " + s.required + "</b>" +
+        '<div class="xs mut" style="margin-top:2px">обязательных по твоим ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + "</div></div>" + ringHTML(s.pct, 52) + "</div>" +
+      '<div class="dstats"><span><b>' + s.ready + "</b>готово</span><span><b>" + s.progress + "</b>в работе</span><span><b>" + s.none + "</b>не начато</span>" + (s.optional ? "<span><b>" + s.optional + "</b>дополнительно</span>" : "") + "</div>" +
+      (longest ? '<div class="xs mut" style="margin-top:10px">Самая длинная цепочка: <b>' + esc(longest.T.title) + "</b> — ≈" + longest.chainLead + " " + plural(longest.chainLead, "день", "дня", "дней") +
+        (nearest ? " · ближайший дедлайн «" + esc(nearest.title) + "» " + fmtDL(nearest.date) : "") + "</div>" : "") +
+      (nextStart ? '<div class="xs" style="margin-top:4px">' + (nextStart.startBy < todayDate()
+          ? 'Начать первым: <b>' + esc(nextStart.T.title) + "</b> — старт был нужен " + fmtDL(nextStart.startBy) + ", дальше только срочный тариф"
+          : 'Следующий старт: <b>' + esc(nextStart.T.title) + "</b> — до " + fmtDL(nextStart.startBy)) + "</div>" : "") +
+      (s.overdue
+        ? '<div class="verd bad" style="margin:12px 0 0"><span>🔴</span><div><b>Старт просрочен: ' + s.overdue + " " + plural(s.overdue, "документ", "документа", "документов") + "</b>Это ещё не провал: сроки обычно можно ужать срочным тарифом. Но начинать надо сегодня.</div></div>"
+        : s.now
+          ? '<div class="verd warn" style="margin:12px 0 0"><span>⏳</span><div><b>Пора начинать: ' + s.now + " " + plural(s.now, "документ", "документа", "документов") + "</b>У них длинный срок изготовления, а дедлайн уже близко.</div></div>"
+          : s.ready === s.required && s.required
+            ? '<div class="verd ok" style="margin:12px 0 0"><span>✅</span><div><b>Обязательные документы собраны</b>Проверь пакет перед отправкой — это последняя точка, где ошибку ещё можно поймать.</div></div>'
+            : '<div class="verd ok" style="margin:12px 0 0"><span>👌</span><div><b>Сроки пока не горят</b>Начни с того, что делается дольше всего — это всегда апостиль и перевод.</div></div>') +
+      "</div>";
+  }
+  /* Типовой набор, когда подач ещё нет: честно помечен как типовой. */
+  function docTypicalHTML() {
+    var lvl = (S.ans && S.ans.level) || "bachelor";
+    var types = lvl === "bachelor" ? ["diploma", "passport", "ielts", "motivation", "apostille", "translation", "photo"]
+              : lvl === "phd" ? ["diploma", "passport", "ielts", "motivation", "recommendation", "cv", "research", "apostille", "translation"]
+              : ["diploma", "passport", "ielts", "motivation", "recommendation", "cv", "apostille", "translation"];
+    return '<div class="card" style="margin-bottom:14px;background:var(--accent-soft);border-color:var(--accent-border)"><b class="sm">Типовой набор для ' + esc((L.level[lvl] || "").toLowerCase()) + "</b>" +
+      '<p class="xs mut" style="margin:4px 0 0">Точный список со сроками появится, когда добавишь программы: у Венгрии и Кореи он разный. Пока — что обычно просят.</p></div>' +
+      '<div class="dgrid">' + types.map(function (t) {
+        var T = D.TYPES[t], d = docsOfType(t)[0];
+        return '<button class="dcard tappable" data-act="' + (d ? "doc" : "doc-new") + '" data-id="' + (d ? d.id : "") + '" data-doc="' + t + '">' +
+          '<div class="dcard-top"><span class="dic" style="background:' + (d && d.status === "ready" ? "var(--ok-soft)" : "var(--bg)") + '">' + T.ic + "</span>" +
+          (d ? (d.status === "ready" ? '<span class="pill pill-ok">готов</span>' : '<span class="pill pill-acc">в работе</span>') : '<span class="pill pill-mut">типовой</span>') + "</div>" +
+          '<b class="dcard-t">' + esc(T.title) + '</b><div class="xs mut dcard-m">≈' + T.lead + " " + plural(T.lead, "день", "дня", "дней") + "</div>" +
+          '<div class="xs dcard-l">' + esc(T.hint || "") + "</div></button>";
+      }).join("") + "</div>" +
+      '<button class="btn btn-primary btn-block" style="margin-top:14px" data-act="tab-unis">Выбрать программы</button>';
+  }
+
   function renderDocs() {
     var vs = appViews();
-    /* Без подач список документов собрать не из чего — честно говорим об этом,
-       а не показываем выдуманный набор из четырёх штук, как было раньше. */
     if (!vs.length) {
-      $("tab-docs").innerHTML =
-        '<div class="h2" style="margin:10px 0 4px">Документы</div>' +
-        '<div class="empty"><div class="art">📂</div><h3>Пока нечего собирать</h3>' +
-        '<p>Список документов мы собираем не «вообще», а под конкретные программы: у Венгрии и Кореи он разный. Добавь хотя бы одну программу — и здесь появится план со сроками.</p>' +
-        '<button class="btn btn-primary" data-act="tab-unis">Выбрать программы</button></div>';
+      $("tab-docs").innerHTML = '<div class="h2" style="margin:10px 0 10px">Документы</div>' + docTypicalHTML() +
+        '<div class="upload tappable" data-act="doc-pick" style="margin-top:14px">＋ Загрузить документ<div class="xs">PDF, JPG или PNG · до 10 МБ</div></div>';
       return;
     }
-
     var plan = docPlanNow(), s = D.planSummary(plan);
     var g = function (u) { return plan.filter(function (p) { return p.urgency === u; }); };
     var nowList = g("overdue").concat(g("now"));
+    var rec = plan.filter(function (p) { return p.t === "recommendation" && p.status !== "ready"; })[0];
 
     $("tab-docs").innerHTML =
       '<div class="h2" style="margin:10px 0 10px">Документы</div>' +
-
-      /* --- дашборд --- */
-      '<div class="card" style="margin-bottom:14px">' +
-        '<div class="h-row"><div style="padding-right:12px">' +
-          '<b class="sm">Собрано ' + s.ready + " из " + s.required + "</b>" +
-          '<div class="xs mut" style="margin-top:2px">обязательных по твоим ' + vs.length + " " + plural(vs.length, "подаче", "подачам", "подачам") + "</div>" +
-        "</div>" + ringHTML(s.pct, 52) + "</div>" +
-        '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
-          '<span class="pill pill-ok">Готово ' + s.ready + "</span>" +
-          '<span class="pill pill-acc">В работе ' + s.progress + "</span>" +
-          '<span class="pill pill-mut">Не начато ' + s.none + "</span>" +
-          (s.optional ? '<span class="pill pill-mut">Дополнительных ' + s.optional + "</span>" : "") +
-        "</div>" +
-        (s.overdue
-          ? '<div class="verd bad" style="margin:12px 0 0"><span>🔴</span><div><b>Старт просрочен: ' + s.overdue + " " + plural(s.overdue, "документ", "документа", "документов") + "</b>" +
-            "Это ещё не провал: сроки изготовления обычно можно ужать срочным тарифом. Но начинать надо сегодня — ниже они первыми.</div></div>"
-          : s.now
-            ? '<div class="verd warn" style="margin:12px 0 0"><span>⏳</span><div><b>Пора начинать: ' + s.now + " " + plural(s.now, "документ", "документа", "документов") + "</b>" +
-              "У них длинный срок изготовления, а дедлайн уже близко.</div></div>"
-            : s.ready === s.required && s.required
-              ? '<div class="verd ok" style="margin:12px 0 0"><span>✅</span><div><b>Обязательные документы собраны</b>Проверь пакет перед отправкой — это последняя точка, где ошибку ещё можно поймать.</div></div>'
-              : '<div class="verd ok" style="margin:12px 0 0"><span>👌</span><div><b>Сроки пока не горят</b>Запас есть. Начни с того, что делается дольше всего — это всегда апостиль и перевод.</div></div>') +
-      "</div>" +
-
-      /* --- группы по критическому пути --- */
-      docGroupHTML("Начать сейчас", "Дольше всего делаются — и дедлайн ближе всего", nowList) +
-      docGroupHTML("Скоро", "Начинать в ближайший месяц", g("soon")) +
-      docGroupHTML("Можно позже", "Срок позволяет — но не забудь", g("later")) +
-      docGroupHTML("Готово", "", g("done")) +
-      docGroupHTML("Дополнительные", "Не требует ни одна из твоих программ, но заявку усиливают", g("optional")) +
-
+      docOverviewHTML(plan, s, vs) +
+      (rec ? '<div class="card tappable" data-act="rec-request" style="margin-bottom:14px;border-color:var(--accent-border)"><div class="h-row"><div style="padding-right:10px"><b class="sm">📮 Попросить рекомендацию</b>' +
+        '<div class="xs mut">' + (rec.doc && (rec.doc.fields || {}).requested_at ? "Запрошено " + fmtDL(new Date(rec.doc.fields.requested_at)) + " · напомни через неделю" : "Готовый текст письма учителю: программа, дедлайн, что приложить") + "</div></div><span class=\"pill pill-acc\">→</span></div></div>" : "") +
+      docGridGroup("Начать сейчас", "дольше всего делаются, дедлайн ближе всего", nowList) +
+      docGridGroup("Скоро", "начинать в ближайший месяц", g("soon")) +
+      docGridGroup("Можно позже", "срок позволяет", g("later")) +
+      docGridGroup("Готово", "", g("done")) +
+      docGridGroup("Дополнительные", "не требует ни одна программа, но усиливают", g("optional")) +
       '<div class="upload tappable" data-act="doc-pick" style="margin-top:14px">＋ Загрузить документ<div class="xs">PDF, JPG или PNG · до 10 МБ · сразу проверим по требованиям твоих программ</div></div>' +
       proCardHTML() +
-
-      /* --- решение проблем --- */
       '<div class="lst tappable" data-act="doc-help" style="margin-top:12px"><div style="flex:1"><b class="sm">Что делать, если…</b>' +
         '<div class="xs mut">не тот формат · нет документа на руках · файл не открывается</div></div><span class="xs mut">→</span></div>' +
       '<p class="xs mut" style="margin-top:12px">Файлы видишь только ты: доступ закрыт по твоему аккаунту. <a href="/privacy/" target="_blank" rel="noopener">Как мы храним данные</a></p>';
+  }
+
+  /* ---- письмо учителю с просьбой о рекомендации ---- */
+  function recLetterText(lang) {
+    var vs = appViews().filter(function (v) { return !v.a.submitted_at; }).slice(0, 3);
+    var name = (S.profile && S.profile.name) || "";
+    var progs = vs.map(function (v) { return v.title + (v.date ? " (до " + fmtDL(v.date) + ")" : ""); }).join(", ");
+    var first = vs[0], deadline = first && first.date ? fmtDL(new Date(first.date.getTime() - 14 * 864e5)) : "за две недели до дедлайна";
+    if (lang === "en") {
+      return "Dear [Name],\n\nI am applying to " + (progs || "several international programmes") + " and would be honoured if you could write a letter of recommendation for me. " +
+        "You taught me [subject] and know my work on [project / achievement].\n\nWhat they ask for: 1–2 pages, on official letterhead if possible, signed, in English. " +
+        "I would need it by " + deadline + ". I will attach my CV, a short summary of the programme and my motivation letter so it takes as little of your time as possible.\n\nThank you very much,\n" + name;
+    }
+    return "Здравствуйте, [Имя Отчество]!\n\nЯ подаю документы на " + (progs || "несколько зарубежных программ") + " и буду очень благодарен(-на), если вы напишете мне рекомендательное письмо. " +
+      "Вы вели у меня [предмет] и знаете мою работу над [проект / достижение].\n\nЧто просит программа: 1–2 страницы, по возможности на бланке школы/вуза, с подписью, на английском (перевод могу взять на себя). " +
+      "Письмо нужно к " + deadline + ". Я приложу CV, краткое описание программы и своё мотивационное письмо, чтобы это заняло у вас минимум времени.\n\nСпасибо большое!\n" + name;
+  }
+  function openRecRequest() {
+    S.recLang = S.recLang || "ru";
+    openSub(function () {
+      var txt = recLetterText(S.recLang);
+      var rec = docsOfType("recommendation")[0];
+      return subHead("Попросить рекомендацию", "письмо учителю или преподавателю") +
+        '<div class="card" style="margin-bottom:12px"><b class="sm">Кого просить</b><div class="feat">1️⃣ Преподаватель профильного предмета — знает твою работу</div><div class="feat">2️⃣ Научрук / классный руководитель — знает тебя как человека</div>' +
+        '<p class="xs mut" style="margin:6px 0 0">Просить за 3 недели до дедлайна: преподаватели пишут медленно, в сессию — ещё медленнее.</p></div>' +
+        '<div class="seg2"><button data-act="rec-lang" data-v="ru" class="' + (S.recLang === "ru" ? "on" : "") + '">По-русски</button><button data-act="rec-lang" data-v="en" class="' + (S.recLang === "en" ? "on" : "") + '">In English</button></div>' +
+        '<textarea class="f ta big" id="rec-text" style="min-height:260px">' + esc(txt) + "</textarea>" +
+        '<p class="xs mut" style="margin:6px 0 10px">Замени слова в квадратных скобках — и можно отправлять.</p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" data-act="rec-copy">Скопировать</button>' +
+        '<button class="btn btn-soft btn-sm" data-act="rec-wa">Отправить в WhatsApp</button>' +
+        '<button class="btn btn-ghost btn-sm" data-act="rec-mark">Отметить «запрошено»</button></div>' +
+        (rec && (rec.fields || {}).requested_at ? '<p class="xs mut" style="margin-top:10px">Запрошено ' + fmtDL(new Date(rec.fields.requested_at)) + ". Если ответа нет неделю — вежливо напомни: это норма.</p>" : "");
+    });
+    if (window.track) track("cab_rec_request", { open: 1 });
+  }
+  function recMarkRequested(cb) {
+    var rec = docsOfType("recommendation")[0];
+    var patch = function (d) { var f = Object.assign({}, d.fields || {}, { requested_at: new Date().toISOString().slice(0, 10) }); saveDoc(d, { fields: f, status: d.status === "none" ? "progress" : d.status }, function () { recompute(); touch(true); if (cb) cb(); }); };
+    if (rec) patch(rec);
+    else createDoc({ doc_type: "recommendation", title: D.TYPES.recommendation.title, status: "progress", program_ids: [] }, function (d) { patch(d); });
+    toast("Отметили: рекомендация запрошена");
+    if (window.track) track("cab_rec_request", { marked: 1 });
   }
 
   /* ---------- «что делать, если…» ---------- */
@@ -976,19 +1245,27 @@ function __scholaryMain() {
       "С уважением,\n" + ((S.profile && S.profile.name) || "");
   }
 
-  /* ================= 3 · ВУЗЫ ================= */
-  var uniFilter = { q: "", cc: null, budget: null, noIelts: false };
+  /* ================= 3 · ВУЗЫ (web-74: Discover + фильтры + плашки) ================= */
+  var uniFilter = { q: "", cc: null, budget: null, noIelts: false, deadline: null, sort: "match", mode: "discover", col: null };
+  function progDeadline(p) { return Path.nextFromMD(p.deadline_md, todayDate()) || parseDeadline(p.deadline); }
   function catalogViews() {
     var prof = S.evalR && S.evalR.profile;
     var lvl = (S.ans && S.ans.level) || "bachelor";
     var mine = {}; S.apps.forEach(function (a) { mine[a.program_id] = 1; });
+    var today = todayDate();
     return S.programs.filter(function (p) {
       // куда казахстанец подать не может — в каталоге не показываем совсем
-      if (p.available_kz === false) return false;
+      if (p.available_kz === false || p.duplicate_of) return false;
       if (p.levels && p.levels.indexOf(lvl) === -1) return false;
       if (uniFilter.cc && (p.cc || "").toLowerCase() !== uniFilter.cc) return false;
-      if (uniFilter.noIelts && p.req && p.req.language > 4.5) return false;
-      if (uniFilter.budget === 0 && p.req && p.req.budget > 0) return false;
+      if (uniFilter.noIelts && !((p.req && p.req.language != null && p.req.language <= 4.5) || p.lang_year)) return false;
+      if (uniFilter.budget === 0 && !(p.req && p.req.budget === 0)) return false;
+      if (uniFilter.deadline) {
+        var d = progDeadline(p); if (!d) return false;
+        var dd = Path.daysBetween(d, today);
+        if (uniFilter.deadline === "month" && dd > 31) return false;
+        if (uniFilter.deadline === "3m" && dd > 92) return false;
+      }
       if (uniFilter.q) {
         var s = (p.name + " " + p.country + " " + (p.funding || "")).toLowerCase();
         if (s.indexOf(uniFilter.q.toLowerCase()) === -1) return false;
@@ -996,25 +1273,73 @@ function __scholaryMain() {
       return true;
     }).map(function (p) {
       var pr = probFor(prof, p);
-      return { prog: p, p: pr, mine: !!mine[p.id], match: pr ? Math.round((pr.adm * 0.6 + (pr.sch || pr.adm) * 0.4) * 100) : 0, date: parseDeadline(p.deadline) };
-    }).sort(function (a, b) { return b.match - a.match; });
+      return { prog: p, p: pr, mine: !!mine[p.id], match: pr ? Math.round((pr.adm * 0.6 + (pr.sch || pr.adm) * 0.4) * 100) : 0, date: progDeadline(p) };
+    }).sort(function (a, b) {
+      if (uniFilter.sort === "deadline") return ((a.date || Infinity) - (b.date || Infinity)) || (b.match - a.match);
+      if (uniFilter.sort === "name") return String(a.prog.name).localeCompare(String(b.prog.name), "ru");
+      return b.match - a.match;
+    });
+  }
+  function uniCountries() {
+    var lvl = (S.ans && S.ans.level) || "bachelor", cnt = {};
+    S.programs.forEach(function (p) { if (p.available_kz === false || p.duplicate_of) return; if (p.levels && p.levels.indexOf(lvl) === -1) return; var c = (p.cc || "").toLowerCase(); if (!c) return; cnt[c] = cnt[c] || { cc: c, n: 0, name: p.country }; cnt[c].n++; });
+    return Object.keys(cnt).map(function (k) { return cnt[k]; }).sort(function (a, b) { return b.n - a.n; });
+  }
+  function uniFiltersHTML(total) {
+    var cs = uniCountries().slice(0, 14);
+    return '<div class="fld"><svg class="ic16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
+      '<input id="uni-q" placeholder="Страна, программа, «без IELTS»" value="' + esc(uniFilter.q) + '"></div>' +
+      '<div class="chips scrollx" style="margin:10px 0 6px"><button class="chip ' + (!uniFilter.cc ? "on" : "") + '" data-act="unicc" data-v="">Все страны</button>' + cs.map(function (c) {
+        return '<button class="chip ' + ((uniFilter.cc || "") === c.cc ? "on" : "") + '" data-act="unicc" data-v="' + c.cc + '">' + flag(c.cc) + " " + esc(c.name || c.cc.toUpperCase()) + ' <span class="mut">' + c.n + "</span></button>";
+      }).join("") + "</div>" +
+      '<div class="chips scrollx" style="margin:0 0 6px">' +
+        '<button class="chip ' + (uniFilter.budget === 0 ? "on" : "") + '" data-act="unibudget">🎓 Полное покрытие</button>' +
+        '<button class="chip ' + (uniFilter.noIelts ? "on" : "") + '" data-act="uniielts">🗣 Без IELTS</button>' +
+        '<button class="chip ' + (uniFilter.deadline === "month" ? "on" : "") + '" data-act="unidl" data-v="month">⏰ Дедлайн в этом месяце</button>' +
+        '<button class="chip ' + (uniFilter.deadline === "3m" ? "on" : "") + '" data-act="unidl" data-v="3m">⏰ В ближайшие 3 месяца</button>' +
+      "</div>" +
+      '<div class="h-row" style="margin:4px 0 12px"><span class="xs mut">' + total + " " + plural(total, "программа", "программы", "программ") + "</span>" +
+        '<span class="xs mut">сортировка: ' + ["match|совпадение", "deadline|дедлайн", "name|название"].map(function (s) { var p = s.split("|"); return '<a href="#" data-act="unisort" data-v="' + p[0] + '"' + (uniFilter.sort === p[0] ? ' style="font-weight:800;color:var(--accent-dark)"' : "") + ">" + p[1] + "</a>"; }).join(" · ") + "</span></div>";
   }
   function renderUnis() {
+    var total = S.programs.filter(function (p) { return p.available_kz !== false && !p.duplicate_of; }).length;
+    var head = '<div class="h2" style="margin:10px 0 2px">Вузы и программы</div>' +
+      '<p class="sm mut" style="margin:0 0 10px">' + total + " программ в базе · проценты посчитаны по твоему профилю</p>" +
+      '<div class="seg2"><button data-act="unimode" data-v="discover" class="' + (uniFilter.mode === "discover" ? "on" : "") + '">Discover</button><button data-act="unimode" data-v="all" class="' + (uniFilter.mode === "all" ? "on" : "") + '">Все программы</button></div>';
+    if (uniFilter.mode === "discover") { $("tab-unis").innerHTML = head + discoverHTML(); return; }
     var vs = catalogViews();
-    var chips = [["", "Все"], ["hu", "🇭🇺 Венгрия"], ["de", "🇩🇪 Германия"], ["it", "🇮🇹 Италия"], ["tr", "🇹🇷 Турция"], ["kr", "🇰🇷 Корея"], ["cz", "🇨🇿 Чехия"], ["nl", "🇳🇱 Нидерланды"], ["cn", "🇨🇳 Китай"]];
-    $("tab-unis").innerHTML =
-      '<div class="h2" style="margin:10px 0 2px">Вузы и программы</div>' +
-      '<p class="sm mut" style="margin:0 0 10px">' + S.programs.length + " программ в базе · проценты посчитаны по твоему профилю</p>" +
-      '<div class="fld"><svg class="ic16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
-      '<input id="uni-q" placeholder="Страна, программа, «без IELTS»" value="' + esc(uniFilter.q) + '"></div>' +
-      '<div class="chips" style="margin:10px 0 6px">' + chips.map(function (c) {
-        return '<button class="chip ' + ((uniFilter.cc || "") === c[0] ? "on" : "") + '" data-act="unicc" data-v="' + c[0] + '">' + c[1] + "</button>";
+    $("tab-unis").innerHTML = head + uniFiltersHTML(vs.length) + uniListHTML(vs);
+  }
+  /* ---- Discover: подборки из каталога ---- */
+  function discoverHTML() {
+    var ctx = pathCtx(), cols = Path.collections(S.programs, ctx);
+    var mine = {}; S.apps.forEach(function (a) { mine[a.program_id] = 1; });
+    if (uniFilter.col) {
+      var col = cols.filter(function (c) { return c.key === uniFilter.col; })[0];
+      if (!col) { uniFilter.col = null; return discoverHTML(); }
+      var vs = col.items.map(function (p) { var pr = probFor(S.evalR && S.evalR.profile, p); return { prog: p, p: pr, mine: !!mine[p.id], match: pr ? Math.round((pr.adm * 0.6 + (pr.sch || pr.adm) * 0.4) * 100) : 0, date: progDeadline(p) }; });
+      return '<div class="subhead" style="margin-top:4px"><button class="iconbtn" data-act="disc-back" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>' +
+        '<div><div class="subttl">' + col.ic + " " + esc(col.title) + '</div><div class="xs mut">' + esc(col.why) + " · " + vs.length + " " + plural(vs.length, "программа", "программы", "программ") + "</div></div></div>" +
+        '<div class="grid2">' + vs.slice(0, 60).map(uniCard).join("") + "</div>";
+    }
+    return '<div class="chips scrollx" style="margin:0 0 12px">' + cols.map(function (c) {
+        return '<button class="chip" data-act="disc-col" data-v="' + c.key + '">' + c.ic + " " + esc(c.title) + ' <span class="mut">' + c.items.length + "</span></button>";
       }).join("") + "</div>" +
-      '<div class="chips" style="margin:0 0 12px">' +
-        '<button class="chip ' + (uniFilter.budget === 0 ? "on" : "") + '" data-act="unibudget">Только 0 ₸</button>' +
-        '<button class="chip ' + (uniFilter.noIelts ? "on" : "") + '" data-act="uniielts">Можно без IELTS</button>' +
-      "</div>" +
-      uniListHTML(vs);
+      cols.map(function (c) {
+        return '<div class="disc-row"><div class="h-row" style="margin:12px 0 6px"><div><b class="sm">' + c.ic + " " + esc(c.title) + '</b><div class="xs mut">' + esc(c.why) + "</div></div>" +
+          '<button class="lnk xs" data-act="disc-col" data-v="' + c.key + '">все ' + c.items.length + "</button></div>" +
+          '<div class="disc-scroll">' + c.items.slice(0, 8).map(function (p) { return discCard(p, mine[p.id]); }).join("") + "</div></div>";
+      }).join("") +
+      '<p class="xs mut" style="margin-top:14px">Подборки собираются из каталога по твоему уровню. ✅ — данные проверены командой; остальные проверяются — сверься с официальным сайтом.</p>';
+  }
+  function discCard(p, isMine) {
+    var pr = probFor(S.evalR && S.evalR.profile, p), b = Path.badges(p, pathCtx()).slice(0, 3);
+    return '<div class="disc-card tappable" data-act="prog" data-id="' + esc(p.id) + '">' +
+      '<div class="h-row" style="align-items:flex-start"><b class="sm" style="flex:1;min-width:0">' + flag(p.cc) + " " + esc(p.name) + "</b>" +
+      (pr ? '<span class="pill ' + (pr.adm >= 0.5 ? "pill-ok" : pr.adm >= 0.3 ? "pill-warn" : "pill-mut") + '">' + pct(pr.adm) + "%</span>" : "") + "</div>" +
+      '<div class="xs mut" style="margin-top:2px">' + esc(p.country || "") + (p.funding ? " · " + esc(String(p.funding).slice(0, 60)) : "") + "</div>" +
+      '<div class="badges">' + b.map(function (x) { return '<span class="badge ' + (x.cls || "") + '">' + x.ic + " " + esc(x.t) + "</span>"; }).join("") + "</div>" +
+      (isMine ? '<span class="xs" style="color:var(--accent-dark)">уже в подачах</span>' : "") + "</div>";
   }
   /* Программы с очень низким совпадением прячем под кнопку: стена нулей
      демотивирует и выглядит как ошибка, но скрывать их совсем нечестно. */
@@ -1031,7 +1356,7 @@ function __scholaryMain() {
         html += '<div class="grid2">' + weak.slice(0, 40).map(uniCard).join("") + "</div>" +
           '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-act="uniweak">Свернуть</button>';
       } else {
-        html += '<p class="sm mut" style="margin:0 0 10px">Тут пороги выше твоего профиля прямо сейчас. Это не «никогда»: подтяни язык или достижения — и проценты вырастут.</p>' +
+        html += '<p class="sm mut" style="margin:0 0 10px">Тут пороги выше твоего профиля прямо сейчас. Это не «никогда»: подтяни язык или достижения — и они поднимутся.</p>' +
           '<button class="btn btn-soft btn-sm btn-block" data-act="uniweak">Показать ' + weak.length + " " + plural(weak.length, "программу", "программы", "программ") + "</button>";
       }
     }
@@ -1039,20 +1364,23 @@ function __scholaryMain() {
   }
   function uniEmpty() {
     return '<div class="empty"><div class="art">🔎</div><h3>Под эти фильтры ничего нет</h3>' +
-      "<p>Попробуй убрать один фильтр — например, «только 0 ₸»: программы с частичным покрытием часто выгоднее по деньгам.</p>" +
+      "<p>Попробуй убрать один фильтр — например, «полное покрытие»: программы с частичным покрытием часто выгоднее по деньгам.</p>" +
       '<button class="btn btn-soft btn-sm" data-act="unireset">Сбросить фильтры</button></div>';
   }
   function uniCard(v) {
+    var b = Path.badges(v.prog, pathCtx()).slice(0, 4);
     return '<div class="prog tappable" data-act="prog" data-id="' + esc(v.prog.id) + '">' +
       '<div class="h-row" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>' + flag(v.prog.cc) + " " + esc(v.prog.name) + "</b>" +
-      '<div class="xs mut">' + [esc(v.prog.country), esc(v.prog.funding || "")].filter(Boolean).join(" · ") + "</div></div>" +
+      '<div class="xs mut fund">' + [esc(v.prog.country), esc(v.prog.funding || "")].filter(Boolean).join(" · ") + "</div></div>" +
       '<span class="pill ' + (v.match >= 70 ? "pill-ok" : v.match >= 45 ? "pill-warn" : "pill-mut") + '">' + v.match + "%</span></div>" +
+      (b.length ? '<div class="badges">' + b.map(function (x) { return '<span class="badge ' + (x.cls || "") + '">' + x.ic + " " + esc(x.t) + "</span>"; }).join("") + "</div>" : "") +
       (v.p ? '<div class="pb-line"><span class="nm">Поступление</span><div class="pb"><i style="width:' + pct(v.p.adm) + '%"></i></div><span class="v">' + pct(v.p.adm) + "%</span></div>" +
         (v.p.sch != null ? '<div class="pb-line"><span class="nm">Стипендия</span><div class="pb"><i class="sch" style="width:' + pct(v.p.sch) + '%"></i></div><span class="v">' + pct(v.p.sch) + "%</span></div>" : "") : "") +
       '<div class="h-row" style="margin-top:10px">' +
       (v.mine ? '<span class="pill pill-acc">уже в подачах</span>' : '<button class="btn btn-soft btn-sm" data-act="add" data-id="' + esc(v.prog.id) + '">+ В подачи</button>') +
-      '<span class="xs mut">' + (v.date ? "дедлайн " + fmtD(v.date) : esc(v.prog.deadline || "")) + "</span></div></div>";
+      '<span class="xs mut">' + (v.date ? "дедлайн " + fmtD(v.date) : esc(v.prog.deadline || "уточняется")) + "</span></div></div>";
   }
+
   function openProg(id) {
     var p = progById(id); if (!p) return;
     var pr = probFor(S.evalR && S.evalR.profile, p);
@@ -1166,6 +1494,7 @@ function __scholaryMain() {
           '<button class="btn btn-ghost btn-sm" data-act="edit" data-key="level">Сменить уровень</button>' +
         "</div></div>" +
       schoolCardHTML() +
+      weekSettingsHTML() +
       '<div class="card" style="margin-bottom:12px"><div class="h-row"><div style="padding-right:10px"><b class="sm">Telegram</b><div class="xs mut">' +
         (S.tg && S.tg.chat_id ? "подключён · шаг дня и дедлайны" : "не подключён — уведомления о дедлайнах не придут") + "</div></div>" +
         '<button class="btn ' + (S.tg && S.tg.chat_id ? "btn-ghost" : "btn-primary") + ' btn-sm" data-act="tg">' + (S.tg && S.tg.chat_id ? "Настроить" : "Подключить") + "</button></div></div>" +
@@ -1429,6 +1758,7 @@ function __scholaryMain() {
     sb.from("portfolio_items").insert({ user_id: S.session.user.id, program_id: id, status: "study" }).select().single().then(function (r) {
       if (r.error) { toast("Не удалось добавить", "bad"); return; }
       S.apps.push(r.data); recompute(); toast("Добавлено в подачи"); if (cb) cb();
+      touch(true); awardCheck();
       if (window.track) track("cab_add_prog", { id: id });
     });
   }
@@ -1480,6 +1810,7 @@ function __scholaryMain() {
           var blockers = vs.filter(function (x) { return x.level === "blocker"; }).length;
           toast(blockers ? "Загружено · нашли " + blockers + " " + plural(blockers, "замечание", "замечания", "замечаний") + " ниже" : "Загружено · замечаний нет", blockers ? "bad" : "");
           if (window.track) track("cab_doc_upload", { type: d.doc_type, blockers: blockers });
+          touch(true); awardCheck();
           if (cb) cb();
         });
       });
@@ -1639,6 +1970,56 @@ function __scholaryMain() {
       encodeURIComponent("Здравствуйте! Хочу Scholary Pro (" + label + "). Аккаунт: " + (email || "")), "_blank", "noopener");
   }
 
+  /* ---- маршрутизация действий задач/темы недели ---- */
+  function goAct(a) {
+    var p = a.split(":"), k = p[0], arg = p.slice(1).join(":");
+    if (k === "tab-unis") { setTab("unis"); return; }
+    if (k === "tab-docs") { setTab("docs"); return; }
+    if (k === "tab-apps") { setTab("apps"); return; }
+    if (k === "tab-today") { setTab("today"); return; }
+    if (k === "chance") { openChance(); return; }
+    if (k === "subscribe") { openSubscribe(); return; }
+    if (k === "discover") { uniFilter.mode = "discover"; uniFilter.col = arg === "week" ? null : arg; if (window.track) track("cab_discover_open", { col: arg }); setTab("unis"); return; }
+    if (k === "doc-id") { openDoc(arg); return; }
+    if (k === "doc") { var ex = docsOfType(arg)[0]; if (ex) openDoc(ex.id); else openNewDoc(arg, null); return; }
+    if (k === "presubmit") { openPresubmit(arg); return; }
+    if (k === "app") { openApp(arg); return; }
+    if (k === "letter") {
+      var app0 = arg ? S.apps.filter(function (x) { return x.id === +arg; })[0] : appViews().filter(function (v) { return !v.a.submitted_at; }).map(function (v) { return v.a; })[0];
+      if (!app0) { setTab("unis"); return; }
+      var dl = docFor("motivation", app0.program_id);
+      if (dl && dl.content) openDoc(dl.id); else openWizard(null, app0.id);
+      return;
+    }
+    if (k === "rec-request") { openRecRequest(); return; }
+    setTab("today");
+  }
+  function saveCabPrefs(cab, cb) {
+    S.profile = Object.assign({}, S.profile || {}, { cab: cab });
+    sb.from("profiles").update({ cab: cab, updated_at: new Date().toISOString() }).eq("user_id", S.session.user.id).then(function (r) {
+      if (r && r.error && window.console) console.warn("profiles.cab", r.error.message);
+      if (cb) cb();
+    });
+  }
+  /* Настройки недели в профиле. */
+  function weekSettingsHTML() {
+    var cab = cabPrefs(), wp = weeksNow(), tg = S.tg && S.tg.chat_id, prefs = (S.tg && S.tg.prefs) || {};
+    return '<div class="card" style="margin-bottom:12px"><b class="sm">Моя неделя</b>' +
+      '<div class="lst"><div style="flex:1"><b class="sm">Цель недели</b><div class="xs mut">задач в неделю · сейчас ' + weekGoal() + "</div></div><button class=\"btn btn-ghost btn-sm\" data-act=\"week-goal\">Изменить</button></div>" +
+      '<div class="lst"><div style="flex:1"><b class="sm">Недели с прогрессом</b><div class="xs mut">' + (wp.streak ? wp.streak + " подряд · всего " + wp.total : "всего " + wp.total) + " · пропуск раз в месяц не рвёт серию</div></div></div>" +
+      '<div class="lst"><div style="flex:1"><b class="sm">Эта неделя</b><div class="xs mut">' + (wp.quietThisWeek ? "на паузе (экзамены, каникулы)" : "в плане") + "</div></div><button class=\"btn btn-ghost btn-sm\" data-act=\"quiet-week\">" + (wp.quietThisWeek ? "Снять паузу" : "Пауза") + "</button></div>" +
+      (tg ? '<div class="lst"><div style="flex:1"><b class="sm">Дайджест недели в Telegram</b><div class="xs mut">понедельник утром · план и ближайший дедлайн</div></div><button class="btn ' + (prefs.digest === false ? "btn-ghost" : "btn-soft") + ' btn-sm" data-act="tg-pref" data-v="digest">' + (prefs.digest === false ? "Выкл" : "Вкл") + "</button></div>" +
+             '<div class="lst"><div style="flex:1"><b class="sm">«Неделя ещё не засчитана»</b><div class="xs mut">четверг вечером, только если задач за неделю нет</div></div><button class="btn ' + (prefs.week === false ? "btn-ghost" : "btn-soft") + ' btn-sm" data-act="tg-pref" data-v="week">' + (prefs.week === false ? "Выкл" : "Вкл") + "</button></div>"
+          : '<p class="xs mut" style="margin:8px 0 0">Подключи Telegram ниже — план недели и дедлайны будут приходить сами, не чаще раза в день.</p>') +
+      "</div>";
+  }
+  function toggleTgPref(key) {
+    if (!S.tg) return;
+    var prefs = Object.assign({}, S.tg.prefs || {}); prefs[key] = prefs[key] === false;
+    S.tg.prefs = prefs;
+    sb.from("tg_links").update({ prefs: prefs }).eq("user_id", S.session.user.id).then(function () { renderProfile(); });
+  }
+
   /* ================= делегирование событий ================= */
   document.addEventListener("click", function (e) {
     var el = e.target.closest("[data-act]"); if (!el) return;
@@ -1662,11 +2043,13 @@ function __scholaryMain() {
     if (act === "apptab") { appTab = v; drawSub(); return; }
     if (act === "status" && app) { saveApp(app, { status: v }, function () { drawSub(); }); return; }
     if (act === "outcome" && app) {
-      saveApp(app, { outcome: v, outcome_at: new Date().toISOString() }, function () { drawSub(); });
+      saveApp(app, { outcome: v, outcome_at: new Date().toISOString() }, function () { drawSub(); awardCheck(); });
+      touch(true);
       toast(v === "admit" ? "Поздравляем! Записали исход" : "Записали — это уточняет модель"); return;
     }
     if (act === "submit" && app) {
-      saveApp(app, { submitted_at: new Date().toISOString(), status: "applied" }, function () { S.stack.pop(); drawSub(); });
+      saveApp(app, { submitted_at: new Date().toISOString(), status: "applied" }, function () { S.stack.pop(); drawSub(); awardCheck(); });
+      touch(true);
       toast("Подача отмечена отправленной"); if (window.track) track("cab_submit", {}); return;
     }
     if (act === "presubmit") { openPresubmit(appId); return; }
@@ -1711,7 +2094,8 @@ function __scholaryMain() {
       return;
     }
     if (act === "docst" && doc) {
-      saveDoc(doc, { status: v, checked_at: new Date().toISOString() }, function () { recompute(); drawSub(); pushHistory("документ " + v); });
+      saveDoc(doc, { status: v, checked_at: new Date().toISOString() }, function () { recompute(); drawSub(); pushHistory("документ " + v); awardCheck(); });
+      touch(v !== "none");
       if (v === "ready") toast("Отмечено готовым");
       return;
     }
@@ -1732,7 +2116,8 @@ function __scholaryMain() {
     if (act === "letter" && doc) { openDoc(doc.id); return; }
     if (act === "letter-save" && doc) {
       var t = document.getElementById("letter-text");
-      saveDoc(doc, { content: t ? t.value : "", version: (doc.version || 1) + 1, checked_at: new Date().toISOString() }, function () { drawSub(); });
+      saveDoc(doc, { content: t ? t.value : "", version: (doc.version || 1) + 1, checked_at: new Date().toISOString() }, function () { drawSub(); awardCheck(); });
+      touch(true);
       toast("Сохранено · разбор обновлён"); return;
     }
     if (act === "ai-doc" && doc) { aiCheckDoc(doc); return; }
@@ -1773,10 +2158,110 @@ function __scholaryMain() {
       var wa2 = "https://wa.me/" + (C.WHATSAPP_NUMBER || "") + "?text=" + encodeURIComponent("Кажется, в кабинете Scholary неточность. Экран: " + (act === "ai-wrong" ? "проверка документа" : "программа " + (id || appId || "")) + ". Опишу: ");
       window.open(wa2, "_blank", "noopener"); return;
     }
+    /* ---- web-74: задачи недели, путь, календарь, discover, рекомендации ---- */
+    var tkey = el.getAttribute("data-key");
+    if (act === "task-done" && tkey) {
+      var cur = S.cab.state[tkey] || {};
+      var toDone = cur.status !== "done";
+      var planT = (S.plan && S.plan.tasks || []).filter(function (t) { return t.key === tkey; })[0];
+      taskSave(tkey, { status: toDone ? "done" : "open" }, null);
+      if (toDone) { touch(true); if (window.track) track("cab_task_done", { kind: tkey.split(":")[1], week: S.plan ? S.plan.week.n : 0 }); }
+      var goal = weekGoal(), doneN = (S.plan && S.plan.tasks || []).filter(function (t) { return (S.cab.state[t.key] || {}).status === "done"; }).length;
+      renderToday(); renderWidget();
+      if (toDone) { toast(doneN >= goal ? "Цель недели закрыта · " + doneN + " из " + goal : "Готово · неделя засчитана · " + doneN + " из " + goal, "ok"); awardCheck(); }
+      return;
+    }
+    if (act === "task-undo" && tkey) { taskSave(tkey, { status: "open" }); renderToday(); return; }
+    if (act === "task-menu" && tkey) {
+      var bgm = document.createElement("div"); bgm.className = "modal-bg";
+      bgm.innerHTML = '<div class="modal"><b>Задача</b><div style="margin-top:10px">' +
+        '<button class="lst wide" data-m="move"><span>↪</span><div style="flex:1;text-align:left"><b class="sm">Перенести на следующую неделю</b><div class="xs mut">появится в плане в понедельник</div></div></button>' +
+        '<button class="lst wide" data-m="skip"><span>✕</span><div style="flex:1;text-align:left"><b class="sm">Не актуально</b><div class="xs mut">уберём из плана без последствий</div></div></button>' +
+        '</div><button class="btn btn-ghost btn-sm btn-block" style="margin-top:10px" data-x="1">Отмена</button></div>';
+      document.getElementById("modal-root").appendChild(bgm);
+      bgm.addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-m]");
+        if (b) {
+          var m = b.getAttribute("data-m"), pt = (S.plan && S.plan.tasks || []).filter(function (t) { return t.key === tkey; })[0];
+          taskSave(tkey, { status: m === "move" ? "moved" : "skipped", title: pt ? pt.title : "" });
+          if (window.track) track(m === "move" ? "cab_task_move" : "cab_task_skip", { kind: tkey.split(":")[1] });
+          bgm.remove(); renderToday(); toast(m === "move" ? "Перенесли на следующую неделю" : "Убрали из плана"); return;
+        }
+        if (ev.target.closest("[data-x]") || ev.target === bgm) bgm.remove();
+      });
+      return;
+    }
+    if (act === "task-when" && tkey) {
+      var bgw = document.createElement("div"); bgw.className = "modal-bg";
+      var curW = (S.cab.state[tkey] || {}).when_day || 0;
+      bgw.innerHTML = '<div class="modal"><b>Когда займёшься?</b><p class="xs mut" style="margin:4px 0 10px">Задача с назначенным днём выполняется в разы чаще — это самый проверенный приём планирования.</p>' +
+        '<div class="chips">' + Path.WD_FULL.map(function (w, i) { return '<button class="chip ' + (curW === i + 1 ? "on" : "") + '" data-w="' + (i + 1) + '">' + w + "</button>"; }).join("") + "</div>" +
+        '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-x="1">' + (curW ? "Убрать день" : "Отмена") + "</button></div>";
+      document.getElementById("modal-root").appendChild(bgw);
+      bgw.addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-w]");
+        if (b) { taskSave(tkey, { when_day: +b.getAttribute("data-w") }); if (window.track) track("cab_task_when", { day: +b.getAttribute("data-w") }); bgw.remove(); renderToday(); return; }
+        if (ev.target.closest("[data-x]")) { if (curW) taskSave(tkey, { when_day: null }); bgw.remove(); renderToday(); return; }
+        if (ev.target === bgw) bgw.remove();
+      });
+      return;
+    }
+    if (act === "task-go") { goAct(v || ""); return; }
+    if (act === "quiet-week") {
+      e.preventDefault();
+      var wkq = Path.weekInfo(todayDate()), cabp = Object.assign({}, cabPrefs()), q = (cabp.quiet || []).slice();
+      var idx = q.indexOf(wkq.key);
+      if (idx >= 0) q.splice(idx, 1); else q.push(wkq.key);
+      cabp.quiet = q.slice(-20);
+      saveCabPrefs(cabp, function () { renderToday(); toast(idx >= 0 ? "Пауза снята" : "Неделя на паузе: серия не прервётся", "ok"); });
+      if (window.track) track("cab_quiet_week", { on: idx < 0 });
+      return;
+    }
+    if (act === "week-goal") {
+      e.preventDefault();
+      var bgg = document.createElement("div"); bgg.className = "modal-bg";
+      bgg.innerHTML = '<div class="modal"><b>Цель недели</b><p class="xs mut" style="margin:4px 0 10px">Сколько задач закрывать в неделю. Три — реалистично в учебный год, пять — на каникулах.</p>' +
+        '<div class="chips">' + [2, 3, 4, 5].map(function (n) { return '<button class="chip ' + (weekGoal() === n ? "on" : "") + '" data-g="' + n + '">' + n + "</button>"; }).join("") + "</div>" +
+        '<button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-x="1">Отмена</button></div>';
+      document.getElementById("modal-root").appendChild(bgg);
+      bgg.addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-g]");
+        if (b) { var cp = Object.assign({}, cabPrefs(), { goal: +b.getAttribute("data-g") }); saveCabPrefs(cp, function () { renderToday(); if (S.tab === "profile") renderProfile(); }); bgg.remove(); return; }
+        if (ev.target.closest("[data-x]") || ev.target === bgg) bgg.remove();
+      });
+      return;
+    }
+    if (act === "cal-prev" || act === "cal-next") {
+      var m0 = S.calMonth || (function () { var t = todayDate(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
+      S.calMonth = new Date(m0.getFullYear(), m0.getMonth() + (act === "cal-next" ? 1 : -1), 1); S.calSel = null;
+      if (window.track) track("cab_calendar_open", { m: S.calMonth.getMonth() + 1 });
+      if (S.tab === "today") { renderToday(); renderWidget(); } return;
+    }
+    if (act === "cal-day") { S.calSel = S.calSel === v ? null : v; if (S.tab === "today") { renderToday(); renderWidget(); } return; }
+    if (act === "disc-col") { uniFilter.mode = "discover"; uniFilter.col = v; if (window.track) track("cab_discover_open", { col: v }); if (S.tab !== "unis") setTab("unis"); else renderUnis(); window.scrollTo(0, 0); return; }
+    if (act === "disc-back") { uniFilter.col = null; renderUnis(); return; }
+    if (act === "unimode") { uniFilter.mode = v; uniFilter.col = null; renderUnis(); return; }
+    if (act === "unidl") { e.preventDefault(); uniFilter.deadline = uniFilter.deadline === v ? null : v; renderUnis(); return; }
+    if (act === "unisort") { e.preventDefault(); uniFilter.sort = v; renderUnis(); return; }
+    if (act === "tab-apps") { setTab("apps"); return; }
+    if (act === "tab-today") { setTab("today"); return; }
+    if (act === "rec-request") { openRecRequest(); return; }
+    if (act === "rec-lang") { S.recLang = v; drawSub(); return; }
+    if (act === "rec-copy") {
+      var ta3 = document.getElementById("rec-text"); var txt3 = ta3 ? ta3.value : "";
+      var done3 = false;
+      try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt3); done3 = true; } } catch (err) {}
+      if (!done3 && ta3) { ta3.select(); try { document.execCommand("copy"); done3 = true; } catch (err) {} }
+      toast(done3 ? "Скопировано — вставь в письмо или мессенджер" : "Выдели текст и скопируй вручную");
+      return;
+    }
+    if (act === "rec-wa") { var ta4 = document.getElementById("rec-text"); window.open("https://wa.me/?text=" + encodeURIComponent(ta4 ? ta4.value : recLetterText(S.recLang)), "_blank", "noopener"); return; }
+    if (act === "rec-mark") { recMarkRequested(function () { drawSub(); }); return; }
+    if (act === "content-open") { if (window.track) track("cab_content_open", { id: id }); return; }
     if (act === "unicc") { uniFilter.cc = v || null; renderUnis(); return; }
     if (act === "unibudget") { uniFilter.budget = uniFilter.budget === 0 ? null : 0; renderUnis(); return; }
     if (act === "uniielts") { uniFilter.noIelts = !uniFilter.noIelts; renderUnis(); return; }
-    if (act === "unireset") { uniFilter = { q: "", cc: null, budget: null, noIelts: false }; uniShowWeak = false; renderUnis(); return; }
+    if (act === "unireset") { uniFilter = { q: "", cc: null, budget: null, noIelts: false, deadline: null, sort: "match", mode: "all", col: null }; uniShowWeak = false; renderUnis(); return; }
     if (act === "uniweak") { uniShowWeak = !uniShowWeak; renderUnis(); return; }
     if (act === "prog") { openProg(id); return; }
     if (act === "add") { addProgram(id, function () { if (S.stack.length) drawSub(); else renderUnis(); }); return; }
@@ -1786,6 +2271,7 @@ function __scholaryMain() {
     }
     if (act === "edit") { openEdit(el.getAttribute("data-key")); return; }
     if (act === "tg") { openTg(); return; }
+    if (act === "tg-pref") { toggleTgPref(v); return; }
     if (act === "reports") { openReports(); return; }
     if (act === "privacy") { openPrivacy(); return; }
     if (act === "help") { openHelp(); return; }
@@ -2077,7 +2563,9 @@ function __scholaryMain() {
         sb.from("programs_public").select("*"),
         sb.rpc("my_reports"),
         sb.from("probability_history").select("*").order("ts", { ascending: true }).limit(30),
-        sb.from("tg_links").select("*").maybeSingle()
+        sb.from("tg_links").select("*").maybeSingle(),
+        /* web-74: задачи недели, активность, вехи, материалы — одним запросом */
+        sb.rpc("cab_state").then(function (r) { return r; }, function () { return { data: null }; })
       ]).then(function (rs) {
         S.apps = rs[0].data || [];
         S.docs = rs[1].data || [];
@@ -2085,13 +2573,32 @@ function __scholaryMain() {
         S.reports = rs[3].data || [];
         S.hist = rs[4].data || [];
         S.tg = rs[5] && rs[5].data ? rs[5].data : null;
+        var cs = rs[6] && rs[6].data && typeof rs[6].data === "object" ? rs[6].data : null;
+        S.cab = { state: {}, activity: [], ach: {}, content: [] };
+        if (cs) {
+          (cs.tasks || []).forEach(function (t) { S.cab.state[t.task_key] = { status: t.status, when_day: t.when_day, week_start: t.week_start, title: t.title || undefined }; });
+          S.cab.activity = (cs.activity || []).map(function (a) { return { day: String(a.day), progress: !!a.progress }; });
+          (cs.ach || []).forEach(function (a) { S.cab.ach[a.key] = a.earned_at; });
+          S.cab.content = cs.content || [];
+        } else {
+          /* базы ещё нет (или сбой) — берём состояние задач с этого устройства */
+          try { S.cab.state = JSON.parse(localStorage.getItem("scholary_cab_state") || "{}") || {}; } catch (e) {}
+        }
         recompute();
         var proceed = function () {
           entering = false;
           $("topbar-ava").textContent = ((S.profile && S.profile.name) || "S")[0].toUpperCase();
+          /* deep-link из Telegram/письма: ?tab=…&d=<подборка>&task=<ключ> */
+          var dl = Path.parseDeepLink(location.search);
+          if (dl.d) { uniFilter.mode = "discover"; uniFilter.col = dl.d === "week" ? null : dl.d; }
+          if (dl.tab) S.tab = dl.tab;
           show("v-app"); setTab(S.tab); pushHistory("вход");
+          if (dl.task) { var tEl = document.querySelector('.task[data-key="' + dl.task + '"]'); if (tEl) { tEl.classList.add("hl"); tEl.scrollIntoView({ block: "center" }); } }
+          if (dl.from && window.track) track("cab_deeplink", { from: dl.from, tab: dl.tab || "today" });
+          if (dl.tab || dl.d || dl.task || dl.from) { try { history.replaceState(null, "", location.pathname); } catch (e) {} }
           loadSchool();
-          if (window.track) track("cab_open", { v: 2 });
+          touch(false); awardCheck();
+          if (window.track) track("cab_open", { v: 3 });
         };
         if (!S.apps.length && S.evalR && S.evalR.portfolio.length) {
           var uid = S.session.user.id;
