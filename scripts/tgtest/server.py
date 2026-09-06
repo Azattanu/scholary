@@ -17,11 +17,13 @@ class H(http.server.BaseHTTPRequestHandler):
             if fn == "tg_due": return self._json(200, {"ok": True, "items": STATE["due"]})
             if fn == "ws_digest_due":
                 return self._json(200, STATE.get("ws", {"ok": True, "items": [], "milestone": 110, "week_start": "2026-09-07"}))
+            if fn == "founder_digest_due":
+                return self._json(200, STATE.get("founder") or {"ok": True, "day": "2026-09-05", "milestone": 120, "stats": {}, "prev": {}, "top_channels": [], "recipients": []})
             if fn == "tg_week_due":
                 w = STATE["week"].get(b.get("p_kind"), {"ok": True, "items": [], "milestone": 0, "week_start": "2026-09-07"})
                 return self._json(200, w)
             return self._json(200, {"ok": True})
         if self.path == "/__set": STATE.update(b); return self._json(200, {"ok": True})
-        if self.path == "/__reset": STATE["rpc"].clear(); STATE["due"]=[]; STATE["week"]={}; STATE["ws"]=None; return self._json(200, {"ok": True})
+        if self.path == "/__reset": STATE["rpc"].clear(); STATE["due"]=[]; STATE["week"]={}; STATE["ws"]=None; STATE["founder"]=None; return self._json(200, {"ok": True})
         return self._json(404, {})
 http.server.ThreadingHTTPServer(("127.0.0.1", 8132), H).serve_forever()
