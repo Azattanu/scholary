@@ -128,7 +128,7 @@ function __scholaryMain() {
                  programs: r[8] || [], countries: r[9] || [], leads: r[10] || [],
                  reports: r[11] || [], paidNoReport: r[12] || [], timings: r[13] || {}, steps: r[14] || [] };
       S.loading = false;
-      $("updatedAt").textContent = "Обновлено " + new Date().toLocaleTimeString("ru-RU") + " · период: " + S.days + " " + plural(S.days, "день", "дня", "дней");
+      if (S.tab !== "day") $("updatedAt").textContent = "Обновлено " + new Date().toLocaleTimeString("ru-RU") + " · период: " + S.days + " " + plural(S.days, "день", "дня", "дней");
       draw();
       loadSchools();
     }, function (e) {
@@ -278,8 +278,8 @@ function __scholaryMain() {
       ]) + "</div>" +
       '<div class="kgrp"><h3>Квиз</h3>' + kpiWrap([
         dkpi("открыли квиз", "quiz_open", o),
-        dkpi("начали", "quiz_start", o, null, false, pct(c.quiz_start, c.quiz_open) + "% от открывших"),
-        dkpi("дошли до результата", "quiz_done", o, null, false, pct(c.quiz_done, c.quiz_start) + "% от начавших"),
+        dkpi("начали", "quiz_start", o, null, false, Number(c.quiz_open) ? pct(c.quiz_start, c.quiz_open) + "% от открывших" : "просмотры квиза копятся с 6 сентября"),
+        dkpi("дошли до результата", "quiz_done", o, null, false, Number(c.quiz_start) ? pct(c.quiz_done, c.quiz_start) + "% от начавших" : ""),
         dkpi("оставили контакт", "contacts", o, null, false, "пейвол видели: " + num(c.paywall))
       ]) + "</div>" +
       '<div class="kgrp"><h3>Визиты</h3>' + kpiWrap([
@@ -318,8 +318,10 @@ function __scholaryMain() {
           '</td><td class="num">' + num(r.quiz_start) + " → " + num(r.quiz_done) + '</td><td class="num">' + num(r.pay_click) + '</td><td class="num">' + num(r.payments) + '</td><td class="num">' + money(r.revenue) +
           '</td><td class="num">' + num(r.contacts) + '</td><td class="num">' + num(r.cab_signup) + '</td><td class="num">' + num(Number(r.school_demo || 0) + Number(r.prof_demo || 0)) + "</td>";
       }) + "</div>";
-    var empty = !Number(c.visits) && !Number(c.quiz_open) && !Number(c.payments);
-    return nav + (empty && !isToday ? '<div class="note">За этот день данных нет. Заходы копятся с выпуска web-77 — дни до него покажут только квиз, оплаты и клики из старых событий.</div>' : "") +
+    var empty = !Number(c.visits) && !Number(c.quiz_open) && !Number(c.payments) && !Number(c.quiz_start);
+    var noVisits = !Number(c.visits) && !empty && k < "2026-09-06";
+    return nav + (empty && !isToday ? '<div class="note">За этот день данных нет.</div>' : "") +
+      (noVisits ? '<div class="note">Заходы, время на сайте и страницы считаются с <b>6 сентября 2026</b> (web-77) — до этого дня их в базе нет. Квиз, оплаты, клики «купить» и кабинеты — из событий, они есть за все дни.</div>' : "") +
       groups +
       '<div class="grid2"><div class="box"><h2>Заходы по часам</h2><p class="sub">Когда именно приходят люди — чтобы видеть эффект от публикации или запуска рекламы.</p>' + visChart + "</div>" +
       '<div class="box"><h2>Действия по часам</h2><p class="sub">Квиз, кнопка «купить»/Kaspi и оплаты — тот же день по часам.</p>' + payChart + "</div></div>" +
