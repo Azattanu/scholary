@@ -178,6 +178,18 @@
           window.fbq("track", "InitiateCheckout", { value: PRICE[d.plan === "season" ? "pro_season" : "pro_month"], currency: "KZT" });
           return;
         }
+        /* Любой клик «написать в WhatsApp/Telegram» или позвонить — стандартное
+           Contact (намерение связаться): годится как цель оптимизации и чистее в отчётах,
+           чем кастомное событие. Ловим и общие wa_click/tg_click/tel_click, и именные
+           CTA (cta_hero_wa, cta_parents_wa, float_wa, school_parent_chat_wa, cta_hero_tg…). */
+        if (/^wa_click$|^tg_click$|^tel_click$|_wa$|_tg$|float_wa|chat_wa/.test(event)) {
+          window.fbq("track", "Contact", safe); return;
+        }
+        /* Заявка школы или профориентолога (B2B) — SubmitApplication, отдельно от
+           потребительского Lead, чтобы каналы и стоимость B2B-заявки считались отдельно. */
+        if (event === "school_apply_ok" || event === "counselor_apply_ok") {
+          window.fbq("track", "SubmitApplication", safe); return;
+        }
         if (STD[event]) window.fbq("track", STD[event], safe);
         else window.fbq("trackCustom", event, safe);
       } catch (e) {}
