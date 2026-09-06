@@ -14,7 +14,7 @@ function __scholaryMain() {
   var C = window.SCHOLARY_CONFIG || {};
   var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
 
-  var S = { days: 30, tab: "overview", data: null, loading: false, whoami: "" };
+  var S = { days: 30, tab: "day", data: null, loading: false, whoami: "", day: null, dayCache: {}, days14: null, tags: null };
 
   /* ---------- мелочи ---------- */
   function $(id) { return document.getElementById(id); }
@@ -146,8 +146,10 @@ function __scholaryMain() {
 
   /* ---------- вкладки ---------- */
   function draw() {
-    if (!S.data) return;
     var v = $("view");
+    var seg = $("periodSeg"); if (seg) seg.hidden = (S.tab === "day");
+    if (S.tab === "day") { v.innerHTML = viewDay(); if (!S.dayCache[dayKey()]) loadDay(); return; }
+    if (!S.data) return;
     if (S.tab === "overview") v.innerHTML = viewOverview();
     else if (S.tab === "money") v.innerHTML = viewMoney();
     else if (S.tab === "funnel") v.innerHTML = viewFunnel();
@@ -158,6 +160,209 @@ function __scholaryMain() {
     else if (S.tab === "reports") v.innerHTML = viewReports();
     else if (S.tab === "product") { v.innerHTML = viewProduct(); loadRetention(); }
     else if (S.tab === "system") { v.innerHTML = viewSystem(); loadHealth(false); }
+  }
+
+  /* ==================== вкладка «День» (web-77) ====================
+     Смысл: после запуска рекламы на 1–2 дня нужно видеть «что было вчера
+     и что происходит сегодня по часам», а не средние за месяц.
+     Все числа считает база (admin_day / admin_days из миграции 046):
+     визиты — из своей таблицы visits (сайт шлёт visit_ping), деньги — из
+     payments, квиз и клики — из events. Тестовые аккаунты и /admin исключены. */
+  function isoDay(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function almatyToday() {
+    /* дата «сегодня» по Алматы, независимо от часового пояса браузера */
+    var p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    return p; /* en-CA даёт YYYY-MM-DD */
+  }
+  function shiftDay(iso, n) { var d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function dayKey() { return S.day || shiftDay(almatyToday(), -1); }
+  function dayTitle(iso) {
+    var today = almatyToday(), d = new Date(iso + "T12:00:00Z");
+    var w = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"][d.getUTCDay()];
+    var pretty = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", timeZone: "UTC" });
+    if (iso === today) return "Сегодня, " + pretty;
+    if (iso === shiftDay(today, -1)) return "Вчера, " + pretty;
+    return w + ", " + pretty;
+  }
+  function secs(s) {
+    s = Math.round(Number(s) || 0);
+    if (s < 60) return s + " с";
+    return Math.floor(s / 60) + " м " + ("0" + (s % 60)).slice(-2) + " с";
+  }
+  function delta(cur, prev, fmt) {
+    cur = Number(cur) || 0; prev = Number(prev) || 0;
+    var d = cur - prev, cls = d > 0 ? "up" : d < 0 ? "down" : "same";
+    var txt = d === 0 ? "=" : (d > 0 ? "+" : "−") + (fmt ? fmt(Math.abs(d)) : num(Math.abs(d)));
+    return '<span class="delta ' + cls + '" title="вчера было ' + esc(fmt ? fmt(prev) : num(prev)) + '">' + txt + "</span>";
+  }
+  /* карточка с числом и двумя сравнениями: с предыдущим днём и с тем же днём неделю назад */
+  function dkpi(label, key, o, fmt, hl, help) {
+    var c = o.cur || {}, p = o.prev || {}, w = o.week_ago || {};
+    var f = fmt || num;
+    return '<div class="kpi' + (hl ? " hl" : "") + '"><div class="n">' + f(c[key]) + "</div><div class=\"l\">" + esc(label) + "</div>" +
+      '<div class="s">' + delta(c[key], p[key], fmt) + ' к пред. дню · ' + delta(c[key], w[key], fmt) + " к нед. назад</div>" +
+      (help ? '<div class="s metric-help">' + esc(help) + "</div>" : "") + "</div>";
+  }
+  function hourChart(hours, series, nowHour, isToday) {
+    var W = 720, H = 150, padL = 30, padB = 20, padT = 8, n = 24, bw = (W - padL - 6) / n;
+    var max = 0;
+    hours.forEach(function (r) { series.forEach(function (s) { max = Math.max(max, Number(r[s.key]) || 0); }); });
+    if (max === 0) max = 1;
+    var body = "";
+    hours.forEach(function (r, i) {
+      var x0 = padL + i * bw, future = isToday && r.h > nowHour;
+      series.forEach(function (s, si) {
+        var v = Number(r[s.key]) || 0, h = Math.round((v / max) * (H - padT - padB));
+        var w = Math.max(2, (bw - 3) / series.length), x = x0 + 1.5 + si * w;
+        body += '<rect x="' + x.toFixed(1) + '" y="' + (H - padB - h) + '" width="' + w.toFixed(1) + '" height="' + Math.max(h, v > 0 ? 2 : 0) +
+          '" rx="1.5" fill="' + s.color + '"' + (future ? ' opacity=".18"' : "") + "><title>" + r.h + ":00 — " + esc(s.name) + ": " + num(v) + "</title></rect>";
+      });
+      if (isToday && r.h === nowHour) body += '<rect x="' + x0.toFixed(1) + '" y="' + padT + '" width="' + bw.toFixed(1) + '" height="' + (H - padT - padB) + '" fill="#5B4BFF" opacity=".08"/>';
+    });
+    var axis = [0, max].map(function (t) {
+      var y = H - padB - (t / max) * (H - padT - padB);
+      return '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + W + '" y2="' + y.toFixed(1) + '" stroke="#EFEFF3"/><text x="0" y="' + (y + 4).toFixed(1) + '" font-size="11" fill="#8A8A90">' + Math.round(t) + "</text>";
+    }).join("");
+    var lbl = [0, 6, 12, 18, 23].map(function (h) { return '<text x="' + (padL + h * bw + bw / 2).toFixed(1) + '" y="' + (H - 5) + '" font-size="11" fill="#8A8A90" text-anchor="middle">' + h + ":00</text>"; }).join("");
+    return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img">' + axis + body + lbl + "</svg>" +
+      '<div class="legend">' + series.map(function (s) { return '<span><i style="background:' + s.color + '"></i>' + esc(s.name) + "</span>"; }).join("") +
+      (isToday ? '<span><i style="background:#E3DFFF"></i>текущий час; будущие часы приглушены</span>' : "") + "</div>";
+  }
+  function funnelRows(steps) {
+    var base = Number(steps[0][1]) || 0;
+    return steps.map(function (st, i) {
+      var v = Number(st[1]) || 0, prev = i ? Number(steps[i - 1][1]) || 0 : v;
+      return '<div class="frow"><div>' + esc(st[0]) + '</div><div class="fbar"><i style="width:' + (base ? Math.max(1, v / base * 100) : 0) + '%"></i></div>' +
+        '<div class="fnum">' + num(v) + "<small>" + (i ? pct(v, prev) + "%" : "100%") + "</small></div></div>";
+    }).join("");
+  }
+  var FEED_KIND = { pay: ["ok", "оплата"], contact: ["warn", "контакт"], pay_click: ["no", "клик «купить»"], school: ["ok", "B2B"], signup: ["no", "регистрация"] };
+  function loadDay() {
+    var k = dayKey();
+    if (S.dayLoading === k) return;
+    S.dayLoading = k;
+    $("updatedAt").textContent = "Загружаю день…";
+    Promise.all([rpc("admin_day", { p_day: k }), S.days14 ? Promise.resolve(S.days14) : rpc("admin_days", { p_days: 14 })]).then(function (r) {
+      S.dayLoading = null; S.dayCache[k] = r[0] || {}; S.days14 = r[1] || [];
+      $("updatedAt").textContent = "Обновлено " + new Date().toLocaleTimeString("ru-RU") + " · время по Алматы";
+      if (S.tab === "day") draw();
+    }, function (e) {
+      S.dayLoading = null;
+      $("updatedAt").textContent = "Ошибка: " + e.message;
+      if (S.tab === "day") $("view").innerHTML = '<div class="box"><h2>Не удалось загрузить день</h2><p class="sub">' + esc(e.message) + "</p>" +
+        (/admin_day|function/i.test(e.message) ? '<div class="note">Похоже, не применена миграция 046 (ежедневная аналитика).</div>' : "") + "</div>";
+    });
+  }
+  function viewDay() {
+    var k = dayKey(), o = S.dayCache[k], today = almatyToday(), isToday = k === today;
+    var nav = '<div class="box daynav"><div class="arow">' +
+      '<button class="btn-adm btn-ghost" data-day="prev" title="предыдущий день">‹</button>' +
+      '<button class="btn-adm' + (k === shiftDay(today, -1) ? "" : " btn-ghost") + '" data-day="' + shiftDay(today, -1) + '">Вчера</button>' +
+      '<button class="btn-adm' + (isToday ? "" : " btn-ghost") + '" data-day="' + today + '">Сегодня</button>' +
+      '<button class="btn-adm btn-ghost" data-day="next" title="следующий день"' + (isToday ? " disabled" : "") + ">›</button>" +
+      '<input type="date" id="dayPick" value="' + k + '" max="' + today + '" aria-label="выбрать день">' +
+      '</div><div><b class="daytitle">' + esc(dayTitle(k)) + "</b>" +
+      (isToday ? '<span class="muted"> · день ещё идёт, сравнение с полными днями условно</span>' : "") + "</div></div>";
+    if (!o) return nav + '<div class="box"><p class="sub">Загружаю…</p></div>';
+    var c = o.cur || {}, hours = o.hours || [], ch = o.channels || [], pages = o.pages || [], feed = o.feed || [];
+    var payChart = hourChart(hours, [
+      { key: "quiz", name: "начали квиз", color: "#D9A413" }, { key: "pay", name: "нажали «купить»/Kaspi", color: "#5B4BFF" }, { key: "paid", name: "оплатили", color: "#0B7A3E" }
+    ], o.now_hour, isToday);
+    var visChart = hourChart(hours, [{ key: "visits", name: "заходы на сайт", color: "#5B4BFF" }], o.now_hour, isToday);
+    var groups =
+      '<div class="kgrp"><h3>Деньги</h3>' + kpiWrap([
+        dkpi("нажали «купить»", "pay_click", o, null, true, "из них Kaspi: " + num(c.kaspi_click)),
+        dkpi("оплат", "payments", o, null, true),
+        dkpi("выручка", "revenue", o, money, true),
+        dkpi("клик «Pro»", "pro_click", o, null, false, "оплат Pro: " + num(c.pro_paid))
+      ]) + "</div>" +
+      '<div class="kgrp"><h3>Квиз</h3>' + kpiWrap([
+        dkpi("открыли квиз", "quiz_open", o),
+        dkpi("начали", "quiz_start", o, null, false, pct(c.quiz_start, c.quiz_open) + "% от открывших"),
+        dkpi("дошли до результата", "quiz_done", o, null, false, pct(c.quiz_done, c.quiz_start) + "% от начавших"),
+        dkpi("оставили контакт", "contacts", o, null, false, "пейвол видели: " + num(c.paywall))
+      ]) + "</div>" +
+      '<div class="kgrp"><h3>Визиты</h3>' + kpiWrap([
+        dkpi("заходов", "visits", o, null, false, "уникальных: " + num(c.visitors)),
+        dkpi("время на сайте", "avg_active_s", o, secs, false, "среднее, только пока вкладка открыта"),
+        dkpi("страниц за визит", "pages_per_visit", o, function (v) { return (Number(v) || 0).toLocaleString("ru-RU"); }),
+        dkpi("ушли с первой страницы", "bounce", o, function (v) { return num(v) + "%"; }, false, "с мобильного: " + num(c.mobile_share) + "%")
+      ]) + "</div>" +
+      '<div class="kgrp"><h3>Кабинеты и B2B</h3>' + kpiWrap([
+        dkpi("вход в кабинет", "cab_open", o, null, false, "регистраций: " + num(c.cab_signup)),
+        dkpi("демо школы", "school_demo", o, null, false, "страницу /schools смотрели: " + num(c.schools_page)),
+        dkpi("демо профориентолога", "prof_demo", o, null, false, "страницу /prof смотрели: " + num(c.prof_page)),
+        dkpi("заявок школ и профориентологов", "b2b_apply", { cur: { b2b_apply: Number(c.school_apply || 0) + Number(c.prof_apply || 0) }, prev: { b2b_apply: Number((o.prev || {}).school_apply || 0) + Number((o.prev || {}).prof_apply || 0) }, week_ago: { b2b_apply: Number((o.week_ago || {}).school_apply || 0) + Number((o.week_ago || {}).prof_apply || 0) } }, null, false, "клики WhatsApp: " + num(c.wa_click) + " · Telegram: " + num(c.tg_click))
+      ]) + "</div>";
+    var funnel = '<div class="box"><h2>Воронка дня</h2><p class="sub">Каждый шаг — люди, дошедшие до него в этот день. Процент — от предыдущего шага.</p>' +
+      funnelRows([["Зашли на сайт", c.visits], ["Открыли квиз", c.quiz_open], ["Начали квиз", c.quiz_start], ["Дошли до результата", c.quiz_done], ["Увидели пейвол", c.paywall], ["Нажали «купить»", c.pay_click], ["Оплатили", c.payments]]) + "</div>";
+    var chTable = '<div class="box"><h2>Каналы за день</h2><p class="sub">Метки ссылок ?s=… из вкладки «Каналы», UTM и click-id рекламы, иначе — откуда пришёл браузер. «Прямые заходы» — адрес набрали руками или перешли из мессенджера без метки.</p>' +
+      table([["Канал"], ["Заходов", 1], ["Время", 1], ["Стр./визит", 1], ["Начали квиз", 1], ["«Купить»", 1], ["Оплат", 1], ["Выручка", 1]], ch, function (r) {
+        return "<td><b>" + esc(r.label) + '</b><div class="muted" style="font-size:11.5px">' + esc(r.channel) + "</div></td><td class=\"num\">" + num(r.visits) + '</td><td class="num">' + secs(r.avg_active_s) +
+          '</td><td class="num">' + (Number(r.pages) || 0).toLocaleString("ru-RU") + '</td><td class="num">' + num(r.quiz_start) + '</td><td class="num">' + num(r.pay_click) + '</td><td class="num">' + num(r.payments) + '</td><td class="num">' + money(r.revenue) + "</td>";
+      }) + "</div>";
+    var pgTable = '<div class="box"><h2>Страницы за день</h2><p class="sub">Просмотры и среднее время на странице.</p>' +
+      table([["Страница"], ["Просмотров", 1], ["Заходов", 1], ["Время", 1]], pages, function (r) {
+        return "<td><code>" + esc(r.page) + "</code></td><td class=\"num\">" + num(r.views) + '</td><td class="num">' + num(r.visitors) + '</td><td class="num">' + secs(r.avg_active_s) + "</td>";
+      }) + "</div>";
+    var feedBox = '<div class="box"><h2>Лента дня</h2><p class="sub">Оплаты, контакты из квиза, клики «купить», регистрации, новые школы — по времени, свежие сверху.</p>' +
+      (feed.length ? '<div class="scroll"><table class="adm">' + feed.map(function (f) {
+        var kd = FEED_KIND[f.kind] || ["no", f.kind];
+        var t = new Date(f.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Almaty" });
+        return "<tr><td>" + t + '</td><td><span class="pill ' + kd[0] + '">' + esc(kd[1]) + "</span></td><td>" + esc(f.what || "") + (f.amount ? " · <b>" + money(f.amount) + "</b>" : "") + "</td><td class=\"muted\">" + esc(f.lead ? String(f.lead).slice(0, 8) + "…" : "") + "</td></tr>";
+      }).join("") + "</table></div>" : '<div class="muted">За этот день событий нет.</div>') + "</div>";
+    var days = S.days14 || [];
+    var daysBox = '<div class="box"><h2>Последние 14 дней</h2><p class="sub">Та же логика по дням — чтобы видеть, чем день запуска отличается от обычного. Строка кликабельна.</p>' +
+      table([["День"], ["Заходов", 1], ["Время", 1], ["Квиз: начали → дошли", 1], ["«Купить»", 1], ["Оплат", 1], ["Выручка", 1], ["Контактов", 1], ["Регистр.", 1], ["B2B демо", 1]], days, function (r) {
+        return '<td><a href="#" data-day="' + esc(r.day) + '">' + esc(dayTitle(r.day)) + "</a></td><td class=\"num\">" + num(r.visits) + '</td><td class="num">' + secs(r.avg_active_s) +
+          '</td><td class="num">' + num(r.quiz_start) + " → " + num(r.quiz_done) + '</td><td class="num">' + num(r.pay_click) + '</td><td class="num">' + num(r.payments) + '</td><td class="num">' + money(r.revenue) +
+          '</td><td class="num">' + num(r.contacts) + '</td><td class="num">' + num(r.cab_signup) + '</td><td class="num">' + num(Number(r.school_demo || 0) + Number(r.prof_demo || 0)) + "</td>";
+      }) + "</div>";
+    var empty = !Number(c.visits) && !Number(c.quiz_open) && !Number(c.payments);
+    return nav + (empty && !isToday ? '<div class="note">За этот день данных нет. Заходы копятся с выпуска web-77 — дни до него покажут только квиз, оплаты и клики из старых событий.</div>' : "") +
+      groups +
+      '<div class="grid2"><div class="box"><h2>Заходы по часам</h2><p class="sub">Когда именно приходят люди — чтобы видеть эффект от публикации или запуска рекламы.</p>' + visChart + "</div>" +
+      '<div class="box"><h2>Действия по часам</h2><p class="sub">Квиз, кнопка «купить»/Kaspi и оплаты — тот же день по часам.</p>' + payChart + "</div></div>" +
+      '<div class="grid2">' + funnel + pgTable + "</div>" + chTable + feedBox + daysBox;
+  }
+  function kpiWrap(cards) { return '<div class="kpis">' + cards.join("") + "</div>"; }
+
+  /* ---------- метки ссылок (вкладка «Каналы») ---------- */
+  var TAG_CHANNELS = [["whatsapp_schools", "WhatsApp · школам"], ["whatsapp_prof", "WhatsApp · профориентологам"], ["whatsapp_parents", "WhatsApp · родителям"], ["instagram_bio", "Instagram · профиль"], ["instagram_post", "Instagram · пост/сторис"], ["tiktok_bio", "TikTok · профиль"], ["telegram_posts", "Telegram"], ["offline", "Офлайн / QR"], ["partner", "Партнёр"], ["other", "Другое"]];
+  var TAG_PAGES = [["/", "главная"], ["/prof/", "/prof"], ["/schools/", "/schools"], ["/cabinet/", "кабинет"]];
+  function loadTags() {
+    rpc("admin_link_tags").then(function (r) { S.tags = r || []; if (S.tab === "channels") draw(); }, function (e) { S.tags = []; S.tagsErr = e.message; if (S.tab === "channels") draw(); });
+  }
+  function viewTags() {
+    var rows = S.tags;
+    var head = '<div class="box"><h2>Ссылки с меткой</h2><p class="sub">Одна метка — один способ распространения. Ссылка вида <code>scholary.kz/?s=wa-school</code> сама попадает в нужный канал во вкладке «День». Метка держится на весь визит, UTM и рекламные click-id работают как раньше.</p>';
+    if (!rows) return head + (S.tagsErr ? '<div class="err">' + esc(S.tagsErr) + "</div>" : '<div class="muted">Загружаю…</div>') + "</div>";
+    var origin = "https://scholary.kz";
+    var tbl = rows.length ? '<div class="scroll"><table class="adm"><tr><th>Метка</th><th>Куда ведёт</th><th class="num">Заходов 7 дн.</th><th class="num">Всего</th><th></th></tr>' + rows.map(function (r) {
+      var links = TAG_PAGES.map(function (p) { var u = origin + p[0] + "?s=" + r.tag; return '<a href="' + u + '" data-act="copy" data-link="' + esc(u) + '" class="taglink">' + esc(p[1]) + "</a>"; }).join(" · ");
+      return "<tr><td><b>" + esc(r.label) + '</b><div class="muted"><code>?s=' + esc(r.tag) + "</code>" + (r.note ? " · " + esc(r.note) : "") + "</div></td><td>" + links + '</td><td class="num">' + num(r.visits_7d) + '</td><td class="num">' + num(r.visits_all) +
+        '</td><td><a href="#" data-act="tag-del" data-tag="' + esc(r.tag) + '" class="muted">удалить</a></td></tr>';
+    }).join("") + "</table></div>" : '<div class="muted">Меток пока нет.</div>';
+    var form = '<div class="adsform" style="margin-top:14px"><div><label>метка (латиница, без пробелов)</label><input id="tagId" placeholder="wa-school-almaty" maxlength="32"></div>' +
+      '<div class="wide"><label>как показывать</label><input id="tagLabel" placeholder="WhatsApp · школы Алматы" maxlength="60"></div>' +
+      '<div><label>тип</label><select id="tagChannel">' + TAG_CHANNELS.map(function (c) { return '<option value="' + c[0] + '">' + esc(c[1]) + "</option>"; }).join("") + "</select></div>" +
+      '<div class="wide"><label>заметка</label><input id="tagNote" placeholder="кому и когда отправляем" maxlength="120"></div>' +
+      '<div><button class="btn-adm" id="btnTagSave">Добавить метку</button></div></div><div id="tagMsg" class="muted" style="margin-top:8px"></div>';
+    return head + tbl + form + '<div class="note">Нажми на «главная», «/prof» и т. д. — ссылка скопируется. В WhatsApp школам отправляй <code>' + origin + "/schools/?s=wa-school</code>, родителям — <code>" + origin + "/?s=wa-parent</code>.</div></div>";
+  }
+  function saveTag() {
+    var tag = ($("tagId").value || "").trim().toLowerCase(), label = ($("tagLabel").value || "").trim(), msg = $("tagMsg");
+    if (!tag || !label) { msg.textContent = "Нужны метка и название"; return; }
+    msg.textContent = "Сохраняю…";
+    rpc("admin_link_tag_upsert", { p_tag: tag, p_label: label, p_channel: $("tagChannel").value, p_note: ($("tagNote").value || "").trim() || null }).then(function (j) {
+      if (!j || !j.ok) { msg.textContent = j && j.why === "tag" ? "Метка: 2–31 символ, латиница, цифры, «-» и «_»" : "Не вышло"; return; }
+      msg.textContent = "Готово"; loadTags();
+    }, function (e) { msg.textContent = "Ошибка: " + e.message; });
+  }
+  function deleteTag(el) {
+    var tag = el.getAttribute("data-tag");
+    if (!window.confirm("Удалить метку «" + tag + "»? Старые заходы останутся с ней в базе, но в списке её не будет.")) return;
+    rpc("admin_link_tag_delete", { p_tag: tag }).then(loadTags, function (e) { window.alert("Ошибка: " + e.message); });
   }
 
   function viewOverview() {
@@ -455,9 +660,10 @@ function __scholaryMain() {
   window.__parseAdsCsv = parseAdsCsv;   // для автотестов
 
   function viewChannels() {
+    if (S.tags === null && !S.tagsErr) loadTags();
     var rows = S.data.sources;
     var totalLeads = rows.reduce(function (a, r) { return a + Number(r.zayavok || 0); }, 0);
-    return '<div class="box"><h2>Откуда приходят</h2>' +
+    return viewTags() + '<div class="box"><h2>Откуда приходят (по заявкам)</h2>' +
       '<p class="sub">Из меток utm в ссылке. «Прямой заход» — без меток: набрали адрес, перешли из профиля или из мессенджера.</p>' +
       table([["Источник"], ["Канал"], ["Кампания"], ["Заявок", 1], ["Доля", 1], ["С контактом", 1], ["Оплат", 1], ["Конверсия", 1], ["Выручка", 1]],
         rows, function (r) {
@@ -910,10 +1116,21 @@ function __scholaryMain() {
         });
       return;
     }
-    if (t.id === "btnReload") { loadAll(); return; }
+    if (t.id === "btnReload") { if (S.tab === "day") { delete S.dayCache[dayKey()]; S.days14 = null; loadDay(); } loadAll(); return; }
     if (t.id === "btnReport") { downloadReport(); return; }
     if (t.id === "btnLogout" || t.id === "btnLogout2") { sb.auth.signOut().then(function () { try { Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {} location.reload(); }); return; }
     if (t.id === "btnPro") { grantPro(); return; }
+    if (t.id === "btnTagSave") { saveTag(); return; }
+    var dayBtn = t.closest("[data-day]");
+    if (dayBtn) {
+      ev.preventDefault();
+      var dv = dayBtn.getAttribute("data-day"), cur = dayKey(), today = almatyToday();
+      if (dv === "prev") dv = shiftDay(cur, -1); else if (dv === "next") dv = shiftDay(cur, 1);
+      if (dv > today) dv = today;
+      S.day = dv; S.tab = "day";
+      Array.prototype.forEach.call(document.querySelectorAll("#tabs button"), function (b) { b.classList.toggle("on", b.getAttribute("data-t") === "day"); });
+      draw(); return;
+    }
     if (t.id === "btnHealth") { loadHealth(false); return; }
     if (t.id === "btnAdSave") { saveAdRow(); return; }
     if (t.id === "btnContentSave") { saveContent(); return; }
@@ -926,6 +1143,7 @@ function __scholaryMain() {
       if (a === "issue")  { ev.preventDefault(); issueReport(act); return; }
       if (a === "resend") { ev.preventDefault(); resendReport(act); return; }
       if (a === "copy")   { ev.preventDefault(); copyLink(act); return; }
+      if (a === "tag-del") { ev.preventDefault(); deleteTag(act); return; }
       if (a === "ad-del") { ev.preventDefault(); deleteAdRow(act); return; }
       if (a === "ct-del" || a === "ct-toggle") { ev.preventDefault(); contentAction(a, act); return; }
       if (/^sch-/.test(a)) { ev.preventDefault(); schoolAction(a, act.getAttribute("data-id"), act); return; }
@@ -947,6 +1165,7 @@ function __scholaryMain() {
     if (e.key === "Enter" && $("gate") && !$("gate").hidden) login();
   });
   document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "dayPick" && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { S.day = e.target.value > almatyToday() ? almatyToday() : e.target.value; draw(); return; }
     if (e.target && e.target.id === "adCsv" && e.target.files && e.target.files[0]) { importAdsCsv(e.target.files[0]); e.target.value = ""; }
   });
 
@@ -1054,10 +1273,15 @@ function __scholaryMain() {
       S.whoami = on ? ((r.data.session.user || {}).email || "") : "";
       $("gate").hidden = on;
       $("panel").hidden = !on;
-      if (on) loadAll();
+      if (on) { if (S.tab === "day") draw(); loadAll(); }
     });
   }
   boot();
+  /* «Сегодня» живёт: раз в 2 минуты обновляем текущий день, пока вкладка видна */
+  setInterval(function () {
+    if (S.tab !== "day" || document.hidden || dayKey() !== almatyToday() || !S.dayCache[dayKey()]) return;
+    delete S.dayCache[dayKey()]; loadDay();
+  }, 120000);
 }
 
 /* Библиотека Supabase грузится с CDN; если основной адрес заблокирован,

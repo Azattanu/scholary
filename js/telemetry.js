@@ -398,4 +398,80 @@
       });
     } catch (e) {}
   }
+
+  /* ---------- Визиты: своя серверная аналитика дня (web-77) ----------
+     Зачем: пиксели и PostHog не дают «сегодня по часам» в нашей админке.
+     Что шлём (без персональных данных): id визита, страница, реферер, utm,
+     метка ссылки ?s=…, устройство, язык и секунды активности вкладки.
+     · визит = вкладка/сессия браузера; новый после 30 минут тишины;
+     · «view» при каждой загрузке страницы, «beat» раз в 15 с пока вкладка
+       видна и при уходе (keepalive), «event» — клик по WhatsApp/Telegram/tel;
+     · /admin не считается (и сервер это тоже проверяет). */
+  (function visits() {
+    if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return;
+    if (/^\/admin/.test(location.pathname)) return;
+    var IDLE = 30 * 60 * 1000, KEY = "scholary_sid";
+    function rid() {
+      try { var a = new Uint8Array(12); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); }
+      catch (e) { return String(Date.now().toString(36)) + Math.random().toString(36).slice(2, 12); }
+    }
+    function store(k, v, ss) { try { (ss ? sessionStorage : localStorage).setItem(k, v); } catch (e) {} }
+    function load(k, ss) { try { return (ss ? sessionStorage : localStorage).getItem(k); } catch (e) { return null; } }
+    /* id визита живёт в sessionStorage (вкладка), устаревает после 30 мин тишины */
+    var sid = null, isNew = false;
+    try {
+      var raw = load(KEY, true); var o = raw ? JSON.parse(raw) : null;
+      if (o && o.sid && /^[a-z0-9-]{8,48}$/.test(o.sid) && Date.now() - (o.t || 0) < IDLE) sid = o.sid;
+    } catch (e) {}
+    if (!sid) { sid = rid(); isNew = true; }
+    function touch() { store(KEY, JSON.stringify({ sid: sid, t: Date.now() }), true); }
+    touch();
+    /* метка ссылки ?s=wa-school → на весь визит */
+    var qs; try { qs = new URLSearchParams(location.search); } catch (e) { qs = null; }
+    var tag = qs && qs.get("s") ? qs.get("s").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32) : "";
+    if (tag) store("scholary_tag", tag, true); else tag = load("scholary_tag", true) || "";
+    /* utm и click-id: те же, что копит app.js; если его нет — снимаем сами */
+    var utm = {};
+    try {
+      var u = {}; if (qs) ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "ttclid", "gclid"].forEach(function (k) { if (qs.get(k)) u[k] = qs.get(k).slice(0, 200); });
+      if (Object.keys(u).length) store("scholary_utm", JSON.stringify(u), true);
+      utm = JSON.parse(load("scholary_utm", true) || "{}");
+    } catch (e) { utm = {}; }
+    function leadId() { var id = load("scholary_lead_id"); return (id && /^[0-9a-fA-F-]{20,64}$/.test(id)) ? id : (window.scholaryLeadId || null); }
+    var ua = navigator.userAgent || "";
+    var device = /iPad|Tablet|(Android(?!.*Mobile))/i.test(ua) ? "tablet" : /Mobi|Android|iPhone/i.test(ua) ? "mobile" : "desktop";
+    var page = location.pathname.replace(/\/index\.html$/, "/") + (qs && qs.get("demo") ? "?demo=1" : "");
+    var url = C.SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/rpc/visit_ping";
+    function send(body, keep) {
+      try {
+        return fetch(url, { method: "POST", keepalive: !!keep, headers: { "Content-Type": "application/json", "apikey": C.SUPABASE_ANON_KEY, "Authorization": "Bearer " + C.SUPABASE_ANON_KEY }, body: JSON.stringify({ p: body }) }).catch(function () {});
+      } catch (e) { return null; }
+    }
+    var ref = ""; try { ref = (document.referrer || "").slice(0, 300); if (ref && new URL(ref).host === location.host) ref = ""; } catch (e) {}
+    send({ sid: sid, kind: "view", page: page, ref: isNew ? ref : "", utm: utm, tag: tag, device: device, lang: (navigator.language || "").slice(0, 8), lead_id: leadId() });
+    /* секунды активности: считаем только пока вкладка видна */
+    var since = document.hidden ? 0 : Date.now(), acc = 0;
+    function flush(keep) {
+      if (since) { acc += (Date.now() - since) / 1000; since = document.hidden ? 0 : Date.now(); }
+      var s = Math.round(acc); if (s < 1) return; acc -= s; touch();
+      send({ sid: sid, kind: "beat", page: page, active_s: s, lead_id: leadId() }, keep);
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { flush(true); since = 0; } else since = Date.now();
+    });
+    window.addEventListener("pagehide", function () { flush(true); });
+    setInterval(function () { if (!document.hidden) flush(false); }, 15000);
+    /* клики по мессенджерам и телефону — событие визита и события сайта */
+    document.addEventListener("click", function (e) {
+      try {
+        var el = e.target && e.target.closest ? e.target.closest("a[href]") : null; if (!el) return;
+        var href = el.getAttribute("href") || "";
+        var ev = /wa\.me|api\.whatsapp\.com|whatsapp:/.test(href) ? "wa_click" : /t\.me\/|tg:\/\//.test(href) ? "tg_click" : /^tel:/.test(href) ? "tel_click" : null;
+        if (!ev) return;
+        touch(); send({ sid: sid, kind: "event", page: page, lead_id: leadId() }, true);
+        if (window.track) { try { window.track(ev, { page: page, text: (el.textContent || "").trim().slice(0, 60) }); } catch (x) {} }
+      } catch (err) {}
+    }, true);
+    window.scholaryVisit = { sid: sid, tag: tag, device: device, page: page };
+  })();
 })();
