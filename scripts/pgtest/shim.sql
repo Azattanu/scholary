@@ -1,6 +1,7 @@
 -- Минимальный шим Supabase для проверки миграции 042 на локальном Postgres.
 create schema if not exists auth;
-create table if not exists auth.users (id uuid primary key, email text);
+create table if not exists auth.users (id uuid primary key, email text, created_at timestamptz default now());
+alter table auth.users add column if not exists created_at timestamptz default now();
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('app.uid', true), '')::uuid $$;
 do $$ begin if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if; if not exists (select 1 from pg_roles where rolname='anon') then create role anon nologin; end if; end $$;
@@ -16,6 +17,7 @@ create table if not exists probability_history (id bigint generated always as id
 create table if not exists tg_links (user_id uuid primary key references auth.users(id) on delete cascade, chat_id text, code text, linked_at timestamptz, prefs jsonb not null default '{"step":true,"deadlines":true,"verdicts":true,"digest":true,"quiet":true}'::jsonb, created_at timestamptz default now());
 create table if not exists tg_sent (id bigint generated always as identity primary key, user_id uuid not null, program_id text not null, milestone int not null, sent_at timestamptz default now(), unique (user_id, program_id, milestone));
 create table if not exists app_secrets (name text primary key, value text);
+create table if not exists leads (id text primary key, updated_at timestamptz default now(), utm jsonb, name text, whatsapp text, email text, level text, paid boolean default false, paid_at timestamptz);
 create table if not exists events (id bigint generated always as identity primary key, lead_id text, event text, data jsonb, utm jsonb, ts timestamptz default now(), page text);
 create table if not exists payments (id bigint generated always as identity primary key, txn text, lead_id text, user_email text, amount numeric, kind text, status text, test_mode boolean default false, created_at timestamptz default now());
 create table if not exists admins (user_id uuid primary key, email text);
