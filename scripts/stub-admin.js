@@ -50,6 +50,24 @@
       { lead_id: "l5", name: "Тимур", whatsapp: "+7 707 222 33 44", email: "", paid_at: new Date(Date.now()-31*36e5).toISOString(), paid_amount: 4000, chasov_zhdet: 31 } ],
     admin_timings: { kviz_mediana_sek: 268, kviz_p90_sek: 640, razdumya_mediana_sek: 151,
       ves_put_mediana_sek: 419, chtenie_lendinga_mediana_sek: 92, vyborka_kviz: 34, vyborka_put: 12 },
+    /* ежедневная аналитика (web-77) */
+    admin_day: (function () {
+      function st(m) { return { day: "2026-09-05", visits: 143 * m, visitors: 131 * m, pages_per_visit: 1.8, avg_active_s: 74, bounce: 46, mobile_share: 82, quiz_open: 61 * m, quiz_start: 44 * m, quiz_done: 27 * m, paywall: 25 * m, contacts: 12 * m, pay_click: 9 * m, kaspi_click: 6 * m, pro_click: 3, payments: 3 * m, revenue: 12000 * m, pro_paid: 0, cab_open: 8, cab_signup: 2, school_demo: 4, prof_demo: 1, schools_page: 9, prof_page: 5, school_apply: 1, prof_apply: 0, wa_click: 5, tg_click: 1 }; }
+      var hours = []; for (var h = 0; h < 24; h++) hours.push({ h: h, visits: h < 8 ? h % 3 : 4 + ((h * 7) % 13), quiz: h < 9 ? 0 : (h * 3) % 5, pay: h === 12 || h === 19 ? 2 : (h % 7 === 0 ? 1 : 0), paid: h === 19 ? 1 : (h === 13 ? 2 : 0) });
+      var today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Almaty", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      return { day: "2026-09-05", today: today, now_hour: 14, cur: st(1), prev: st(0.5), week_ago: st(2), hours: hours,
+        channels: [ { channel: "tiktok_ads", label: "TikTok · реклама", visits: 71, avg_active_s: 52, pages: 1.4, quiz_start: 25, pay_click: 4, payments: 1, revenue: 4000 },
+          { channel: "tag:wa-school", label: "WhatsApp · школам", visits: 30, avg_active_s: 140, pages: 2.9, quiz_start: 4, pay_click: 1, payments: 0, revenue: 0 },
+          { channel: "direct", label: "Прямые заходы", visits: 24, avg_active_s: 61, pages: 1.6, quiz_start: 9, pay_click: 3, payments: 2, revenue: 8000 },
+          { channel: "instagram", label: "Instagram · органика", visits: 18, avg_active_s: 40, pages: 1.2, quiz_start: 6, pay_click: 1, payments: 0, revenue: 0 } ],
+        pages: [ { page: "/", views: 150, visitors: 120, avg_active_s: 48 }, { page: "/quiz/", views: 61, visitors: 58, avg_active_s: 190 }, { page: "/schools/", views: 9, visitors: 9, avg_active_s: 120 }, { page: "/schools/cabinet/?demo=1", views: 4, visitors: 4, avg_active_s: 240 } ],
+        feed: [ { ts: "2026-09-05T14:12:00+05:00", kind: "pay", what: "report", amount: 4000, lead: "8f3a9c1d-aaaa" }, { ts: "2026-09-05T13:40:00+05:00", kind: "contact", what: "заявка из квиза", amount: null, lead: "8f3a9c1d-bbbb" },
+          { ts: "2026-09-05T12:05:00+05:00", kind: "pay_click", what: "report · Kaspi", amount: null, lead: "8f3a9c1d-cccc" }, { ts: "2026-09-05T10:30:00+05:00", kind: "school", what: "Лицей № 1 (школа)", amount: null, lead: null }, { ts: "2026-09-05T09:02:00+05:00", kind: "signup", what: "регистрация в кабинете", amount: null, lead: null } ] };
+    })(),
+    admin_days: days(14, function (d, i) { return { day: d, visits: 60 + i * 5, visitors: 55 + i * 5, avg_active_s: 50 + i, pages_per_visit: 1.7, quiz_open: 30, quiz_start: 20 + i, quiz_done: 12, paywall: 11, contacts: 5, pay_click: 4, kaspi_click: 2, payments: i % 3, revenue: (i % 3) * 4000, cab_signup: 1, school_demo: i % 2, prof_demo: 0 }; }).reverse(),  /* как сервер: свежие сверху */
+    admin_link_tags: [ { tag: "wa-school", label: "WhatsApp · школам", channel: "whatsapp_schools", note: "директорам и профориентологам", created_at: "2026-09-06T00:00:00Z", visits_7d: 30, visits_all: 30 },
+      { tag: "ig-bio", label: "Instagram · ссылка в профиле", channel: "instagram_bio", note: null, created_at: "2026-09-06T00:00:00Z", visits_7d: 0, visits_all: 0 } ],
+    admin_link_tag_upsert: { ok: true, tag: "qr-almaty" }, admin_link_tag_delete: { ok: true },
     admin_quiz_steps: [
       { shag: 1, vopros: "level", doshli: 412 }, { shag: 2, vopros: "gpa", doshli: 351 },
       { shag: 3, vopros: "lang", doshli: 307 }, { shag: 4, vopros: "field", doshli: 235 },
