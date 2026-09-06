@@ -4,17 +4,26 @@
    обещали «дедлайны за 30/14/7/3/1 день», но отправлять их было некому.
    Этот скрипт закрывает обещание.
 
-   КАК ЗАПУСКАЕТСЯ. Планировщиком Plesk раз в сутки утром:
-     curl -s -m 300 "https://scholary.kz/api/tg-send.php?key=<TG_CRON_KEY>"
-   Ключ лежит в private/scholary-config.php. Без ключа — 403.
+   КАК ЗАПУСКАЕТСЯ. Планировщиком Plesk («Запустить PHP-скрипт», каждый час):
+     httpdocs/api/tg-send.php
+   В таком запуске (CLI) ключ не нужен: скрипт запускает сам сервер, снаружи
+   его так не вызвать. Аргументы: kind=founder|digest|nudge|ws, dry=1.
+   Через HTTP по-прежнему нужен ключ: ...tg-send.php?key=<TG_CRON_KEY>
+   (лежит в private/scholary-config.php). Без ключа — 403.
+   Часовой запуск безопасен: каждая рассылка помнит, что уже отправила
+   (tg_sent), тихие часы 22:00–08:00 соблюдаются, дайджест фаундеру уходит
+   в первый запуск после 9:00 по Алматы.
 
    ПОЧЕМУ УТРОМ. У бота обещаны тихие часы 22:00–08:00, и мы их соблюдаем:
    если скрипт вызвали в тихое время, он ничего не шлёт и выходит. */
 require __DIR__ . '/_lib.php';
 
 $c = cfg();
+/* Запуск планировщиком как PHP-скрипт: аргументы вида kind=founder dry=1 читаем из argv. */
+$isCli = PHP_SAPI === 'cli';
+if ($isCli) { foreach (array_slice($argv ?? [], 1) as $a) { if (strpos($a, '=') !== false) { [$k, $v] = explode('=', $a, 2); $_GET[$k] = $v; } } }
 $key = (string)($_GET['key'] ?? '');
-if (empty($c['TG_CRON_KEY']) || !hash_equals((string)$c['TG_CRON_KEY'], $key)) {
+if (!$isCli && (empty($c['TG_CRON_KEY']) || !hash_equals((string)$c['TG_CRON_KEY'], $key))) {
   http_response_code(403); echo 'forbidden'; exit;
 }
 if (empty($c['TELEGRAM_TOKEN']) || empty($c['TIPTOP_RPC_SECRET'])) {
@@ -209,8 +218,67 @@ foreach ($chats as $chat) {
   usleep(120000);   // ~8 сообщений в секунду: лимит Telegram — 30
 }
 
+/* web-77 · утренний дайджест фаундеру: вчерашний день цифрами (визиты, квиз, деньги,
+   кабинеты, B2B, топ каналов) — отдельным сообщением админам с привязанным Telegram.
+   С 9:00 по Алматы, один раз в день: дедуп через tg_sent (founder:<день>, рубеж 120).
+   Считает база (founder_digest_due, миграция 046); ?kind=founder — принудительно. */
+$founderOn = $forceKind === 'founder' || ($forceKind === '' && $hourKz >= 9);
+$founderSent = 0; $founderFailed = 0; $founderPeople = 0; $founderPreview = null;
+if ($founderOn) {
+  $rf = tgs_rpc($c, 'founder_digest_due', ['p_secret' => $c['TIPTOP_RPC_SECRET']]);
+  $jf = is_array($rf['json']) ? $rf['json'] : null;
+  if ($jf && !empty($jf['ok'])) {
+    $recips = is_array($jf['recipients'] ?? null) ? $jf['recipients'] : [];
+    $founderPeople = count($recips);
+    if ($founderPeople) {
+      $ftext = founder_text($jf); $founderPreview = $ftext;
+      foreach ($recips as $r) {
+        $chat = (string)($r['chat_id'] ?? ''); if ($chat === '') continue;
+        if ($dry) { $founderSent++; continue; }
+        $res = http_json('https://api.telegram.org/bot' . $c['TELEGRAM_TOKEN'] . '/sendMessage', 'POST', ['Content-Type: application/json'],
+          ['chat_id' => $chat, 'text' => $ftext, 'parse_mode' => 'HTML', 'disable_web_page_preview' => true], 15);
+        $okSend = ($res['code'] >= 200 && $res['code'] < 300);
+        if ($okSend) $founderSent++; else $founderFailed++;
+        if ($okSend || (int)$res['code'] === 403) {
+          tgs_rpc($c, 'tg_mark_sent', ['p_secret' => $c['TIPTOP_RPC_SECRET'], 'p_user' => $r['user_id'],
+            'p_program' => 'founder:' . (string)$jf['day'], 'p_milestone' => (int)($jf['milestone'] ?? 120)]);
+        }
+        usleep(120000);
+      }
+    }
+  }
+}
+
+function founder_text($j) {
+  $s = is_array($j['stats'] ?? null) ? $j['stats'] : []; $p = is_array($j['prev'] ?? null) ? $j['prev'] : [];
+  $n = function ($k) use ($s) { return (int)round((float)($s[$k] ?? 0)); };
+  $d = function ($k) use ($s, $p) { $v = (int)round((float)($s[$k] ?? 0)) - (int)round((float)($p[$k] ?? 0)); return $v === 0 ? '' : ' (' . ($v > 0 ? '+' : '−') . number_format(abs($v), 0, ',', ' ') . ')'; };
+  $m = function ($v) { return number_format((float)$v, 0, ',', ' ') . ' ₸'; };
+  $secs = function ($v) { $v = (int)round((float)$v); return $v < 60 ? $v . ' с' : intdiv($v, 60) . ' м ' . str_pad((string)($v % 60), 2, '0', STR_PAD_LEFT) . ' с'; };
+  $day = (string)($j['day'] ?? ''); $ts = strtotime($day . ' 12:00:00 UTC');
+  $months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  $dows = ['', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+  $dayLabel = $ts ? ((int)gmdate('j', $ts)) . ' ' . $months[(int)gmdate('n', $ts) - 1] . ', ' . $dows[(int)gmdate('N', $ts)] : $day;
+  $lines = ['📊 <b>Scholary · вчера, ' . $dayLabel . '</b>', ''];
+  $lines[] = '👀 Заходов: <b>' . $n('visits') . '</b>' . $d('visits') . ' · время ' . $secs($s['avg_active_s'] ?? 0) . ' · ' . number_format((float)($s['pages_per_visit'] ?? 0), 1, ',', ' ') . ' стр./визит · с мобильного ' . $n('mobile_share') . '%';
+  $lines[] = '📝 Квиз: открыли <b>' . $n('quiz_open') . '</b> → начали <b>' . $n('quiz_start') . '</b> → дошли <b>' . $n('quiz_done') . '</b>' . $d('quiz_done') . ' · контактов ' . $n('contacts') . $d('contacts');
+  $lines[] = '💳 Деньги: «купить» <b>' . $n('pay_click') . '</b> (Kaspi ' . $n('kaspi_click') . ') · оплат <b>' . $n('payments') . '</b>' . $d('payments') . ' · <b>' . $m($s['revenue'] ?? 0) . '</b>' . ($d('revenue') !== '' ? ' (' . (((float)($s['revenue'] ?? 0) - (float)($p['revenue'] ?? 0)) > 0 ? '+' : '−') . $m(abs((float)($s['revenue'] ?? 0) - (float)($p['revenue'] ?? 0))) . ')' : '') . ($n('pro_paid') ? ' · Pro ' . $n('pro_paid') : '');
+  $lines[] = '🎓 Кабинет: входов ' . $n('cab_open') . ' · регистраций <b>' . $n('cab_signup') . '</b>' . $d('cab_signup');
+  $lines[] = '🏫 B2B: демо школ ' . $n('school_demo') . ', профориентологов ' . $n('prof_demo') . ' · заявок <b>' . ($n('school_apply') + $n('prof_apply')) . '</b> · WhatsApp-кликов ' . $n('wa_click');
+  $top = is_array($j['top_channels'] ?? null) ? $j['top_channels'] : [];
+  if ($top) {
+    $parts = [];
+    foreach ($top as $t) $parts[] = htmlspecialchars((string)($t['label'] ?? ''), ENT_QUOTES, 'UTF-8') . ' ' . (int)($t['visits'] ?? 0);
+    $lines[] = ''; $lines[] = '📣 Каналы: ' . implode(' · ', $parts);
+  }
+  if ($n('visits') === 0 && $n('quiz_open') === 0) { $lines[] = ''; $lines[] = 'Заходов не было — проверь, что сайт и реклама живы.'; }
+  $lines[] = ''; $lines[] = 'По часам и каналам: https://scholary.kz/admin/';
+  return implode("\n", $lines);
+}
+
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['ok' => true, 'people' => count($chats), 'sent' => $sent, 'failed' => $failed, 'items' => count($items),
+  'founder' => ['on' => $founderOn, 'people' => $founderPeople, 'sent' => $founderSent, 'failed' => $founderFailed, 'preview' => $dry ? $founderPreview : null],
   'week' => ['kind' => $weekKind, 'people' => count($weekByChat), 'sent' => $weekSent, 'dry' => $dry],
   'ws' => ['on' => $wsKind, 'people' => count($wsByChat), 'sent' => $wsSent],
   'preview' => $dry ? $preview : null], JSON_UNESCAPED_UNICODE);

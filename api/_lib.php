@@ -5,10 +5,17 @@
    невалидный JSON у клиента и утечка путей сервера. */
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
+/* Корень подписки (где лежит private/): из DOCUMENT_ROOT, а при запуске из
+   планировщика как PHP-скрипт (CLI, DOCUMENT_ROOT пустой) — от места этого файла:
+   httpdocs/api/_lib.php → на два уровня выше. */
+function vhost_root() {
+  $dr = (string)($_SERVER['DOCUMENT_ROOT'] ?? '');
+  return $dr !== '' ? dirname($dr) : dirname(__DIR__, 2);
+}
 function cfg() {
   static $c = null;
   if ($c === null) {
-    $base = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/';
+    $base = vhost_root() . '/private/';
     $c = is_file($base . 'scholary-config.php') ? require $base . 'scholary-config.php' : [];
     /* Ключи эквайринга лежат отдельным файлом: их можно перевыпустить
        и залить заново, не трогая остальные секреты сервиса. */
@@ -79,13 +86,13 @@ function tt_api_event($event, $props = [], $user = [], $event_id = null, $test_c
   return $r;
 }
 function tt_api_log($row) {
-  $dir = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiktok';
+  $dir = vhost_root() . '/private/tiktok';
   if (!is_dir($dir)) @mkdir($dir, 0700, true);
   @file_put_contents($dir . '/events-' . gmdate('Y-m') . '.log', json_encode($row, JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
 }
 /* Последние записи журнала Events API (для админки). */
 function tt_api_log_tail($n = 8) {
-  $f = dirname($_SERVER['DOCUMENT_ROOT']) . '/private/tiktok/events-' . gmdate('Y-m') . '.log';
+  $f = vhost_root() . '/private/tiktok/events-' . gmdate('Y-m') . '.log';
   if (!is_file($f)) return ['total' => 0, 'ok' => 0, 'fail' => 0, 'last' => []];
   $lines = array_values(array_filter(array_map('trim', (array)file($f))));
   $ok = 0; $fail = 0; $real = 0;
