@@ -39,7 +39,7 @@ window.SCHOLARY_CONFIG = {
   SENTRY_DSN:   "https://0ad2d6dd84df02c6c621e990bb7493a9@o4512013087866880.ingest.de.sentry.io/4512013095600208",
   POSTHOG_KEY:  "phc_kF4f8FKLJ9uiL2x8XDAtNzHs8zQwkWGgWsBSMhaCkGKn",
   POSTHOG_HOST: "https://scholary.kz/ph",
-  RELEASE:      "web-77",
+  RELEASE:      "web-78",
 
   // --- Яндекс.Метрика ---
   // Номер счётчика из metrika.yandex.ru (только цифры). Пустая строка = выключено.
@@ -47,7 +47,7 @@ window.SCHOLARY_CONFIG = {
   // с теми же именами — список целей для создания в интерфейсе см. в 32-АНАЛИТИКА.md
   /* Пиксель Meta (Facebook/Instagram). Вставь сюда ID из Events Manager —
      без него реклама не умеет оптимизироваться на заявки и собирать ретаргет. */
-  META_PIXEL_ID: "",
+  META_PIXEL_ID: "2010329602953828",
   // TikTok Pixel (Events Manager → Web → Manual). Пустой ID — блок не грузится.
   TIKTOK_PIXEL_ID: "DACVEIRC77UCRCTVA5DG",
 
